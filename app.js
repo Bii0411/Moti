@@ -375,28 +375,49 @@ function choiceHtml(c,m,i){
     const lab=own?"소장":S.views.left>0?`무료 보기 ${S.views.left}회`:(x.tier==="T2"||newInfo(x)?"점프 3":"스텝 4 · 점프 2");
     return `<button data-act="pickm" data-v="${id}" data-i="${i}"><span class="gb" style="background:var(--${x.grade})">${x.grade}</span>${x.name}<small class="${own?"own":""}">${own?"✓ ":""}${lab}</small></button>`}).join("")}</div></div>`;
 }
-function send(){
-  const i=$("#ci");const t=i.value.trim();if(!t)return;const c=chById(U.chatChar);const b=bond(c.id);
+// ── LLM 서버 주소 ─────────────────────────────────────────────
+// 내 컴퓨터에서 서버를 켰으면 http://localhost:8000 그대로 두면 돼요.
+// 서버를 인터넷에 올리면 그 주소로 바꿔요. 서버가 꺼져 있으면 미리 써 둔 대사로 대답해요.
+const API_URL="http://localhost:8000";
+async function askAI(c,t,hist){
+  const sc=sceneOf(c.id);const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),20000);
+  try{
+    const r=await fetch(API_URL+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,
+      body:JSON.stringify({char:c.id,message:t,history:hist,scene:sc?sc.name:null,scenes:(SCENES[c.id]||[]).map(x=>x.name),motions:M.map(m=>m.name)})});
+    if(!r.ok){console.warn("AI 서버 오류",r.status,await r.text());return null}
+    return await r.json();
+  }catch(e){console.warn("AI 서버에 연결 못 함 → 미리 써 둔 대사 사용",e);return null}
+  finally{clearTimeout(tm)}
+}
+async function send(){
+  const i=$("#ci");const t=i.value.trim();if(!t||U.busy)return;const c=chById(U.chatChar);const b=bond(c.id);
+  const hist=(S.chats[c.id]||[]).filter(m=>m.r==="u"||m.r==="c").map(m=>({r:m.r,t:m.t}));
   S.chats[c.id].push({r:"u",t});S.last[c.id]=Date.now();
-  const lv0=Math.min(5,Math.floor(b.pts/4));
-  b.turns++;b.pts+=1+(KEYMOMENT.test(t)?2:0);b.mood=Math.min(2,Math.floor(Math.random()*3));
+  // 대답 기다리는 동안 "…" 표시
+  U.busy=true;S.chats[c.id].push({r:"c",t:"…",typing:true});renderChat();
+  const ai=await askAI(c,t,hist);
+  U.busy=false;S.chats[c.id]=S.chats[c.id].filter(m=>!m.typing);
+  b.turns++;b.pts+=1+((ai?ai.key_moment>=30:KEYMOMENT.test(t))?2:0);b.mood=Math.min(2,Math.floor(Math.random()*3));
   const owned=M.filter(m=>owns(c.id,m.id));let pick=owned[Math.floor(Math.random()*owned.length)];
-  // 장소 말이 나오면 배경 바꾸기
+  // 장소 바뀜: AI가 알려 준 장소 (서버 없으면 단어 찾기)
   const L=SCENES[c.id];let moved=null;
-  if(L){const sm=S.scene||(S.scene={});const cur=sm[c.id]||0;const k=L.findIndex(x=>x.kw.test(t));
+  if(L){const sm=S.scene||(S.scene={});const cur=sm[c.id]||0;
+    const k=ai?L.findIndex(x=>x.name===ai.scene):L.findIndex(x=>x.kw.test(t));
     if(k>=0&&k!==cur){U.sceneFrom={cid:c.id,img:L[cur].img};sm[c.id]=k;moved=L[k];S.chats[c.id].push({r:"sys",t:`📍 장소가 바뀌었어요 · ${moved.name}`})}}
-  // 결정적 순간: 대화가 쌓여 게이지가 100을 넘으면 자동으로 (무료, 구매 유도 없음)
-  //  턴 +15, 20자 이상 +10, 마음이 담긴 말 +35, 장소 이동 +25 (실제 앱에선 AI가 대화 맥락으로 판단)
-  const g=(S.gauge[c.id]||0)+15+(t.length>=20?10:0)+(KEYMOMENT.test(t)?35:0)+(moved?25:0);
+  // 결정적 순간 게이지: 턴마다 +10 + AI가 매긴 중요도(0~60). 100이 넘으면 자동으로 (무료, 구매 유도 없음)
+  const g=(S.gauge[c.id]||0)+(ai?10+ai.key_moment:15+(t.length>=20?10:0)+(KEYMOMENT.test(t)?35:0)+(moved?25:0));
   const key=g>=100&&b.turns>=2;S.gauge[c.id]=key?0:Math.min(95,g);
-  const line=moved?moved.say:c.lines[(b.turns-1)%c.lines.length];
+  const line=ai&&ai.reply?ai.reply:(moved?moved.say:c.lines[(b.turns-1)%c.lines.length]);
   if(key){pick=owned.slice().sort((x,y)=>GRADES.indexOf(x.grade)-GRADES.indexOf(y.grade))[0];S.chats[c.id].push({r:"sys",t:"✨ 결정적 순간"})}
-  S.chats[c.id].push({r:"c",t:line,a:key?pick.name:null});
+  S.chats[c.id].push({r:"c",t:line,a:key?pick.name:null,emo:ai?ai.emotion:null});
+  // 3지선다: AI가 고른 어울리는 모션 3개 (없으면 무작위). 아직 없는 모션 1개는 꼭 섞기
   const choose=!key&&b.turns%3===0;
-  if(choose)S.chats[c.id].push({r:"choice",ms:choicePick(c.id),done:null});
-  save();renderChat();
-  if(key)playMotion(pick,{key:true,line});
-
+  if(choose){let ids=ai?ai.motions.map(n=>mByName(n)).filter(Boolean).map(m=>m.id):[];
+    ids=[...new Set(ids)].slice(0,3);
+    if(ids.length<3)ids=choicePick(c.id);
+    else if(ids.every(id=>owns(c.id,id))){const no=M.filter(m=>!owns(c.id,m.id)&&!ids.includes(m.id));if(no.length)ids[2]=no[Math.floor(Math.random()*no.length)].id}
+    S.chats[c.id].push({r:"choice",ms:ids,done:null})}
+  save();if(U.tab==="chat"&&U.chatChar===c.id){renderChat();if(key)playMotion(pick,{key:true,line})}
 }
 function motionSheet(){
   const c=chById(U.chatChar);
