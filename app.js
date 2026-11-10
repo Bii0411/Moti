@@ -263,7 +263,7 @@ function renderHome(){
   $("#view").innerHTML=`<div class="search hsearch"><input id="hq" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(U.hq)}" aria-label="캐릭터 검색"></div>
   <div class="srow">${sorts.map(([k,l])=>`<button class="pillchip ${U.hsort===k?"on":""}" data-act="hsort" data-v="${k}">${l}</button>`).join("")}</div>
   <div class="srow tagrow"><button class="fchip ${!U.htag?"on":""}" data-act="htag" data-v="">전체</button>${tags.map(t=>`<button class="fchip ${U.htag===t?"on":""}" data-act="htag" data-v="${t}">#${t}</button>`).join("")}</div>
-  ${list.length?`<div class="grid2">${cards}</div>`:`<div class="empty">맞는 캐릭터가 없어요. 다른 키워드를 눌러 보세요.</div>`}
+  ${list.length?`<div class="grid2">${cards}</div>`:`<div class="empty">맞는 캐릭터가 없어요.</div>`}
   <div class="banner" role="region" aria-label="배너" style="margin-top:22px">${sl}<span class="cnt">${U.slide+1}/${SLIDES.length}</span></div>
   <div class="sec"><h2>캐릭터 팩</h2><span>시즌 장면 팩을 한 번에</span></div><div class="hscroll">${packs}</div>
   <div class="sec"><h2>지금 뜨는 개별 루트</h2><span>전용 테마</span></div><div class="hscroll">${routes}</div>
@@ -282,7 +282,7 @@ function renderRank(){
 // ---------- discover
 function renderDiscover(){if(U.dsub==="goods")return renderGoods();return renderFeed();
   const list=CH;
-  $("#view").innerHTML=dtabs()+`${list.length?`<div class="grid2">${list.map(c=>`<button class="ccard" data-act="openchat" data-v="${c.id}"><div class="pic" style="${bgi(c)}"><span class="pill">💬 ${c.chats}만</span></div><div class="bd"><h3>${c.name}</h3><p>${c.desc}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("")}</div>`:`<div class="empty">맞는 캐릭터가 없어요. 다른 태그를 눌러 보세요.</div>`}
+  $("#view").innerHTML=dtabs()+`${list.length?`<div class="grid2">${list.map(c=>`<button class="ccard" data-act="openchat" data-v="${c.id}"><div class="pic" style="${bgi(c)}"><span class="pill">💬 ${c.chats}만</span></div><div class="bd"><h3>${c.name}</h3><p>${c.desc}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("")}</div>`:`<div class="empty">맞는 캐릭터가 없어요.</div>`}
   ${adBlock()}
   <div class="wide"><button class="btn" data-act="share">영업하러 가기</button><button class="btn pri" data-act="soon" data-v="자캐">자캐 만들기</button></div>`;
 }
@@ -325,7 +325,7 @@ function renderGoods(){
   <div class="sec"><h2>실물 굿즈</h2><span>${S.plus?"PLUS 5% 할인 적용 중":"PLUS면 5% 할인"}</span></div><div class="goodsgrid">${real.map(goodCard).join("")}</div>${adBlock()}`;
 }
 function goodSheet(id){const g=gBy(id);const c=chById(g.ch);
-  if(g.type==="dig"){if(S.goods.includes(id))return toast("이미 소장 중이에요 · 마이페이지 굿즈 보관함");
+  if(g.type==="dig"){if(S.goods.includes(id))return toast("이미 소장 중이에요");
     return payChooser({title:g.name,desc:g.desc,step:g.step,stepLock:g.lock,jump:g.jump,onPay:()=>{S.goods.push(id);save();toast(`${c.name}: “…아무한테나 주는 거 아니다.”`)}});}
   const pm=g.perk?mBy(g.perk):null;
   sheet(`<div class="boxstage"><div style="${bgi(c)};width:100%;height:160px;border-radius:16px;background-size:cover;background-position:center 18%;display:grid;place-items:center;font-size:60px">${g.icon}</div></div><h3>${g.name}</h3><p class="sub">${g.desc} · ${g.due} 예약 마감 · 2027년 1월 중순부터 순차 발송</p>
@@ -334,9 +334,9 @@ function goodSheet(id){const g=gBy(id);const c=chById(g.ch);
   <button class="btn gold" style="width:100%" data-act="order" data-v="${id}">예약 주문하기 (시연)</button><p class="sub" style="margin-top:10px">결제는 시연용이라 실제로 청구되지 않아요.</p><button class="close" data-act="close">닫기</button>`);
 }
 function shareSheet(){
-  if(!S.reels.length)return sheet(`<h3>올릴 릴스가 아직 없어요</h3><p class="sub">대화를 3번 이상 하고 🎬 릴스를 소장하면 피드에 영업할 수 있어요.</p><button class="btn pri" style="width:100%" data-act="tab" data-v="chat">대화하러 가기</button><button class="close" data-act="close">닫기</button>`);
+  if(!S.reels.length)return sheet(`<h3>올릴 릴스가 아직 없어요</h3><button class="btn pri" style="width:100%" data-act="tab" data-v="chat">대화하러 가기</button><button class="close" data-act="close">닫기</button>`);
   if(U.shareReel==null)U.shareReel=S.reels.length-1;
-  sheet(`<h3>영업하러 가기</h3><p class="sub">소장한 릴스를 골라 공유 피드에 올려요.</p>${S.reels.map((r,i)=>`<button class="reelpick ${U.shareReel===i?"on":""}" data-act="pickreel" data-v="${i}"><b>${r.name}</b><span style="font-size:12px;color:var(--sub)">${r.lv} · ${r.date}</span></button>`).join("")}<textarea class="ta" id="cap" placeholder="이 장면, 어디가 좋았는지 적어 주세요" maxlength="120"></textarea><button class="btn pri" style="width:100%" data-act="post">피드에 올리기</button><button class="close" data-act="close">닫기</button>`);
+  sheet(`<h3>영업하러 가기</h3>${S.reels.map((r,i)=>`<button class="reelpick ${U.shareReel===i?"on":""}" data-act="pickreel" data-v="${i}"><b>${r.name}</b><span style="font-size:12px;color:var(--sub)">${r.lv} · ${r.date}</span></button>`).join("")}<textarea class="ta" id="cap" placeholder="이 장면, 어디가 좋았는지 적어 주세요" maxlength="120"></textarea><button class="btn pri" style="width:100%" data-act="post">피드에 올리기</button><button class="close" data-act="close">닫기</button>`);
 }
 // ---------- chat
 function bond(cid){return S.bond[cid]||(S.bond[cid]={pts:0,turns:0,mood:0})}
@@ -365,11 +365,12 @@ function renderChatPick(){
 function renderChat(){
   const c=chById(U.chatChar);if(!c)return renderChatPick();
   const b=bond(c.id);const lv=Math.min(5,Math.floor(b.pts/4));
+  if(S.chats[c.id])S.chats[c.id]=S.chats[c.id].filter(m=>m.t!=="…이렇게?");
   const msgs=S.chats[c.id]||(S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}]);
   S.read[c.id]=msgs.length;if(!S.last[c.id])S.last[c.id]=Date.now()-FIRST_MIN[c.id]*60000;save();renderNav();
   const co=chatOnly(c.id),csc=sceneOf(c.id);
   $("#view").innerHTML=`<div class="chatwrap ${co?"conly":""}" ${co&&csc?`style="--scn:url(${csc.img})"`:""}>${co?`<div class="cohd"><b>${c.name}</b><span>📍 ${csc?csc.name:""}</span><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`:has3D(c.id)?stage3dHtml(c,lv,b):`<div class="stage"><div class="figure" id="fig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div class="info"><b>${c.name}</b><div class="gauge" aria-label="두근 게이지 ${lv}/5">${"♥".repeat(lv)}${"♡".repeat(5-lv)}</div><small>인연 ${lv} · ${BONDL[lv]}</small><span class="mood">분위기: ${MOODS[b.mood]}</span></div><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`}
-  <div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp" title="대화가 깊어지면 차올라요. 다 차면 결정적 순간이 무료로 열려요"><small>결정적 순간</small><span class="kbar" aria-label="결정적 순간 게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>
+  <div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp"><small>결정적 순간</small><span class="kbar" aria-label="결정적 순간 게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>
   <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):`<div class="msg ${m.r}">${m.a?`<span class="act">▶ ${m.a}</span>`:""}${m.r==="sys"?esc(m.t):fmtMsg(m.t)}</div>`).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
   <div class="composer"><textarea id="ci" rows="1" name="moti-msg-${Date.now()}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="send" placeholder="${c.name}에게 말 걸기" aria-label="메시지"></textarea><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
@@ -444,11 +445,11 @@ function motionSheet(){
     else if(S.views.left>0)r=`<span class="lab fr">${S.plus?"무료로 보기":"광고 보고 보기"} · 남은 ${S.views.left}회</span>`;
     else r=prem?`<span class="lab jp">점프 3 · 점프 전용</span>`:`<span class="lab st">스텝 4</span> <span class="lab jp">점프 2</span>`;
     return `<button class="payopt" data-act="viewm" data-v="${m.id}"><div><b>${m.name}</b><small>${m.grade}등급 · ${m.emo} · ${m.tier==="T0"?"기본 리액션":m.tier==="T1"?"일반 모션":"고급 모션"}</small></div><div style="text-align:right">${r}</div></button>`};
-  sheet(`<h3>${c.name}의 모션 보기</h3><p class="sub">소장한 모션은 언제든 무료. 없는 모션은 하루 3번 무료로 보고, 그 뒤엔 추가 모션 보기 요금이 붙어요.</p>${M.map(row).join("")}<button class="close" data-act="close">닫기</button>`);
+  sheet(`<h3>${c.name}의 모션 보기</h3>${M.map(row).join("")}<button class="close" data-act="close">닫기</button>`);
 }
 function viewMotion(mid){
   const c=chById(U.chatChar);const m=mBy(mid);
-  const play=()=>{closeSheet();S.chats[c.id].push({r:"c",t:"…이렇게?",a:m.name});save();renderChat();playMotion(m)};
+  const play=()=>{closeSheet();playMotion(m)};
   if(owns(c.id,mid))return play();
   if(S.views.left>0){S.views.left--;save();if(!S.plus)toast("광고 시청 완료 (시연)");return play()}
   const prem=m.tier==="T2"||newInfo(m);
@@ -475,9 +476,9 @@ function renderMotion(){
       +(mine.length?`<div class="sec"><h2>내가 만든 장면 팩</h2><span>${mine.length}개</span></div>`+mine.map(p=>`<div class="pack"><span class="kind">나만의 장면 팩 · ${p.date}</span><h4>「${p.title}」</h4><ul>${p.motions.map((id,k)=>`<li><i>${k+1}</i>${mBy(id).name}</li>`).join("")}</ul><button class="btn" style="width:100%" data-act="playpack" data-v="${p.id}">▷ 순서대로 보기</button></div>`).join(""):"");
   }else body=charPackMaker(c);
   $("#view").innerHTML=`<div class="charbar">${bar}</div>
-  ${has3D(c.id)?`<div class="room3d">${stage3dHtml(c,0,{mood:0},3)}<div class="rinfo"><span class="now">${c.name} · 보유 모션 ${M.filter(m=>owns(c.id,m.id)).length}/${M.length}</span><b>모션 하나씩 입혀보기</b><p>아래 모션 카드를 누르면 ${c.name}${(c.name.charCodeAt(c.name.length-1)-44032)%28?"이":"가"} 3D로 바로 움직여요. 밝은 카드는 소장 중이에요.</p></div></div>`:`<div class="room"><div class="figure" id="rfig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div><span class="now">${c.name} · 보유 모션 ${M.filter(m=>owns(c.id,m.id)).length}/${M.length}</span><b>모션 하나씩 입혀보기</b><p>카드를 누르면 바로 입혀 볼 수 있어요. 3D는 지금 윤서아·한지후만 돼요.</p></div></div>`}
-  <div class="boxcard"><h3>🎁 모션 랜덤 박스</h3><p>등급이 먼저 정해지고, 그 등급 모션 1개가 ${c.name}에게 들어가요. 중복이면 스텝으로 돌려받아요.</p>${pt}<div class="boxbtns"><button class="btn" data-act="box" data-v="normal">일반 · 점프 100</button><button class="btn gold" data-act="box" data-v="prem">고급 · 점프 500</button></div></div>
-  <div class="tabs" role="tablist"><button class="${U.fitTab==="motion"?"on":""}" data-act="fittab" data-v="motion">모션</button><button class="${U.fitTab==="pack"?"on":""}" data-act="fittab" data-v="pack">장면 팩</button><button class="${U.fitTab==="bundle"?"on":""}" data-act="fittab" data-v="bundle">캐릭터팩 만들기</button></div>${body}`;
+  ${has3D(c.id)?`<div class="room3d">${stage3dHtml(c,0,{mood:0},3)}<div class="rinfo"><span class="now">${c.name} · 보유 모션 ${M.filter(m=>owns(c.id,m.id)).length}/${M.length}</span></div></div>`:`<div class="room"><div class="figure" id="rfig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div><span class="now">${c.name} · 보유 모션 ${M.filter(m=>owns(c.id,m.id)).length}/${M.length}</span></div></div>`}
+  <div class="tabs" role="tablist"><button class="${U.fitTab==="motion"?"on":""}" data-act="fittab" data-v="motion">모션</button><button class="${U.fitTab==="pack"?"on":""}" data-act="fittab" data-v="pack">장면 팩</button><button class="${U.fitTab==="bundle"?"on":""}" data-act="fittab" data-v="bundle">캐릭터팩 만들기</button></div>${body}
+  <div class="boxcard"><h3>🎁 모션 랜덤 박스</h3>${pt}<div class="boxbtns"><button class="btn" data-act="box" data-v="normal">일반 · 점프 100</button><button class="btn gold" data-act="box" data-v="prem">고급 · 점프 500</button></div></div>`;
 }
 function fitPlay(m){if(!m)return;if(has3D(U.fitChar)&&$("#r3d")){J3D.play(m);const r=$("#r3d").getBoundingClientRect();if(r.bottom<80||r.top>innerHeight-120)$("#r3d").scrollIntoView({behavior:"smooth",block:"start"})}else playOn($("#rfig"),m)}
 function mountFit(){if(U.tab==="motion"&&has3D(U.fitChar)&&$("#r3d"))J3D.mount($("#r3d"),U.fitChar)}
@@ -503,7 +504,7 @@ function bundleInfo(c){const all=PACKS.filter(p=>p.ch===c.id);const left=all.fil
 function bundleCard(c){
   const b=bundleInfo(c);
   return `<div class="pack prem"><span class="kind">캐릭터 시즌 번들 · 2026 겨울</span><h4>${c.name} 시즌 전부</h4><ul>${b.all.map(p=>`<li><i>${p.kind==="gen"?"일반":"프리미엄"}</i>「${p.title}」${S.packs.includes(p.id)?" ✓":""}</li>`).join("")}</ul>
-  ${b.left.length?`<div class="cmp">남은 팩 ${b.left.length}개를 따로 사면 <s>점프 ${b.full}</s> → 15% 할인 <strong>점프 ${b.price}</strong>${b.left.length<b.all.length?"<br>이미 산 팩은 빼고 다시 계산했어요.":""}</div><button class="btn pri" style="width:100%" data-act="buybundle" data-v="${c.id}">점프 ${b.price}로 번들 소장하기</button>`:`<div class="cmp">이번 시즌 팩을 모두 소장했어요.</div>`}</div>`;
+  ${b.left.length?`<div class="cmp">남은 팩 ${b.left.length}개를 따로 사면 <s>점프 ${b.full}</s> → 15% 할인 <strong>점프 ${b.price}</strong>${b.left.length<b.all.length?"":""}</div><button class="btn pri" style="width:100%" data-act="buybundle" data-v="${c.id}">점프 ${b.price}로 번들 소장하기</button>`:`<div class="cmp">이번 시즌 팩을 모두 소장했어요.</div>`}</div>`;
 }
 // 장면 팩 만들기: 장면 고르기 → 모션 순서대로 담기 → 결제하고 만들기
 const SCENE_TYPES=["첫 만남","위로","고백","재회","질투","작별 인사"];
@@ -513,13 +514,13 @@ function makerHtml(c){
   const mk=U.mk;const tot=mkTotal(c.id,mk.ms);
   const row=m=>{const k=mkCost(c.id,m),i=mk.ms.indexOf(m.id);
     return `<div class="mkrow ${i>=0?"on":""}"><button class="pv" data-act="mkprev" data-v="${m.id}" aria-label="${m.name} 미리보기">▷</button><div class="nm"><b>${m.name}</b><small>${m.grade}등급 · ${m.emo}</small></div><span class="cost">${k.free?"무료":k.step==null?`점프 ${k.jump}`:`스텝 ${k.step} / 점프 ${k.jump}`}</span><button class="add" data-act="mkadd" data-v="${m.id}">${i>=0?i+1:"+"}</button></div>`};
-  return `<div class="maker"><h3>🎬 장면 팩 만들기</h3><p class="sub">장면을 고르고, 보고 싶은 모션을 순서대로 담아요(최대 5개). 미리보기는 무료예요.</p>
+  return `<div class="maker"><h3>🎬 장면 팩 만들기</h3><p class="sub">최대 5개</p>
   <div class="fchips">${SCENE_TYPES.map(x=>`<button class="fchip ${mk.scene===x?"on":""}" data-act="mkscene" data-v="${x}">${x}</button>`).join("")}</div>
   <div class="mklist">${M.filter(m=>m.tier!=="T0").map(row).join("")}</div>
   <div class="mkbar"><div><b>「${c.name} · ${mk.scene}」 ${mk.ms.length}/5</b><small>${mk.ms.length?(tot.jump===0?"전부 소장 중이라 무료":`${tot.step==null?"고급·신규 모션이 있어 점프만":`스텝 ${tot.step}`} · 점프 ${tot.jump}`):"모션을 담아 주세요"}</small></div><button class="btn pri" data-act="mkbuy" ${mk.ms.length?"":"disabled"}>${tot.jump===0&&mk.ms.length?"만들기":"결제하고 만들기"}</button></div></div>`;
 }
 function mkBuy(){const c=chById(U.fitChar);const mk=U.mk;const tot=mkTotal(c.id,mk.ms);
-  const done=()=>{mk.ms.forEach(id=>grant(c.id,id));S.mypacks.push({id:"my"+Date.now(),ch:c.id,title:`${c.name} · ${mk.scene}`,motions:mk.ms.slice(),date:fmtMD(new Date())});U.mk={scene:mk.scene,ms:[]};save();render();toast("장면 팩을 만들었어요 · 아래 ‘내가 만든 장면 팩’에 있어요")};
+  const done=()=>{mk.ms.forEach(id=>grant(c.id,id));S.mypacks.push({id:"my"+Date.now(),ch:c.id,title:`${c.name} · ${mk.scene}`,motions:mk.ms.slice(),date:fmtMD(new Date())});U.mk={scene:mk.scene,ms:[]};save();render();toast("장면 팩 완성!")};
   if(tot.jump===0)return done();
   payChooser({title:`「${c.name} · ${mk.scene}」 장면 팩`,desc:`모션 ${mk.ms.length}개`,step:tot.step,stepLock:"고급·신규 모션이 들어 있어 점프로만 만들 수 있어요",jump:tot.jump,onPay:done});
 }
@@ -528,7 +529,7 @@ const CK_OFF=n=>n>=4?15:n===3?10:n===2?5:0;
 function charPackMaker(c){
   const list=PACKS.filter(p=>p.ch===c.id);const sel=U.ck.filter(id=>list.some(p=>p.id===id)&&!S.packs.includes(id));
   const full=sel.reduce((s,id)=>s+pBy(id).price,0),off=CK_OFF(sel.length),price=Math.round(full*(100-off)/100/5)*5;
-  return `<div class="maker"><h3>🧩 ${c.name} 캐릭터팩 만들기</h3><p class="sub">원하는 장면 팩만 골라 나만의 캐릭터팩으로 묶어요. 2개 5% · 3개 10% · 4개 이상 15% 할인.</p>
+  return `<div class="maker"><h3>🧩 ${c.name} 캐릭터팩 만들기</h3><p class="sub">2개 5% · 3개 10% · 4개 이상 15% 할인</p>
   ${list.map(p=>{const own=S.packs.includes(p.id),on=sel.includes(p.id);return `<button class="payopt ${own?"lock":""}" data-act="ckpick" data-v="${p.id}" ${own?"disabled":""}><div><b>${on?"☑":"☐"} 「${p.title}」</b><small>${p.kind==="gen"?"일반 장면 팩":"프리미엄 · 시즌 한정"} · 모션 ${p.motions.length}개${p.ep?" + 에피소드":""}${own?" · 소장 중":""}</small></div><span class="amt" style="color:var(--jump)">${p.price}</span></button>`}).join("")}
   <div class="mkbar"><div><b>${sel.length}개 선택${off?` · ${off}% 할인`:""}</b><small>${sel.length?`${off?`<s>점프 ${full}</s> → `:""}점프 ${price}`:"장면 팩을 골라 주세요"}</small></div><button class="btn pri" data-act="ckbuy" data-v="${price}" ${sel.length?"":"disabled"}>결제하고 만들기</button></div></div>`;
 }
@@ -541,9 +542,9 @@ function renderMy(){
   $("#view").innerHTML=`<div class="wallet"><h3>내 지갑</h3><div style="display:flex;gap:8px;margin-bottom:12px"><span class="chip"><span class="dot s"></span>스텝 ${S.step}</span><span class="chip"><span class="dot j"></span>점프 ${S.jump}</span></div><button class="btn" style="flex:none" data-act="charge">스텝 받기 · 점프 충전</button></div>
   <div class="pluscard"><div class="m"><b>moti PLUS</b><p>광고 없이 · 고급 AI + 장기 기억 · 매월 점프 100 (약 10,000원 가치)</p></div><button class="btn gold" style="flex:none" data-act="plus">${S.plus?"구독 중":"월 13,000원"}</button></div>
   <div class="stats"><div><b>${S.reels.length}</b><span>변화 기록</span></div><div><b>${S.posts.length}</b><span>내 창작물</span></div><div><b>0</b><span>만든 캐릭터</span></div></div>
-  <div class="card"><h3>우리의 서사</h3>${S.reels.length?`<div class="tl">${S.reels.slice().reverse().map(r=>`<div><b>${r.name} · ${r.lv}</b><span>${r.date} · 분위기 ${r.mood} · 대화 ${r.turns}번</span></div>`).join("")}</div>`:`<p>대화를 3번 이상 하고 "릴스"를 누르면 주요 장면 릴스와 서사가 여기에 쌓여요.</p><button class="btn" style="flex:none" data-act="tab" data-v="chat">대화하러 가기</button>`}</div>
-  <div class="card"><h3>내 모션</h3><p>산 모션과 장면 팩은 대화의 👀 모션 보기와 릴스에 바로 나와요.</p>${CH.map(c=>`<div class="ownrow"><b>${c.name}</b><span>모션 ${S.owned[c.id].length} · 장면 팩 ${PACKS.filter(p=>p.ch===c.id&&S.packs.includes(p.id)).length}</span></div>`).join("")}<p style="margin-top:10px">구매한 유료 모션 총 ${totalOwn}개</p></div>
-  <div class="card"><h3>굿즈 보관함</h3>${S.goods.length||S.orders.length?S.goods.map(id=>`<div class="ownrow"><b>${gBy(id).name}</b><span>디지털 · 소장 중</span></div>`).join("")+S.orders.map(o=>`<div class="ownrow"><b>${gBy(o.id).name}</b><span>예약 완료 · ${o.date}</span></div>`).join(""):`<p>굿즈샵에서 산 디지털 굿즈와 실물 예약 내역이 여기에 모여요.</p><button class="btn" style="flex:none" data-act="gogoods">굿즈샵 가기</button>`}</div>
+  <div class="card"><h3>우리의 서사</h3>${S.reels.length?`<div class="tl">${S.reels.slice().reverse().map(r=>`<div><b>${r.name} · ${r.lv}</b><span>${r.date} · 분위기 ${r.mood} · 대화 ${r.turns}번</span></div>`).join("")}</div>`:`<p>아직 기록이 없어요</p><button class="btn" style="flex:none" data-act="tab" data-v="chat">대화하러 가기</button>`}</div>
+  <div class="card"><h3>내 모션</h3>${CH.map(c=>`<div class="ownrow"><b>${c.name}</b><span>모션 ${S.owned[c.id].length} · 장면 팩 ${PACKS.filter(p=>p.ch===c.id&&S.packs.includes(p.id)).length}</span></div>`).join("")}<p style="margin-top:10px">구매한 유료 모션 총 ${totalOwn}개</p></div>
+  <div class="card"><h3>굿즈 보관함</h3>${S.goods.length||S.orders.length?S.goods.map(id=>`<div class="ownrow"><b>${gBy(id).name}</b><span>디지털 · 소장 중</span></div>`).join("")+S.orders.map(o=>`<div class="ownrow"><b>${gBy(o.id).name}</b><span>예약 완료 · ${o.date}</span></div>`).join(""):`<p>아직 굿즈가 없어요</p><button class="btn" style="flex:none" data-act="gogoods">굿즈샵 가기</button>`}</div>
   <button class="btn" style="width:100%" data-act="reset">시연 데이터 처음으로</button>`;
 }
 // ---------- pay
@@ -561,7 +562,7 @@ function buyMotion(cid,mid){const m=mBy(mid);const c=chById(cid);
   payChooser({title:`「${m.name}」 소장`,desc:`${c.name}에게 입혀요 · ${m.grade}등급 ${m.emo}`,step:stepLock(m)?null:stepPrice(m),stepLock:stepLock(m),jump:m.price,onPay:()=>{grant(cid,mid);save();toast(`${c.name}: “…이건 너한테만 보여 주는 거다.”`)}});
 }
 function buyPack(pid){const p=pBy(pid);const c=chById(p.ch);
-  payChooser({title:`「${p.title}」`,desc:"장면 팩은 점프로만 살 수 있어요",step:null,stepLock:"장면 팩은 점프 전용이에요",jump:p.price,onPay:()=>{S.packs.push(p.id);p.motions.forEach(id=>grant(p.ch,id));save();toast(`「${p.title}」 소장 완료 · ${c.name}의 장면이 열렸어요`)}});
+  payChooser({title:`「${p.title}」`,desc:"장면 팩은 점프로만 살 수 있어요",step:null,stepLock:"장면 팩은 점프 전용이에요",jump:p.price,onPay:()=>{S.packs.push(p.id);p.motions.forEach(id=>grant(p.ch,id));save();toast(`「${p.title}」 소장 완료`)}});
 }
 function buyBundle(cid){const c=chById(cid);const b=bundleInfo(c);
   payChooser({title:`${c.name} 시즌 번들`,desc:`남은 팩 ${b.left.length}개 · 15% 할인`,step:null,stepLock:"번들은 점프 전용이에요",jump:b.price,onPay:()=>{b.left.forEach(p=>{S.packs.push(p.id);p.motions.forEach(id=>grant(cid,id))});save();toast(`${c.name} 2026 겨울 시즌 전부 소장!`)}});
@@ -579,7 +580,7 @@ function pkEp(pid){const p=pBy(pid);const c=chById(p.ch);
 function chargeSheet(){
   const att=S.attend===todayKey;if(S.stepAds.date!==todayKey)S.stepAds={date:todayKey,n:0};
   const opts=[[30,0,3000],[60,0,6000],[120,10,12000],[200,25,20000],[500,60,50000]];
-  sheet(`<h3>스텝 받기 · 점프 충전</h3><p class="sub">스텝은 무료로 모으고, 점프는 충전해요. 1점프 = 100원.</p>
+  sheet(`<h3>스텝 받기 · 점프 충전</h3><p class="sub">1점프 = 100원</p>
   <div class="wide" style="margin:0 0 16px"><button class="btn" data-act="attend" ${att?"disabled":""}>${att?"오늘 출석 완료":"출석 체크 · 스텝 +10"}</button><button class="btn" data-act="stepad" ${S.stepAds.n>=3?"disabled":""}>광고 보기 · 스텝 +5 (${3-S.stepAds.n}/3)</button></div>
   <div class="chg">${opts.map(([j,b,w])=>`<button data-act="buyjump" data-v="${j+b}"><b>점프 ${j}${b?` <em>+${b}</em>`:""}</b><span>${w.toLocaleString()}원</span></button>`).join("")}</div>
   <p class="sub" style="margin-top:12px">결제는 시연용이라 실제로 청구되지 않아요.</p><button class="close" data-act="close">닫기</button>`);
@@ -589,10 +590,10 @@ function plusSheet(){
 }
 // ---------- box
 function boxSheet(kind){const b=BOX[kind];const c=chById(U.fitChar);
-  sheet(`<h3>${b.name}</h3><p class="sub">${c.name}에게 들어갈 모션을 뽑아요 · 점프 ${b.price} (보유 ${S.jump})</p><table class="ptable" style="color:var(--text)"><tr><th></th>${GRADES.map(g=>`<th style="color:var(--${g})">${g}</th>`).join("")}</tr><tr><td>확률</td>${b.p.map(p=>`<td>${p}%</td>`).join("")}</tr><tr><td>중복 시 스텝</td>${GRADES.map(g=>`<td>${REFUND[g]}</td>`).join("")}</tr></table><div class="boxstage" id="bst"><div class="giftbox" id="gb">🎁</div></div><button class="btn ${kind==="prem"?"gold":"pri"}" style="width:100%" data-act="openbox" data-v="${kind}">점프 ${b.price}로 열기</button><button class="close" data-act="close">닫기</button>`);
+  sheet(`<h3>${b.name}</h3><p class="sub">점프 ${b.price} · 보유 ${S.jump}</p><table class="ptable" style="color:var(--text)"><tr><th></th>${GRADES.map(g=>`<th style="color:var(--${g})">${g}</th>`).join("")}</tr><tr><td>확률</td>${b.p.map(p=>`<td>${p}%</td>`).join("")}</tr><tr><td>중복 시 스텝</td>${GRADES.map(g=>`<td>${REFUND[g]}</td>`).join("")}</tr></table><div class="boxstage" id="bst"><div class="giftbox" id="gb">🎁</div></div><button class="btn ${kind==="prem"?"gold":"pri"}" style="width:100%" data-act="openbox" data-v="${kind}">점프 ${b.price}로 열기</button><button class="close" data-act="close">닫기</button>`);
 }
 function openBox(kind){const b=BOX[kind];const c=chById(U.fitChar);
-  if(S.jump<b.price){closeSheet();toast("점프가 모자라요. 충전 화면을 열게요.");return setTimeout(chargeSheet,300)}
+  if(S.jump<b.price){closeSheet();toast("점프가 모자라요");return setTimeout(chargeSheet,300)}
   S.jump-=b.price;let r=Math.random()*100,gi=0;for(;gi<7;gi++){r-=b.p[gi];if(r<0)break}gi=Math.min(gi,6);
   const g=GRADES[gi];const pool=M.filter(m=>m.grade===g);const m=pool[Math.floor(Math.random()*pool.length)];
   const dup=owns(c.id,m.id);if(dup)S.step+=REFUND[g];else grant(c.id,m.id);save();render();
@@ -638,7 +639,7 @@ document.addEventListener("click",e=>{
     case"viewm":viewMotion(v);break;
     case"buymotion":buyMotion(t.dataset.c,v);break;
     case"reel":reel();break;
-    case"savereel":{const c=chById(U.chatChar),b=bond(c.id),lv=Math.min(5,Math.floor(b.pts/4));S.reels.push({ch:c.id,name:c.name,lv:`인연 ${lv} — ${BONDL[lv]}`,mood:MOODS[b.mood],turns:b.turns,date:fmtMD(new Date())});save();closeSheet();toast("소장했어요 · 마이페이지 ‘우리의 서사’에 쌓였어요");break}
+    case"savereel":{const c=chById(U.chatChar),b=bond(c.id),lv=Math.min(5,Math.floor(b.pts/4));S.reels.push({ch:c.id,name:c.name,lv:`인연 ${lv} — ${BONDL[lv]}`,mood:MOODS[b.mood],turns:b.turns,date:fmtMD(new Date())});save();closeSheet();toast("릴스 소장 완료");break}
     case"restart":{const c=chById(U.chatChar);if(S.sid)delete S.sid[c.id];S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}];S.bond[c.id]={pts:0,turns:0,mood:0};if(S.scene)S.scene[c.id]=0;save();render();toast("새 회차 시작");break}
     case"fitchar":U.fitChar=v;U.mk.ms=[];U.ck=[];render();break;
     case"fittab":U.fitTab=v;render();break;
