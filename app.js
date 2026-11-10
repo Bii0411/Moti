@@ -28,7 +28,7 @@ const CH=[
  {id:"haram",name:"류하람",img:IMG.haram,hook:"데뷔하면, 제일 먼저 너한테 보여줄게.",desc:"데뷔 D-30 연습생. 웃게 해 주면 춤으로 답한다.",tags:["연습생","성장","응원","하트챌린지"],chats:25.6,badge:"NEW",bg:"#2b1236",route:"데뷔 조 루트",
   intro:"잠깐, 머리 좀 정리하고! …됐다. 오늘도 보러 와 준 거야?",lines:["방금 안무 봤어? 엔딩요정 각 나왔지?","누나, 아니 선배… 아니 그냥 너! 오늘 와 줘서 고마워.","연습 끝나고 편의점 갈래? 내가 쏠게.","나 데뷔하면 첫 직캠은 너한테 보낼 거야.","지금 웃었다! 내가 웃게 했다!","긴장돼서 손 떨려. 잠깐만 잡아 줄래?"]},
  {id:"seoa",name:"윤서아",img:IMG.seoa,hook:"이 도시에서 날 아는 사람은 없어. …너 빼고.",desc:"요원, 해커, 특수부대 팀장. 이야기마다 정체도 옷도 바뀌는 직진 선배.",tags:["걸크러시","요원","해커","정체반전"],chats:33.1,badge:"3D",bg:"#0c1630",route:"네온 시티 잠입 루트",glow:"#1e3a66",
-  intro:"늦었어. 3분 뒤에 경비 드론 돈다. …따라와, 내 뒤에.",lines:["쉿. 이 층 카메라는 내가 다 꺼 놨어.","걱정 마. 이 도시에서 내가 못 뚫는 건 없어. …너 빼고.","손 줘. 길 잃으면 곤란하니까.","방금 그 표정, 기록해 둘게. 내 전용 파일에.","작전 끝나면 라멘 먹자. 내가 살게, 선배니까.","정체가 들켜도 괜찮아. 너한텐 처음부터 들키고 싶었어."]}
+  intro:"…내가 처리할 수 있었는데. 근데, 꽤 멋있었어. 사장님. 이것도 처리해 줄래? 아니면… 문 닫는다고 쫓아낼 거야?",lines:["쉿. 이 층 카메라는 내가 다 꺼 놨어.","걱정 마. 이 도시에서 내가 못 뚫는 건 없어. …너 빼고.","손 줘. 길 잃으면 곤란하니까.","방금 그 표정, 기록해 둘게. 내 전용 파일에.","작전 끝나면 라멘 먹자. 내가 살게, 선배니까.","정체가 들켜도 괜찮아. 너한텐 처음부터 들키고 싶었어."]}
 ];
 const chById=id=>CH.find(c=>c.id===id);
 // motions: tier, jump price, grade, emotion, anim, released (NEW rule)
@@ -244,7 +244,7 @@ function renderHome(){
   const cards=list.map(c=>`<button class="ccard" data-act="openchat" data-v="${c.id}"><div class="pic" style="${bgi(c)}"><span class="pill">💬 ${c.chats}만</span>${c.badge?`<span class="pill r">${c.badge}</span>`:""}</div><div class="bd"><h3>${c.hook}</h3><p>${c.desc}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("");
   const routes=CH.map(c=>`<button class="route" data-act="openchat" data-v="${c.id}"><span class="k">개별 루트</span><div class="av" style="${bgi(c)}"></div><b>${c.route}</b><span>${c.name} · 공통 루트 이후 분기</span></button>`).join("");
   const epRows=[...EPS.map(e=>epRow(e)),...PACKS.filter(p=>p.kind==="gen").map(p=>packEpRow(p))].join("");
-  $("#view").innerHTML=`<div class="search hsearch"><input id="hq" autocomplete="off" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(U.hq)}" aria-label="캐릭터 검색"></div>
+  $("#view").innerHTML=`<div class="search hsearch"><input id="hq" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(U.hq)}" aria-label="캐릭터 검색"></div>
   <div class="srow">${sorts.map(([k,l])=>`<button class="pillchip ${U.hsort===k?"on":""}" data-act="hsort" data-v="${k}">${l}</button>`).join("")}</div>
   <div class="srow tagrow"><button class="fchip ${!U.htag?"on":""}" data-act="htag" data-v="">전체</button>${tags.map(t=>`<button class="fchip ${U.htag===t?"on":""}" data-act="htag" data-v="${t}">#${t}</button>`).join("")}</div>
   ${list.length?`<div class="grid2">${cards}</div>`:`<div class="empty">맞는 캐릭터가 없어요. 다른 키워드를 눌러 보세요.</div>`}
@@ -356,7 +356,7 @@ function renderChat(){
   <div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp" title="대화가 깊어지면 차올라요. 다 차면 결정적 순간이 무료로 열려요"><small>결정적 순간</small><span class="kbar" aria-label="결정적 순간 게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>
   <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="choice"?choiceHtml(c,m,i):`<div class="msg ${m.r}">${m.a?`<span class="act">▶ ${m.a}</span>`:""}${esc(m.t)}</div>`).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
-  <div class="composer"><input id="ci" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${c.name}에게 말 걸기" aria-label="메시지"><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
+  <div class="composer"><input id="ci" placeholder="${c.name}에게 말 걸기" aria-label="메시지"><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
   const m=$("#msgs");m.scrollTop=m.scrollHeight;if(has3D(c.id))J3D.mount($("#s3d"),c.id);
   $("#ci").onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)send()};
 }
@@ -383,9 +383,11 @@ async function askAI(c,t,hist){
   const sc=sceneOf(c.id);const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),20000);
   try{
     const r=await fetch(API_URL+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,
-      body:JSON.stringify({char:c.id,message:t,history:hist,scene:sc?sc.name:null,scenes:(SCENES[c.id]||[]).map(x=>x.name),motions:M.map(m=>m.name)})});
+      body:JSON.stringify({char:c.id,message:t,session_id:(S.sid||{})[c.id]||null,history:hist,scene:sc?sc.name:null,scenes:(SCENES[c.id]||[]).map(x=>x.name),motions:M.map(m=>m.name)})});
     if(!r.ok){console.warn("AI 서버 오류",r.status,await r.text());return null}
-    return await r.json();
+    const j=await r.json();
+    if(j.session_id){(S.sid||(S.sid={}))[c.id]=j.session_id;save()}  // 서버 대화 번호 기억
+    return j;
   }catch(e){console.warn("AI 서버에 연결 못 함 → 미리 써 둔 대사 사용",e);return null}
   finally{clearTimeout(tm)}
 }
@@ -621,7 +623,7 @@ document.addEventListener("click",e=>{
     case"buymotion":buyMotion(t.dataset.c,v);break;
     case"reel":reel();break;
     case"savereel":{const c=chById(U.chatChar),b=bond(c.id),lv=Math.min(5,Math.floor(b.pts/4));S.reels.push({ch:c.id,name:c.name,lv:`인연 ${lv} — ${BONDL[lv]}`,mood:MOODS[b.mood],turns:b.turns,date:fmtMD(new Date())});save();closeSheet();toast("소장했어요 · 마이페이지 ‘우리의 서사’에 쌓였어요");break}
-    case"restart":{const c=chById(U.chatChar);S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}];S.bond[c.id]={pts:0,turns:0,mood:0};if(S.scene)S.scene[c.id]=0;save();render();toast("새 회차 시작");break}
+    case"restart":{const c=chById(U.chatChar);if(S.sid)delete S.sid[c.id];S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}];S.bond[c.id]={pts:0,turns:0,mood:0};if(S.scene)S.scene[c.id]=0;save();render();toast("새 회차 시작");break}
     case"fitchar":U.fitChar=v;U.mk.ms=[];U.ck=[];render();break;
     case"fittab":U.fitTab=v;render();break;
     case"filter":U.filter=v;render();break;
