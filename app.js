@@ -244,7 +244,7 @@ function renderHome(){
   const cards=list.map(c=>`<button class="ccard" data-act="openchat" data-v="${c.id}"><div class="pic" style="${bgi(c)}"><span class="pill">💬 ${c.chats}만</span>${c.badge?`<span class="pill r">${c.badge}</span>`:""}</div><div class="bd"><h3>${c.hook}</h3><p>${c.desc}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("");
   const routes=CH.map(c=>`<button class="route" data-act="openchat" data-v="${c.id}"><span class="k">개별 루트</span><div class="av" style="${bgi(c)}"></div><b>${c.route}</b><span>${c.name} · 공통 루트 이후 분기</span></button>`).join("");
   const epRows=[...EPS.map(e=>epRow(e)),...PACKS.filter(p=>p.kind==="gen").map(p=>packEpRow(p))].join("");
-  $("#view").innerHTML=`<div class="search hsearch"><input id="hq" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(U.hq)}" aria-label="캐릭터 검색"></div>
+  $("#view").innerHTML=`<div class="search hsearch"><input id="hq" autocomplete="off" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(U.hq)}" aria-label="캐릭터 검색"></div>
   <div class="srow">${sorts.map(([k,l])=>`<button class="pillchip ${U.hsort===k?"on":""}" data-act="hsort" data-v="${k}">${l}</button>`).join("")}</div>
   <div class="srow tagrow"><button class="fchip ${!U.htag?"on":""}" data-act="htag" data-v="">전체</button>${tags.map(t=>`<button class="fchip ${U.htag===t?"on":""}" data-act="htag" data-v="${t}">#${t}</button>`).join("")}</div>
   ${list.length?`<div class="grid2">${cards}</div>`:`<div class="empty">맞는 캐릭터가 없어요. 다른 키워드를 눌러 보세요.</div>`}
@@ -356,7 +356,7 @@ function renderChat(){
   <div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp" title="대화가 깊어지면 차올라요. 다 차면 결정적 순간이 무료로 열려요"><small>결정적 순간</small><span class="kbar" aria-label="결정적 순간 게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>
   <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="choice"?choiceHtml(c,m,i):`<div class="msg ${m.r}">${m.a?`<span class="act">▶ ${m.a}</span>`:""}${esc(m.t)}</div>`).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
-  <div class="composer"><input id="ci" placeholder="${c.name}에게 말 걸기" aria-label="메시지"><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
+  <div class="composer"><input id="ci" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${c.name}에게 말 걸기" aria-label="메시지"><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
   const m=$("#msgs");m.scrollTop=m.scrollHeight;if(has3D(c.id))J3D.mount($("#s3d"),c.id);
   $("#ci").onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing)send()};
 }
