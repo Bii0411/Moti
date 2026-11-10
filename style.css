@@ -162,7 +162,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent2);outlin
 .msg.sys{align-self:center;background:none;color:var(--sub);font-size:12px;padding:2px}
 .msg .act{display:block;font-size:12px;color:var(--accent2);margin-bottom:2px}
 .composer{display:flex;gap:6px;padding-top:8px}
-.composer input{flex:1;height:46px;border-radius:23px;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:0 16px;font:inherit}
+.composer textarea{flex:1;height:46px;min-height:46px;max-height:46px;resize:none;overflow:hidden;border-radius:23px;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:12px 16px;font:inherit;line-height:20px;outline:none}
 .composer .ic{width:46px;height:46px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);font-size:18px}
 .composer .send{background:var(--accent);border-color:var(--accent)}
 .toolrow{display:flex;gap:6px;padding-top:8px;overflow-x:auto;scrollbar-width:none}.toolrow::-webkit-scrollbar{display:none}.toolrow button{flex:none;white-space:nowrap}
@@ -361,3 +361,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent2);outlin
 .reelpick{width:100%;display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);margin-bottom:8px;text-align:left}
 .reelpick.on{border-color:var(--accent2);background:#221a38}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+
+/* 대사 / 나레이션 구분 (말풍선 안) */
+.msg p{margin:0}
+.msg p+p{margin-top:10px}
+.msg .narr{font-style:italic;color:#a3a1ae;font-size:13.5px}
+.msg .say{color:var(--text);font-weight:500}
+.msg.u .narr{color:rgba(255,255,255,.72)}
+.msg.u .say{color:#fff}
+/* 결정적 순간 배지는 화면에 표시하지 않음 */
+.kmo{display:none!important}
