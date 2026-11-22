@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>XSTAGE 모션 테스트</title>
+<style>
+:root{--bg:#0b0912;--surface:#16121f;--surface2:#211b2e;--line:#2d2540;--text:#f3eff9;--sub:#a69db8;--accent:#8b5cf6;--pink:#ff6b9a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+.wrap{max-width:900px;margin:0 auto;padding:14px 16px 32px}
+h1{margin:0;font-size:19px}
+.sub{color:var(--sub);font-size:12.5px;margin:2px 0 0;word-break:keep-all}
+.view{position:relative;margin-top:12px;aspect-ratio:16/10;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#140a24 url(bg_seoa_roof.jpg) center/cover}
+.view::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(11,9,18,.25),transparent 30%,transparent 70%,rgba(11,9,18,.6));pointer-events:none}
+.view canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;z-index:1}
+.lbl{position:absolute;bottom:12px;z-index:2;font-size:12px;font-weight:700;background:rgba(10,8,18,.65);border-radius:99px;padding:3px 10px}
+.msg{position:absolute;inset:0;display:grid;place-items:center;z-index:3;color:var(--sub);text-align:center;padding:16px}
+.ctrl{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn{height:38px;border-radius:11px;background:var(--surface2);border:1px solid var(--line);font-weight:700;padding:0 14px;white-space:nowrap}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.on{border-color:var(--pink);color:var(--pink)}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--pink)}
+.time{font-variant-numeric:tabular-nums;color:var(--sub);font-size:12.5px;min-width:86px;text-align:right}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:13px 15px;margin-top:12px}
+.card h3{margin:0 0 6px;font-size:14.5px}
+ol{margin:4px 0 0;padding-left:20px;font-size:13px;color:#ddd3ee}
+ol li{margin:3px 0}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:12.5px}
+.meta span{color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>XSTAGE 모션 테스트 · Lovely – Embarrassing 3</h1>
+  <p class="sub">XSTAGE에서 구매한 모션을 서아에 옮겨 재생해요. 화면을 드래그하면 돌려 볼 수 있어요.</p>
+  <div class="view" id="view">
+    
+    <div class="msg" id="msg">불러오는 중…</div>
+  </div>
+  <div class="ctrl">
+    <button class="btn pri" id="playBtn">⏸ 일시정지</button>
+    <input type="range" id="seek" min="0" max="1000" value="0" aria-label="재생 위치">
+    <span class="time" id="time">0.0 / 0.0초</span>
+  </div>
+  <div class="ctrl">
+    <span class="sub">속도</span>
+    <button class="btn" data-sp="0.5">0.5×</button><button class="btn on" data-sp="1">1×</button><button class="btn" data-sp="1.5">1.5×</button>
+    <span style="flex:1"></span>
+    <button class="btn" id="viewBtn">🎥 정면</button>
+    
+  </div>
+  <div class="card">
+    <h3>어떻게 작동하나요?</h3>
+    <ol>
+      <li><b>FBX 읽기:</b> XSTAGE FBX에서 뼈 68개 중 몸의 주요 뼈 20개(골반·척추·목·머리·어깨·팔·다리)의 움직임을 뽑아요.</li>
+      <li><b>회전값으로 바꾸기:</b> 프레임마다 "기본 자세에서 얼마나 돌았는지"만 저장해요 (30fps, JSON 약 290KB).</li>
+      <li><b>서아에 옮기기:</b> 원본은 T자 자세, 서아는 팔을 내린 자세라서 먼저 자세 차이를 맞춘 뒤 같은 회전을 서아 뼈에 적용해요. 골반 이동은 키 차이만큼 비율을 맞춰요.</li>
+      <li><b>재생:</b> 이 JSON만 있으면 서아가 바로 움직여요. 원본 FBX 파일은 필요 없어요.</li>
+    </ol>
+  </div>
+  <div class="card"><h3>모션 정보</h3><div class="meta" id="meta"></div></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const ALIAS={Spine1:"Spine01",Spine2:"Spine02",Neck:"neck"};const norm=n=>{n=n.replace(/^mixamorig[:_]?/,"");return ALIAS[n]||n};
+// 부모 → 자식 순서 (부모를 먼저 돌려야 자식 계산이 맞음)
+const ORDER=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
+const CHILD={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
+const view=$("#view");
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.outputEncoding=THREE.sRGBEncoding;view.prepend(R.domElement);
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,16/10,.05,50);cam.position.set(0,1.1,5.2);
+scene.add(new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.1));const k=new THREE.DirectionalLight(0xffffff,.9);k.position.set(1.2,2,2.4);scene.add(k);const r2=new THREE.DirectionalLight(0xb49cff,.6);r2.position.set(-2,1.6,-1.5);scene.add(r2);
+const ctl=new THREE.OrbitControls(cam,R.domElement);ctl.target.set(0,.95,0);ctl.enableDamping=true;ctl.update();
+let M=null,seoa=null,orig=null,mixer=null,playing=true,speed=1,t=0,showOrig=false;
+
+function fit(obj,h){const box=new THREE.Box3().setFromObject(obj);const sc=h/Math.max(.01,box.max.y-box.min.y);obj.scale.multiplyScalar(sc);obj.updateMatrixWorld(true);const b2=new THREE.Box3().setFromObject(obj);obj.position.y-=b2.min.y;const c=b2.getCenter(new THREE.Vector3());obj.position.x-=c.x;obj.position.z-=c.z}
+async function loadSeoa(){
+  const g=await new Promise((res,rej)=>new THREE.GLTFLoader().load("seoa.glb",res,undefined,rej));
+  const inner=g.scene;inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.material.map)o.material.map.encoding=THREE.sRGBEncoding}});
+  const box=new THREE.Box3();inner.traverse(o=>{if(o.isSkinnedMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox)}});
+  const sc=1.72/(box.max.y-box.min.y),c=box.getCenter(new THREE.Vector3());inner.scale.setScalar(sc);inner.position.set(-c.x*sc,-box.min.y*sc,-c.z*sc);
+  const root=new THREE.Group();root.add(inner);scene.add(root);root.updateMatrixWorld(true);
+  const bones={},rest={};root.traverse(o=>{if(o.isBone){const n=norm(o.name);if(bones[n])return;bones[n]=o;rest[n]={local:o.quaternion.clone(),world:o.getWorldQuaternion(new THREE.Quaternion())}}});
+  const wp=n=>bones[n].getWorldPosition(new THREE.Vector3());
+  // 자세 차이 A: 서아 기본 방향 → 원본(T자) 기본 방향
+  const A={};for(const n of ORDER){const d=M.dir[n],ch=CHILD[n];if(!d||!ch||!bones[n]||!bones[ch]){A[n]=new THREE.Quaternion();continue}
+    A[n]=new THREE.Quaternion().setFromUnitVectors(wp(ch).sub(wp(n)).normalize(),new THREE.Vector3(...d))}
+  const hipH=wp("Hips").y;
+  return{root,bones,rest,A,hipH};
+}
+const qa=new THREE.Quaternion(),qp=new THREE.Quaternion();
+function poseSeoa(f){
+  const s=seoa,N=M.frames,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
+  for(const n of ORDER){const b=s.bones[n],tr=M.tracks[n];if(!b||!tr)continue;
+    const d=new THREE.Quaternion(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]);qa.set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]);d.slerp(qa,u);
+    const W=d.multiply(s.A[n]).multiply(s.rest[n].world);           // 목표 월드 회전
+    b.parent.getWorldQuaternion(qp);b.quaternion.copy(qp.invert().multiply(W));b.updateMatrixWorld(true)}
+  const h=M.hip;s.root.position.set((showOrig&&orig?.85:0)+(h[i*3]+(h[j*3]-h[i*3])*u)*s.hipH,(h[i*3+1]+(h[j*3+1]-h[i*3+1])*u)*s.hipH,(h[i*3+2]+(h[j*3+2]-h[i*3+2])*u)*s.hipH);
+}
+async function boot(){
+  try{
+    M=await (await fetch("motions/xstage_embarrassing3.json")).json();
+    $("#meta").innerHTML=`<span>원본 파일</span><b>standard_Lovely - Embarrassing 3.fbx</b><span>길이</span><b>${M.duration.toFixed(1)}초 · ${M.frames}프레임 (30fps)</b><span>옮긴 뼈</span><b>${M.found.length}개</b><span>변환 데이터</span><b>JSON 약 290KB</b>`;
+    seoa=await loadSeoa();
+    $("#msg").remove();
+  }catch(e){console.error(e);$("#msg").textContent="불러오지 못했어요: "+(e.message||e)}
+}
+const clock=new THREE.Clock();
+function loop(){
+  requestAnimationFrame(loop);const dt=Math.min(.05,clock.getDelta());
+  const w=view.clientWidth,h=view.clientHeight,pr=R.getPixelRatio(),c=R.domElement;
+  if(w&&h&&(c.width!==Math.round(w*pr)||c.height!==Math.round(h*pr))){R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  if(M&&seoa){if(playing)t=(t+dt*speed)%M.duration;poseSeoa(t*M.fps);if(mixer)mixer.setTime(t);
+    if(!seeking){$("#seek").value=Math.round(t/M.duration*1000)}$("#time").textContent=`${t.toFixed(1)} / ${M.duration.toFixed(1)}초`}
+  ctl.update();R.render(scene,cam);
+}
+let seeking=false;
+$("#seek").addEventListener("input",e=>{seeking=true;if(M)t=e.target.value/1000*M.duration});
+$("#seek").addEventListener("change",()=>{seeking=false});
+$("#playBtn").onclick=()=>{playing=!playing;$("#playBtn").textContent=playing?"⏸ 일시정지":"▶ 재생"};
+document.querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{speed=+b.dataset.sp;document.querySelectorAll("[data-sp]").forEach(x=>x.classList.toggle("on",x===b))});
+if($("#origBtn"))$("#origBtn").onclick=e=>{showOrig=!showOrig;if(orig)orig.visible=showOrig;e.currentTarget.classList.toggle("on",showOrig)};
+let vi=0;const VIEWS=[["🎥 정면",[0,1.1,5.2],[0,.95,0]],["🎥 옆",[5.2,1.1,0],[0,.95,0]],["🎥 가까이",[0,1.4,2.2],[0,1.2,0]]];
+$("#viewBtn").onclick=()=>{vi=(vi+1)%VIEWS.length;const v=VIEWS[vi];cam.position.set(...v[1]);ctl.target.set(...v[2]);ctl.update();$("#viewBtn").textContent=VIEWS[(vi+1)%VIEWS.length][0]};
+$("#viewBtn").textContent=VIEWS[1][0];
+boot();loop();
+</script>
+</body>
+</html>
