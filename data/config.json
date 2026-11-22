@@ -11,14 +11,16 @@
   "_replyTimeout": "서버가 깨어난 것이 확인된 뒤에는 답장을 replyTimeoutMs 까지만 기다리고, 넘기면 예시 대사로 넘어간다(시연이 멈추지 않게). 깨어나기 전 첫 답장은 firstReplyWaitMs 그대로. wakeTimeoutMs: 「서버 깨우기」가 이만큼 응답이 없으면 빨강(응답 없음).",
   "replyTimeoutMs": 8000,
   "wakeTimeoutMs": 60000,
-  "_camera": "세로 화면 카메라 구도. 값은 모두 캐릭터 키(발=0, 머리 꼭대기=1)에 대한 비율: 보여 줄 위(top)·아래(bottom), 최소 너비(width), 카메라를 화면 중심보다 올리는 값(lift). 키는 모델마다 Head 뼈 높이 + headTopK × (Head−목) 으로 잰다. normal 상반신(평소) · motion 무릎 위(몸짓) · full 전신(춤 m23만). moveMs 는 구도가 바뀌는 시간. 가로 화면은 예전 값을 그대로 쓴다.",
+  "_camera": "세로 화면 카메라 구도. 값은 모두 캐릭터 키(발=0, 머리 꼭대기=1)에 대한 비율: 보여 줄 위(top)·아래(bottom), 최소 너비(width), 카메라를 화면 중심보다 올리는 값(lift). 키는 모델마다 Head 뼈 높이 + headTopK × (Head−목) 으로 잰다. normal 상반신(평소) · motion 허벅지 중간(몸짓, 6-B에서 무릎 위 0.31 → 0.40) · full 전신(춤 m23만). moveMs 는 구도가 바뀌는 시간. 가로 화면은 예전 값을 그대로 쓴다.",
   "camera": {
     "headTopK": 2.4,
     "normal": { "top": 1.05, "bottom": 0.57, "width": 0.45, "lift": 0.03 },
-    "motion": { "top": 1.05, "bottom": 0.31, "width": 0.48, "lift": 0.03 },
+    "motion": { "top": 1.05, "bottom": 0.40, "width": 0.48, "lift": 0.03 },
     "full": { "top": 1.05, "bottom": -0.03, "width": 0.7, "lift": 0.03 },
     "moveMs": 350
   },
-  "_stage": "대화 화면에서 몸짓이 재생될 때 3D 칸을 화면 높이의 bigRatio 까지 growMs 동안 키우고, 몸짓이 끝나고 backDelayMs 뒤 되돌린다.",
-  "stage": { "bigRatio": 0.54, "growMs": 350, "backDelayMs": 1000 }
+  "_stage": "대화 화면에서 몸짓이 재생될 때 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」(1 = 정사각형)까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게 한다(6-B, 예전: 화면 높이의 54%). 화면이 낮아 대화 목록이 minLogPx(px, 말풍선 두 줄) 아래로 줄어들면 그만큼만 키운다. 몸짓이 끝나고 backDelayMs 뒤 되돌린다.",
+  "_notify": "다른 캐릭터가 먼저 말 거는 알림(6-C). 알림 사이 최소 간격 minGapMs(3분) + 0~jitterMs 무작위, 헤더에 보이는 시간 showMs. 예전에는 45~75초마다였다. 문구는 data/ui.json notify",
+  "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
+  "stage": { "bigAspect": 1, "bigMaxRatio": 0.58, "minLogPx": 80, "growMs": 350, "backDelayMs": 1000 }
 }

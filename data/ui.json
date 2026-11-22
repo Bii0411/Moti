@@ -1,0 +1,21 @@
+{
+  "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
+  "album": {
+    "_album": "추억 앨범 탭. tabFirst = 해금 기록 칸(예전 「처음 본 모습」), tabGift = 선물 반응 칸. firstProgress 의 {got}·{total} 은 모은 수·전체 수. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "tabFirst": "명장면",
+    "tabGift": "선물 리액션",
+    "firstProgress": "명장면 수집 {got} / {total}",
+    "unlockTag": "🔓 새 명장면",
+    "unlockSaved": "📔 명장면에 기록됐어요"
+  },
+  "chatList": {
+    "_chatList": "대화 탭 메시지 목록이 비어 있을 때(앱을 처음 열었을 때 등). 홈에서 캐릭터 카드를 눌러 들어가야 목록에 생긴다",
+    "empty": "홈에서 캐릭터를 골라 대화를 시작해 보세요",
+    "goHome": "홈으로 가기"
+  },
+  "notify": {
+    "_notify": "다른 캐릭터가 먼저 말 거는 알림. 헤더의 로고와 💎 사이에 한 줄로 보인다. 간격·보이는 시간은 data/config.json notify",
+    "format": "💬 {name}: {line}",
+    "aria": "{name} 대화방으로 가기"
+  }
+}
