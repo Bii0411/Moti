@@ -1,12 +1,12 @@
 // moti 앱 기능 (캐릭터·대화·모션 피팅룸·지갑 등)
 const IMG={doyun:"card_doyun.jpg",jihu:"card_jihu.jpg",ijun:"card_ijun.jpg",haram:"card_haram.jpg",seoa:"card_seoa.jpg"};
 // 3D 모델: 지후(후보 2)·서아만. 나머지는 사진만 (3D 준비 중)
-const MODEL={jihu:"jihu.glb",seoa:"seoa.glb"};
+const MODEL={jihu:"jihu.glb",seoa:"seoa_vroid.glb"};
 // 3D 칸 뒤 장소 그림: 캐릭터마다 3곳. 대화에 장소 말이 나오면(kw) 배경이 바뀌어요
 const SCENES={
  seoa:[
-  {name:"네온 거리",img:"bg_seoa_rain.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니|비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
-  {name:"도시 옥상",img:"bg_seoa_roof.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
+  {name:"네온 거리",img:"bg_seoa_street.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니|비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
+  {name:"도시 옥상",img:"bg_seoa_rooftop.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
  ],
  jihu:[
   {name:"노을 진 교실",img:"bg_jihu_class.jpg",kw:/교실|수업|책상|칠판|방과\s?후|노을|해 질|오후/,say:"여기, 네 자리였잖아. 노을 질 때면 네가 늘 창밖을 봤어."},
