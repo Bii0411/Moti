@@ -89,6 +89,8 @@ const Onboard=(()=>{
     root.querySelector("#obGo").classList.remove("loading");
     if(typeof dataReady!=="undefined")dataReady.then(fill);fill();
     stageOut();
+    // 첫 화면이 뜨는 동안 필름 띠 사진도 미리 불러와 셰이더까지 준비(7-2)
+    if(typeof Stage!=="undefined")Promise.all([Stage.ready,typeof dataReady!=="undefined"?dataReady:null]).then(()=>Film.prepare());
     showScr("obFirst");
   }
   let going=false;
@@ -137,10 +139,11 @@ const Onboard=(()=>{
     leaveT.push(setTimeout(()=>{if(step==="ticket")root.querySelector("#obCard").classList.add("leave")},G.leaveMs!=null?G.leaveMs:1700));
     leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},(G.leaveMs!=null?G.leaveMs:1700)+(G.leaveFadeMs!=null?G.leaveFadeMs:450)));
   }
-  // 인사: 서아 손 흔들기(m13) + 「어서 와요」
+  // 인사: 서아 손 흔들기(m13) + 필름 띠가 잠깐 밝고 빨라짐 + 「어서 와요」
   function greet(){
     const G=D().greet||{};
     if(typeof Stage!=="undefined"){Stage.play(G.motion||"m13",{quiet:true});Stage.setFace(G.face||"joy")}
+    Film.punch();
     root.querySelector("#obGuide").classList.add("off");
     const w=root.querySelector("#obWelcome");w.classList.remove("on");void w.offsetWidth;w.classList.add("on");
   }
@@ -152,17 +155,18 @@ const Onboard=(()=>{
     const C=D().scene3d||{};
     const st=root.querySelector("#obStage"),card=root.querySelector("#obCard");
     const fit=()=>{st.style.height=Math.round(card.offsetTop+(C.overlapPx!=null?C.overlapPx:48))+"px"};fit();
-    Stage.borrow(st,C.frame||{top:1.1,bottom:.5,width:.9,lift:.02});borrowed=true;
+    Stage.borrow(st,C.frame||{top:1.1,bottom:.5,width:.9,lift:.02},Film.tick);borrowed=true;
     window.addEventListener("resize",fitNow);fitNow.f=fit;
     const f=C.fog||{};Stage.fog(f.color||"#120e1f",f.near!=null?f.near:2.4,f.far!=null?f.far:6);
     if(typeof Look!=="undefined")Look.setPlace(null);
     Stage.setFace(C.face||"soft");
+    Film.show();
   }
   function fitNow(){if(fitNow.f)fitNow.f()}
   function stageOut(){
     leaveT.forEach(clearTimeout);leaveT=[];
     if(!borrowed)return;borrowed=false;window.removeEventListener("resize",fitNow);
-    Stage.release();Stage.setFace("neutral");
+    Film.hide();Stage.release();Stage.setFace("neutral");
     if(typeof showScene==="function"&&typeof SCENES!=="undefined")showScene(S.scene||0);  // 테두리 빛을 대화 장소로 되돌림
   }
   // Google·카카오: 시연 버전이라 안내 토스트 뒤 게스트로
