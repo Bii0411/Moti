@@ -1,0 +1,55 @@
+/* 온보딩(7단계): 첫 화면 → 입장권 → 로그인. 앱 칸(.app) 전체를 덮는 층. 문구는 data/onboarding.json, 동작은 onboarding.js
+   토스트(z 30)는 이 층 위로 보이고, 시연 패널(z 61)도 위로 열린다 */
+.ob{position:absolute;inset:0;z-index:28;background:var(--bg);display:none;overflow:hidden;opacity:1;transition:opacity .4s}
+.ob.on{display:block}
+.ob.out{opacity:0;pointer-events:none}
+
+/* 어두운 네온 도시: 하늘 빛, 흐린 네온 사각형, 건물 실루엣(SVG), 천천히 떨어지는 빗줄기. 블러 필터 없이 그라데이션·그림자만 */
+.obcity{position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(120% 60% at 20% 105%,#3a1d5c55,transparent 60%),radial-gradient(90% 50% at 85% 95%,#5b1d4a44,transparent 60%),linear-gradient(#0b0a12 0%,#100c1c 55%,#160f26 100%)}
+.obneon{position:absolute;border-radius:3px;opacity:var(--o,.32);border:1.5px solid var(--c);box-shadow:0 0 10px 2px var(--c),inset 0 0 8px var(--c)}
+.obcity svg{position:absolute;left:0;bottom:0;width:100%;height:46%;display:block}
+.obrain{position:absolute;inset:0}
+.obrain i{position:absolute;top:-20%;width:1px;height:var(--h,60px);left:var(--x);background:linear-gradient(transparent,#b9a8ff55);opacity:var(--o,.5);animation:obRain var(--d,2.4s) linear var(--dl,0s) infinite;will-change:transform}
+@keyframes obRain{from{transform:translateY(0)}to{transform:translateY(140vh)}}
+
+.obscr{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity .35s}
+.obscr.on{display:flex}
+.obscr.show{opacity:1}
+
+/* 첫 화면 */
+.obfirst{align-items:center;justify-content:center;padding:0 24px calc(28px + env(safe-area-inset-bottom,0px))}
+.obfirst .obmid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
+.oblogo{font-size:64px;font-weight:800;letter-spacing:-1px;line-height:1;text-shadow:0 0 24px #8b5cf666}
+.obtag{font-size:15px;color:#d9d2ee;line-height:1.5;word-break:keep-all}
+.obfirst .obmid>*{opacity:0}
+.obscr.show .obmid>*{animation:obIn var(--fade,600ms) ease-out both}
+.obscr.show .obmid>.obtag{animation-delay:120ms}
+@keyframes obIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* 큰 버튼(입장권 받기 등). .loading: 서아 3D 준비를 기다리는 중 작은 로딩 표시 */
+.obbtn{width:100%;max-width:360px;height:52px;border-radius:14px;background:var(--pri);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;-webkit-tap-highlight-color:transparent;transition:transform .1s}
+.obbtn:active{transform:scale(.98)}
+.obbtn .spin{display:none;width:16px;height:16px;border-radius:50%;border:2px solid #ffffff55;border-top-color:#fff;animation:obSpin .8s linear infinite}
+.obbtn.loading .spin{display:block}
+@keyframes obSpin{to{transform:rotate(360deg)}}
+
+/* 시연 패널 열기(온보딩 중에는 헤더가 가려져서 같은 톱니바퀴를 오른쪽 위에 작게) */
+.obgear{position:absolute;right:8px;top:calc(8px + env(safe-area-inset-top,0px));z-index:5;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:#a59fb8;opacity:.55;-webkit-tap-highlight-color:transparent}
+.obgear svg{width:20px;height:20px}
+.obgear:active,.obgear.on{opacity:1;color:var(--text)}
+
+/* 입장권 임시(7-A) */
+.obtemp{align-items:center;justify-content:center;gap:18px;padding:24px}
+.obtemp .obguide{font-size:18px;font-weight:800}
+
+/* 로그인 */
+.oblogin{padding:0 24px calc(26px + env(safe-area-inset-bottom,0px));justify-content:flex-end}
+.oblogin .obhead{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding-top:40px}
+.oblogin h2{font-size:28px;font-weight:800;line-height:1.35;letter-spacing:-.3px}
+.oblogin .obdesc{font-size:14px;color:#cfc8e4;line-height:1.55;word-break:keep-all}
+.oblogin .obacts{display:flex;flex-direction:column;align-items:center;gap:10px}
+.oblogin .obbtn.g{background:#fff;color:#1f1f1f}
+.oblogin .obbtn.k{background:#fee500;color:#191600}
+.obtext{font-size:14px;font-weight:700;color:var(--pri2);padding:10px 16px;-webkit-tap-highlight-color:transparent}
+.obnote{font-size:12px;color:#8a83a0;text-align:center}

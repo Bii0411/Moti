@@ -265,6 +265,7 @@ nav button.on{color:var(--text)}
 .chapter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:32;background:#0d0b16e6;border:1px solid #f5c66b66;color:var(--gold);padding:14px 24px;border-radius:16px;font-size:20px;font-weight:800;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;white-space:nowrap}
 .chapter.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 </style>
+<link rel="stylesheet" href="onboarding.css">
 </head>
 <body>
 <div class="app">
@@ -331,6 +332,7 @@ nav button.on{color:var(--text)}
 <script src="motion.js"></script>
 <script src="look.js"></script>
 <script src="alive.js"></script>
+<script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -347,8 +349,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json")]);
-  DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json")]);
+  DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
@@ -449,10 +451,14 @@ const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"H
 const Stage=(()=>{
   let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
+  // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
+  let readyFn;const ready=new Promise(r=>readyFn=r);const T0=performance.now();let readyMs=null;
   function init(){
     R=new THREE.WebGLRenderer({antialias:true,alpha:true});
     R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.outputEncoding=THREE.sRGBEncoding;
     scene=new THREE.Scene();
+    // 안개(7-B 입장권의 마네킹용): 평소엔 아주 멀리 둬서 보이지 않게. 켜고 끌 때 셰이더를 다시 만들지 않도록 항상 달아 둔다
+    scene.fog=new THREE.Fog(0x000000,1000,1001);
     cam=new THREE.PerspectiveCamera(30,1,.1,20);
     const hemi=new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05);scene.add(hemi);
     const k=new THREE.DirectionalLight(0xffffff,.85);k.position.set(1.2,2,2.4);scene.add(k);
@@ -475,7 +481,10 @@ const Stage=(()=>{
       md={root,bones,rest};scene.add(root);$("#ld").remove();
       // 4-2A 살아 있게(머리카락·숨·시선): 서아만. ?alive=off 로 끔
       if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
-    }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
+      // 셰이더를 미리 만들어 둠: 3D 칸이 처음 보일 때(입장권·서아 대화방) 멈칫하지 않게
+      try{R.compile(scene,cam)}catch(e){}
+      readyMs=Math.round(performance.now()-T0);readyFn(true);
+    }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요.";readyFn(false)});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
   }
@@ -513,7 +522,8 @@ const Stage=(()=>{
     return H0=h&&nk?h+(camCfg().headTopK||2.4)*(h-nk):1.6}
   const camCfg=()=>(DATA.config&&DATA.config.camera)||{};
   const landscape=()=>{const a=$(".app");return a.clientWidth>a.clientHeight};
-  function frameTo(name,ms){const F=camCfg()[name];if(!F)return;
+  // name: data/config.json camera 의 구도 이름, 또는 {top,bottom,width,lift} 직접(입장권 구도 등)
+  function frameTo(name,ms){const F=name&&typeof name==="object"?name:camCfg()[name];if(!F)return;
     frFrom=frNow?{...frNow}:{...F};frTo={...F};frT0=performance.now();frMs=ms!=null?ms:(camCfg().moveMs||350)}
   function camAt(now){
     if(landscape()||!frTo){cam.position.set(0,tall?1.25:1.26,tall?2.9:2.3);cam.lookAt(0,tall?1.12:1.19,0);return}
@@ -529,7 +539,8 @@ const Stage=(()=>{
     if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio()))){
       R.setSize(w,h,false);cam.aspect=w/h;tall=w/h<.8;cam.updateProjectionMatrix()}
     camAt(now);Look.tick(now,w,h);
-    if(!md){R.render(scene,cam);return}
+    if(extraTick)extraTick(now,w,h);
+    if(!md){if(w&&h)R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
     if(cur){mt=t-cur.start;const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
@@ -539,7 +550,7 @@ const Stage=(()=>{
     if(isXs&&xsData)xsApply(xsData,mt,XS[id]);
     if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
     face(t);
-    R.render(scene,cam);
+    if(w&&h)R.render(scene,cam);  // 3D 칸이 안 보일 때(홈·마이, 온보딩 첫 화면)는 그리지 않음
   }
   // 표정: 목표 표정으로 부드럽게 + 눈 깜빡임 + 말할 때 입 움직임
   function face(t){
@@ -580,9 +591,11 @@ const Stage=(()=>{
     if(faceKey&&(g.avertFaces||["shy"]).indexOf(faceKey)>=0)return true;
     return !!(faceEmo&&new RegExp(g.avertEmotion||"당황|수줍|부끄").test(faceEmo))}
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
+  // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사)
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
     cur={id:mid,start:performance.now()/1000};
+    if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
     if(mid===IDLE&&!o.tag){c.classList.remove("on");return}
@@ -595,7 +608,13 @@ const Stage=(()=>{
   // 대사 글자 수 → 입 움직이는 시간 (글자당 msPerChar, 최대 maxMs. 띄어쓰기는 세지 않음)
   function talkFor(text){const tk=talkCfg(),n=String(text||"").replace(/\s+/g,"").length;if(n)talk(Math.min(tk.maxMs||4000,n*(tk.msPerChar||70)))}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  // 온보딩(7-B): 3D 그림판(canvas)을 다른 칸으로 잠깐 빌려줌 → 모델을 두 번 불러오지 않는다. release 로 대화 3D 칸에 돌려놓음
+  let extraTick=null;
+  function borrow(el,frame,tick){el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0)}
+  function release(){const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
+    scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null}
+  function fog(color,near,far){scene.fog.color.set(color);scene.fog.near=near;scene.fog.far=far}
+  return{init,ready,readyMs:()=>readyMs,borrow,release,fog,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1083,13 +1102,17 @@ const Demo=(()=>{
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
-    all(){S=blank();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral")},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로)
+    all(){S=blank();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
     album(){S.firsts=[];S.album={}}
   };
-  function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800)}
+  function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
+  // 온보딩(7-A): 다시 보기 = onboarded 만 지우고 첫 화면부터. 장면 0 「앱 처음 열기」 = 전체 초기화 후 첫 화면
+  const OT=k=>Onboard.T(k);
+  function replayOnboard(){cancel();delete S.onboarded;save();setTab("home");Onboard.open();refresh();reveal()}
+  function firstOpen(){cancel();RESET.all();refresh();reveal()}
   // 오프닝 다시 보기: 서아 대화를 비우고 오프닝부터 (관계·앨범은 그대로)
   function opening(){cancel();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;story().recent_lines=[];S.introDone=false;start();
     setTab("chat");openRoom("seoa");refresh();reveal()}
@@ -1117,7 +1140,7 @@ const Demo=(()=>{
     h+=Scenes.html(T,B);
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("resetAll",esc(confirmAll?T("resetAllConfirm"):T("resetAll")),{cls:confirmAll?"warn":""})}${B("dia",esc(T("dia")))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("resetAll",esc(confirmAll?T("resetAllConfirm"):T("resetAll")),{cls:confirmAll?"warn":""})}${B("dia",esc(T("dia")))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${STATES[k].e} ${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     if(DEBUG){
       const q=qs.get("server");
@@ -1142,6 +1165,8 @@ const Demo=(()=>{
     if(a==="close")return setOpen(false);
     if(a==="wake")return wakeServer();
     if(a==="opening")return opening();
+    if(a==="replayOnboard")return replayOnboard();
+    if(a==="scene0")return firstOpen();
     if(a==="resetAll"){
       if(!confirmAll){confirmAll=true;clearTimeout(confirmT);confirmT=setTimeout(()=>{confirmAll=false;render()},4000);return render()}
       confirmAll=false;clearTimeout(confirmT);return reset("all")}
@@ -1166,7 +1191,7 @@ const Demo=(()=>{
     $("#gearBtn").setAttribute("aria-label",T("handle"));$("#gearBtn").onclick=toggle;
     setOpen(!!DS.open);
   }
-  return{init,render,toggle,setOpen,setLast:o=>{last=o;render()},cancel,setStage,resetSeoa,refresh,reveal,toChat,T,isOpen:()=>open};
+  return{init,render,toggle,setOpen,setLast:o=>{last=o;render()},cancel,setStage,resetSeoa,refresh,reveal,toChat,T,OT,firstOpen,isOpen:()=>open};
 })();
 // ───────────────────────── 장면 바로가기 (5-B) ─────────────────────────
 // data/demo_scenes.json 의 장면 6개. 들어가면 서아 대화를 비우고 상태를 맞춘 뒤 장 제목 2초. 예약(next)은 다음 답장 뒤 send() 가 실행
@@ -1180,7 +1205,7 @@ const Scenes=(()=>{
   const evMotions=ev=>((DATA.story&&DATA.story.unlock.event[ev])||{}).motions||[];
   function go(n){
     const sc=L()[n-1];if(!sc)return;
-    DS.scene=n;saveDS();Demo.cancel();
+    DS.scene=n;saveDS();Demo.cancel();Onboard.hide();  // 온보딩 중이면 저장 없이 닫고 장면으로
     S.placeLock=false;
     if(sc.album){setTab("album");albumSeg=sc.album;renderAlbum();Demo.render();Demo.reveal();chapter(sc);return}  // 상태는 그대로
     if(sc.reset==="seoa"){Demo.resetSeoa();setTab("chat");openRoom("seoa")}  // 서아 전체 초기화 → 오프닝
@@ -1213,7 +1238,7 @@ const Scenes=(()=>{
     const list=L();if(!list.length)return "";
     const c=cur(),now=list[c-1],nx=list[c];
     return `<div class="now">${esc(T("now"))} <b>${now?esc(now.n+" "+now.name):esc(T("none"))}</b> · ${esc(T("next"))} ${nx?esc(nx.n+" "+nx.name):esc(T("none"))}${S.demoNext?`<br><span class="rs">${esc(T("reserved"))} · ${esc(resText(S.demoNext))}</span>`:""}</div>
-      <h4>${esc(T("sec.scenes"))}</h4><div class="row">${list.map(sc=>B("scene",esc(sc.n+" "+sc.name),{v:sc.n,on:c===sc.n})).join("")}</div>`;
+      <h4>${esc(T("sec.scenes"))}</h4><div class="row">${B("scene0",esc("0 "+Demo.OT("demo.scene0")))}${list.map(sc=>B("scene",esc(sc.n+" "+sc.name),{v:sc.n,on:c===sc.n})).join("")}</div>`;
   }
   function click(a,v){if(a==="scene"){go(+v);return true}return false}
   // 단축키: ?debug=1 일 때만, 입력창에 글자를 치는 중에는 무시
@@ -1221,7 +1246,8 @@ const Scenes=(()=>{
     if(!DEBUG||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
     const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
     const c=e.code,n=L().length;let m;
-    if((m=/^(Digit|Numpad)([1-9])$/.exec(c))&&+m[2]<=n)go(+m[2]);
+    if(c==="Digit0"||c==="Numpad0")Demo.firstOpen();  // 장면 0 앱 처음 열기(7-A)
+    else if((m=/^(Digit|Numpad)([1-9])$/.exec(c))&&+m[2]<=n)go(+m[2]);
     else if(c==="ArrowRight")go(Math.min(n,cur()+1));
     else if(c==="ArrowLeft")go(Math.max(1,cur()-1));
     else if(c==="KeyR")go(cur()||1);
@@ -1388,11 +1414,14 @@ function start(){
   CH.forEach(c=>chatOf(c.id));
 }
 const dataReady=loadData();
+// 온보딩(7-A): 처음 실행일 때만(저장값 onboarded 가 없을 때). 데이터를 기다리지 않고 바로 덮어서 홈이 먼저 비치지 않게. ?skipintro=1 이면 건너뜀(개발용)
+const SKIP_INTRO=qs.get("skipintro")==="1";
+if(!S.onboarded&&!SKIP_INTRO)Onboard.open();
 // 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");Demo.init();pingLater()});
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
