@@ -80,6 +80,63 @@
         "비 내리는 골목": "#8AB4FF",
         "바 옥상": "#B89CFF"
       }
+    },
+    "_alive": "살아 있게(4-2A). 모두 몸짓 위에 더해지는 작은 움직임. bigScale = 3D 확대(큰 몸짓) 중 숨·흔들림·시선 머리 회전 세기 배율. hair: 이름이 J_Sec_Hair 로 시작하는 뼈 사슬(가닥)만. 가닥마다 감쇠 스프링 하나(freqHz 흔들리는 빠르기 = 뻣뻣함, damping 감쇠 0~1 클수록 빨리 멈춤, follow 머리가 움직일 때 가닥이 늦게 남는 정도 0~1, maxDeg 가닥 끝이 원래 방향에서 벌어질 수 있는 최대 각도). breath: periodSec 주기, chestDeg 가슴(Spine02) 젖힘, shoulderDeg 어깨 올림. sway: periodSec 주기 범위(한 바퀴마다 새로 뽑음), hipDeg 골반 기울기, counter 상체가 반대로 세우는 비율, shiftCm 좌우 이동(cm). gaze: 눈 뼈(J_Adj_L/R_FaceEye)+머리(Head). headFollow 머리가 따라가는 비율, eyeMax*/headMaxDeg 최대 각도, eyeSpeed/headSpeed 따라가는 빠르기(클수록 빠름), reduceDeg 몸짓이 머리를 이 각도 범위로 돌리면 시선 머리 회전을 1→0 으로 줄임, jitter 잠깐 시선 흔들림(everySec 간격, deg 크기, holdSec 머무는 시간), avert* 시선 피하기(감정 정규식·표정 이름·몸짓, 피하는 각도). 주소 뒤 ?alive=off 로 전부 끔.",
+    "alive": {
+      "bigScale": 0.4,
+      "hair": {
+        "freqHz": 2.5,
+        "damping": 0.3,
+        "follow": 1,
+        "maxDeg": 8
+      },
+      "breath": {
+        "periodSec": 4,
+        "chestDeg": 0.8,
+        "shoulderDeg": 0.6
+      },
+      "sway": {
+        "periodSec": [
+          6,
+          8
+        ],
+        "hipDeg": 0.6,
+        "counter": 0.8,
+        "shiftCm": 0.4
+      },
+      "gaze": {
+        "headFollow": 0.3,
+        "eyeMaxYawDeg": 12,
+        "eyeMaxPitchDeg": 8,
+        "headMaxDeg": 12,
+        "eyeSpeed": 16,
+        "headSpeed": 3,
+        "reduceDeg": [
+          8,
+          25
+        ],
+        "jitter": {
+          "everySec": [
+            2,
+            5
+          ],
+          "deg": 2.5,
+          "holdSec": [
+            0.25,
+            0.6
+          ]
+        },
+        "avertEmotion": "당황|수줍|부끄",
+        "avertFaces": [
+          "shy"
+        ],
+        "avertMotions": [
+          "m05",
+          "m10"
+        ],
+        "avertYawDeg": 30,
+        "avertPitchDeg": 8
+      }
     }
   }
 }

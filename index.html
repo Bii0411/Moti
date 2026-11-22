@@ -275,6 +275,7 @@ nav button.on{color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="motion.js"></script>
 <script src="look.js"></script>
+<script src="alive.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -377,7 +378,7 @@ const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
-  let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null;
+  let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   function init(){
     R=new THREE.WebGLRenderer({antialias:true,alpha:true});
@@ -403,6 +404,8 @@ const Stage=(()=>{
       root.traverse(o=>{if(o.isBone&&!bones[o.name]){bones[o.name]=o;const w=new THREE.Quaternion();o.getWorldQuaternion(w);rest[o.name]={local:[o.quaternion.x,o.quaternion.y,o.quaternion.z,o.quaternion.w],world:[w.x,w.y,w.z,w.w]}}});
       if(useLook)lookInfo=Look.apply(DATA.look&&DATA.look.seoa,root,{hemi,key:k,back:r},{extra:lookExtra});
       md={root,bones,rest};scene.add(root);$("#ld").remove();
+      // 4-2A 살아 있게(머리카락·숨·시선): 서아만. ?alive=off 로 끔
+      if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive);aliveOn=true}
     }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
@@ -465,6 +468,7 @@ const Stage=(()=>{
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(isXs&&xsData)xsApply(xsData,mt,XS[id]);
+    if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
     face(t);
     R.render(scene,cam);
   }
@@ -480,6 +484,11 @@ const Stage=(()=>{
     for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
   }
+  // 시선 피하기: 감정이 당황·수줍음(또는 수줍음 표정)이거나, 몸짓이 시선 피하기(m05)·등 돌리기(m10)
+  function avert(mid){const g=(DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive&&DATA.look.seoa.alive.gaze)||{};
+    if(mid&&(g.avertMotions||["m05","m10"]).indexOf(mid)>=0)return true;
+    if(faceKey&&(g.avertFaces||["shy"]).indexOf(faceKey)>=0)return true;
+    return !!(faceEmo&&new RegExp(g.avertEmotion||"당황|수줍|부끄").test(faceEmo))}
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
@@ -490,11 +499,11 @@ const Stage=(()=>{
     c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
     if(mid!==IDLE&&typeof View!=="undefined")View.motion(mid);
   }
-  // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접
-  function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
+  // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
+  function setFace(k,emo){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
   function talk(ms){talkUntil=performance.now()+ms}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{init,play,setFace,talk,alive:()=>aliveInfo,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -542,7 +551,7 @@ function setScene(i){clearTimeout(sceneBackT);if(!SCENES[i])i=0;S.scene=i;showSc
 // 다시 보기 동안만 그때 장소를 보여 주고, 끝나면 대화의 원래 장소로
 function sceneForReplay(i,ms){clearTimeout(sceneBackT);showScene(i);sceneBackT=setTimeout(()=>showScene(S.scene),ms)}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
-function react(r,tag,sub){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t,0,sub);faceReset()}
+function react(r,tag,sub){Stage.play(r.m,{tag});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
 // ───────────────────────── 대화 ─────────────────────────
@@ -808,7 +817,7 @@ async function send(text){
   const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
   const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
-  react({m:mid||IDLE,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  react({m:mid||IDLE,f:v.face,t:v.line,e:emo},learned?"✨ 선물로 배운 모습":"");
   firstSeen(mid);
   afterReply(v);
   // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
