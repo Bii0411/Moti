@@ -39,6 +39,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .msg{max-width:82%;padding:9px 12px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap}
 .msg.c{background:var(--card);align-self:flex-start;border-top-left-radius:6px}
 .msg.u{background:var(--pri);align-self:flex-end;border-top-right-radius:6px}
+.mnarr{align-self:flex-start;max-width:88%;font-size:13px;line-height:1.55;color:#a39cb8;font-style:italic;padding:0 4px}
+.mnarr.u{align-self:flex-end;text-align:right}
 .msg.sys{align-self:center;background:none;color:var(--sub);font-size:12px;text-align:center;max-width:95%}
 .msg.gift{align-self:flex-end;background:#2a1d47;border:1px solid #6d4bd1}
 .msg .tag{display:inline-block;margin-top:5px;font-size:11px;color:var(--gold);font-weight:700}
@@ -415,7 +417,7 @@ const Stage=(()=>{
 let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
-function say(text,ms){const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
+function say(text,ms){text=speechOnly(text);if(!text)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
 function burst(e){const b=$("#burst");b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
 function setScene(i){S.scene=i;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
@@ -423,6 +425,15 @@ function react(r,tag){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t);faceRese
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
 // ───────────────────────── 대화 ─────────────────────────
+// *별표* = 나레이션(지문), 나머지 = 대사. 따옴표만 있으면 따옴표 안이 대사.
+function msgParts(t){
+  t=String(t||"");const out=[];const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
+  if(/\*[^*]+\*/.test(t)){t.split(/(\*[^*]+\*)/).forEach(seg=>{if(/^\*[^*]+\*$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg.replace(/\*/g,""))})}
+  else if(/[“"][^”"]+[”"]/.test(t)){t.split(/([“"][^”"]+[”"])/).forEach(seg=>{if(/^[“"][^”"]+[”"]$/.test(seg))push("d",seg.slice(1,-1));else push("n",seg)})}
+  else push("d",t);
+  return out.flatMap(p=>p.x.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>({k:p.k,x:p.k==="d"?x.replace(/^[“"]|[”"]$/g,""):x})));
+}
+const speechOnly=t=>msgParts(t).filter(p=>p.k==="d").map(p=>p.x).join(" ");
 function chatOf(cid){return S.chats[cid]||(S.chats[cid]=[{r:"c",t:chBy(cid).intro,at:Date.now()-FIRST_MIN[cid]*60000}])}
 function addMsg(r,t,extra,cid){cid=cid||S.room||"seoa";const L=chatOf(cid);L.push({r,t,at:Date.now(),...(extra||{})});if(L.length>60)S.chats[cid]=L.slice(-60);
   if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
@@ -430,7 +441,8 @@ function renderLog(){
   const L=$("#log");
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
-    `<div class="msg ${m.r}">${esc(m.t)}${m.tag?`<br><span class="tag">${esc(m.tag)}</span>`:""}</div>`).join("")+(busy?`<div class="msg c typing">서아가 입력 중…</div>`:"");
+    m.r==="c"?msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}${m.tag&&i===a.length-1?`<br><span class="tag">${esc(m.tag)}</span>`:""}</div>`).join("")+(m.tag&&msgParts(m.t).slice(-1)[0]?.k==="n"?`<div class="mnarr"><span class="tag" style="font-style:normal">${esc(m.tag)}</span></div>`:"")
+    :`<div class="msg ${m.r}">${esc(m.t)}${m.tag?`<br><span class="tag">${esc(m.tag)}</span>`:""}</div>`).join("")+(busy?`<div class="msg c typing">서아가 입력 중…</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
 const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
@@ -691,7 +703,7 @@ function renderList(){
   const rows=CH.map(c=>{const L=chatOf(c.id).filter(m=>m.r!=="sys"),last=L[L.length-1];return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
   const tot=rows.reduce((a,r)=>a+r.u,0);$("#dmUnread").textContent=tot?`안 읽은 메시지 ${tot}`:"";
   $("#dmList").innerHTML=rows.map(({c,last,u})=>`<button class="dm" data-c="${c.id}"><span class="av" style="background-image:url(${c.img})">${c.badge==="3D"&&c.id==="seoa"?"<i>3D</i>":""}</span>
-    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.t):""}</span></span>
+    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.t):""}</span></span>
     <span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`).join("");
   $("#dmList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>openRoom(b.dataset.c));
 }
