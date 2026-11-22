@@ -50,11 +50,16 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .msg.gift{align-self:flex-end;background:#2a1d47;border:1px solid #6d4bd1}
 .msg .tag{display:inline-block;margin-top:5px;font-size:11px;color:var(--gold);font-weight:700}
 .typing{color:var(--sub)}
-.bar{display:flex;gap:8px;padding:8px 12px 12px;align-items:center;min-width:0}
+.bar{display:flex;gap:8px;padding:8px 12px 12px;align-items:flex-end;min-width:0}
 .gbtn{width:48px;height:48px;border-radius:50%;background:#000 url(icons/gift_button.png) center/cover;flex:none;position:relative;box-shadow:0 0 12px #a78bfa66}
 .gbtn .dot{position:absolute;right:-2px;top:-2px;background:var(--gold);color:#000;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px}
-.inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;outline:none}
-.send{width:44px;height:44px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
+/* 여러 줄 입력창: 엔터는 줄바꿈, 4줄까지 커지고 그 이상은 안에서 스크롤 (autoGrow). 16px = 아이폰 자동 확대 방지 */
+.inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;line-height:22px;outline:none;resize:none;display:block;height:46px;max-height:112px;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
+/* 안내 문구가 길어 두 줄: 글자만 13px로 줄이고(입력 글자는 16px 그대로) 빈 칸일 때만 위아래 여백을 줄여 46px 안에 넣음 */
+.inp::placeholder{color:#6b6480;font-size:13px;line-height:17px}
+.inp:placeholder-shown{padding-top:5px;padding-bottom:5px;word-break:keep-all;overflow-wrap:normal}
+.abtn{flex:none;height:46px;padding:0 9px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--pri2);line-height:1.15}
+.send{width:46px;height:46px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
 .quick{display:flex;gap:6px;padding:0 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0;max-width:100%;flex:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .quick::-webkit-scrollbar{display:none}
 .quick button{flex:none;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--sub)}
@@ -232,7 +237,8 @@ nav button.on{color:var(--text)}
       <div class="quick" id="quick"></div>
       <div class="bar">
         <button class="gbtn" id="giftBtn" aria-label="선물하기"></button>
-        <input class="inp" id="inp" placeholder="서아에게 말 걸기" autocomplete="off">
+        <button class="abtn" id="actBtn" aria-label="행동 묘사 넣기">( )<br>행동</button>
+        <textarea class="inp" id="inp" rows="1" placeholder="서아에게 말 걸기" autocomplete="off" enterkeyhint="enter"></textarea>
         <button class="send" id="sendBtn" aria-label="보내기">↑</button>
       </div>
       </div>
@@ -532,6 +538,13 @@ function msgParts(t){
   return out.flatMap(p=>p.x.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>({k:p.k,x:p.k==="d"?x.replace(/^[“"]|[”"]$/g,""):x})));
 }
 const speechOnly=t=>msgParts(t).filter(p=>p.k==="d").map(p=>p.x).join(" ");
+// 내 메시지: 괄호 ( ) 안 = 상황 묘사(지문), 나머지 = 말풍선. 괄호 기호는 보이지 않게. 서버에는 원문 그대로 보냄
+function userParts(t){
+  const out=[];const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
+  String(t||"").split(/([(（][^()（）]*[)）])/).forEach(seg=>{if(/^[(（][^()（）]*[)）]$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg)});  // 말풍선 안 줄바꿈은 그대로
+  return out;
+}
+const userPlain=t=>userParts(t).map(p=>p.x).join(" ");
 function chatOf(cid){return S.chats[cid]||(S.chats[cid]=[{r:"c",t:chBy(cid).intro,at:Date.now()-FIRST_MIN[cid]*60000}])}
 function addMsg(r,t,extra,cid){cid=cid||S.room||"seoa";const L=chatOf(cid);L.push({r,t,at:Date.now(),...(extra||{})});if(L.length>60)S.chats[cid]=L.slice(-60);
   if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
@@ -540,6 +553,7 @@ function renderLog(){
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
     m.r==="c"?(m.act?`<div class="mnarr">${esc(m.act)}</div>`:"")+msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
+    :m.r==="u"?userParts(m.t).map(p=>p.k==="n"?`<div class="mnarr u">${esc(p.x)}</div>`:`<div class="msg u">${esc(p.x)}</div>`).join("")
     :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+(busy?`<div class="msg c typing">${esc(waiting&&!serverAwake&&DATA.config.waitText||"서아가 입력 중…")}</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
@@ -568,9 +582,10 @@ const replyWait=normal=>serverAwake?normal:Math.max(normal,DATA.config.firstRepl
 const story=()=>S.story||(S.story={});
 async function post(path,body,ms){
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
+  const P=path==="/chat"?PERF_CUR:null;if(P)P.req=performance.now();
   try{const r=await fetch(apiUrl()+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
     serverAwake=true;
-    if(!r.ok){console.warn("서버 오류",path,r.status);return null}return await r.json()}
+    if(!r.ok){console.warn("서버 오류",path,r.status);return null}const j=await r.json();if(P)P.res=performance.now();return j}
   catch(e){console.warn("서버에 연결 못 함 → 예시 대사",path,e&&e.name);return null}finally{clearTimeout(tm)}
 }
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
@@ -730,17 +745,25 @@ async function askOther(cid,text){
   const j=await askServer(cid,text);if(j)return (j.action?`*${j.action}* `:"")+j.line;
   return c.lines[Math.floor(Math.random()*c.lines.length)];
 }
+// 답장 속도 재기: 전송 → (앱 준비) → 서버 요청~응답 → (응답 후 표시). 콘솔과 PERF 에 남김
+const PERF=[];let PERF_CUR=null;
+function perfStart(){return PERF_CUR={t0:performance.now()}}
+function perfEnd(P){P.dom=performance.now();requestAnimationFrame(()=>{P.shown=performance.now();const r=x=>x==null?null:Math.round(x);
+  const o={준비:r((P.req||P.dom)-P.t0),서버:P.req&&P.res?r(P.res-P.req):null,표시:r(P.dom-(P.res||P.req||P.t0)),그려짐:r(P.shown-P.dom),전체:r(P.shown-P.t0),입력중표시:r((P.typing||P.t0)-P.t0),판정대기:r(P.judgeWait||0),출처:P.src||""};
+  PERF.push(o);console.info("[답장 속도 ms]",o);if(PERF_CUR===P)PERF_CUR=null})}
 async function send(text){
   text=(text||"").trim();if(!text||busy)return;
   const room=S.room||"seoa";
-  $("#inp").value="";addMsg("u",text,null,room);busy=true;renderLog();
-  if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);return}
-  if(judgeP)await judgeP;  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
+  const P=perfStart();
+  $("#inp").value="";autoGrow();addMsg("u",text,null,room);busy=true;renderLog();
+  if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);perfEnd(P);return}
+  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저)
+  P.typing=performance.now();
+  if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
   S.bond=(S.bond||0)+1;
-  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
-  const v=await askSeoa(text);busy=false;waiting=false;
+  const v=await askSeoa(text);busy=false;waiting=false;P.src=v.src||"local";
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
@@ -757,7 +780,7 @@ async function send(text){
     const ev=usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
     runJudge(text,turnText(talkOf("seoa").slice(-1)[0]));
   }else countStage();
-  renderBond();renderTop();
+  renderBond();renderTop();perfEnd(P);
   if(prevMood!==S.mood&&!S.force&&!S.birthday){const g=GIFTS.find(x=>x.rec===S.mood);toast(`${STATES[S.mood].e} 서아가 <b>${STATES[S.mood].ko}</b> 상태가 됐어요`+(g&&S.mood!=="normal"?`<br><small>🎁 ${g.e} ${g.name}을(를) 주면 특별한 반응이 있을지도…?</small>`:""))}
 }
 // 답장 뒤 이야기 상태 갱신: 최근 서아 응답 3개(반복 방지), 장소, 쓴 사건 비우기
@@ -954,7 +977,7 @@ function renderList(){
   const rows=CH.map(c=>{const L=chatOf(c.id).filter(m=>m.r!=="sys"),last=L[L.length-1];return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
   const tot=rows.reduce((a,r)=>a+r.u,0);$("#dmUnread").textContent=tot?`안 읽은 메시지 ${tot}`:"";
   $("#dmList").innerHTML=rows.map(({c,last,u})=>`<button class="dm" data-c="${c.id}"><span class="av" style="background-image:url(${c.img})">${c.badge==="3D"&&c.id==="seoa"?"<i>3D</i>":""}</span>
-    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
+    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.r==="u"?userPlain(last.t):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
     <span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`).join("");
   $("#dmList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>openRoom(b.dataset.c));
 }
@@ -965,7 +988,7 @@ function openRoom(cid){
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   $("#roomSub").textContent=cid==="seoa"?"3D · 표정 · 선물":"2D · 3D는 준비 중이에요";
   $("#giftBtn").style.display=cid==="seoa"?"":"none";$("#quick").style.display=cid==="seoa"?"":"none";
-  $("#inp").placeholder=c.name+"에게 말 걸기";
+  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
   if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
 }
@@ -1001,7 +1024,13 @@ $("#backBtn").onclick=showList;
 $("#demoBtn").onclick=demoSheet;
 $("#scrim").onclick=closeSheets;
 $("#sendBtn").onclick=()=>send($("#inp").value);
-$("#inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)send($("#inp").value)});
+// 엔터는 줄바꿈만(기본 동작). 전송은 화살표 버튼으로만
+function autoGrow(){const t=$("#inp");t.style.height="auto";const max=parseFloat(getComputedStyle(t).maxHeight)||112;const h=Math.min(t.scrollHeight+2,max);t.style.height=h+"px";t.style.overflowY=t.scrollHeight+2>max?"auto":"hidden"}
+$("#inp").addEventListener("input",autoGrow);
+// 행동 버튼: 커서 자리에 "()"를 넣고 커서를 괄호 안에. 누를 때 입력창 포커스(키보드)를 잃지 않게 pointerdown 기본 동작을 막음
+$("#actBtn").addEventListener("pointerdown",e=>e.preventDefault());
+$("#actBtn").onclick=()=>{const t=$("#inp"),a=t.selectionStart??t.value.length,b=t.selectionEnd??a;
+  t.focus();t.setRangeText("("+t.value.slice(a,b)+")",a,b,"start");t.setSelectionRange(a+1,a+1+(b-a));autoGrow()};
 Stage.init();
 $("#inp").addEventListener("focus",()=>{if(View.isBig())View.rest()});
 // 대화 목록이 맨 아래를 보고 있었으면, 3D가 커져 목록이 줄어들어도 맨 아래(최신 말풍선)를 유지
