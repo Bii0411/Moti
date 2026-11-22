@@ -16,7 +16,7 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:700}
 .demo-btn{font-size:12px;color:var(--sub);border:1px dashed var(--line);border-radius:999px;padding:6px 10px}
 
-.stage{position:relative;height:44%;min-height:250px;margin:0 12px;border-radius:20px;overflow:hidden;background:#140a24 center 40%/cover no-repeat;transition:background-image .6s}
+.stage{position:relative;height:36%;min-height:210px;margin:0 12px;border-radius:20px;overflow:hidden;background:#140a24 center 40%/cover no-repeat;transition:background-image .6s}
 .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .stage .ld{position:absolute;inset:0;display:grid;place-items:center;color:var(--sub);font-size:13px;background:#0008}
 .where{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
@@ -175,6 +175,9 @@ nav button.on{color:var(--text)}
 .items{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:left;position:relative}
 .item .e{font-size:30px}
+.gi{width:56px;height:56px;display:block;filter:drop-shadow(0 4px 10px #a78bfa55)}
+.gi.s{width:22px;height:22px;display:inline-block;vertical-align:-5px;filter:none}
+.burst img{width:110px;height:110px}
 .item b{display:block;font-size:14px;margin-top:4px}
 .item .p{font-size:12px;color:var(--pri2);font-weight:700}
 .item .c{font-size:11px;color:var(--sub);margin-top:4px}
@@ -277,22 +280,22 @@ const SORDER=["normal","tired","sulky","birthday"];
 
 // 선물 = 겉으로는 아이템, 실제로는 반응 모션 + 표정 + 대사
 const GIFTS=[
- {id:"coffee",e:"☕",name:"커피",price:30,sign:"m15",fx:"☕",rec:"tired",
+ {id:"coffee",icon:"icons/gift_coffee.svg",e:"☕",name:"커피",price:30,sign:"m15",fx:"☕",rec:"tired",
   r:{normal:{m:"m15",f:"fun",t:"커피? …작전 중엔 카페인이 생명이지. 잘 마실게."},
      tired:{m:"m02",f:"soft",t:"…딱 이게 필요했어. 어떻게 알았어?"},
      sulky:{m:"m05",f:"sulky",t:"커피로 넘어가려고? …식기 전에 마실 거야. 너 때문 아니고."},
      birthday:{m:"m15",f:"joy",t:"생일에 커피라니. 내일도 사 와. 생일 연장이야."}}},
- {id:"ramen",e:"🍜",name:"라멘",price:50,sign:"m16",fx:"🍜",rec:"normal",
+ {id:"ramen",icon:"icons/gift_ramen.svg",e:"🍜",name:"라멘",price:50,sign:"m16",fx:"🍜",rec:"normal",
   r:{normal:{m:"m16",f:"joy",t:"라멘! …작전 끝나고 먹자던 거, 기억했어?"},
      tired:{m:"m11",f:"soft",t:"같이 먹자. 혼자 먹는 라멘은 맛없거든."},
      sulky:{m:"m07",f:"sulky",t:"라멘으로 넘어가려고? …곱빼기면 생각해 볼게."},
      birthday:{m:"m16",f:"joy",t:"생일 라멘! 오늘은 국물까지 다 마실 거야."}}},
- {id:"flower",e:"💐",name:"꽃다발",price:80,sign:"m24",fx:"🌸",rec:"sulky",
+ {id:"flower",icon:"icons/gift_flower.svg",e:"💐",name:"꽃다발",price:80,sign:"m24",fx:"🌸",rec:"sulky",
   r:{normal:{m:"m24",f:"shy",t:"…꽃? 이런 거 받아 본 적 없는데. 보지 마, 얼굴 빨개졌으니까."},
      tired:{m:"m12",f:"soft",t:"…고마워. 오늘 처음으로 웃었다."},
      sulky:{m:"m05",f:"shy",t:"꽃은 반칙이지. …화 풀렸어. 됐어?"},
      birthday:{m:"m24",f:"shy",t:"생일에 꽃이라니. …말려서 평생 간직할 거야."}}},
- {id:"ring",e:"💍",name:"반지",price:200,sign:"m22",fx:"💗",rec:"birthday",
+ {id:"ring",icon:"icons/gift_ring.svg",e:"💍",name:"반지",price:200,sign:"m22",fx:"💗",rec:"birthday",
   r:{normal:{m:"m22",f:"joy",t:"반지…? 너 무슨 뜻인지 알고 주는 거지? …나도 좋아."},
      tired:{m:"m18",f:"shy",t:"…이거 끼고 있으면 아무리 힘들어도 버틸 수 있을 것 같아."},
      sulky:{m:"m03",f:"surprised",t:"잠깐, 반지? 화내고 있었는데… 이러면 화를 어떻게 내."},
@@ -380,7 +383,7 @@ const Stage=(()=>{
     requestAnimationFrame(frame);
     const cv=R.domElement,w=cv.clientWidth,h=cv.clientHeight;
     if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio()))){
-      R.setSize(w,h,false);cam.aspect=w/h;const tall=w/h<.8;cam.position.set(0,tall?1.15:1.32,tall?3.9:2.7);cam.lookAt(0,tall?1:1.18,0);cam.updateProjectionMatrix()}
+      R.setSize(w,h,false);cam.aspect=w/h;const tall=w/h<.8;cam.position.set(0,tall?1.32:1.42,tall?2.3:1.65);cam.lookAt(0,tall?1.2:1.33,0);cam.updateProjectionMatrix()}
     if(!md){R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
     if(cur){mt=t-cur.start;const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
@@ -418,7 +421,7 @@ let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
 function say(text,ms){text=speechOnly(text);if(!text)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
-function burst(e){const b=$("#burst");b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
+function burst(e){const b=$("#burst");if(/\.svg$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
 function setScene(i){S.scene=i;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
 function react(r,tag){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t);faceReset()}
@@ -555,7 +558,7 @@ function giftSheet(focus){
   <p class="sub">지금 서아는 <b>${STATES[st].e} ${STATES[st].ko}</b> 상태예요. 같은 선물도 서아 상태에 따라 반응이 달라요.<br>선물마다 <b style="color:var(--gold)">서아의 특별한 반응(모션)</b>이 있고, 처음 본 반응은 추억 앨범에 남아요.</p>
   <div class="items">${GIFTS.map(g=>`<button class="item ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${g.rec===st?`<span class="rec">지금 추천</span>`:""}
-    <div class="e">${g.e}</div><b>${g.name}</b><div class="p">💎 ${g.price}</div>
+    <img class="gi" src="${g.icon}" alt=""><b>${g.name}</b><div class="p">💎 ${g.price}</div>
     <div class="c">반응 ${got(g)} / 4 발견</div>
     <div class="sp">✨ ${S.learned.includes(g.sign)?"배운 모습: "+SIGN[g.sign]:"새 모습을 배울 수 있어요"}</div></button>`).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
@@ -570,7 +573,7 @@ function give(id){
   S.album[key]={at:Date.now(),scene:S.scene};
   if(firstItem)S.learned.push(g.sign);
   addMsg("g",`${g.e} ${g.name}을(를) 선물했어요`);
-  burst(g.fx);
+  burst(g.icon);
   setTimeout(()=>{
     react(r,first?"✨ 새 모습":"");
     addMsg("c",r.t,{tag:`${STATES[st].e} ${STATES[st].ko}일 때의 ${g.name} 반응 · ${MNAME[r.m]} · ${FACEKO[r.f]}`});
@@ -592,7 +595,7 @@ function renderAlbum(fresh){
   $("#album").innerHTML=`<div class="alh"><b>서아의 모습</b><span>${n} / 16</span></div>
   <div class="prog"><i style="width:${n/16*100}%"></i></div>
   <p class="alnote">선물을 주면 서아의 반응이 여기 영구로 남아요. 카드를 누르면 그때 장소에서 서아가 다시 보여 줘요.<br>빈칸은 아직 못 본 모습이에요. 힌트를 보고 대화에서 선물해 보세요.</p>
-  ${GIFTS.map(g=>`<div class="grp"><h3>${g.e} ${g.name} <small>💎 ${g.price}</small><span class="sig">${S.learned.includes(g.sign)?"✨ 배운 모습: "+SIGN[g.sign]:""}</span></h3>
+  ${GIFTS.map(g=>`<div class="grp"><h3><img class="gi s" src="${g.icon}" alt=""> ${g.name} <small>💎 ${g.price}</small><span class="sig">${S.learned.includes(g.sign)?"✨ 배운 모습: "+SIGN[g.sign]:""}</span></h3>
     <div class="slots">${SORDER.map(s=>{const k=g.id+":"+s,a=S.album[k];
       return a?`<button class="slot got ${fresh===k?"fresh":""}" data-k="${k}"><span class="e">${STATES[s].e}</span><span class="s">${STATES[s].ko}</span><span class="d">${MNAME[g.r[s].m]}</span><span class="d">${fmtD(a.at)}</span></button>`
               :`<button class="slot lock" data-lock="${k}"><span class="e">${STATES[s].e}</span><span class="s">？</span><span class="d">${STATES[s].ko}일 때</span></button>`}).join("")}</div></div>`).join("")}`;
