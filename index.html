@@ -217,6 +217,45 @@ nav button.on{color:var(--text)}
 .demo p{font-size:11px;color:var(--sub);line-height:1.5}
 .toast{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-10px);background:#211b33;border:1px solid #6d4bd1;color:var(--text);font-size:13px;font-weight:600;padding:9px 14px;border-radius:12px;opacity:0;transition:.3s;z-index:30;width:max-content;max-width:calc(100% - 24px);text-align:center;line-height:1.45}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* 시연 설정 패널(5단계): 오른쪽 가장자리 작은 손잡이로 접고 폄. 접으면 손잡이만 흐리게. 문구는 data/demo.json */
+.dph{position:fixed;right:0;top:50%;transform:translateY(-50%);width:12px;height:52px;border-radius:8px 0 0 8px;background:#ffffff10;z-index:60;padding:0}
+.dph::after{content:"";position:absolute;left:5px;top:16px;bottom:16px;width:2px;border-radius:2px;background:#ffffff2a}
+.dph.off{display:none}
+.dp{position:fixed;top:0;right:0;bottom:0;width:min(340px,calc(100vw - 28px));background:#120f1cf5;border-left:1px solid var(--line);z-index:61;transform:translateX(102%);transition:transform .25s;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px calc(18px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--text)}
+.dp.on{transform:none}
+.dp .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dp .hd b{font-size:15px;flex:1}
+.dp .hd .dbg{font-size:10px;font-weight:800;color:#000;background:var(--gold);border-radius:999px;padding:1px 7px}
+.dp .hd button{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.dp h4{font-size:12px;margin:12px 0 2px;color:var(--pri2)}
+.dp h4 small{color:var(--sub);font-weight:500;margin-left:4px}
+.dp .row{margin:4px 0 6px;gap:5px}
+.dp .row button{padding:5px 9px}
+.dp .row button.warn{border-color:#ef4444;color:#fecaca;background:#3b1220}
+.dp .now{font-size:11px;color:var(--sub);background:#0006;border-radius:8px;padding:5px 8px;line-height:1.5}
+.dp .now b{color:var(--text)}
+.dp .now .rs{color:var(--gold)}
+.dp .st{display:flex;align-items:center;gap:6px;margin:4px 0}
+.dp .dot{width:10px;height:10px;border-radius:50%;background:#6b6480;flex:none}
+.dp .dot.waking{background:#facc15}.dp .dot.awake{background:#22c55e}.dp .dot.down{background:#ef4444}
+.dp .kv{color:var(--sub);line-height:1.5}
+.dp details{margin-top:4px}
+.dp summary{cursor:pointer;color:var(--pri2)}
+.dp pre{white-space:pre-wrap;word-break:break-all;font-size:10px;line-height:1.4;background:#0008;border-radius:8px;padding:6px 8px;margin-top:4px;max-height:220px;overflow:auto}
+.dp input[type=range]{flex:1;min-width:0;accent-color:var(--pri)}
+.dp .aff{display:flex;align-items:center;gap:8px}
+.dp .aff b{width:28px;text-align:right}
+.dp .mlist{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.dp .mrow{display:flex;align-items:center;gap:5px}
+.dp .mrow .pl{flex:1;min-width:0;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dp .mrow .pl i{font-style:normal;color:var(--sub);font-size:10px;margin-left:4px}
+.dp .mrow .pl.open i{color:#86efac}
+.dp .mrow .pv{flex:none;font-size:11px;border:1px solid var(--line);border-radius:8px;padding:5px 7px;color:var(--gold)}
+.dp .keys{margin-top:12px;font-size:10px;color:var(--sub);line-height:1.5}
+/* 장 제목: 장면에 들어갈 때 대화 화면 가운데 2초 (투명도·크기 전환만) */
+.chapter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:32;background:#0d0b16e6;border:1px solid #f5c66b66;color:var(--gold);padding:14px 24px;border-radius:16px;font-size:20px;font-weight:800;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;white-space:nowrap}
+.chapter.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 </style>
 </head>
 <body>
@@ -224,7 +263,6 @@ nav button.on{color:var(--text)}
   <header>
     <h1>moti<small id="aiTag"></small></h1>
     <span class="pill">💎 <span id="dia">0</span></span>
-    <button class="demo-btn" id="demoBtn">시연 설정</button>
   </header>
 
   <div class="stage" id="stage">
@@ -272,10 +310,12 @@ nav button.on{color:var(--text)}
 
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="giftSheet"></div>
-  <div class="sheet" id="demoSheet"></div>
   <div class="toast" id="toast"></div>
   <div class="firstchip" id="firstChip"></div>
+  <div class="chapter" id="chapter"></div>
 </div>
+<button class="dph" id="dph" aria-label="시연 설정 열기"></button>
+<div class="dp" id="dp" aria-hidden="true"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -298,8 +338,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json")]);
-  DATA.look=lk;
+  const [c,f,m,st,it,kw,lk,dm]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json")]);
+  DATA.look=lk;DATA.demo=dm||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
@@ -307,7 +347,14 @@ async function loadData(){
 }
 // 서버 버전: data/config.json → 주소 ?server=2 로 덮어쓰기. 서버 주소: ?api=http://localhost:8000
 const qs=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams()}})();
-const serverVer=()=>{const q=qs.get("server");return q==="1"||q==="2"?+q:(DATA.config.serverVersion===2?2:1)};
+// 서버 모드: 1 = v1, 2 = v2, 0 = 없음(예시 대사만). 주소 ?server= → 시연 패널에서 고른 값(새로고침해도 유지) → data/config.json
+const DEBUG=qs.get("debug")==="1";
+const DKEY="moti_demo";  // 시연 패널 자체 설정(서버 모드·패널 열림·지금 장면). 초기화해도 지우지 않음
+let DS;try{DS=JSON.parse(localStorage.getItem(DKEY))||{}}catch(e){DS={}}
+const saveDS=()=>{try{localStorage.setItem(DKEY,JSON.stringify(DS))}catch(e){}};
+const serverMode=()=>{const q=qs.get("server");if(q==="0"||q==="1"||q==="2")return +q;if(DS.server===0||DS.server===1||DS.server===2)return DS.server;return DATA.config.serverVersion===2?2:1};
+const serverVer=()=>serverMode()===2?2:1;
+const noServer=()=>serverMode()===0;
 const apiUrl=()=>(qs.get("api")||DATA.config.apiUrl||"https://seoa-backand.onrender.com").replace(/\/+$/,"");
 
 // 표정: VRoid 표정 데이터(Fcl_…) 조합
@@ -629,19 +676,27 @@ const emoFace=e=>{for(const x of DATA.face.map||[]){try{if(new RegExp(x.match,"i
 const turnText=m=>(m.act?`*${m.act}* `:"")+m.t;
 const talkOf=cid=>chatOf(cid).filter(m=>(m.r==="u"||m.r==="c")&&!m.intro);
 // 서버 깨우기: 앱을 열 때 가벼운 요청을 미리 보냄(응답은 기다리지 않음). 깨어난 게 확인되기 전 첫 답장은 오래 기다림
-let serverAwake=false;
-function wakeServer(){const p=DATA.config.wakePath;if(!p)return;
-  fetch(apiUrl()+p,{mode:"no-cors",cache:"no-store"}).then(()=>{serverAwake=true;renderLog()}).catch(()=>{})}
-const replyWait=normal=>serverAwake?normal:Math.max(normal,DATA.config.firstReplyWaitMs||45000);
+// 상태 점: idle(회색, 아직) · waking(노랑) · awake(초록) · down(빨강, wakeTimeoutMs 안에 응답 없음/연결 실패)
+let serverAwake=false,wakeState="idle",wakeMs=null;
+function wakeServer(){const p=DATA.config.wakePath;if(!p||wakeState==="waking")return;
+  wakeState="waking";const t0=performance.now(),ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),DATA.config.wakeTimeoutMs||60000);
+  if(typeof Demo!=="undefined")Demo.render();
+  fetch(apiUrl()+p,{mode:"no-cors",cache:"no-store",signal:ctl.signal})
+    .then(()=>{serverAwake=true;wakeState="awake";renderLog()}).catch(()=>{wakeState="down"})
+    .finally(()=>{clearTimeout(tm);wakeMs=Math.round(performance.now()-t0);if(typeof Demo!=="undefined")Demo.render()})}
+// 답장 기다리는 시간: 깨어난 게 확인되기 전 첫 답장은 firstReplyWaitMs(45초), 그 뒤엔 replyTimeoutMs(8초)까지만 → 넘기면 예시 대사
+const replyWait=()=>serverAwake?(DATA.config.replyTimeoutMs||8000):(DATA.config.firstReplyWaitMs||45000);
+let lastRaw=null;  // 이번 턴 /chat 원본 응답(시연 패널 「마지막 답장」용)
 // 서아 이야기 상태. 서버 v2는 저장하지 않으므로 여기 보관해서 매 요청에 보냄
 const story=()=>S.story||(S.story={});
 async function post(path,body,ms){
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
   const P=path==="/chat"?PERF_CUR:null;if(P)P.req=performance.now();
+  const t0=performance.now(),rec=o=>{if(path==="/chat")lastRaw={ms:Math.round(performance.now()-t0),wait:ms,...o}};
   try{const r=await fetch(apiUrl()+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
-    serverAwake=true;
-    if(!r.ok){console.warn("서버 오류",path,r.status);return null}const j=await r.json();if(P)P.res=performance.now();return j}
-  catch(e){console.warn("서버에 연결 못 함 → 예시 대사",path,e&&e.name);return null}finally{clearTimeout(tm)}
+    serverAwake=true;if(wakeState!=="awake"){wakeState="awake";if(typeof Demo!=="undefined")Demo.render()}
+    if(!r.ok){console.warn("서버 오류",path,r.status);rec({status:r.status,error:"http"});return null}const j=await r.json();if(P)P.res=performance.now();rec({status:r.status,json:j});return j}
+  catch(e){const to=e&&e.name==="AbortError";console.warn(to?"서버 답장 시간 초과 → 예시 대사":"서버에 연결 못 함 → 예시 대사",path,e&&e.name);rec({error:to?"timeout":"error"});return null}finally{clearTimeout(tm)}
 }
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
 function readReply(j){
@@ -651,14 +706,15 @@ function readReply(j){
   return null;
 }
 async function askServer(cid,text){
+  if(noServer())return null;  // 시연 패널 「서버 없음」: 바로 예시 대사
   if(serverVer()===2){
     // v2 요청: 최근 16턴, 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
-    return readReply(await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait(45000)));
+    return readReply(await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait()));
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
   const motions=cid==="seoa"?Object.values(allowedMotions()):[];
-  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions},replyWait(25000));
+  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions},replyWait());
   if(j&&j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
   return readReply(j);
 }
@@ -689,15 +745,16 @@ function countStage(){
   if(cur<6&&at[cur]!=null&&(S.bond||0)>=at[cur]){st.stage=cur+1;const q=[];stageUp(cur,cur+1,q);save();unlockShow(q)}
 }
 // 서버 v2: 답장을 보여 준 뒤 화면을 막지 않고 판정. 끝나기 전에 보낸 메시지는 send()가 기다렸다가 보냄
-function runJudge(lastUser,lastReply){
-  const st=story(),before=curStage();
+// keep: 시연 예약을 실행한 턴이면 그 단계로 고정(판정이 단계를 바꾸려 해도 예약 우선)하고, 판정 플래그 해금 연출은 건너뜀
+function runJudge(lastUser,lastReply,keep){
+  const st=story(),before=curStage(),gen=GEN;
   const recent=talkOf("seoa").slice(-24).map(m=>({r:m.r,t:turnText(m)}));
   const need=(S.bond||0)%6===0;
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state)return;Object.assign(st,j.state);const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN)return;Object.assign(st,j.state);if(keep)st.stage=keep;const q=[];
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
-      (j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
+      if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
       save();renderBond();unlockShow(q)})
     .catch(()=>{}).finally(()=>{judgeP=null});
   return judgeP;
@@ -738,9 +795,13 @@ function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
   unlockBusy=true;
   if(curTab!=="chat"||S.room!=="seoa"){unlockQ=[];unlockBusy=false;return}  // 대화방 밖이면 기록만
-  Stage.play(x.mid,{tag:"🔓 처음 본 모습"});Stage.setFace("shy");faceReset();  // 3D 확대 + 무릎 위(춤은 전신)는 View.motion 이
-  toast(`🔓 ${esc(x.text)}<br><b>「${esc(MNAME[x.mid]||x.mid)}」</b><br><small>📔 추억 앨범에 기록됐어요</small>`,3600);
+  unlockFx(x.mid,x.text);
   setTimeout(unlockNext,Stage.dur(x.mid)*1000+700);
+}
+// 해금 연출(재생·표정·토스트). 시연 패널 「연출 미리보기」도 이것만 부름(기록 없음)
+function unlockFx(mid,text){
+  Stage.play(mid,{tag:"🔓 처음 본 모습"});Stage.setFace("shy");faceReset();  // 3D 확대 + 무릎 위(춤은 전신)는 View.motion 이
+  toast(`🔓 ${esc(text)}<br><b>「${esc(MNAME[mid]||mid)}」</b><br><small>📔 추억 앨범에 기록됐어요</small>`,3600);
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
@@ -763,7 +824,7 @@ function pickMotion(want,act){
   return r.mid;
 }
 async function askSeoa(text){
-  const sm=serverVer()===2?null:await getSample();  // 서버 v2 시험 중엔 Claude 미리보기를 건너뜀
+  const sm=serverVer()===2||noServer()?null:await getSample();  // 서버 v2 시험 중·서버 없음 모드엔 Claude 미리보기를 건너뜀
   const allowed=allowedMotions();
   if(sm){
     const hist=chatOf("seoa").filter(m=>m.r==="u"||m.r==="c"||m.r==="g").slice(-10).map(m=>(m.r==="u"?"유저: ":m.r==="g"?"[유저가 선물함] ":"서아: ")+m.t).join("\n");
@@ -808,7 +869,7 @@ function localReply(t,allowed){
   return pick([{line:"쉿. 이 층 카메라는 내가 다 꺼 놨어.",motion:"m05",face:"soft",mood:S.mood},{line:"방금 그 표정, 기록해 둘게. 내 전용 파일에.",motion:"m01",face:"fun",mood:S.mood},{line:"…너랑 있으면 시간 가는 줄 모르겠어.",motion:"m02",face:"soft",mood:S.mood}]);
 }
 async function askOther(cid,text){
-  const c=chBy(cid),sm=await getSample();
+  const c=chBy(cid),sm=noServer()?null:await getSample();
   if(sm){
     const hist=chatOf(cid).filter(m=>m.r==="u"||m.r==="c").slice(-10).map(m=>(m.r==="u"?"유저: ":c.name+": ")+m.t).join("\n");
     try{const v=await sm.json(`너는 캐릭터 채팅 앱 moti의 캐릭터 "${c.name}"이다. 소개: ${c.desc} 대표 대사: "${c.hook}" 말투 예시: ${c.lines.map(x=>'"'+x+'"').join(" ")}
@@ -829,14 +890,21 @@ async function send(text){
   const room=S.room||"seoa";
   const P=perfStart();
   $("#inp").value="";autoGrow();addMsg("u",text,null,room);busy=true;renderLog();
-  if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);perfEnd(P);return}
+  if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;addMsg("c",line,null,room);perfEnd(P);return}
   Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저)
   P.typing=performance.now();
+  const g0=GEN;
   if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
+  if(g0!==GEN)return;
+  const gen=g0;
   S.bond=(S.bond||0)+1;
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
-  const v=await askSeoa(text);busy=false;waiting=false;P.src=v.src||"local";
+  lastRaw=null;const a0=performance.now();
+  const v=await askSeoa(text);
+  if(gen!==GEN)return;  // 기다리는 사이 시연 패널에서 초기화·장면 이동 → 이 답장은 버림
+  busy=false;waiting=false;P.src=v.src||"local";
+  Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
@@ -948,21 +1016,132 @@ function renderAlbum(fresh){
     toast(`${STATES[s].e} 서아가 <b>${STATES[s].ko}</b>일 때 ${g.e} ${g.name}을(를) 주면…?<br><small>대화에서 선물해 보세요</small>`,3000);setTimeout(()=>{setTab("chat");openRoom("seoa");giftSheet(gid)},900)});
 }
 
-// ───────────────────────── 시연 설정 ─────────────────────────
-function demoSheet(){
-  $("#demoSheet").innerHTML=`<div class="demo"><h2>시연 설정</h2><p class="sub">발표할 때 상황을 바로 만들 수 있게 한 설정이에요. 실제 앱에서는 대화 흐름과 날짜로 정해져요.</p>
-  <h4>서아 상태</h4><p>자동은 대화 내용에 따라 서아 상태가 바뀌어요.</p>
-  <div class="row">${[["","자동 ("+STATES[S.mood].ko+")"],["normal","😐 평소"],["tired","😮‍💨 지침"],["sulky","😤 삐짐"]].map(([v,l])=>`<button data-f="${v}" class="${(S.force||"")===v?"on":""}">${l}</button>`).join("")}</div>
-  <h4>오늘이 서아 생일</h4><div class="row"><button data-b="1" class="${S.birthday?"on":""}">🎂 생일 켜기</button><button data-b="0" class="${S.birthday?"":"on"}">끄기</button></div>
-  <h4>장소</h4><div class="row">${SCENES.map((s,i)=>`<button data-s="${i}" class="${S.scene===i?"on":""}">${s.name}</button>`).join("")}</div>
-  <h4>기타</h4><div class="row"><button data-x="dia">💎 500 충전</button><button data-x="reset">처음부터 다시</button></div></div>`;
-  const D=$("#demoSheet");
-  D.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{S.force=b.dataset.f||null;save();renderTop();faceReset();Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");demoSheet()});
-  D.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{S.birthday=b.dataset.b==="1";save();renderTop();demoSheet()});
-  D.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{setScene(+b.dataset.s);save();demoSheet()});
-  D.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{if(b.dataset.x==="dia"){S.dia+=500}else{S=blank();start()}save();renderTop();renderAlbum();renderLog();demoSheet()});
-  openSheet("#demoSheet");
-}
+// ───────────────────────── 시연 설정 패널 (5단계) ─────────────────────────
+// 오른쪽 가장자리 손잡이로 접고 폄. 항상: 장면 바로가기·서버 깨우기·오프닝·전체 초기화·💎·기분. ?debug=1 일 때만 나머지.
+// 관계·해금 규칙은 바꾸지 않고 상태만 바꾼다. 문구는 data/demo.json
+let GEN=0;  // 초기화·장면 이동마다 +1. 그 전에 시작한 답장·판정·인트로는 결과를 버림
+const Demo=(()=>{
+  const T=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.demo||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
+  let open=false,confirmAll=false,confirmT=null,last=null,jsonOpen=false;
+  const P=()=>$("#dp");
+  function setOpen(on){open=on;DS.open=on;saveDS();P().classList.toggle("on",on);P().setAttribute("aria-hidden",on?"false":"true");$("#dph").classList.toggle("off",on);if(on)render()}
+  const toggle=()=>setOpen(!open);
+  // 3D를 보여 주는 동작 뒤: 좁은 화면(휴대폰)이면 패널이 대화 화면을 가리지 않게 접음
+  const reveal=()=>{if(window.innerWidth<800&&open)setOpen(false)};
+  // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
+  function cancel(){
+    GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
+    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();
+    ["#toast","#firstChip","#rcap"].forEach(s=>$(s).classList.remove("on"));
+    View.rest(true);Stage.play(IDLE);
+  }
+  function refresh(){save();renderTop();renderBond();
+    if(curTab==="album")renderAlbum();else if(curTab==="my")renderMy();else if(curTab==="home")renderHome();else if(S.room)renderLog();else renderList();
+    renderUnread();render()}
+  const U=()=>(DATA.story&&DATA.story.unlock)||{stage:{},flag:{},event:{}};
+  const stageMotions=k=>(U().stage[k]||{}).motions||[];
+  // 단계 n 으로: 그 단계까지의 몸짓은 열고, 위 단계 몸짓은 닫음. 대화 횟수·호감도도 그 단계 시작값으로(이후 진행이 자연스럽게)
+  function setStage(n){
+    const st=story(),D=DATA.story||{};n=Math.max(1,Math.min(6,n));st.stage=n;
+    const above=new Set();for(let k=n+1;k<=6;k++)stageMotions(k).forEach(id=>above.add(id));
+    S.unlocked=(S.unlocked||[]).filter(id=>!above.has(id));
+    for(let k=2;k<=n;k++)stageMotions(k).forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});
+    S.bond=(D.countAt||[])[n-1]||0;st.affection=(D.affectionAt||[])[n-1]||0;
+  }
+  // ── 초기화 ──
+  function resetSeoa(){
+    S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
+    Object.assign(S,{bond:0,album:{},learned:[],mood:"normal",birthday:false,force:null,scene:0,story:{},firsts:[],unlocked:[],introDone:false,demoNext:null});
+    start();setScene(0);Stage.setFace("neutral");
+  }
+  const RESET={
+    all(){S=blank();start();setScene(0);Stage.setFace("neutral")},
+    seoa:resetSeoa,
+    chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
+    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
+    album(){S.firsts=[];S.album={}}
+  };
+  function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800)}
+  // 오프닝 다시 보기: 서아 대화를 비우고 오프닝부터 (관계·앨범은 그대로)
+  function opening(){cancel();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;story().recent_lines=[];S.introDone=false;start();
+    setTab("chat");openRoom("seoa");refresh();reveal()}
+  function setMood(k){S.force=null;S.birthday=k==="birthday";if(k!=="birthday")S.mood=k;
+    Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");faceReset();refresh()}
+  // ── 몸짓 ──
+  const allMotions=()=>{const a=[...stageMotions(1),...firstSlots().map(x=>x.mid)],ban=(DATA.story||{}).ban||[];return a.filter((x,i)=>a.indexOf(x)===i&&!ban.includes(x))};
+  function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
+  function toChat(){setTab("chat");if(S.room!=="seoa")openRoom("seoa");const i=$("#inp");if(document.activeElement===i)i.blur();reveal()}
+  function playMotion(mid){toChat();Stage.play(mid)}
+  function preview(mid){toChat();const g=groupOf(mid);unlockFx(mid,g&&g.text||"")}
+  // ── 그리기 ──
+  const B=(a,label,o={})=>`<button data-a="${a}"${o.v!=null?` data-v="${esc(o.v)}"`:""} class="${o.on?"on":""} ${o.cls||""}"${o.title?` title="${esc(o.title)}"`:""}>${label}</button>`;
+  function lastHtml(){
+    if(!last)return `<div class="kv">${esc(T("lastNone"))}</div>`;
+    const r=last.raw,src=last.src==="server"?T("lastSrc.server")+" · "+T("serverModes."+last.mode):last.src==="timeout"?T("lastSrc.timeout",{ms:r?r.wait:""}):last.src==="error"?T("lastSrc.error"):T("lastSrc.local");
+    const body=r&&r.json!=null?r.json:last.reply;
+    return `<div class="kv"><b>${last.ms}ms</b> · ${esc(src)}${r&&r.ms!=null&&last.src==="server"?` <small>(서버 ${r.ms}ms)</small>`:""}</div>
+      <details${jsonOpen?" open":""}><summary>${esc(T("lastJson"))}</summary><pre>${esc(JSON.stringify(body,null,2))}</pre></details>`;
+  }
+  function render(){
+    if(!open||!P())return;
+    const st=story(),cs=curStage();
+    let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
+    h+=Scenes.html(T,B);
+    h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
+      <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("resetAll",esc(confirmAll?T("resetAllConfirm"):T("resetAll")),{cls:confirmAll?"warn":""})}${B("dia",esc(T("dia")))}</div>`;
+    h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${STATES[k].e} ${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
+    if(DEBUG){
+      const q=qs.get("server");
+      h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
+        <div class="row">${[1,2,0].map(n=>B("server",esc(T("serverModes."+n)),{v:n,on:serverMode()===n})).join("")}</div>${q!=null?`<div class="kv">${esc(T("serverQueryWins"))}</div>`:""}`;
+      h+=`<h4>${esc(T("sec.lastReply"))}</h4>${lastHtml()}`;
+      h+=`<h4>${esc(T("sec.reset"))}</h4><div class="row">${["seoa","chat","bond","album"].map(k=>B("reset",esc(T("resets."+k)),{v:k})).join("")}</div>`;
+      h+=`<h4>${esc(T("sec.stage"))}</h4><div class="row">${[1,2,3,4,5,6].map(n=>B("stage",`${n} ${esc(stageName(n))}`,{v:n,on:cs===n})).join("")}</div>`;
+      h+=`<h4>${esc(T("sec.affection"))} <small>${esc(T("affectionNote"))}</small></h4><div class="aff"><input type="range" min="0" max="100" step="1" value="${st.affection||0}" id="dpAff"><b id="dpAffV">${st.affection||0}</b></div>`;
+      const fl=st.stage_flags||[];
+      h+=`<h4>${esc(T("sec.flags"))} <small>${esc(T("flagNote"))}</small></h4><div class="row">${((DATA.demo||{}).flags||[]).map(f=>B("flag",esc(f),{v:f,on:fl.includes(f)})).join("")}</div>`;
+      h+=`<h4>${esc(T("sec.place"))}</h4><div class="row">${SCENES.map((x,i)=>B("place",esc(x.name),{v:i,on:S.scene===i})).join("")}</div>`;
+      const ids=unlockedIds(),seen=new Set(S.firsts.map(f=>f.mid));
+      h+=`<h4>${esc(T("sec.motions"))} <small>${esc(T("motionPlay"))}</small></h4><div class="row">${B("unlockAll",esc(T("unlockAll")))}${B("lockAll",esc(T("lockAll")))}</div>
+        <div class="mlist">${allMotions().map(id=>{const o=ids.includes(id);return `<div class="mrow"><button data-a="play" data-v="${id}" class="pl ${o?"open":""}">${id} ${esc(MNAME[id]||id)}<i>${esc(o?T("motionOpen"):T("motionLocked"))}${seen.has(id)?" · "+esc(T("motionSeen")):""}</i></button>${B("preview",esc(T("motionPreview")),{v:id,cls:"pv",title:T("motionPreviewTitle")})}</div>`}).join("")}</div>`;
+      h+=`<div class="keys">${esc(T("keysNote"))}</div>`;
+    }
+    P().innerHTML=h;
+  }
+  function onClick(e){
+    const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+    if(a==="close")return setOpen(false);
+    if(a==="wake")return wakeServer();
+    if(a==="opening")return opening();
+    if(a==="resetAll"){
+      if(!confirmAll){confirmAll=true;clearTimeout(confirmT);confirmT=setTimeout(()=>{confirmAll=false;render()},4000);return render()}
+      confirmAll=false;clearTimeout(confirmT);return reset("all")}
+    if(a==="dia"){S.dia+=500;toast(esc(T("diaToast")),1600);return refresh()}
+    if(a==="mood")return setMood(v);
+    if(a==="server"){DS.server=+v;saveDS();return refresh()}
+    if(a==="reset")return reset(v);
+    if(a==="stage"){setStage(+v);return refresh()}
+    if(a==="flag"){const st=story(),fl=st.stage_flags||(st.stage_flags=[]);const i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);return refresh()}
+    if(a==="place"){setScene(+v);return refresh()}
+    if(a==="unlockAll"){allMotions().forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});return refresh()}
+    if(a==="lockAll"){S.unlocked=[];setStage(1);return refresh()}
+    if(a==="play")return playMotion(v);
+    if(a==="preview")return preview(v);
+    Scenes.click(a,v);
+  }
+  function init(){
+    const p=P();p.addEventListener("click",onClick);
+    p.addEventListener("input",e=>{if(e.target.id==="dpAff"){story().affection=+e.target.value;$("#dpAffV").textContent=e.target.value}});
+    p.addEventListener("change",e=>{if(e.target.id==="dpAff"){save();renderBond()}});
+    p.addEventListener("toggle",e=>{if(e.target.tagName==="DETAILS")jsonOpen=e.target.open},true);
+    $("#dph").setAttribute("aria-label",T("handle"));$("#dph").onclick=toggle;
+    setOpen(!!DS.open);
+  }
+  return{init,render,toggle,setOpen,setLast:o=>{last=o;render()},cancel,setStage,resetSeoa,refresh,reveal,toChat,T,isOpen:()=>open};
+})();
+// 장면 바로가기 (5-B)
+const Scenes={html:()=>"",click:()=>false};
 
 // ───────────────────────── 관계 (대화로만 오름) ─────────────────────────
 // 단계는 story().stage (서버 v2 판정 또는 대화 횟수). 게이지: v2는 호감도, 아니면 대화 횟수 기준
@@ -1068,15 +1247,17 @@ function openRoom(cid){
   if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
 }
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
+let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)
 function runIntro(){
   const I=DATA.intro,P=I.paragraphs||[],gap=I.intervalMs||1700;
+  introT.forEach(clearTimeout);introT=[];
   S.introDone=true;save();busy=true;renderLog();
-  P.forEach((t,k)=>setTimeout(()=>{
+  P.forEach((t,k)=>introT.push(setTimeout(()=>{
     addMsg("c",t,{intro:true},"seoa");
     const cue=(I.cues||[]).find(c=>c.at===k);
     if(S.room==="seoa"&&curTab==="chat"){if(cue)Stage.play(cue.motion);const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
     if(k===P.length-1){busy=false;renderLog()}
-  },400+k*gap));
+  },400+k*gap)));
 }
 // 다른 캐릭터가 먼저 메시지를 보내요 (카톡처럼)
 let dmIdx=0;
@@ -1097,11 +1278,10 @@ const dataReady=loadData();
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");Demo.init();pingLater()});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
-$("#demoBtn").onclick=demoSheet;
 $("#scrim").onclick=closeSheets;
 $("#sendBtn").onclick=()=>send($("#inp").value);
 // 엔터는 줄바꿈만(기본 동작). 전송은 화살표 버튼으로만

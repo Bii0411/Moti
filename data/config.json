@@ -8,6 +8,9 @@
   "wakePath": "/openapi.json",
   "firstReplyWaitMs": 45000,
   "waitText": "서아가 바에 들어오는 중…",
+  "_replyTimeout": "서버가 깨어난 것이 확인된 뒤에는 답장을 replyTimeoutMs 까지만 기다리고, 넘기면 예시 대사로 넘어간다(시연이 멈추지 않게). 깨어나기 전 첫 답장은 firstReplyWaitMs 그대로. wakeTimeoutMs: 「서버 깨우기」가 이만큼 응답이 없으면 빨강(응답 없음).",
+  "replyTimeoutMs": 8000,
+  "wakeTimeoutMs": 60000,
   "_camera": "세로 화면 카메라 구도. 값은 모두 캐릭터 키(발=0, 머리 꼭대기=1)에 대한 비율: 보여 줄 위(top)·아래(bottom), 최소 너비(width), 카메라를 화면 중심보다 올리는 값(lift). 키는 모델마다 Head 뼈 높이 + headTopK × (Head−목) 으로 잰다. normal 상반신(평소) · motion 무릎 위(몸짓) · full 전신(춤 m23만). moveMs 는 구도가 바뀌는 시간. 가로 화면은 예전 값을 그대로 쓴다.",
   "camera": {
     "headTopK": 2.4,
