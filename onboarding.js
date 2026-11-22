@@ -1,85 +1,6 @@
 // moti 온보딩(7단계): 첫 화면 → 입장권(약관) → 로그인 → 홈. 처음 실행일 때만(저장값 S.onboarded).
 // 문구·설정은 data/onboarding.json(DATA.onboarding). 이 파일은 index.html 의 본 스크립트보다 먼저 불리지만,
 // 본 스크립트의 것($·S·DATA·Stage·setTab 등)은 함수 안에서만 쓰므로 순서 문제는 없다.
-// ── 입장권 뒤 마네킹들(7-B): 파일을 불러오지 않고 코드로 만든 그림자 같은 인형. 설정은 data/onboarding.json crowd ──
-// 마네킹 하나 = 몸(머리·몸통·다리·머리카락·가만히 있는 팔을 한 덩어리로 합침) + 흔드는 팔 → 그리기 2번
-const Crowd=(()=>{
-  let group=null,list=[];
-  const C=()=>((typeof DATA!=="undefined"&&DATA.onboarding)||{}).crowd||{};
-  // 캡슐(r128 에는 CapsuleGeometry 가 없어 옆모습을 돌려 만듦). 가운데가 원점, 길이 len 은 두 반구 중심 사이
-  function capsule(r,len,seg){const pts=[],n=5;
-    for(let i=0;i<=n;i++){const a=-Math.PI/2+i/n*Math.PI/2;pts.push(new THREE.Vector2(Math.max(1e-4,r*Math.cos(a)),-len/2+r*Math.sin(a)))}
-    for(let i=0;i<=n;i++){const a=i/n*Math.PI/2;pts.push(new THREE.Vector2(Math.max(1e-4,r*Math.cos(a)),len/2+r*Math.sin(a)))}
-    return new THREE.LatheGeometry(pts,seg||10)}
-  const sphere=r=>new THREE.SphereGeometry(r,12,9);
-  const mat4=(x,y,z,rx,ry,rz,sx,sy,sz)=>new THREE.Matrix4().compose(new THREE.Vector3(x,y,z),new THREE.Quaternion().setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0)),new THREE.Vector3(sx||1,sy||sx||1,sz||sx||1));
-  // 여러 도형을 하나로(위치·노멀·색). 색은 부분마다 달리(머리카락을 조금 밝게)
-  function merge(parts){
-    const P=[],N=[],K=[];
-    for(const {g,m,c} of parts){const x=(g.index?g.toNonIndexed():g.clone());x.applyMatrix4(m);
-      const pa=x.attributes.position.array,na=x.attributes.normal.array;P.push(pa);N.push(na);
-      const col=new THREE.Color(c),ca=new Float32Array(pa.length);for(let i=0;i<pa.length;i+=3){ca[i]=col.r;ca[i+1]=col.g;ca[i+2]=col.b}K.push(ca);x.dispose();g.dispose()}
-    const cat=A=>{const n=A.reduce((a,b)=>a+b.length,0),o=new Float32Array(n);let k=0;for(const a of A){o.set(a,k);k+=a.length}return o};
-    const geo=new THREE.BufferGeometry();geo.setAttribute("position",new THREE.BufferAttribute(cat(P),3));geo.setAttribute("normal",new THREE.BufferAttribute(cat(N),3));geo.setAttribute("color",new THREE.BufferAttribute(cat(K),3));
-    return geo}
-  function hairParts(style,s,hc){
-    const cap={g:sphere(.118*s),m:mat4(0,1.515*s,-.012*s,0,0,0,1.07,.96,1.06),c:hc};
-    const H={
-      short:[cap],
-      long:[cap,{g:capsule(.118*s,.26*s),m:mat4(0,1.36*s,-.04*s,0,0,0,1.02,1,.55),c:hc}],
-      pony:[cap,{g:sphere(.045*s),m:mat4(0,1.56*s,-.12*s),c:hc},{g:capsule(.038*s,.2*s),m:mat4(0,1.41*s,-.155*s,.28,0,0),c:hc}],
-      bun:[cap,{g:sphere(.062*s),m:mat4(0,1.645*s,-.05*s),c:hc}],
-      twin:[cap,{g:capsule(.04*s,.22*s),m:mat4(-.125*s,1.42*s,-.03*s,0,0,-.12),c:hc},{g:capsule(.04*s,.22*s),m:mat4(.125*s,1.42*s,-.03*s,0,0,.12),c:hc}]
-    };return H[style]||H.short}
-  function one(o,mat){
-    const s=(o.height||1.6)/1.7,bc=C().color||"#2a2140",hc=C().hairColor||"#3b2e5c",side=o.x<0?-1:1;
-    const armLen=.56*s,armR=.045*s,shX=.19*s,shY=1.33*s,rest=(C().wave||{}).restRad!=null?C().wave.restRad:.12;
-    const parts=[
-      {g:capsule(.062*s,.72*s),m:mat4(-.075*s,.47*s,0),c:bc},{g:capsule(.062*s,.72*s),m:mat4(.075*s,.47*s,0),c:bc},
-      {g:sphere(.135*s),m:mat4(0,.9*s,0,0,0,0,1,.7,.72),c:bc},
-      {g:capsule(.14*s,.32*s),m:mat4(0,1.13*s,0,0,0,0,1,1,.64),c:bc},
-      {g:capsule(.045*s,.08*s),m:mat4(0,1.37*s,0),c:bc},
-      {g:sphere(.11*s),m:mat4(0,1.5*s,0),c:bc},
-      // 흔들지 않는 팔(반대쪽)
-      {g:capsule(armR,armLen),m:new THREE.Matrix4().makeTranslation(-side*shX,shY,0).multiply(new THREE.Matrix4().makeRotationZ(-side*rest)).multiply(new THREE.Matrix4().makeTranslation(0,-armLen/2,0)),c:bc},
-      ...hairParts(o.hair,s,hc)];
-    const body=new THREE.Mesh(merge(parts),mat);
-    const armG=capsule(armR,armLen);armG.translate(0,-armLen/2,0);
-    const armGeo=merge([{g:armG,m:new THREE.Matrix4(),c:bc}]);
-    const pivot=new THREE.Group();pivot.position.set(side*shX,shY,0);pivot.rotation.z=side*rest;
-    pivot.add(new THREE.Mesh(armGeo,mat));
-    const g=new THREE.Group();g.add(body,pivot);g.position.set(o.x||0,0,o.z||-1.6);g.rotation.y=o.turn!=null?o.turn:-(o.x||0)*.3;
-    return{g,body,pivot,side,rest,ph:Math.random()*Math.PI*2,x:o.x||0,start:null};
-  }
-  function build(){
-    if(group||typeof THREE==="undefined")return;
-    const c=C();group=new THREE.Group();group.name="obCrowd";
-    const mat=new THREE.MeshLambertMaterial({color:new THREE.Color(1,1,1).multiplyScalar(c.light!=null?c.light:.6),vertexColors:true,emissive:new THREE.Color(c.emissive||"#0c0916")});
-    list=(c.people||[]).map(o=>one(o,mat));list.forEach(m=>group.add(m.g));
-  }
-  function prepare(){build();if(!group)return;const T3=Stage.three();T3.scene.add(group);try{T3.R.compile(T3.scene,T3.cam)}catch(e){}if(!shown)T3.scene.remove(group)}
-  let shown=false;
-  function show(){build();if(!group)return;shown=true;list.forEach(m=>m.start=null);Stage.three().scene.add(group)}
-  function hide(){shown=false;if(group)Stage.three().scene.remove(group)}
-  // 인사: |x| 가 큰(바깥쪽) 마네킹부터 stepMs 간격으로
-  function wave(t0,G){const w=C().wave||{},step=w.stepMs!=null?w.stepMs:100;
-    [...list].sort((a,b)=>Math.abs(b.x)-Math.abs(a.x)||a.x-b.x).forEach((m,i)=>m.start=t0+i*step)}
-  const sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
-  function tick(now){
-    if(!shown)return;const w=C().wave||{},dur=w.ms||900,up=w.upRad!=null?w.upRad:2.3,amp=w.wiggleRad!=null?w.wiggleRad:.25,br=C().breath||{};
-    for(const m of list){
-      // 숨쉬기: 아주 작게(세로 크기·높이)
-      const b=Math.sin(now/1000*2*Math.PI/(br.sec||3.8)+m.ph);
-      m.body.scale.y=1+(br.scale!=null?br.scale:.006)*b;m.g.position.y=(br.bob!=null?br.bob:.003)*b;
-      let a=m.rest;
-      if(m.start!=null){const k=(now-m.start)/dur;
-        if(k>=0&&k<=1){const lift=sm(k/.3)*(1-sm((k-.72)/.28));a=m.rest+(up-m.rest)*lift+amp*Math.sin(Math.max(0,k-.3)/.42*Math.PI*3)*(k>.3&&k<.72?1:0)}}
-      m.pivot.rotation.z=m.side*a;
-    }
-  }
-  return{prepare,show,hide,wave,tick,info:()=>({count:list.length})};
-})();
-
 const Onboard=(()=>{
   const D=()=>(typeof DATA!=="undefined"&&DATA.onboarding)||{};
   const T=k=>{const v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,D());return typeof v==="string"?v:""};
@@ -168,8 +89,6 @@ const Onboard=(()=>{
     root.querySelector("#obGo").classList.remove("loading");
     if(typeof dataReady!=="undefined")dataReady.then(fill);fill();
     stageOut();
-    // 첫 화면이 뜨는 동안 마네킹도 미리 만들어 셰이더까지 준비
-    if(typeof Stage!=="undefined")Promise.all([Stage.ready,typeof dataReady!=="undefined"?dataReady:null]).then(()=>Crowd.prepare());
     showScr("obFirst");
   }
   let going=false;
@@ -218,11 +137,10 @@ const Onboard=(()=>{
     leaveT.push(setTimeout(()=>{if(step==="ticket")root.querySelector("#obCard").classList.add("leave")},G.leaveMs!=null?G.leaveMs:1700));
     leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},(G.leaveMs!=null?G.leaveMs:1700)+(G.leaveFadeMs!=null?G.leaveFadeMs:450)));
   }
-  // 인사: 서아 손 흔들기(m13) + 마네킹들이 바깥쪽부터 차례로 한 손을 들어 흔듦 + 「어서 와요」
+  // 인사: 서아 손 흔들기(m13) + 「어서 와요」
   function greet(){
     const G=D().greet||{};
     if(typeof Stage!=="undefined"){Stage.play(G.motion||"m13",{quiet:true});Stage.setFace(G.face||"joy")}
-    Crowd.wave(performance.now()+(G.crowdDelayMs||0),G);
     root.querySelector("#obGuide").classList.add("off");
     const w=root.querySelector("#obWelcome");w.classList.remove("on");void w.offsetWidth;w.classList.add("on");
   }
@@ -234,18 +152,17 @@ const Onboard=(()=>{
     const C=D().scene3d||{};
     const st=root.querySelector("#obStage"),card=root.querySelector("#obCard");
     const fit=()=>{st.style.height=Math.round(card.offsetTop+(C.overlapPx!=null?C.overlapPx:48))+"px"};fit();
-    Stage.borrow(st,C.frame||{top:1.1,bottom:.5,width:.9,lift:.02},Crowd.tick);borrowed=true;
+    Stage.borrow(st,C.frame||{top:1.1,bottom:.5,width:.9,lift:.02});borrowed=true;
     window.addEventListener("resize",fitNow);fitNow.f=fit;
     const f=C.fog||{};Stage.fog(f.color||"#120e1f",f.near!=null?f.near:2.4,f.far!=null?f.far:6);
     if(typeof Look!=="undefined")Look.setPlace(null);
     Stage.setFace(C.face||"soft");
-    Crowd.show();
   }
   function fitNow(){if(fitNow.f)fitNow.f()}
   function stageOut(){
     leaveT.forEach(clearTimeout);leaveT=[];
     if(!borrowed)return;borrowed=false;window.removeEventListener("resize",fitNow);
-    Crowd.hide();Stage.release();Stage.setFace("neutral");
+    Stage.release();Stage.setFace("neutral");
     if(typeof showScene==="function"&&typeof SCENES!=="undefined")showScene(S.scene||0);  // 테두리 빛을 대화 장소로 되돌림
   }
   // Google·카카오: 시연 버전이라 안내 토스트 뒤 게스트로

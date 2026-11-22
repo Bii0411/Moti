@@ -460,7 +460,7 @@ const Stage=(()=>{
     R=new THREE.WebGLRenderer({antialias:true,alpha:true});
     R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.outputEncoding=THREE.sRGBEncoding;
     scene=new THREE.Scene();
-    // 안개(7-B 입장권의 마네킹용): 평소엔 아주 멀리 둬서 보이지 않게. 켜고 끌 때 셰이더를 다시 만들지 않도록 항상 달아 둔다
+    // 안개(7-B 입장권 3D 배경용): 평소엔 아주 멀리 둬서 보이지 않게. 켜고 끌 때 셰이더를 다시 만들지 않도록 항상 달아 둔다
     scene.fog=new THREE.Fog(0x000000,1000,1001);
     cam=new THREE.PerspectiveCamera(30,1,.1,20);
     const hemi=new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05);scene.add(hemi);
