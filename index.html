@@ -15,6 +15,10 @@ header h1{font-size:18px;font-weight:800;flex:1}
 header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:700}
 .demo-btn{font-size:12px;color:var(--sub);border:1px dashed var(--line);border-radius:999px;padding:6px 10px}
+/* 설정(톱니바퀴) 버튼(6-B): 헤더 오른쪽 끝. 보조 글자색, 누르거나 올리면 본문 글자색. 누르면 시연 패널을 열고 닫음 */
+.gear{flex:none;width:34px;height:34px;margin-right:-6px;display:grid;place-items:center;border-radius:50%;color:var(--sub);transition:color .15s;-webkit-tap-highlight-color:transparent}
+.gear svg{width:21px;height:21px;display:block}
+.gear:hover,.gear:active,.gear:focus-visible,.gear.on{color:var(--text)}
 
 .stage{position:relative;height:36%;min-height:210px;margin:0 12px;border-radius:20px;overflow:hidden;background:#140a24 center 40%/cover no-repeat;transition:background-image .6s}
 .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
@@ -218,10 +222,7 @@ nav button.on{color:var(--text)}
 .toast{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-10px);background:#211b33;border:1px solid #6d4bd1;color:var(--text);font-size:13px;font-weight:600;padding:9px 14px;border-radius:12px;opacity:0;transition:.3s;z-index:30;width:max-content;max-width:calc(100% - 24px);text-align:center;line-height:1.45}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
-/* 시연 설정 패널(5단계): 오른쪽 가장자리 작은 손잡이로 접고 폄. 접으면 손잡이만 흐리게. 문구는 data/demo.json */
-.dph{position:fixed;right:0;top:50%;transform:translateY(-50%);width:12px;height:52px;border-radius:8px 0 0 8px;background:#ffffff10;z-index:60;padding:0}
-.dph::after{content:"";position:absolute;left:5px;top:16px;bottom:16px;width:2px;border-radius:2px;background:#ffffff2a}
-.dph.off{display:none}
+/* 시연 설정 패널(5단계): 헤더의 톱니바퀴 버튼(6-B)으로 열고 닫음. 문구는 data/demo.json */
 .dp{position:fixed;top:0;right:0;bottom:0;width:min(340px,calc(100vw - 28px));background:#120f1cf5;border-left:1px solid var(--line);z-index:61;transform:translateX(102%);transition:transform .25s;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px calc(18px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--text)}
 .dp.on{transform:none}
 .dp .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -263,6 +264,7 @@ nav button.on{color:var(--text)}
   <header>
     <h1>moti<small id="aiTag"></small></h1>
     <span class="pill">💎 <span id="dia">0</span></span>
+    <button class="gear" id="gearBtn" aria-label="시연 설정" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </header>
 
   <div class="stage" id="stage">
@@ -314,7 +316,6 @@ nav button.on{color:var(--text)}
   <div class="firstchip" id="firstChip"></div>
   <div class="chapter" id="chapter"></div>
 </div>
-<button class="dph" id="dph" aria-label="시연 설정 열기"></button>
 <div class="dp" id="dp" aria-hidden="true"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -486,7 +487,7 @@ const Stage=(()=>{
     const h=d.hip,ip=k=>(h[i*3+k]+(h[j*3+k]-h[i*3+k])*u)*a.hipH*w;
     md.root.position.x+=ip(0);md.root.position.y+=ip(1);md.root.position.z+=ip(2);
   }
-  // 카메라 구도 (data/config.json camera): normal 상반신 · motion 무릎 위 · full 전신(춤)
+  // 카메라 구도 (data/config.json camera): normal 상반신 · motion 허벅지 중간 · full 전신(춤)
   // 구도 = 모델(키 1.72m로 맞춤)에서 보여 줄 위·아래 높이(top·bottom)와 최소 너비(width), 카메라를 눈높이보다 올리는 값(lift).
   // 3D 칸 비율이 바뀌어도(확대 중) 같은 범위가 들어오도록 거리를 그때그때 계산한다.
   // 앱 화면이 가로로 넓을 때(가로 화면)는 예전 카메라 값을 그대로 쓴다.
@@ -583,7 +584,7 @@ const Stage=(()=>{
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
-// 대화 화면에서 몸짓이 나오면 3D 칸을 화면 높이의 bigRatio 까지 키우고 카메라를 무릎 위(춤은 전신)로.
+// 대화 화면에서 몸짓이 나오면 3D 칸을 정사각형(높이 = 3D 칸 가로 폭 × bigAspect)까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게. 카메라는 허벅지 중간(춤은 전신)으로.
 // 몸짓이 끝나고 backDelayMs 뒤 원래 높이·상반신으로. 그 사이 다음 몸짓이 오면 커진 채로. (data/config.json stage)
 // 대기 몸짓(m25)과 입력창에 포커스가 있을 때(키보드)는 커지지 않는다. 앨범 다시 보기는 카메라만 바꾼다.
 const View=(()=>{
@@ -594,10 +595,16 @@ const View=(()=>{
   function setBig(on,instant){
     const st=$("#stage"),ms=instant?0:(cfg().growMs||350);if(on===big)return;
     st.style.transition=`background-image .6s,height ${ms}ms ease`;
-    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=Math.round(window.innerHeight*(cfg().bigRatio||.54))+"px"}
+    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=bigH(st)+"px"}
     else{st.style.height=h0+"px";setTimeout(()=>{if(!big)st.style.height=""},ms+30)}
     big=on;keepBottom(ms+80);
   }
+  // 확대 높이: 3D 칸 가로 폭 × bigAspect(1 = 정사각형), 화면 높이 × bigMaxRatio 가 상한. 예전 값(bigRatio)만 있으면 그것을 씀.
+  // 대화 목록이 minLogPx(말풍선 두 줄) 아래로 줄어들 만큼 화면이 낮으면(375×667 등) 그만큼만 키움
+  function bigH(st){const c=cfg(),W=st.offsetWidth,vh=window.innerHeight;
+    if(c.bigAspect==null&&c.bigRatio!=null)return Math.round(vh*c.bigRatio);
+    const room=st.offsetHeight+$("#log").clientHeight-(c.minLogPx!=null?c.minLogPx:80);
+    return Math.round(Math.max(st.offsetHeight,Math.min(W*(c.bigAspect!=null?c.bigAspect:1),vh*(c.bigMaxRatio!=null?c.bigMaxRatio:.58),room)))}
   function rest(instant){clearTimeout(backT);tok++;setBig(false,instant);Stage.frameTo("normal",instant?0:undefined)}
   function motion(mid){
     const my=++tok;clearTimeout(backT);
@@ -800,7 +807,7 @@ function unlockNext(){
 }
 // 해금 연출(재생·표정·토스트). 시연 패널 「연출 미리보기」도 이것만 부름(기록 없음)
 function unlockFx(mid,text){
-  Stage.play(mid,{tag:"🔓 처음 본 모습"});Stage.setFace("shy");faceReset();  // 3D 확대 + 무릎 위(춤은 전신)는 View.motion 이
+  Stage.play(mid,{tag:"🔓 처음 본 모습"});Stage.setFace("shy");faceReset();  // 3D 확대 + 허벅지 중간(춤은 전신)은 View.motion 이
   toast(`🔓 ${esc(text)}<br><b>「${esc(MNAME[mid]||mid)}」</b><br><small>📔 추억 앨범에 기록됐어요</small>`,3600);
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
@@ -906,7 +913,8 @@ async function send(text){
   busy=false;waiting=false;P.src=v.src||"local";
   Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
-  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
+  // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
+  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
   const mid=pickMotion(v.motion,actionText(v));
@@ -1020,14 +1028,14 @@ function renderAlbum(fresh){
 }
 
 // ───────────────────────── 시연 설정 패널 (5단계) ─────────────────────────
-// 오른쪽 가장자리 손잡이로 접고 폄. 항상: 장면 바로가기·서버 깨우기·오프닝·전체 초기화·💎·기분. ?debug=1 일 때만 나머지.
+// 헤더 오른쪽 위 톱니바퀴(6-B, 단축키 D)로 열고 닫음. 항상: 장면 바로가기·서버 깨우기·오프닝·전체 초기화·💎·기분. ?debug=1 일 때만 나머지.
 // 관계·해금 규칙은 바꾸지 않고 상태만 바꾼다. 문구는 data/demo.json
 let GEN=0;  // 초기화·장면 이동마다 +1. 그 전에 시작한 답장·판정·인트로는 결과를 버림
 const Demo=(()=>{
   const T=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.demo||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
   let open=false,confirmAll=false,confirmT=null,last=null,jsonOpen=false;
   const P=()=>$("#dp");
-  function setOpen(on){open=on;DS.open=on;saveDS();P().classList.toggle("on",on);P().setAttribute("aria-hidden",on?"false":"true");$("#dph").classList.toggle("off",on);if(on)render()}
+  function setOpen(on){open=on;DS.open=on;saveDS();P().classList.toggle("on",on);P().setAttribute("aria-hidden",on?"false":"true");const g=$("#gearBtn");g.classList.toggle("on",on);g.setAttribute("aria-expanded",on?"true":"false");if(on)render()}
   const toggle=()=>setOpen(!open);
   // 3D를 보여 주는 동작 뒤: 좁은 화면(휴대폰)이면 패널이 대화 화면을 가리지 않게 접음
   const reveal=()=>{if(window.innerWidth<800&&open)setOpen(false)};
@@ -1054,7 +1062,7 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Object.assign(S,{bond:0,album:{},learned:[],mood:"normal",birthday:false,force:null,scene:0,story:{},firsts:[],unlocked:[],introDone:false,demoNext:null});
+    Object.assign(S,{bond:0,album:{},learned:[],mood:"normal",birthday:false,force:null,scene:0,story:{},firsts:[],unlocked:[],introDone:false,demoNext:null,placeLock:false});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
@@ -1138,7 +1146,7 @@ const Demo=(()=>{
     p.addEventListener("input",e=>{if(e.target.id==="dpAff"){story().affection=+e.target.value;$("#dpAffV").textContent=e.target.value}});
     p.addEventListener("change",e=>{if(e.target.id==="dpAff"){save();renderBond()}});
     p.addEventListener("toggle",e=>{if(e.target.tagName==="DETAILS")jsonOpen=e.target.open},true);
-    $("#dph").setAttribute("aria-label",T("handle"));$("#dph").onclick=toggle;
+    $("#gearBtn").setAttribute("aria-label",T("handle"));$("#gearBtn").onclick=toggle;
     setOpen(!!DS.open);
   }
   return{init,render,toggle,setOpen,setLast:o=>{last=o;render()},cancel,setStage,resetSeoa,refresh,reveal,toChat,T,isOpen:()=>open};
@@ -1156,6 +1164,7 @@ const Scenes=(()=>{
   function go(n){
     const sc=L()[n-1];if(!sc)return;
     DS.scene=n;saveDS();Demo.cancel();
+    S.placeLock=false;
     if(sc.album){setTab("album");albumSeg=sc.album;renderAlbum();Demo.render();Demo.reveal();chapter(sc);return}  // 상태는 그대로
     if(sc.reset==="seoa"){Demo.resetSeoa();setTab("chat");openRoom("seoa")}  // 서아 전체 초기화 → 오프닝
     else{
@@ -1169,6 +1178,7 @@ const Scenes=(()=>{
       if(sc.next&&sc.next.event)evMotions(sc.next.event).forEach(id=>drop.add(id));
       S.firsts=S.firsts.filter(f=>!drop.has(f.mid));S.unlocked=S.unlocked.filter(id=>!drop.has(id));
       S.demoNext=sc.next||null;
+      S.placeLock=!!sc.place;  // 이 장면 동안 장소는 장면 설정·서버 location 으로만 바뀜. 다른 장면(①·⑥)·전체 초기화에서 풀림
       Stage.setFace("neutral");setTab("chat");openRoom("seoa");
     }
     Demo.refresh();Demo.reveal();chapter(sc);
