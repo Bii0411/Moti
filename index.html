@@ -90,6 +90,11 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .aseg button.on{background:var(--pri);border-color:var(--pri);color:var(--text)}
 .slot .hint{color:#9d95b5;font-size:10px;line-height:1.35;word-break:keep-all;padding:0 2px}
 .slot .ln{color:#cfc8e4;font-size:10px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.slot.soon{border:1px dashed #6d4bd1;background:#1b1628}
+.slot.soon .hint{color:var(--pri2)}
+/* 처음 본 모습 작은 표시: 애니메이션이 아닌 전환(transition)이라 화면을 옮겨도 다시 재생되지 않음 */
+.firstchip{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-6px);background:#211b33e6;border:1px solid #f5c66b88;color:var(--gold);font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .25s,transform .25s;z-index:29;white-space:nowrap;pointer-events:none}
+.firstchip.on{opacity:1;transform:translate(-50%,0)}
 .slot.fresh{animation:fresh 1.6s ease-out}
 @keyframes fresh{0%{box-shadow:0 0 0 0 #f5c66b}60%{box-shadow:0 0 0 6px #f5c66b55}100%{box-shadow:0 0 0 0 transparent}}
 
@@ -263,6 +268,7 @@ nav button.on{color:var(--text)}
   <div class="sheet" id="giftSheet"></div>
   <div class="sheet" id="demoSheet"></div>
   <div class="toast" id="toast"></div>
+  <div class="firstchip" id="firstChip"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -653,13 +659,31 @@ function unlockShow(groups){
   const seen=new Set(S.firsts.map(f=>f.mid));
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
   const line=last?(last.act?`*${last.act}* `:"")+last.t:"";
-  for(const g of groups)for(const id of g.motions||[]){
-    if(!S.unlocked.includes(id))S.unlocked.push(id);
-    if(seen.has(id)||!canPlay(id))continue;seen.add(id);
-    S.firsts.push({mid:id,text:g.text||"",line,at:Date.now(),scene:S.scene});unlockQ.push({mid:id,text:g.text||""});
+  // 연출할 몸짓 하나: 단계 상승이면 대표 몸짓(lead), 판정·사건이면 그 몸짓. 한 번에 여럿이면 앞의 하나만
+  let show=null;
+  for(const g of groups){
+    (g.motions||[]).forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});  // 모두 해금
+    if(show)continue;
+    const cand=g.lead?[g.lead]:(g.motions||[]);
+    const id=cand.find(x=>!seen.has(x)&&canPlay(x));if(id)show={mid:id,text:g.text||""};
   }
+  // 나머지는 「열렸지만 처음 보지 않음」: 대화에서 처음 재생될 때 firstSeen() 이 기록
+  if(show){S.firsts.push({mid:show.mid,text:show.text,line,at:Date.now(),scene:S.scene});unlockQ.push(show)}
   save();if(curTab==="album")renderAlbum();
   if(!unlockBusy&&unlockQ.length)setTimeout(unlockNext,1400);  // 답장 몸짓이 먼저 보이게 조금 뒤에
+}
+// 열렸지만 아직 처음 보지 않은 몸짓 = 앨범 「처음 본 모습」 칸 중 해금됐고 기록이 없는 것
+const isSoon=mid=>!S.firsts.some(f=>f.mid===mid)&&firstSlots().some(x=>x.mid===mid)&&unlockedIds().includes(mid);
+// 대화에서 그 몸짓이 처음 재생됐을 때: 평소처럼 재생 + 작은 표시 + 그때 대사로 앨범 기록
+let firstChipT;
+function firstSeen(mid){
+  if(!mid||!isSoon(mid))return;
+  const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
+  S.firsts.push({mid,text:"",line:last?(last.act?`*${last.act}* `:"")+last.t:"",at:Date.now(),scene:S.scene});save();
+  const D=DATA.story||{},c=$("#firstChip");
+  c.textContent=(D.firstSeenText||"처음 본 모습 · {name}").replace("{name}",MNAME[mid]||mid);
+  c.classList.add("on");clearTimeout(firstChipT);firstChipT=setTimeout(()=>c.classList.remove("on"),D.firstSeenMs||2000);
+  if(curTab==="album")renderAlbum();
 }
 function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
@@ -774,6 +798,7 @@ async function send(text){
   const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
   react({m:mid||IDLE,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  firstSeen(mid);
   afterReply(v);
   // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
   if(serverVer()===2&&v.src==="server"){
@@ -849,6 +874,7 @@ function renderAlbum(fresh){
     $("#album").innerHTML=seg+`<div class="alh"><b>처음 본 모습</b><span>${got} / ${slots.length}</span></div>
     <div class="prog"><i style="width:${slots.length?got/slots.length*100:0}%"></i></div>
     <div class="slots" style="margin-top:12px">${slots.map(x=>{const f=S.firsts.find(y=>y.mid===x.mid);
+      if(!f&&isSoon(x.mid))return `<button class="slot soon" data-h="${x.mid}"><span class="e">✨</span><span class="hint">${esc((DATA.story||{}).soonText||"곧 보게 될 거예요")}</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}</button>`;
       return f?`<button class="slot got" data-f="${x.mid}"><span class="s">${esc(MNAME[x.mid]||x.mid)}</span><span class="ln">${esc(speechOnly(f.line)||f.text)}</span><span class="d">${fmtD(f.at)}</span></button>`
         :`<button class="slot lock" data-h="${x.mid}"><span class="e">👤</span>${hints[x.mid]?`<span class="hint">${esc(hints[x.mid])}</span>`:`<span class="s">？</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}`}</button>`}).join("")}</div>`;
     bindSeg();
