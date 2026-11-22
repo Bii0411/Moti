@@ -1,7 +1,7 @@
 // moti 앱 기능 (캐릭터·대화·모션 피팅룸·지갑 등)
 const IMG={doyun:"card_doyun.jpg",jihu:"card_jihu.jpg",ijun:"card_ijun.jpg",haram:"card_haram.jpg",seoa:"card_seoa.jpg"};
 // 3D 모델: 지후(후보 2)·서아만. 나머지는 사진만 (3D 준비 중)
-const MODEL={jihu:"jihu.glb",seoa:"seoa_vroid.glb?v=20261122b"};
+const MODEL={jihu:"jihu.glb",seoa:"seoa_vroid.glb?v=20261122c"};
 // 3D 칸 뒤 장소 그림: 캐릭터마다 3곳. 대화에 장소 말이 나오면(kw) 배경이 바뀌어요
 const SCENES={
  seoa:[
