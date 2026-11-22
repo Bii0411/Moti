@@ -8,7 +8,7 @@
   "next": "다음",
   "none": "없음",
   "reserved": "예약",
-  "reserveStage": "다음 답장 뒤 {name} 으로 상승",
+  "reserveStage": "다음 답장 뒤 {name} 단계로 상승",
   "reserveEvent": "다음 답장 뒤 {name} 해금",
   "sec": {
     "scenes": "장면 바로가기",

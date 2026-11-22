@@ -338,8 +338,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json")]);
-  DATA.look=lk;DATA.demo=dm||{};
+  const [c,f,m,st,it,kw,lk,dm,dsc]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json")]);
+  DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
@@ -917,11 +917,14 @@ async function send(text){
   react({m:mid||IDLE,f:v.face,t:v.line,e:emo},learned?"✨ 선물로 배운 모습":"");
   firstSeen(mid);
   afterReply(v);
+  // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
+  const R=S.demoNext;let keep=null;
+  if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
   // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
   if(serverVer()===2&&v.src==="server"){
-    const ev=usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
-    runJudge(text,turnText(talkOf("seoa").slice(-1)[0]));
-  }else countStage();
+    const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
+    runJudge(text,turnText(talkOf("seoa").slice(-1)[0]),keep);
+  }else if(!R)countStage();
   renderBond();renderTop();perfEnd(P);
   if(prevMood!==S.mood&&!S.force&&!S.birthday){const g=GIFTS.find(x=>x.rec===S.mood);toast(`${STATES[S.mood].e} 서아가 <b>${STATES[S.mood].ko}</b> 상태가 됐어요`+(g&&S.mood!=="normal"?`<br><small>🎁 ${g.e} ${g.name}을(를) 주면 특별한 반응이 있을지도…?</small>`:""))}
 }
@@ -1140,8 +1143,69 @@ const Demo=(()=>{
   }
   return{init,render,toggle,setOpen,setLast:o=>{last=o;render()},cancel,setStage,resetSeoa,refresh,reveal,toChat,T,isOpen:()=>open};
 })();
-// 장면 바로가기 (5-B)
-const Scenes={html:()=>"",click:()=>false};
+// ───────────────────────── 장면 바로가기 (5-B) ─────────────────────────
+// data/demo_scenes.json 의 장면 6개. 들어가면 서아 대화를 비우고 상태를 맞춘 뒤 장 제목 2초. 예약(next)은 다음 답장 뒤 send() 가 실행
+const Scenes=(()=>{
+  const L=()=>(DATA.scenes&&DATA.scenes.scenes)||[];
+  const cur=()=>DS.scene||0;  // 지금 장면 번호(1부터, 0 = 없음)
+  const T=(k,v)=>Demo.T(k,v);
+  const title=sc=>T("chapter",{n:sc.n,name:sc.titleStage?stageName(sc.titleStage):sc.name});
+  let chT;
+  function chapter(sc){const c=$("#chapter");c.textContent=title(sc);c.classList.add("on");clearTimeout(chT);chT=setTimeout(()=>c.classList.remove("on"),(DATA.scenes||{}).titleMs||2000)}
+  const evMotions=ev=>((DATA.story&&DATA.story.unlock.event[ev])||{}).motions||[];
+  function go(n){
+    const sc=L()[n-1];if(!sc)return;
+    DS.scene=n;saveDS();Demo.cancel();
+    if(sc.album){setTab("album");albumSeg=sc.album;renderAlbum();Demo.render();Demo.reveal();chapter(sc);return}  // 상태는 그대로
+    if(sc.reset==="seoa"){Demo.resetSeoa();setTab("chat");openRoom("seoa")}  // 서아 전체 초기화 → 오프닝
+    else{
+      S.chats.seoa=[{r:"sys",t:title(sc)}];S.read.seoa=1;S.introDone=true;if(S.sid)delete S.sid.seoa;
+      Object.assign(story(),{recent_lines:[],summary:"",pending_event:null,stage_flags:[]});
+      Demo.setStage(sc.stage||1);
+      const pi=SCENES.findIndex(x=>x.name===sc.place);setScene(pi>=0?pi:0);
+      const md=sc.mood||"normal";S.force=null;S.birthday=md==="birthday";S.mood=md==="birthday"?"normal":md;
+      // 예약된 연출이 매번 다시 나오게: 이 장면 단계보다 위 몸짓·예약 사건 몸짓의 해금과 앨범 기록을 지움
+      const drop=new Set();for(let k=(sc.stage||1)+1;k<=6;k++)(((DATA.story||{}).unlock||{stage:{}}).stage[k]||{motions:[]}).motions.forEach(id=>drop.add(id));
+      if(sc.next&&sc.next.event)evMotions(sc.next.event).forEach(id=>drop.add(id));
+      S.firsts=S.firsts.filter(f=>!drop.has(f.mid));S.unlocked=S.unlocked.filter(id=>!drop.has(id));
+      S.demoNext=sc.next||null;
+      Stage.setFace("neutral");setTab("chat");openRoom("seoa");
+    }
+    Demo.refresh();Demo.reveal();chapter(sc);
+  }
+  // 예약 실행. 돌려주는 값 = 이 턴에 고정할 단계
+  function runReserve(R){
+    const q=[],st=story(),D=DATA.story||{};
+    if(R.stage&&R.stage>curStage()){const from=curStage();st.stage=R.stage;
+      S.bond=Math.max(S.bond||0,(D.countAt||[])[R.stage-1]||0);st.affection=Math.max(st.affection||0,(D.affectionAt||[])[R.stage-1]||0);stageUp(from,R.stage,q)}
+    if(R.event){const ev=D.unlock&&D.unlock.event[R.event];if(ev)q.push(ev)}
+    save();unlockShow(q);Demo.render();return curStage();
+  }
+  const resText=R=>!R?"":R.stage?T("reserveStage",{name:stageName(R.stage)}):R.event?T("reserveEvent",{name:evMotions(R.event).map(id=>MNAME[id]||id).join(", ")||R.event}):"";
+  function html(T,B){
+    const list=L();if(!list.length)return "";
+    const c=cur(),now=list[c-1],nx=list[c];
+    return `<div class="now">${esc(T("now"))} <b>${now?esc(now.n+" "+now.name):esc(T("none"))}</b> · ${esc(T("next"))} ${nx?esc(nx.n+" "+nx.name):esc(T("none"))}${S.demoNext?`<br><span class="rs">${esc(T("reserved"))} · ${esc(resText(S.demoNext))}</span>`:""}</div>
+      <h4>${esc(T("sec.scenes"))}</h4><div class="row">${list.map(sc=>B("scene",esc(sc.n+" "+sc.name),{v:sc.n,on:c===sc.n})).join("")}</div>`;
+  }
+  function click(a,v){if(a==="scene"){go(+v);return true}return false}
+  // 단축키: ?debug=1 일 때만, 입력창에 글자를 치는 중에는 무시
+  function onKey(e){
+    if(!DEBUG||e.ctrlKey||e.metaKey||e.altKey||e.isComposing)return;
+    const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+    const c=e.code,n=L().length;let m;
+    if((m=/^(Digit|Numpad)([1-9])$/.exec(c))&&+m[2]<=n)go(+m[2]);
+    else if(c==="ArrowRight")go(Math.min(n,cur()+1));
+    else if(c==="ArrowLeft")go(Math.max(1,cur()-1));
+    else if(c==="KeyR")go(cur()||1);
+    else if(c==="KeyD")Demo.toggle();
+    else if(c==="KeyW")wakeServer();
+    else return;
+    e.preventDefault();
+  }
+  document.addEventListener("keydown",onKey);
+  return{html,click,go,runReserve,cur};
+})();
 
 // ───────────────────────── 관계 (대화로만 오름) ─────────────────────────
 // 단계는 story().stage (서버 v2 판정 또는 대화 횟수). 게이지: v2는 호감도, 아니면 대화 횟수 기준
