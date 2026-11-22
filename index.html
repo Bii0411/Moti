@@ -175,9 +175,9 @@ nav button.on{color:var(--text)}
 .items{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:left;position:relative}
 .item .e{font-size:30px}
-.gi{width:56px;height:56px;display:block;filter:drop-shadow(0 4px 10px #a78bfa55)}
-.gi.s{width:22px;height:22px;display:inline-block;vertical-align:-5px;filter:none}
-.burst img{width:110px;height:110px}
+.gi{width:72px;height:72px;display:block;border-radius:14px;box-shadow:0 4px 14px #7c5cff44}
+.gi.s{width:26px;height:26px;display:inline-block;vertical-align:-7px;border-radius:7px;box-shadow:none}
+.burst img{width:120px;height:120px;border-radius:24px;box-shadow:0 0 30px #a78bfa88}
 .item b{display:block;font-size:14px;margin-top:4px}
 .item .p{font-size:12px;color:var(--pri2);font-weight:700}
 .item .c{font-size:11px;color:var(--sub);margin-top:4px}
@@ -280,22 +280,22 @@ const SORDER=["normal","tired","sulky","birthday"];
 
 // 선물 = 겉으로는 아이템, 실제로는 반응 모션 + 표정 + 대사
 const GIFTS=[
- {id:"coffee",icon:"icons/gift_coffee.svg",e:"☕",name:"커피",price:30,sign:"m15",fx:"☕",rec:"tired",
+ {id:"coffee",icon:"icons/gift_coffee.png",e:"☕",name:"커피",price:30,sign:"m15",fx:"☕",rec:"tired",
   r:{normal:{m:"m15",f:"fun",t:"커피? …작전 중엔 카페인이 생명이지. 잘 마실게."},
      tired:{m:"m02",f:"soft",t:"…딱 이게 필요했어. 어떻게 알았어?"},
      sulky:{m:"m05",f:"sulky",t:"커피로 넘어가려고? …식기 전에 마실 거야. 너 때문 아니고."},
      birthday:{m:"m15",f:"joy",t:"생일에 커피라니. 내일도 사 와. 생일 연장이야."}}},
- {id:"ramen",icon:"icons/gift_ramen.svg",e:"🍜",name:"라멘",price:50,sign:"m16",fx:"🍜",rec:"normal",
+ {id:"ramen",icon:"icons/gift_ramen.png",e:"🍜",name:"라멘",price:50,sign:"m16",fx:"🍜",rec:"normal",
   r:{normal:{m:"m16",f:"joy",t:"라멘! …작전 끝나고 먹자던 거, 기억했어?"},
      tired:{m:"m11",f:"soft",t:"같이 먹자. 혼자 먹는 라멘은 맛없거든."},
      sulky:{m:"m07",f:"sulky",t:"라멘으로 넘어가려고? …곱빼기면 생각해 볼게."},
      birthday:{m:"m16",f:"joy",t:"생일 라멘! 오늘은 국물까지 다 마실 거야."}}},
- {id:"flower",icon:"icons/gift_flower.svg",e:"💐",name:"꽃다발",price:80,sign:"m24",fx:"🌸",rec:"sulky",
+ {id:"flower",icon:"icons/gift_flower.png",e:"💐",name:"꽃다발",price:80,sign:"m24",fx:"🌸",rec:"sulky",
   r:{normal:{m:"m24",f:"shy",t:"…꽃? 이런 거 받아 본 적 없는데. 보지 마, 얼굴 빨개졌으니까."},
      tired:{m:"m12",f:"soft",t:"…고마워. 오늘 처음으로 웃었다."},
      sulky:{m:"m05",f:"shy",t:"꽃은 반칙이지. …화 풀렸어. 됐어?"},
      birthday:{m:"m24",f:"shy",t:"생일에 꽃이라니. …말려서 평생 간직할 거야."}}},
- {id:"ring",icon:"icons/gift_ring.svg",e:"💍",name:"반지",price:200,sign:"m22",fx:"💗",rec:"birthday",
+ {id:"ring",icon:"icons/gift_ring.png",e:"💍",name:"반지",price:200,sign:"m22",fx:"💗",rec:"birthday",
   r:{normal:{m:"m22",f:"joy",t:"반지…? 너 무슨 뜻인지 알고 주는 거지? …나도 좋아."},
      tired:{m:"m18",f:"shy",t:"…이거 끼고 있으면 아무리 힘들어도 버틸 수 있을 것 같아."},
      sulky:{m:"m03",f:"surprised",t:"잠깐, 반지? 화내고 있었는데… 이러면 화를 어떻게 내."},
@@ -421,7 +421,7 @@ let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
 function say(text,ms){text=speechOnly(text);if(!text)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
-function burst(e){const b=$("#burst");if(/\.svg$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
+function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
 function setScene(i){S.scene=i;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
 function react(r,tag){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t);faceReset()}
