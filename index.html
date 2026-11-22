@@ -523,7 +523,13 @@ let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
 function say(text,ms,sub){text=speechOnly(text);if(!text)return;if(!sub){Stage.talk(Math.min(4000,text.length*85));return}if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
-function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
+// 선물 연출(한 번만): 애니메이션이 끝나면 go 를 바로 뗀다. 떼지 않으면 3D 칸을 앨범↔대화로 옮기거나(placeStage)
+// 숨겼다 다시 보일 때(display) 브라우저가 CSS 애니메이션을 처음부터 다시 재생한다 → 화면 이동 때마다 팝업이 다시 뜨던 원인
+let burstT;
+function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go");
+  clearTimeout(burstT);burstT=setTimeout(()=>b.classList.remove("go"),1500)}  // 1.4초 애니메이션. 숨겨져 animationend 가 안 와도 뗌
+// 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
+["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 let sceneBackT;
