@@ -1,0 +1,20 @@
+{
+  "_설명": "캐릭터 3D 모습(명암·조명) 값. 캐릭터별로 둔다. 지금은 서아(seoa)만. 주소 뒤 ?look=old 를 붙이면 이 파일을 쓰지 않고 예전 모습(조명 무시 재질)으로 보인다. 색은 모두 화면에서 보이는 색(sRGB) 16진수.",
+  "seoa": {
+    "_lights": "key = 주 조명(방향광). elevationDeg 는 캐릭터 기준 위쪽 각도, sideDeg 는 정면에서 옆으로 돈 각도(+ 는 화면 오른쪽). hemi = 환경광(하늘색 sky·땅색 ground·세기). back = 예전 뒤쪽 보라 조명(만화풍 명암에서는 띠가 하나 더 생겨 0으로 끔).",
+    "lights": {
+      "key": { "color": "#FFF6EE", "intensity": 0.75, "elevationDeg": 45, "sideDeg": 35 },
+      "hemi": { "sky": "#FFF1E6", "ground": "#6A5A7A", "intensity": 0.4 },
+      "back": { "intensity": 0 }
+    },
+    "_bands": "명암 단계 3개(그림자·중간·밝음). 경계는 빛과 면이 이루는 값(dot) 기준, -1(완전히 등짐)~1(정면으로 받음). edges[0] 아래는 그림자, edges[0]~edges[1] 은 중간, edges[1] 위는 밝음. mid 는 중간 단계가 그림자(0)와 밝음(1) 사이 어디인지.",
+    "bands": { "edges": [-0.05, 0.25], "mid": 0.55 },
+    "_materials": "재질 이름(match 가 들어 있는 것)별 그림자 색. 위에서부터 먼저 맞는 것을 쓴다. shadow 는 그림자 부분에 곱해지는 색, mix 는 그 색을 얼마나 쓸지(0 = 그림자 없음, 1 = 그 색 그대로). normalBlend(얼굴만) 는 얼굴 명암을 공 모양 쪽으로 펴서 얼룩을 없애는 정도(0~1). 눈(_EYE)·눈썹·속눈썹·입(_FACE)은 여기 없어서 예전처럼 조명 무시.",
+    "materials": [
+      { "key": "faceSkin", "match": "Face_00_SKIN", "shadow": "#F0C4BA", "mix": 0.6, "normalBlend": 0.7 },
+      { "key": "bodySkin", "match": "Body_00_SKIN", "shadow": "#E3A79A", "mix": 1 },
+      { "key": "cloth", "match": "_CLOTH", "shadow": "#6B5A8E", "mix": 0.75 },
+      { "key": "hair", "match": "_HAIR", "shadow": "#6B5A8E", "mix": 0.75 }
+    ]
+  }
+}

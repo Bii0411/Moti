@@ -274,6 +274,7 @@ nav button.on{color:var(--text)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="motion.js"></script>
+<script src="look.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -290,7 +291,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json")]);
+  const [c,f,m,st,it,kw,lk]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json")]);
+  DATA.look=lk;
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
@@ -375,19 +377,21 @@ const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
-  let R,scene,cam,md=null,cur=null,xsData=null,faces=[];
+  let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null;
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   function init(){
     R=new THREE.WebGLRenderer({antialias:true,alpha:true});
     R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.outputEncoding=THREE.sRGBEncoding;
     scene=new THREE.Scene();
     cam=new THREE.PerspectiveCamera(30,1,.1,20);
-    scene.add(new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05));
+    const hemi=new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05);scene.add(hemi);
     const k=new THREE.DirectionalLight(0xffffff,.85);k.position.set(1.2,2,2.4);scene.add(k);
     const r=new THREE.DirectionalLight(0xb49cff,.7);r.position.set(-2,1.6,-1.5);scene.add(r);
+    // 서아 모습(만화풍 명암·조명, data/look.json): 지후 모델과 ?look=old 는 예전 그대로
+    const jihu=qs.get("model")==="jihu",useLook=!jihu&&qs.get("look")!=="old";
     $("#stage").prepend(R.domElement);
     // ?model=jihu : 카메라 구도 시험용으로 지후 모델을 띄움 (표정·몸짓 뼈 이름은 서아 기준이라 일부만 움직임)
-    new THREE.GLTFLoader().load(qs.get("model")==="jihu"?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>{
+    new THREE.GLTFLoader().load(jihu?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>dataReady.then(()=>{
       const inner=g.scene;
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.material.map)o.material.map.encoding=THREE.sRGBEncoding;
         if(o.morphTargetDictionary&&o.morphTargetDictionary.Fcl_ALL_Joy!==undefined)faces.push(o)}});
@@ -397,8 +401,9 @@ const Stage=(()=>{
       const root=new THREE.Group();root.add(inner);root.updateMatrixWorld(true);
       const bones={},rest={};
       root.traverse(o=>{if(o.isBone&&!bones[o.name]){bones[o.name]=o;const w=new THREE.Quaternion();o.getWorldQuaternion(w);rest[o.name]={local:[o.quaternion.x,o.quaternion.y,o.quaternion.z,o.quaternion.w],world:[w.x,w.y,w.z,w.w]}}});
+      if(useLook)lookInfo=Look.apply(DATA.look&&DATA.look.seoa,root,{hemi,key:k,back:r});
       md={root,bones,rest};scene.add(root);$("#ld").remove();
-    },undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
+    }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
   }
@@ -489,7 +494,7 @@ const Stage=(()=>{
   function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
   function talk(ms){talkUntil=performance.now()+ms}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n)};
+  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1049,7 +1054,8 @@ function start(){
   if(!S.story.location&&SCENES[S.scene||0])S.story.location=SCENES[S.scene||0].name;
   CH.forEach(c=>chatOf(c.id));
 }
-loadData().then(()=>{Stage.frameTo("normal",0);wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
+const dataReady=loadData();
+dataReady.then(()=>{Stage.frameTo("normal",0);wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
