@@ -50,11 +50,16 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .msg.gift{align-self:flex-end;background:#2a1d47;border:1px solid #6d4bd1}
 .msg .tag{display:inline-block;margin-top:5px;font-size:11px;color:var(--gold);font-weight:700}
 .typing{color:var(--sub)}
-.bar{display:flex;gap:8px;padding:8px 12px 12px;align-items:center;min-width:0}
+.bar{display:flex;gap:8px;padding:8px 12px 12px;align-items:flex-end;min-width:0}
 .gbtn{width:48px;height:48px;border-radius:50%;background:#000 url(icons/gift_button.png) center/cover;flex:none;position:relative;box-shadow:0 0 12px #a78bfa66}
 .gbtn .dot{position:absolute;right:-2px;top:-2px;background:var(--gold);color:#000;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px}
-.inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;outline:none}
-.send{width:44px;height:44px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
+/* 여러 줄 입력창: 엔터는 줄바꿈, 4줄까지 커지고 그 이상은 안에서 스크롤 (autoGrow). 16px = 아이폰 자동 확대 방지 */
+.inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;line-height:22px;outline:none;resize:none;display:block;height:46px;max-height:112px;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
+/* 안내 문구가 길어 두 줄: 글자만 13px로 줄이고(입력 글자는 16px 그대로) 빈 칸일 때만 위아래 여백을 줄여 46px 안에 넣음 */
+.inp::placeholder{color:#6b6480;font-size:13px;line-height:17px}
+.inp:placeholder-shown{padding-top:5px;padding-bottom:5px;word-break:keep-all;overflow-wrap:normal}
+.abtn{flex:none;height:46px;padding:0 9px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--pri2);line-height:1.15}
+.send{width:46px;height:46px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
 .quick{display:flex;gap:6px;padding:0 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0;max-width:100%;flex:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .quick::-webkit-scrollbar{display:none}
 .quick button{flex:none;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--sub)}
@@ -85,6 +90,11 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .aseg button.on{background:var(--pri);border-color:var(--pri);color:var(--text)}
 .slot .hint{color:#9d95b5;font-size:10px;line-height:1.35;word-break:keep-all;padding:0 2px}
 .slot .ln{color:#cfc8e4;font-size:10px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.slot.soon{border:1px dashed #6d4bd1;background:#1b1628}
+.slot.soon .hint{color:var(--pri2)}
+/* 처음 본 모습 작은 표시: 애니메이션이 아닌 전환(transition)이라 화면을 옮겨도 다시 재생되지 않음 */
+.firstchip{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-6px);background:#211b33e6;border:1px solid #f5c66b88;color:var(--gold);font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .25s,transform .25s;z-index:29;white-space:nowrap;pointer-events:none}
+.firstchip.on{opacity:1;transform:translate(-50%,0)}
 .slot.fresh{animation:fresh 1.6s ease-out}
 @keyframes fresh{0%{box-shadow:0 0 0 0 #f5c66b}60%{box-shadow:0 0 0 6px #f5c66b55}100%{box-shadow:0 0 0 0 transparent}}
 
@@ -232,7 +242,8 @@ nav button.on{color:var(--text)}
       <div class="quick" id="quick"></div>
       <div class="bar">
         <button class="gbtn" id="giftBtn" aria-label="선물하기"></button>
-        <input class="inp" id="inp" placeholder="서아에게 말 걸기" autocomplete="off">
+        <button class="abtn" id="actBtn" aria-label="행동 묘사 넣기">( )<br>행동</button>
+        <textarea class="inp" id="inp" rows="1" placeholder="서아에게 말 걸기" autocomplete="off" enterkeyhint="enter"></textarea>
         <button class="send" id="sendBtn" aria-label="보내기">↑</button>
       </div>
       </div>
@@ -257,6 +268,7 @@ nav button.on{color:var(--text)}
   <div class="sheet" id="giftSheet"></div>
   <div class="sheet" id="demoSheet"></div>
   <div class="toast" id="toast"></div>
+  <div class="firstchip" id="firstChip"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -275,14 +287,14 @@ const MNAME={...BASE,...SIGN};  // 나머지 몸짓 이름은 data/motions.json 
 const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 없을 때 (data/motions.json idle)
 
 // ── 데이터 파일 (data/*.json) ──
-const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},emotionMotion:{},faceEmotion:{}}};
+const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json")]);
-  if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;DATA.story=st;DATA.intro=it;
+  const [c,f,m,st,it,kw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json")]);
+  if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  if(!c||!f||!m||!st||!it)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+  if(!c||!f||!m||!st||!it||!kw)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 서버 버전: data/config.json → 주소 ?server=2 로 덮어쓰기. 서버 주소: ?api=http://localhost:8000
 const qs=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams()}})();
@@ -463,11 +475,11 @@ const Stage=(()=>{
     for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
   }
-  let lastMid=null;
+  let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
     cur={id:mid,start:performance.now()/1000};
-    if(mid!==IDLE)lastMid=mid;
+    if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
     if(mid===IDLE&&!o.tag){c.classList.remove("on");return}
     c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
@@ -477,7 +489,7 @@ const Stage=(()=>{
   function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
   function talk(ms){talkUntil=performance.now()+ms}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid};
+  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n)};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -492,7 +504,7 @@ const View=(()=>{
   function setBig(on,instant){
     const st=$("#stage"),ms=instant?0:(cfg().growMs||350);if(on===big)return;
     st.style.transition=`background-image .6s,height ${ms}ms ease`;
-    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=Math.round(window.innerHeight*(cfg().bigRatio||.64))+"px"}
+    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=Math.round(window.innerHeight*(cfg().bigRatio||.54))+"px"}
     else{st.style.height=h0+"px";setTimeout(()=>{if(!big)st.style.height=""},ms+30)}
     big=on;keepBottom(ms+80);
   }
@@ -511,7 +523,13 @@ let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
 function say(text,ms,sub){text=speechOnly(text);if(!text)return;if(!sub){Stage.talk(Math.min(4000,text.length*85));return}if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
-function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
+// 선물 연출(한 번만): 애니메이션이 끝나면 go 를 바로 뗀다. 떼지 않으면 3D 칸을 앨범↔대화로 옮기거나(placeStage)
+// 숨겼다 다시 보일 때(display) 브라우저가 CSS 애니메이션을 처음부터 다시 재생한다 → 화면 이동 때마다 팝업이 다시 뜨던 원인
+let burstT;
+function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go");
+  clearTimeout(burstT);burstT=setTimeout(()=>b.classList.remove("go"),1500)}  // 1.4초 애니메이션. 숨겨져 animationend 가 안 와도 뗌
+// 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
+["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 let sceneBackT;
@@ -532,6 +550,13 @@ function msgParts(t){
   return out.flatMap(p=>p.x.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>({k:p.k,x:p.k==="d"?x.replace(/^[“"]|[”"]$/g,""):x})));
 }
 const speechOnly=t=>msgParts(t).filter(p=>p.k==="d").map(p=>p.x).join(" ");
+// 내 메시지: 괄호 ( ) 안 = 상황 묘사(지문), 나머지 = 말풍선. 괄호 기호는 보이지 않게. 서버에는 원문 그대로 보냄
+function userParts(t){
+  const out=[];const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
+  String(t||"").split(/([(（][^()（）]*[)）])/).forEach(seg=>{if(/^[(（][^()（）]*[)）]$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg)});  // 말풍선 안 줄바꿈은 그대로
+  return out;
+}
+const userPlain=t=>userParts(t).map(p=>p.x).join(" ");
 function chatOf(cid){return S.chats[cid]||(S.chats[cid]=[{r:"c",t:chBy(cid).intro,at:Date.now()-FIRST_MIN[cid]*60000}])}
 function addMsg(r,t,extra,cid){cid=cid||S.room||"seoa";const L=chatOf(cid);L.push({r,t,at:Date.now(),...(extra||{})});if(L.length>60)S.chats[cid]=L.slice(-60);
   if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
@@ -540,6 +565,7 @@ function renderLog(){
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
     m.r==="c"?(m.act?`<div class="mnarr">${esc(m.act)}</div>`:"")+msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
+    :m.r==="u"?userParts(m.t).map(p=>p.k==="n"?`<div class="mnarr u">${esc(p.x)}</div>`:`<div class="msg u">${esc(p.x)}</div>`).join("")
     :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+(busy?`<div class="msg c typing">${esc(waiting&&!serverAwake&&DATA.config.waitText||"서아가 입력 중…")}</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
@@ -568,9 +594,10 @@ const replyWait=normal=>serverAwake?normal:Math.max(normal,DATA.config.firstRepl
 const story=()=>S.story||(S.story={});
 async function post(path,body,ms){
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
+  const P=path==="/chat"?PERF_CUR:null;if(P)P.req=performance.now();
   try{const r=await fetch(apiUrl()+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
     serverAwake=true;
-    if(!r.ok){console.warn("서버 오류",path,r.status);return null}return await r.json()}
+    if(!r.ok){console.warn("서버 오류",path,r.status);return null}const j=await r.json();if(P)P.res=performance.now();return j}
   catch(e){console.warn("서버에 연결 못 함 → 예시 대사",path,e&&e.name);return null}finally{clearTimeout(tm)}
 }
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
@@ -638,13 +665,31 @@ function unlockShow(groups){
   const seen=new Set(S.firsts.map(f=>f.mid));
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
   const line=last?(last.act?`*${last.act}* `:"")+last.t:"";
-  for(const g of groups)for(const id of g.motions||[]){
-    if(!S.unlocked.includes(id))S.unlocked.push(id);
-    if(seen.has(id)||!canPlay(id))continue;seen.add(id);
-    S.firsts.push({mid:id,text:g.text||"",line,at:Date.now(),scene:S.scene});unlockQ.push({mid:id,text:g.text||""});
+  // 연출할 몸짓 하나: 단계 상승이면 대표 몸짓(lead), 판정·사건이면 그 몸짓. 한 번에 여럿이면 앞의 하나만
+  let show=null;
+  for(const g of groups){
+    (g.motions||[]).forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});  // 모두 해금
+    if(show)continue;
+    const cand=g.lead?[g.lead]:(g.motions||[]);
+    const id=cand.find(x=>!seen.has(x)&&canPlay(x));if(id)show={mid:id,text:g.text||""};
   }
+  // 나머지는 「열렸지만 처음 보지 않음」: 대화에서 처음 재생될 때 firstSeen() 이 기록
+  if(show){S.firsts.push({mid:show.mid,text:show.text,line,at:Date.now(),scene:S.scene});unlockQ.push(show)}
   save();if(curTab==="album")renderAlbum();
   if(!unlockBusy&&unlockQ.length)setTimeout(unlockNext,1400);  // 답장 몸짓이 먼저 보이게 조금 뒤에
+}
+// 열렸지만 아직 처음 보지 않은 몸짓 = 앨범 「처음 본 모습」 칸 중 해금됐고 기록이 없는 것
+const isSoon=mid=>!S.firsts.some(f=>f.mid===mid)&&firstSlots().some(x=>x.mid===mid)&&unlockedIds().includes(mid);
+// 대화에서 그 몸짓이 처음 재생됐을 때: 평소처럼 재생 + 작은 표시 + 그때 대사로 앨범 기록
+let firstChipT;
+function firstSeen(mid){
+  if(!mid||!isSoon(mid))return;
+  const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
+  S.firsts.push({mid,text:"",line:last?(last.act?`*${last.act}* `:"")+last.t:"",at:Date.now(),scene:S.scene});save();
+  const D=DATA.story||{},c=$("#firstChip");
+  c.textContent=(D.firstSeenText||"처음 본 모습 · {name}").replace("{name}",MNAME[mid]||mid);
+  c.classList.add("on");clearTimeout(firstChipT);firstChipT=setTimeout(()=>c.classList.remove("on"),D.firstSeenMs||2000);
+  if(curTab==="album")renderAlbum();
 }
 function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
@@ -656,13 +701,23 @@ function unlockNext(){
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
-function motionList(){const last=Stage.last();return unlockedIds().filter(id=>id!==last&&canPlay(id)).map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
-// 이번 답장 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 없으면 null(대기 몸짓 유지). 직전과 같은 몸짓은 안 씀
-function pickMotion(want,emo){
-  const last=Stage.last(),ok=unlockedIds().filter(id=>id!==last&&canPlay(id));
-  if(want&&ok.includes(want))return want;
-  for(const tg of (DATA.motions.emotionMotion||{})[emo]||[]){const c=ok.filter(id=>mEmo(id)===tg);if(c.length)return c[Math.floor(Math.random()*c.length)]}
-  return null;
+// 반복 방지: 최근 recentLimit 번 안에 나온 몸짓은 고르지 않음 (data/motion_keywords.json)
+const recentMotions=()=>Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3);
+const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id))};
+function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
+// 답장의 지문: v2 action + 예전 형식의 *…* 부분
+const actionText=v=>[v.action||"",...msgParts(v.line).filter(p=>p.k==="n").map(p=>p.x)].join(" / ");
+// 이번 답장 몸짓: ① 서버가 준 몸짓(해금된 것만) → ② 지문의 행동 단어(먼저 나온 것) → ③ 없으면 null(대기 동작 유지)
+const MOTION_LOG=[];  // 확인용: 턴마다 지문과 고른 몸짓
+function pickMotion(want,act){
+  const ok=pickable();let r={mid:null,by:"없음"};
+  if(want&&ok.includes(want))r={mid:want,by:"서버"};
+  else{let at=Infinity;
+    for(const k of DATA.keywords.keywords||[]){if(!ok.includes(k.id))continue;
+      let t=act;for(const n of k.not||[])t=t.split(n).join(" ".repeat(n.length));  // not 에 든 말은 지움 (예: 코웃음 속 웃)
+      for(const w of k.words){const i=t.indexOf(w);if(i>=0&&i<at){at=i;r={mid:k.id,by:"단어",word:w}}}}}
+  MOTION_LOG.push({act,want,...r,recent:recentMotions()});
+  return r.mid;
 }
 async function askSeoa(text){
   const sm=serverVer()===2?null:await getSample();  // 서버 v2 시험 중엔 Claude 미리보기를 건너뜀
@@ -720,34 +775,43 @@ async function askOther(cid,text){
   const j=await askServer(cid,text);if(j)return (j.action?`*${j.action}* `:"")+j.line;
   return c.lines[Math.floor(Math.random()*c.lines.length)];
 }
+// 답장 속도 재기: 전송 → (앱 준비) → 서버 요청~응답 → (응답 후 표시). 콘솔과 PERF 에 남김
+const PERF=[];let PERF_CUR=null;
+function perfStart(){return PERF_CUR={t0:performance.now()}}
+function perfEnd(P){P.dom=performance.now();requestAnimationFrame(()=>{P.shown=performance.now();const r=x=>x==null?null:Math.round(x);
+  const o={준비:r((P.req||P.dom)-P.t0),서버:P.req&&P.res?r(P.res-P.req):null,표시:r(P.dom-(P.res||P.req||P.t0)),그려짐:r(P.shown-P.dom),전체:r(P.shown-P.t0),입력중표시:r((P.typing||P.t0)-P.t0),판정대기:r(P.judgeWait||0),출처:P.src||""};
+  PERF.push(o);console.info("[답장 속도 ms]",o);if(PERF_CUR===P)PERF_CUR=null})}
 async function send(text){
   text=(text||"").trim();if(!text||busy)return;
   const room=S.room||"seoa";
-  $("#inp").value="";addMsg("u",text,null,room);busy=true;renderLog();
-  if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);return}
-  if(judgeP)await judgeP;  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
+  const P=perfStart();
+  $("#inp").value="";autoGrow();addMsg("u",text,null,room);busy=true;renderLog();
+  if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);perfEnd(P);return}
+  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저)
+  P.typing=performance.now();
+  if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
   S.bond=(S.bond||0)+1;
-  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
-  const v=await askSeoa(text);busy=false;waiting=false;
+  const v=await askSeoa(text);busy=false;waiting=false;P.src=v.src||"local";
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
-  // 모든 답장에서 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 대기 몸짓 유지
+  // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
-  const mid=pickMotion(v.motion,emo);
+  const mid=pickMotion(v.motion,actionText(v));
   const learned=!!mid&&S.learned.includes(mid);
   const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
   const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
   react({m:mid||IDLE,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  firstSeen(mid);
   afterReply(v);
   // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
   if(serverVer()===2&&v.src==="server"){
     const ev=usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
     runJudge(text,turnText(talkOf("seoa").slice(-1)[0]));
   }else countStage();
-  renderBond();renderTop();
+  renderBond();renderTop();perfEnd(P);
   if(prevMood!==S.mood&&!S.force&&!S.birthday){const g=GIFTS.find(x=>x.rec===S.mood);toast(`${STATES[S.mood].e} 서아가 <b>${STATES[S.mood].ko}</b> 상태가 됐어요`+(g&&S.mood!=="normal"?`<br><small>🎁 ${g.e} ${g.name}을(를) 주면 특별한 반응이 있을지도…?</small>`:""))}
 }
 // 답장 뒤 이야기 상태 갱신: 최근 서아 응답 3개(반복 방지), 장소, 쓴 사건 비우기
@@ -816,6 +880,7 @@ function renderAlbum(fresh){
     $("#album").innerHTML=seg+`<div class="alh"><b>처음 본 모습</b><span>${got} / ${slots.length}</span></div>
     <div class="prog"><i style="width:${slots.length?got/slots.length*100:0}%"></i></div>
     <div class="slots" style="margin-top:12px">${slots.map(x=>{const f=S.firsts.find(y=>y.mid===x.mid);
+      if(!f&&isSoon(x.mid))return `<button class="slot soon" data-h="${x.mid}"><span class="e">✨</span><span class="hint">${esc((DATA.story||{}).soonText||"곧 보게 될 거예요")}</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}</button>`;
       return f?`<button class="slot got" data-f="${x.mid}"><span class="s">${esc(MNAME[x.mid]||x.mid)}</span><span class="ln">${esc(speechOnly(f.line)||f.text)}</span><span class="d">${fmtD(f.at)}</span></button>`
         :`<button class="slot lock" data-h="${x.mid}"><span class="e">👤</span>${hints[x.mid]?`<span class="hint">${esc(hints[x.mid])}</span>`:`<span class="s">？</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}`}</button>`}).join("")}</div>`;
     bindSeg();
@@ -944,7 +1009,7 @@ function renderList(){
   const rows=CH.map(c=>{const L=chatOf(c.id).filter(m=>m.r!=="sys"),last=L[L.length-1];return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
   const tot=rows.reduce((a,r)=>a+r.u,0);$("#dmUnread").textContent=tot?`안 읽은 메시지 ${tot}`:"";
   $("#dmList").innerHTML=rows.map(({c,last,u})=>`<button class="dm" data-c="${c.id}"><span class="av" style="background-image:url(${c.img})">${c.badge==="3D"&&c.id==="seoa"?"<i>3D</i>":""}</span>
-    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
+    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.r==="u"?userPlain(last.t):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
     <span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`).join("");
   $("#dmList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>openRoom(b.dataset.c));
 }
@@ -955,7 +1020,7 @@ function openRoom(cid){
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   $("#roomSub").textContent=cid==="seoa"?"3D · 표정 · 선물":"2D · 3D는 준비 중이에요";
   $("#giftBtn").style.display=cid==="seoa"?"":"none";$("#quick").style.display=cid==="seoa"?"":"none";
-  $("#inp").placeholder=c.name+"에게 말 걸기";
+  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
   if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
 }
@@ -991,7 +1056,13 @@ $("#backBtn").onclick=showList;
 $("#demoBtn").onclick=demoSheet;
 $("#scrim").onclick=closeSheets;
 $("#sendBtn").onclick=()=>send($("#inp").value);
-$("#inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)send($("#inp").value)});
+// 엔터는 줄바꿈만(기본 동작). 전송은 화살표 버튼으로만
+function autoGrow(){const t=$("#inp");t.style.height="auto";const max=parseFloat(getComputedStyle(t).maxHeight)||112;const h=Math.min(t.scrollHeight+2,max);t.style.height=h+"px";t.style.overflowY=t.scrollHeight+2>max?"auto":"hidden"}
+$("#inp").addEventListener("input",autoGrow);
+// 행동 버튼: 커서 자리에 "()"를 넣고 커서를 괄호 안에. 누를 때 입력창 포커스(키보드)를 잃지 않게 pointerdown 기본 동작을 막음
+$("#actBtn").addEventListener("pointerdown",e=>e.preventDefault());
+$("#actBtn").onclick=()=>{const t=$("#inp"),a=t.selectionStart??t.value.length,b=t.selectionEnd??a;
+  t.focus();t.setRangeText("("+t.value.slice(a,b)+")",a,b,"start");t.setSelectionRange(a+1,a+1+(b-a));autoGrow()};
 Stage.init();
 $("#inp").addEventListener("focus",()=>{if(View.isBig())View.rest()});
 // 대화 목록이 맨 아래를 보고 있었으면, 3D가 커져 목록이 줄어들어도 맨 아래(최신 말풍선)를 유지
