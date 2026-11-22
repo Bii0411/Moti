@@ -259,7 +259,22 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const BASE={m01:"웃음",m02:"고개 끄덕이기",m03:"놀라기",m04:"한숨 쉬기",m05:"시선 피하기",m06:"허둥대기",m07:"팔짱 끼기",m11:"손 내밀기",m12:"다가가기",m18:"감싸 안기"};
 // 선물로 새로 배우는 모션 (아이템에 딸린 모션)
 const SIGN={m15:"다정하게 인사하기",m16:"응원하기",m24:"부끄러워하기",m22:"하트 챌린지"};
-const MNAME={...BASE,...SIGN};
+const MNAME={...BASE,...SIGN};  // 나머지 몸짓 이름은 data/motions.json 에서 채움
+const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 없을 때 (data/motions.json idle)
+
+// ── 데이터 파일 (data/*.json) ──
+const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},emotionMotion:{},faceEmotion:{}}};
+async function loadData(){
+  const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const [c,f,m]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json")]);
+  if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;
+  for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
+  if(!c||!f||!m)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+}
+// 서버 버전: data/config.json → 주소 ?server=2 로 덮어쓰기. 서버 주소: ?api=http://localhost:8000
+const qs=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams()}})();
+const serverVer=()=>{const q=qs.get("server");return q==="1"||q==="2"?+q:(DATA.config.serverVersion===2?2:1)};
+const apiUrl=()=>(qs.get("api")||DATA.config.apiUrl||"https://seoa-backand.onrender.com").replace(/\/+$/,"");
 
 // 표정: VRoid 표정 데이터(Fcl_…) 조합
 const FACE={
@@ -407,13 +422,19 @@ const Stage=(()=>{
     for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
   }
+  let lastMid=null;
   function play(mid,o={}){
+    if(!RIG.M[mid]&&!XS[mid])return;
     cur={id:mid,start:performance.now()/1000};
-    const c=$("#cap");c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
+    if(mid!==IDLE)lastMid=mid;
+    const c=$("#cap");
+    if(mid===IDLE&&!o.tag){c.classList.remove("on");return}
+    c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
   }
-  function setFace(k){faceT={...(FACE[k]||{})}}
+  // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접
+  function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
   function talk(ms){talkUntil=performance.now()+ms}
-  return{init,play,setFace,talk};
+  return{init,play,setFace,talk,last:()=>lastMid};
 })();
 
 // ───────────────────────── 화면 공용 ─────────────────────────
@@ -444,7 +465,7 @@ function renderLog(){
   const L=$("#log");
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
-    m.r==="c"?msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
+    m.r==="c"?(m.act?`<div class="mnarr">${esc(m.act)}</div>`:"")+msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
     :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+(busy?`<div class="msg c typing">서아가 입력 중…</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
@@ -459,24 +480,53 @@ async function getSample(){
   return sampleFn;
 }
 // ── moti 대화 서버 (GitHub 사이트에서는 이걸로 대답해요) ──
-const API_URL="https://seoa-backand.onrender.com";
-const EMO2FACE=[[/기쁨|행복|joy|happy/i,"joy"],[/설렘|수줍|부끄|shy/i,"shy"],[/슬픔|우울|sad|sorrow/i,"sorrow"],[/분노|화|angry/i,"angry"],[/놀람|surpris/i,"surprised"],[/냉담|삐/i,"sulky"],[/장난|재미|fun|자신감/i,"fun"],[/위로|다정|편안|calm/i,"soft"]];
-const emoFace=e=>{for(const [r,f] of EMO2FACE)if(r.test(e||""))return f;return "soft"};
-async function askServer(cid,text){
-  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),25000);
-  try{
-    const hist=chatOf(cid).filter(m=>m.r==="u"||m.r==="c").slice(-12,-1).map(m=>({r:m.r,t:m.t}));
-    const motions=cid==="seoa"?Object.values(allowedMotions()):[];
-    const r=await fetch(API_URL+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,
-      body:JSON.stringify({char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions})});
-    if(!r.ok)return null;const j=await r.json();
-    if(j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
-    return j&&j.reply?j:null;
-  }catch(e){return null}finally{clearTimeout(tm)}
+// 감정 글자 → 표정 (data/emotion_face.json)
+const emoFace=e=>{for(const x of DATA.face.map||[]){try{if(new RegExp(x.match,"i").test(e||""))return x.face}catch(err){}}return DATA.face.default||"soft"};
+// 대화 기록 → 서버로 보낼 모양 ("*행동* 대사"). 인트로 문단은 서버가 OPENING으로 따로 넣으므로 뺌
+const turnText=m=>(m.act?`*${m.act}* `:"")+m.t;
+const talkOf=cid=>chatOf(cid).filter(m=>(m.r==="u"||m.r==="c")&&!m.intro);
+// 서아 이야기 상태. 서버 v2는 저장하지 않으므로 여기 보관해서 매 요청에 보냄
+const story=()=>S.story||(S.story={});
+async function post(path,body,ms){
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
+  try{const r=await fetch(apiUrl()+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
+    if(!r.ok){console.warn("서버 오류",path,r.status);return null}return await r.json()}
+  catch(e){console.warn("서버에 연결 못 함 → 예시 대사",path,e&&e.name);return null}finally{clearTimeout(tm)}
 }
-function allowedMotions(){const o={...BASE};for(const id of S.learned)o[id]=SIGN[id];return o}
+// 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
+function readReply(j){
+  if(!j)return null;
+  if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null};
+  if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
+  return null;
+}
+async function askServer(cid,text){
+  if(serverVer()===2){
+    // v2 요청: 최근 16턴, 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
+    const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
+    return readReply(await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},45000));
+  }
+  const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
+  const motions=cid==="seoa"?Object.values(allowedMotions()):[];
+  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions},25000);
+  if(j&&j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
+  return readReply(j);
+}
+function allowedMotions(){const o={};for(const id of unlockedIds())o[id]=MNAME[id]||id;return o}
+// 대화에서 쓸 수 있는 몸짓 = 기본 몸짓 + 선물로 배운 몸짓
+function unlockedIds(){return [...Object.keys(BASE),...S.learned.filter(id=>SIGN[id])]}
+const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
+const canPlay=id=>!!(RIG.M[id]||XS[id]);
+function motionList(){const last=Stage.last();return unlockedIds().filter(id=>id!==last&&canPlay(id)).map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
+// 이번 답장 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 없으면 null(대기 몸짓 유지). 직전과 같은 몸짓은 안 씀
+function pickMotion(want,emo){
+  const last=Stage.last(),ok=unlockedIds().filter(id=>id!==last&&canPlay(id));
+  if(want&&ok.includes(want))return want;
+  for(const tg of (DATA.motions.emotionMotion||{})[emo]||[]){const c=ok.filter(id=>mEmo(id)===tg);if(c.length)return c[Math.floor(Math.random()*c.length)]}
+  return null;
+}
 async function askSeoa(text){
-  const sm=await getSample();
+  const sm=serverVer()===2?null:await getSample();  // 서버 v2 시험 중엔 Claude 미리보기를 건너뜀
   const allowed=allowedMotions();
   if(sm){
     const hist=chatOf("seoa").filter(m=>m.r==="u"||m.r==="c"||m.r==="g").slice(-10).map(m=>(m.r==="u"?"유저: ":m.r==="g"?"[유저가 선물함] ":"서아: ")+m.t).join("\n");
@@ -500,10 +550,10 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
     }catch(e){if(e&&e.code==="not_granted"){sampleFn=null;$("#aiTag").textContent=""}}
   }
   const j=await askServer("seoa",text);
-  if(j){const nm=(j.motions||[]).map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
+  if(j){const nm=j.motionNames.map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
     const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
-    const sc=SCENES.findIndex(x=>x.name===j.scene);
-    return{line:j.reply,motion:nm[0]||(face==="joy"?"m01":face==="shy"?"m05":face==="sorrow"?"m04":face==="angry"?"m07":"m02"),face,mood,scene:sc>=0?sc:null}}
+    const sc=j.location?SCENES.findIndex(x=>x.name===j.location):-1;
+    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null}}
   return localReply(text,allowed);
 }
 // Claude를 못 쓸 때의 예시 대사
@@ -528,7 +578,7 @@ async function askOther(cid,text){
 최근 대화:\n${hist}\n유저: ${text}\n${c.name}의 다음 대사를 1~2문장으로 쓴다. JSON만 출력: {"line":"..."}`,{modelTier:"quick",cache:false});
       if(v&&v.line)return v.line}catch(e){}
   }
-  const j=await askServer(cid,text);if(j)return j.reply;
+  const j=await askServer(cid,text);if(j)return (j.action?`*${j.action}* `:"")+j.line;
   return c.lines[Math.floor(Math.random()*c.lines.length)];
 }
 async function send(text){
@@ -537,15 +587,28 @@ async function send(text){
   $("#inp").value="";addMsg("u",text,null,room);busy=true;renderLog();
   if(room!=="seoa"){const line=await askOther(room,text);busy=false;addMsg("c",line,null,room);return}
   bondUp();
+  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기
   const v=await askSeoa(text);busy=false;
   const prevMood=S.mood;S.mood=v.mood||S.mood;
-  if(v.scene===0||v.scene===1)setScene(v.scene);
-  const learned=S.learned.includes(v.motion);
-  const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[v.motion]}`:"";
-  addMsg("c",v.line,tag?{tag}:null,"seoa");
-  react({m:v.motion,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene)setScene(v.scene);
+  // 모든 답장에서 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 대기 몸짓 유지
+  const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
+  const mid=pickMotion(v.motion,emo);
+  const learned=!!mid&&S.learned.includes(mid);
+  const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
+  const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
+  addMsg("c",v.line,msg,"seoa");
+  react({m:mid||IDLE,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  afterReply(v);
   renderTop();
   if(prevMood!==S.mood&&!S.force&&!S.birthday){const g=GIFTS.find(x=>x.rec===S.mood);toast(`${STATES[S.mood].e} 서아가 <b>${STATES[S.mood].ko}</b> 상태가 됐어요`+(g&&S.mood!=="normal"?`<br><small>🎁 ${g.e} ${g.name}을(를) 주면 특별한 반응이 있을지도…?</small>`:""))}
+}
+// 답장 뒤 이야기 상태 갱신: 최근 서아 응답 3개(반복 방지), 장소, 쓴 사건 비우기
+function afterReply(v){
+  const st=story(),last=talkOf("seoa").slice(-1)[0];
+  if(last&&last.r==="c")st.recent_lines=[...(st.recent_lines||[]),turnText(last)].slice(-3);
+  if(v.location)st.location=v.location;
+  st.pending_event=null;save();
 }
 
 // ───────────────────────── 선물 ─────────────────────────
@@ -731,7 +794,7 @@ function start(){
   }
   CH.forEach(c=>chatOf(c.id));
 }
-start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater();
+loadData().then(()=>{start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;

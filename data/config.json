@@ -1,0 +1,5 @@
+{
+  "_설명": "serverVersion: 1 = 지금 배포 서버(예전 /chat, reply 응답), 2 = v2 서버(/chat·/judge, action·dialogue 응답). 주소 뒤 ?server=2 로 덮어쓸 수 있다. apiUrl 은 ?api=http://localhost:8000 으로 덮어쓸 수 있다.",
+  "serverVersion": 1,
+  "apiUrl": "https://seoa-backand.onrender.com"
+}

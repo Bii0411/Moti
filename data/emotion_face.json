@@ -1,0 +1,19 @@
+{
+  "_설명": "서버가 보내는 감정(emotion) 글자 → 서아 표정. match 는 정규식, 위에서부터 먼저 맞는 것을 쓴다. face 가 글자면 index.html FACE 의 표정 이름, 객체면 VRoid 표정 데이터(Fcl_…) 값을 직접 쓴다.",
+  "default": "soft",
+  "map": [
+    { "match": "평온", "face": "neutral" },
+    { "match": "도발", "face": { "Fcl_ALL_Fun": 0.4 } },
+    { "match": "진심", "face": { "Fcl_ALL_Sorrow": 0.3 } },
+    { "match": "질투", "face": { "Fcl_ALL_Angry": 0.35 } },
+    { "match": "당황", "face": { "Fcl_ALL_Surprised": 0.5, "Fcl_ALL_Joy": 0.2 } },
+    { "match": "기쁨|행복|joy|happy", "face": "joy" },
+    { "match": "설렘|수줍|부끄|shy", "face": "shy" },
+    { "match": "슬픔|우울|sad|sorrow", "face": "sorrow" },
+    { "match": "분노|화|angry", "face": "angry" },
+    { "match": "놀람|surpris", "face": "surprised" },
+    { "match": "냉담|삐", "face": "sulky" },
+    { "match": "장난|재미|fun|자신감", "face": "fun" },
+    { "match": "위로|다정|편안|calm", "face": "soft" }
+  ]
+}
