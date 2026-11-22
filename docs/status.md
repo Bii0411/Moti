@@ -48,12 +48,24 @@
 - **이미지 필요:** 바 '라스트 오더' 1층(`bg_seoa_bar.jpg`), 2층(`bg_seoa_room.jpg`) — 지금은 `bg_seoa_alley.jpg`, `bg_seoa_roof.jpg`로 임시 대체
 - **앨범 힌트:** 「처음 본 모습」 잠긴 칸 힌트 15개 들어감 (원고 `docs/drafts/2-1-앨범힌트.md`, 2-1단계)
 
+## 3단계 (`step/3-chat-input`, main 병합 전)
+
+보고서: [reports/3-몸짓맥락-입력.md](reports/3-몸짓맥락-입력.md)
+
+- **몸짓 고르기:** 서버가 준 몸짓(해금된 것) → 답장 지문(`action`, 예전 형식 `*…*`)의 행동 단어 `data/motion_keywords.json` → 없으면 대기 동작 유지. 감정으로 고르던 표(`emotionMotion`)는 없앰. 최근 3번 안에 나온 몸짓은 안 고름
+- **3D 확대:** 몸짓 재생 중 화면 높이 64% → **54%** (`stage.bigRatio`)
+- **입력창:** 여러 줄(4줄까지 커지고 그 이상은 스크롤). 엔터는 줄바꿈, 전송은 화살표 버튼으로만
+- **상황 묘사:** 「( ) 행동」 버튼이 커서 자리에 `()`를 넣음. 내 메시지의 괄호 안은 말풍선 밖 기울임체 지문, 서버에는 원문 그대로. 안내 문구는 `data/config.json` `inputPlaceholder`
+- **답장 속도:** 배포 서버 평균 4.5초 중 앱 쪽은 30ms 안팎 → 서버 쪽 원인 추정은 보고서 「서버 팀원에게 전달할 것」
+- **서버 괄호 규칙:** 서버 저장소 권한이 READ라 서버는 고치지 않음. 프롬프트에 넣을 줄은 보고서에
+
 ## 열려 있는 브랜치·PR
 
 | 저장소 | 브랜치 | PR | 상태 |
 | --- | --- | --- | --- |
 | Bii0411/Moti | `feat/motion-chat-v2` | [Bii0411/Moti#1](https://github.com/Bii0411/Moti/pull/1) 서아 대화 v2 | 열림. main과 `app.js`·`style.css` 충돌. 자세한 차이는 [v2-diff.md](v2-diff.md) |
 | Bii0411/Moti | `step/2-v2-newapp` | 없음 | 2단계 작업. 2026-11-23 main에 병합됨 |
+| Bii0411/Moti | `step/3-chat-input` | 없음 | 3단계 작업. main 병합 전 |
 | ddododo-lang/seoa-backand | `feat/motion-chat-v2` | [ddododo-lang/seoa-backand#1](https://github.com/ddododo-lang/seoa-backand/pull/1) 상태 없는 /chat·/judge와 프롬프트 v2 | 열림 |
 
 ## 서버 배포 상태 (확인 가능한 범위)
@@ -65,6 +77,9 @@
 - 앱: GitHub Pages `https://bii0411.github.io/Moti/` 응답 200.
 
 ## 남은 일
+
+- **서버 팀원:** `yoon_seoa_prompt.md` 절대 규칙 13번(괄호 = 유저 행동 묘사) 추가, `/chat` 응답 속도(판정을 답장과 같은 요청에서 하는 것으로 보임) — [3단계 보고서](reports/3-몸짓맥락-입력.md)
+- 아이폰 사파리 확인 (3단계): 3D 확대 0.54, 엔터 줄바꿈, 입력창 커짐, 행동 버튼 커서 위치
 
 - 서버 v2 배포 후 `data/config.json` `serverVersion` 2로
 - 아이폰 사파리 확인: 새 표정 5개, 앨범 말줄임, 3D 확대 애니메이션, 카메라 전환, 가로 넘침, 토스트 위치
