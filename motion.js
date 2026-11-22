@@ -1,4 +1,4 @@
-// moti 3D 모션 (손으로 만든 동작 23개: RIG)
+// moti 3D 모션 (손으로 만든 동작: m01~m23 공용, c01~c05 서아 전용, m25 대기 동작)
 // Procedural motions for the rigged Jihu model. Rotations are given in the model's rest world frame
 // (+X = character's left, +Y = up, +Z = toward camera) and carried along by parent bones.
 const RIG=(()=>{
@@ -31,7 +31,21 @@ const M={
  m20:{d:2.3,f(t,e,P){L(P,"Spine",-.12*e);L(P,"Head",-.12*e,0,-.16*e);L(P,"RightArm",-.95*e,0,-.15*e);L(P,"RightForeArm",-(.7+.7*max(0,osc(t,2.4)))*e);L(P,"LeftArm",.25*e,0,.5*e);P.r("LeftForeArm","x",-.6*e);P.r("LeftForeArm","y",-1.2*e)}},
  m21:{d:1.7,f(t,e,P){const k1=pulse(t,.45,.22),k2=pulse(t,.95,.22);L(P,"LeftArm",-(.85+.65*k1)*e,0,-.12*e);L(P,"RightArm",-(.85+.65*k2)*e,0,.12*e);L(P,"LeftForeArm",-(1.9-1.75*k1)*e);L(P,"RightForeArm",-(1.9-1.75*k2)*e);L(P,"Spine",.05*e,(-.3*k1+.3*k2)*e);L(P,"Head",.08*e)}},
  m22:{d:2.6,f(t,e,P){L(P,"LeftArm",-.15*e,0,2.55*e);L(P,"RightArm",-.15*e,0,-2.55*e);L(P,"LeftForeArm",0,0,1.35*e);L(P,"RightForeArm",0,0,-1.35*e);L(P,"Head",0,0,.15*osc(t,1.2)*e);L(P,"Spine",0,0,.05*osc(t,1.2)*e);P.m(0,.02*abs(osc(t,1.2))*e,0)}},
- m23:{d:3.2,f(t,e,P){const p=t*2*PI*.95;L(P,"Spine02",.13*sin(p)*e);L(P,"Spine01",.15*sin(p-.9)*e);L(P,"Spine",.15*sin(p-1.8)*e);L(P,"Head",.13*sin(p-2.7)*e);L(P,"Hips",0,0,.07*sin(p/2)*e);P.m(.035*sin(p/2)*e,.02*sin(p)*e,0);L(P,"LeftArm",-.2*e,0,(.45+.25*sin(p))*e);L(P,"RightArm",-.2*e,0,-(.45+.25*sin(p+PI))*e);L(P,"LeftForeArm",-.7*e);L(P,"RightForeArm",-.7*e)}}
+ m23:{d:3.2,f(t,e,P){const p=t*2*PI*.95;L(P,"Spine02",.13*sin(p)*e);L(P,"Spine01",.15*sin(p-.9)*e);L(P,"Spine",.15*sin(p-1.8)*e);L(P,"Head",.13*sin(p-2.7)*e);L(P,"Hips",0,0,.07*sin(p/2)*e);P.m(.035*sin(p/2)*e,.02*sin(p)*e,0);L(P,"LeftArm",-.2*e,0,(.45+.25*sin(p))*e);L(P,"RightArm",-.2*e,0,-(.45+.25*sin(p+PI))*e);L(P,"LeftForeArm",-.7*e);L(P,"RightForeArm",-.7*e)}},
+ // ── 서아 전용 (해금으로만 얻음) ──
+ // (새 VRoid 모델 기준으로 맞춤: 팔 X = 옆으로 들기, 팔 Y = 앞으로 모으기, 아래팔 X = 팔꿈치 굽히기)
+ // c01 칼라 만지작거리기: 고개를 살짝 숙이고 한 손 끝으로 목의 칼라를 만지작 (진심 신호)
+ c01:{d:2.8,f(t,e,P){L(P,"Head",.2*e,-.06*e,.04*e);L(P,"neck",.05*e);L(P,"RightArm",-.35*e,1*e,0);P.r("RightForeArm","x",-2.6*e);L(P,"RightHand",.15*osc(t,2.4)*e,0,.12*osc(t,1.2)*e)}},
+ // c02 머리 쓸어 넘기기: 한 손을 머리 옆으로 올렸다가 어깨 뒤로 넘김
+ c02:{d:2.4,f(t,e,P){const sw=sm((t-.55)/.8);L(P,"LeftArm",-(.9+.35*sw)*e,-.8*e,0);P.r("LeftForeArm","x",-2.6*e);L(P,"Head",-.06*sw*e,.1*sw*e,-.12*e);L(P,"Spine",0,.05*e)}},
+ // c03 팔꿈치 괴고 몸 숙이기: 상체를 앞으로 숙이고 한 팔을 괴어 턱 가까이 (카운터 없이도 성립)
+ c03:{d:2.8,f(t,e,P){L(P,"Spine01",.16*e);L(P,"Spine02",.2*e);L(P,"Head",-.22*e,0,.1*e);L(P,"RightArm",-.3*e,1*e,0);P.r("RightForeArm","x",-2.7*e);P.m(0,-.03*e,.12*e)}},
+ // c04 옷깃 잡아당기기: 한 손을 앞으로 뻗어 쥐고, 팔꿈치를 굽혀 당김
+ c04:{d:2.4,f(t,e,P){const pull=sm((t-.8)/.5);L(P,"RightArm",-(.9+.2*pull)*e,.6*(1-pull)*e,(.6-.1*pull)*e);P.r("RightForeArm","x",-(.3+.9*pull)*e);L(P,"RightHand",.5*e);L(P,"Spine",-.04*pull*e,-.08*pull*e);P.m(0,0,(.06-.08*pull)*e)}},
+ // c05 이마 맞대기: 고개를 앞으로 천천히 숙여 멈춤
+ c05:{d:3.2,f(t,e,P){const k=sm(min(t/1.2,1))*e;L(P,"Spine01",.1*k);L(P,"Spine02",.1*k);L(P,"neck",.12*k);L(P,"Head",.26*k);P.m(0,0,.28*k)}},
+ // m25 고개 갸웃하며 듣기: 답장을 기다리는 동안 (해금 대상 아님)
+ m25:{d:4.5,f(t,e,P){L(P,"Head",.04*e,.06*e,(.2+.04*osc(t,.6))*e);L(P,"neck",0,0,.06*e);L(P,"Spine01",0,0,-.03*e)}}
 };
 function idle(t,P){L(P,"Spine01",.015*sin(t*1.6));L(P,"Head",.02*sin(t*.7),.06*sin(t*.45),.03*sin(t*.6));L(P,"LeftArm",0,0,-.05);L(P,"RightArm",0,0,.05)}
 // quaternion helpers [x,y,z,w]
