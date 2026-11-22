@@ -8,6 +8,6 @@
     { "n": 3, "name": "끌림", "titleStage": 3, "stage": 2, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 3 } },
     { "n": 4, "name": "고백 직전", "titleStage": 4, "stage": 3, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 4 } },
     { "n": 5, "name": "옥상", "stage": 4, "place": "바 옥상", "mood": "normal", "next": { "event": "ROOFTOP" } },
-    { "n": 6, "name": "추억 앨범", "album": "first" }
+    { "n": 6, "name": "앨범", "album": "first" }
   ]
 }

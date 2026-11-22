@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>moti · 선물과 추억 앨범</title>
+<title>moti</title>
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -240,7 +240,6 @@ nav button.on{color:var(--text)}
 .dp h4 small{color:var(--sub);font-weight:500;margin-left:4px}
 .dp .row{margin:4px 0 6px;gap:5px}
 .dp .row button{padding:5px 9px}
-.dp .row button.warn{border-color:#ef4444;color:#fecaca;background:#3b1220}
 .dp .now{font-size:11px;color:var(--sub);background:#0006;border-radius:8px;padding:5px 8px;line-height:1.5}
 .dp .now b{color:var(--text)}
 .dp .now .rs{color:var(--gold)}
@@ -315,7 +314,7 @@ nav button.on{color:var(--text)}
   <nav>
     <button data-tab="home"><b>🏠</b>홈</button>
     <button class="on" data-tab="chat"><b>💬</b>대화<span class="nb" id="navUnread" style="display:none"></span></button>
-    <button data-tab="album"><b>📔</b>추억 앨범</button>
+    <button data-tab="album"><b>📔</b><span id="navAlbum">앨범</span></button>
     <button data-tab="my"><b>👤</b>마이</button>
   </nav>
 
@@ -989,7 +988,7 @@ function giftSheet(focus){
   const st=curState();
   const got=g=>SORDER.filter(s=>S.album[g.id+":"+s]).length;
   $("#giftSheet").innerHTML=`<h2>🎁 서아에게 선물하기</h2>
-  <p class="sub">지금 서아는 <b>${STATES[st].e} ${STATES[st].ko}</b> 상태예요. 같은 선물도 서아 상태에 따라 반응이 달라요.<br>선물마다 <b style="color:var(--gold)">서아의 특별한 반응(모션)</b>이 있고, 처음 본 반응은 추억 앨범에 남아요.</p>
+  <p class="sub">지금 서아는 <b>${STATES[st].e} ${STATES[st].ko}</b> 상태예요. 같은 선물도 서아 상태에 따라 반응이 달라요.<br>${UI("gift.note",{special:"\u0000"}).split("\u0000").map(esc).join(`<b style="color:var(--gold)">${esc(UI("gift.special"))}</b>`)}</p>
   <div class="items">${GIFTS.map(g=>`<button class="item ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${g.rec===st?`<span class="rec">지금 추천</span>`:""}
     <img class="gi" src="${g.icon}" alt=""><b>${g.name}</b><div class="p">💎 ${g.price}</div>
@@ -1014,7 +1013,7 @@ function give(id){
     if(st==="sulky"&&!S.force){S.mood="normal"}
     renderTop();save();
     const msgs=[];
-    if(first)msgs.push(`📔 추억 앨범에 새 모습 저장! <b>(${Object.keys(S.album).length} / 16)</b>`);
+    if(first)msgs.push(`${esc(UI("gift.albumSaved"))} <b>(${Object.keys(S.album).length} / 16)</b>`);
     if(firstItem)msgs.push(`✨ 서아가 <b>${SIGN[g.sign]}</b>을(를) 배웠어요<br><small>이제 대화 중에도 이 모습을 보여 줘요</small>`);
     if(!first)msgs.push(`이미 본 반응이에요. 다른 상황에 주면 새 반응이 나와요`);
     toast(msgs.join("<br>"),3800);
@@ -1022,7 +1021,7 @@ function give(id){
   },700);
 }
 
-// ───────────────────────── 추억 앨범 ─────────────────────────
+// ───────────────────────── 앨범 ─────────────────────────
 const fmtD=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
 // 앨범 두 칸: 처음 본 모습(해금 기록) / 선물 반응
 let albumSeg="first";
@@ -1073,7 +1072,7 @@ function renderAlbum(fresh){
 let GEN=0;  // 초기화·장면 이동마다 +1. 그 전에 시작한 답장·판정·인트로는 결과를 버림
 const Demo=(()=>{
   const T=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.demo||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
-  let open=false,confirmAll=false,confirmT=null,last=null,jsonOpen=false;
+  let open=false,last=null,jsonOpen=false;
   const P=()=>$("#dp");
   function setOpen(on){open=on;DS.open=on;saveDS();P().classList.toggle("on",on);P().setAttribute("aria-hidden",on?"false":"true");const g=$("#gearBtn");g.classList.toggle("on",on);g.setAttribute("aria-expanded",on?"true":"false");if(on)render()}
   const toggle=()=>setOpen(!open);
@@ -1144,7 +1143,7 @@ const Demo=(()=>{
     h+=Scenes.html(T,B);
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(confirmAll?T("resetAllConfirm"):T("resetAll")),{cls:confirmAll?"warn":""})}${B("dia",esc(T("dia")))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",esc(T("dia")))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${STATES[k].e} ${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     if(DEBUG){
       const q=qs.get("server");
@@ -1172,9 +1171,7 @@ const Demo=(()=>{
     if(a==="replayOnboard")return replayOnboard();
     if(a==="adultReset"){delete S.adult;if(S.room&&needAdult(S.room)){S.room=null;if(curTab==="chat")showList()}toast(esc(T("resetToast",{name:OT("demo.adultReset")})),1800);return refresh()}
     if(a==="scene0")return firstOpen();
-    if(a==="resetAll"){
-      if(!confirmAll){confirmAll=true;clearTimeout(confirmT);confirmT=setTimeout(()=>{confirmAll=false;render()},4000);return render()}
-      confirmAll=false;clearTimeout(confirmT);return reset("all")}
+    if(a==="resetAll")return reset("all");  // 한 번 누르면 바로(7-1)
     if(a==="dia"){S.dia+=500;toast(esc(T("diaToast")),1600);return refresh()}
     if(a==="mood")return setMood(v);
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
@@ -1424,7 +1421,7 @@ function headerNote(c,line){
 function start(){
   if(!S.chats.seoa||!S.chats.seoa.length){
     // 인트로 원고(data/seoa_intro.json)가 있으면 처음 들어갈 때 대화방 안에서 문단별로 보여 줌. 없으면 예전 한 줄 인트로
-    S.chats.seoa=[{r:"sys",t:"🎁 버튼으로 서아에게 선물할 수 있어요 · 📔 추억 앨범에 반응이 모여요"},...(DATA.intro&&!S.introDone?[]:[{r:"c",t:chBy("seoa").intro,at:Date.now()-FIRST_MIN.seoa*60000}])];
+    S.chats.seoa=[{r:"sys",t:UI("chat.seoaFirst")},...(DATA.intro&&!S.introDone?[]:[{r:"c",t:chBy("seoa").intro,at:Date.now()-FIRST_MIN.seoa*60000}])];
   }
   if(!S.story.stage)S.story.stage=1;
   if(!S.story.location&&SCENES[S.scene||0])S.story.location=SCENES[S.scene||0].name;
@@ -1438,7 +1435,7 @@ if(!S.onboarded&&!SKIP_INTRO)Onboard.open();
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
