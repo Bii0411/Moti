@@ -1,6 +1,6 @@
 # 진행 현황
 
-기준: 2026-11-23, `main` 커밋 `7121781`
+기준: 2026-11-23, `main` 커밋 `059abc7` (2단계 병합 후)
 
 ## 지금 main에 있는 화면
 
@@ -27,7 +27,9 @@
 - **시연 설정:** 서아 상태 강제, 생일, 장소(2곳), 💎 충전, 초기화
 - **XSTAGE 모션:** `m24 부끄러워하기`만 XSTAGE 데이터(`motions/xstage_embarrassing3.json`)로 재생, 나머지는 `motion.js`의 코드 몸짓
 
-## `step/2-v2-newapp` 브랜치 (2단계, main 병합 전)
+## 2단계에서 main에 들어온 것 (`step/2-v2-newapp` 병합, 2026-11-23)
+
+위 「지금 main의 기능」 중 관계·추억 앨범·장소는 아래 내용으로 바뀌었다.
 
 보고서: [reports/2-대화v2-새앱.md](reports/2-대화v2-새앱.md)
 
@@ -51,20 +53,20 @@
 | 저장소 | 브랜치 | PR | 상태 |
 | --- | --- | --- | --- |
 | Bii0411/Moti | `feat/motion-chat-v2` | [Bii0411/Moti#1](https://github.com/Bii0411/Moti/pull/1) 서아 대화 v2 | 열림. main과 `app.js`·`style.css` 충돌. 자세한 차이는 [v2-diff.md](v2-diff.md) |
-| Bii0411/Moti | `step/2-v2-newapp` | 없음 | 2단계 작업. 확인 후 main 병합 예정 |
+| Bii0411/Moti | `step/2-v2-newapp` | 없음 | 2단계 작업. 2026-11-23 main에 병합됨 |
 | ddododo-lang/seoa-backand | `feat/motion-chat-v2` | [ddododo-lang/seoa-backand#1](https://github.com/ddododo-lang/seoa-backand/pull/1) 상태 없는 /chat·/judge와 프롬프트 v2 | 열림 |
 
 ## 서버 배포 상태 (확인 가능한 범위)
 
 - 주소: `https://seoa-backand.onrender.com` — 응답함.
 - 공개된 API 목록(`/openapi.json`): `/chat`, `/sessions`, `/sessions/{sid}`, `/sessions/{sid}/chat`. **`/judge` 가 없다** → v2 서버는 아직 배포되지 않은 것으로 보인다.
-- 주의: v2 서버가 배포되면 `/chat` 응답이 `reply` 대신 `dialogue`로 바뀐다. main의 `index.html`은 `reply`가 없으면 서버 응답을 버리고 예시 대사로 대답하므로, **서버 v2 배포 전에 `step/2-v2-newapp`을 main에 병합해야 한다** (이 브랜치는 두 형식을 모두 읽는다). 배포 뒤 `data/config.json`의 `serverVersion`을 2로.
+- 주의: v2 서버가 배포되면 `/chat` 응답이 `reply` 대신 `dialogue`로 바뀐다. 2단계 병합으로 main의 `index.html`은 두 형식을 모두 읽으므로 서버를 먼저 배포해도 대화는 이어진다. 배포 뒤 `data/config.json`의 `serverVersion`을 2로.
 - 2026-11-23 확인: 배포 서버 첫 요청이 25초 안에 답하지 않음(Render 깨어나는 시간). 두 번째부터 정상.
 - 앱: GitHub Pages `https://bii0411.github.io/Moti/` 응답 200.
 
 ## 남은 일
 
-- `step/2-v2-newapp` 확인 후 main 병합, 서버 v2 배포, `serverVersion` 2로
+- 서버 v2 배포 후 `data/config.json` `serverVersion` 2로
 - 아이폰 사파리 확인: 새 표정 5개, 앨범 말줄임, 3D 확대 애니메이션, 카메라 전환, 가로 넘침, 토스트 위치
 - **이미지 필요:** 바 '라스트 오더' 1층·2층 전용 배경 (지금은 임시 이미지)
 - 코드 안 콘텐츠(선물 반응·가격·예시 대사·다른 캐릭터 대사 등)를 JSON으로 분리 (이번엔 관계·해금·장소·인트로·표정·몸짓만 분리)
