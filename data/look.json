@@ -88,7 +88,69 @@
         "freqHz": 2.5,
         "damping": 0.3,
         "follow": 1,
-        "maxDeg": 8
+        "maxDeg": 8,
+        "gravity": {
+          "strength": 0.6,
+          "deadDeg": 3,
+          "maxDeg": 40,
+          "followHz": 6
+        },
+        "collide": {
+          "margin": 0.008,
+          "touch": 0.004,
+          "relaxSec": 0.4,
+          "maxDeg": 60,
+          "iter": 3,
+          "minWeight": 0
+        },
+        "colliders": [
+          {
+            "name": "가슴",
+            "bone": "Spine02",
+            "to": "Spine01",
+            "along": 0.3,
+            "offset": [
+              0,
+              0,
+              0.02
+            ],
+            "r": 0.088
+          },
+          {
+            "name": "왼어깨",
+            "bone": "LeftArm",
+            "offset": [
+              -0.01,
+              0.01,
+              0
+            ],
+            "r": 0.055
+          },
+          {
+            "name": "오른어깨",
+            "bone": "RightArm",
+            "offset": [
+              0.01,
+              0.01,
+              0
+            ],
+            "r": 0.055
+          },
+          {
+            "name": "왼위팔",
+            "bone": "LeftArm",
+            "to": "LeftForeArm",
+            "along": 0.5,
+            "r": 0.045
+          },
+          {
+            "name": "오른위팔",
+            "bone": "RightArm",
+            "to": "RightForeArm",
+            "along": 0.5,
+            "r": 0.045
+          }
+        ]
       },
       "breath": {
         "periodSec": 4,

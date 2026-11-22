@@ -458,7 +458,7 @@ const Stage=(()=>{
       if(useLook)lookInfo=Look.apply(DATA.look&&DATA.look.seoa,root,{hemi,key:k,back:r},{extra:lookExtra});
       md={root,bones,rest};scene.add(root);$("#ld").remove();
       // 4-2A 살아 있게(머리카락·숨·시선): 서아만. ?alive=off 로 끔
-      if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive);aliveOn=true}
+      if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
     }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
