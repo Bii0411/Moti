@@ -108,6 +108,7 @@
 - **[7-A] 서아 미리 불러오기:** `Stage.ready` 를 첫 화면 버튼이 기다림(준비 전이면 로딩 표시). 입장권 3D는 대화방 3D 그림판을 빌려 써서 모델은 한 번만 불러옴. 온보딩 뒤 서아 대화방 56ms(건너뛰면 느린 네트워크에서 4.5초)
 - **[7-A] 시연 패널:** 「온보딩 다시 보기」, 전체 초기화 → 첫 화면, 장면 0 「앱 처음 열기」(`?debug=1` 에서 `0` 키)
 - **[7-B] 입장권:** 위쪽 3D 서아 + 코드로 만든 마네킹 4명(안개), 아래쪽 밝은 입장권 카드(전체·필수 3·선택 1, 약관 시트, 펀치). 펀치 → 서아 m13 + 마네킹 차례로 손 흔들기 + 「어서 와요」 → 로그인. 그리기 41회(서아 33 + 마네킹 8). 동의 값 `S.consent`
+- **[7-2] 입장권 배경:** 마네킹을 빼고 서아 몸짓 정지 사진 8장을 이어 붙인 필름(`assets/onboarding/film_seoa.webp`)을 휘어진 큰 띠 + 기운 얇은 띠로 서아 뒤에 흘림(`film.js`, 설정 `data/onboarding.json film`). 펀치 때 1.2초 밝고 빨라짐. 그리기 35회. 사진 다시 만들기 `node tools/filmshot.mjs`
 - **[7-C] 성인 인증(시연용):** 서도윤 `ageRating: 19`, 「19+」 배지. 인증 전엔 대화방 대신 시트(1초 로딩 → 저장 → 대화방). 전체 초기화·패널 「성인 인증 초기화」로 지움
 - 아이폰 사파리 확인 필요: [7단계 보고서](reports/7-온보딩.md) 「아이폰 사파리 확인」
 
@@ -121,7 +122,7 @@
 | Bii0411/Moti | `step/4-seoa-look` | 없음 | 4단계 작업(4-A·4-B·4-1·4-2). 2026-11-23 main에 병합됨 (`3435d1f`) |
 | Bii0411/Moti | `step/5-demo-panel` | 없음 | 5단계 작업(5-A·5-B). 2026-11-23 main에 병합됨 (`292091e`) |
 | Bii0411/Moti | `step/6-seoa-polish` | 없음 | 6단계 작업(6-A·6-B·6-C). 2026-11-23 main에 병합됨 (`5e3bc6d`) |
-| Bii0411/Moti | `step/7-onboarding` | 없음 | 7단계 작업(7-A·7-B·7-C). main 병합 안 함 |
+| Bii0411/Moti | `step/7-onboarding` | 없음 | 7단계 작업(7-A·7-B·7-C·7-1·7-2). main 병합 안 함 |
 | ddododo-lang/seoa-backand | `feat/motion-chat-v2` | [ddododo-lang/seoa-backand#1](https://github.com/ddododo-lang/seoa-backand/pull/1) 상태 없는 /chat·/judge와 프롬프트 v2 | 열림 |
 
 ## 서버 배포 상태 (확인 가능한 범위)
