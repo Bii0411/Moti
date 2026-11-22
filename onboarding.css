@@ -103,3 +103,14 @@
 .oblogin .obbtn.k{background:#fee500;color:#191600}
 .obtext{font-size:14px;font-weight:700;color:var(--pri2);padding:10px 16px;-webkit-tap-highlight-color:transparent}
 .obnote{font-size:12px;color:#8a83a0;text-align:center}
+
+/* 19세 이상 캐릭터 성인 인증 시트(7-C, 시연용). 앱의 아래에서 올라오는 시트(.sheet)를 그대로 씀 */
+.adsheet{padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:10px}
+.adsheet h2{align-self:stretch;font-size:18px;margin-bottom:0;word-break:keep-all}
+.adsheet .sub{align-self:stretch;font-size:14px;line-height:1.55;color:#cfc8e4;margin-bottom:8px;word-break:keep-all}
+.adbtn{width:100%;height:50px;border-radius:14px;background:var(--pri);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px}
+.adbtn .spin{display:none;width:16px;height:16px;border-radius:50%;border:2px solid #ffffff55;border-top-color:#fff;animation:obSpin .8s linear infinite}
+.adbtn.loading .spin{display:block}
+.adbtn.loading{opacity:.85}
+.adlater{font-size:14px;font-weight:700;color:var(--sub);padding:10px 16px}
+.ccard .pl.age{background:#e11d48;font-weight:900}
