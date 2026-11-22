@@ -18,6 +18,11 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 
 .stage{position:relative;height:36%;min-height:210px;margin:0 12px;border-radius:20px;overflow:hidden;background:#140a24 center 40%/cover no-repeat;transition:background-image .6s}
 .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+/* 배경 어둡게(4-2B): 배경 이미지와 3D 사이에 반투명 층. 필터 대신(아이폰 사파리 부담 줄이기). 값은 data/look.json background, ?bg=raw 면 끔 */
+.stage{isolation:isolate}
+.bgdim{position:absolute;inset:0;pointer-events:none;background:rgba(0,0,0,var(--bgDark,.2))}
+.bgdim::after{content:"";position:absolute;inset:0;background:#808080;mix-blend-mode:saturation;opacity:var(--bgDesat,.1)}
+.bgdim.raw{display:none}
 .stage .ld{position:absolute;inset:0;display:grid;place-items:center;color:var(--sub);font-size:13px;background:#0008}
 .where{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
 .mood{position:absolute;right:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
@@ -223,6 +228,7 @@ nav button.on{color:var(--text)}
   </header>
 
   <div class="stage" id="stage">
+    <div class="bgdim" id="bgdim"></div>
     <div class="ld" id="ld">서아: “잠깐, 준비하고 나갈게.”</div>
     <span class="where" id="where">📍 네온 거리</span>
     <span class="mood" id="moodTag">😐 평소</span>
@@ -390,7 +396,7 @@ const Stage=(()=>{
     const r=new THREE.DirectionalLight(0xb49cff,.7);r.position.set(-2,1.6,-1.5);scene.add(r);
     // 서아 모습(만화풍 명암·조명, data/look.json): 지후 모델과 ?look=old 는 예전 그대로
     const jihu=qs.get("model")==="jihu",useLook=!jihu&&qs.get("look")!=="old",lookExtra=qs.get("look")!=="4a";
-    $("#stage").prepend(R.domElement);
+    const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);
     // ?model=jihu : 카메라 구도 시험용으로 지후 모델을 띄움 (표정·몸짓 뼈 이름은 서아 기준이라 일부만 움직임)
     new THREE.GLTFLoader().load(jihu?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>dataReady.then(()=>{
       const inner=g.scene;
@@ -479,10 +485,31 @@ const Stage=(()=>{
     const eyesBusy=(tgt.Fcl_ALL_Joy||0)>.5||(tgt.Fcl_EYE_Joy||0)>.5;
     if(t>blinkAt&&blinkT<0){blinkT=t}
     if(blinkT>=0){const k=(t-blinkT)/.16;tgt.Fcl_EYE_Close=eyesBusy?0:Math.max(tgt.Fcl_EYE_Close||0,k<1?k:2-k);if(k>=2){blinkT=-1;blinkAt=t+2.2+Math.random()*3}}
-    if(t*1000<talkUntil){const m=.35+.3*Math.sin(t*19)*Math.sin(t*7.3);tgt.Fcl_MTH_A=Math.max(0,m)*(eyesBusy?.6:1)}
+    const tk=talkCfg(),vis=talkVis(tk);
+    mouth(t,tk,vis,tgt);
     const names=new Set([...Object.keys(faceW),...Object.keys(tgt)]);
-    for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
+    for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||vis.indexOf(n)>=0?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
+  }
+  // 말할 때 입(4-2B): 입 모양(Fcl_MTH_A·I·U·E·O 중 모델에 있는 것)을 초당 rateHz 번 불규칙하게 바꾼다.
+  // 지금 감정 표정이 입을 쓰고 있으면(Fcl_ALL_…·Fcl_MTH_…) 그만큼 작게 섞어 표정이 깨지지 않게. 끝나면 closeSec 동안 부드럽게 다문다
+  const talkCfg=()=>(DATA.look&&DATA.look.seoa&&DATA.look.seoa.talk)||{};
+  let visList=null;const mw={};let mNext=0,mPick=null,mAmp=0;
+  function talkVis(tk){if(visList)return visList;if(!faces.length)return[];
+    visList=(tk.visemes||["Fcl_MTH_A","Fcl_MTH_I","Fcl_MTH_U","Fcl_MTH_E","Fcl_MTH_O"]).filter(n=>faces.some(f=>f.morphTargetDictionary[n]!==undefined));return visList}
+  let mLast=0;
+  function mouth(t,tk,vis,tgt){
+    const dt=mLast?Math.min(.1,t-mLast):1/60;mLast=t;
+    const on=t*1000<talkUntil;
+    if(on&&t>=mNext){const hz=tk.rateHz||[8,10],w=tk.weight||[.35,.8];
+      let n;do{n=vis[Math.floor(Math.random()*vis.length)]}while(vis.length>1&&n===mPick);
+      mPick=n;mAmp=w[0]+Math.random()*(w[1]-w[0]);
+      if(Math.random()<(tk.closeChance!=null?tk.closeChance:.15))mAmp*=.2;   // 가끔 거의 다문 순간(말 사이 쉼)
+      mNext=t+1/(hz[0]+Math.random()*(hz[1]-hz[0]))}
+    let busy=0;for(const k in tgt)if(/^Fcl_(ALL|MTH)_/.test(k)&&vis.indexOf(k)<0)busy=Math.max(busy,tgt[k]||0);
+    const damp=1-Math.min(1,busy)*(tk.emotionDamp!=null?tk.emotionDamp:.5);
+    const ks=1-Math.exp(-dt/(tk.blendSec||.04)),kc=1-Math.exp(-dt/(tk.closeSec||.12));
+    for(const n of vis){const goal=on&&n===mPick?mAmp*damp:0;const c=mw[n]||0;mw[n]=c+(goal-c)*(on?ks:kc);tgt[n]=Math.max(tgt[n]||0,mw[n])}
   }
   // 시선 피하기: 감정이 당황·수줍음(또는 수줍음 표정)이거나, 몸짓이 시선 피하기(m05)·등 돌리기(m10)
   function avert(mid){const g=(DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive&&DATA.look.seoa.alive.gaze)||{};
@@ -502,8 +529,10 @@ const Stage=(()=>{
   // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
   function setFace(k,emo){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
   function talk(ms){talkUntil=performance.now()+ms}
+  // 대사 글자 수 → 입 움직이는 시간 (글자당 msPerChar, 최대 maxMs. 띄어쓰기는 세지 않음)
+  function talkFor(text){const tk=talkCfg(),n=String(text||"").replace(/\s+/g,"").length;if(n)talk(Math.min(tk.maxMs||4000,n*(tk.msPerChar||70)))}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,alive:()=>aliveInfo,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{init,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -536,7 +565,7 @@ const View=(()=>{
 let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
-function say(text,ms,sub){text=speechOnly(text);if(!text)return;if(!sub){Stage.talk(Math.min(4000,text.length*85));return}if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
+function say(text,ms,sub){text=speechOnly(text);if(!text)return;Stage.talkFor(text);if(!sub)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120))}
 // 선물 연출(한 번만): 애니메이션이 끝나면 go 를 바로 뗀다. 떼지 않으면 3D 칸을 앨범↔대화로 옮기거나(placeStage)
 // 숨겼다 다시 보일 때(display) 브라우저가 CSS 애니메이션을 처음부터 다시 재생한다 → 화면 이동 때마다 팝업이 다시 뜨던 원인
 let burstT;
@@ -1064,7 +1093,11 @@ function start(){
   CH.forEach(c=>chatOf(c.id));
 }
 const dataReady=loadData();
-dataReady.then(()=>{Stage.frameTo("normal",0);wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
+// 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
+function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
+  if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
+  d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
