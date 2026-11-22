@@ -444,8 +444,8 @@ function renderLog(){
   const L=$("#log");
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
-    m.r==="c"?msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}${m.tag&&i===a.length-1?`<br><span class="tag">${esc(m.tag)}</span>`:""}</div>`).join("")+(m.tag&&msgParts(m.t).slice(-1)[0]?.k==="n"?`<div class="mnarr"><span class="tag" style="font-style:normal">${esc(m.tag)}</span></div>`:"")
-    :`<div class="msg ${m.r}">${esc(m.t)}${m.tag?`<br><span class="tag">${esc(m.tag)}</span>`:""}</div>`).join("")+(busy?`<div class="msg c typing">서아가 입력 중…</div>`:"");
+    m.r==="c"?msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
+    :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+(busy?`<div class="msg c typing">서아가 입력 중…</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
 const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
