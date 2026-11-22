@@ -18,6 +18,11 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 
 .stage{position:relative;height:36%;min-height:210px;margin:0 12px;border-radius:20px;overflow:hidden;background:#140a24 center 40%/cover no-repeat;transition:background-image .6s}
 .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+/* 배경 어둡게(4-2B): 배경 이미지와 3D 사이에 반투명 층. 필터 대신(아이폰 사파리 부담 줄이기). 값은 data/look.json background, ?bg=raw 면 끔 */
+.stage{isolation:isolate}
+.bgdim{position:absolute;inset:0;pointer-events:none;background:rgba(0,0,0,var(--bgDark,.2))}
+.bgdim::after{content:"";position:absolute;inset:0;background:#808080;mix-blend-mode:saturation;opacity:var(--bgDesat,.1)}
+.bgdim.raw{display:none}
 .stage .ld{position:absolute;inset:0;display:grid;place-items:center;color:var(--sub);font-size:13px;background:#0008}
 .where{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
 .mood{position:absolute;right:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
@@ -223,6 +228,7 @@ nav button.on{color:var(--text)}
   </header>
 
   <div class="stage" id="stage">
+    <div class="bgdim" id="bgdim"></div>
     <div class="ld" id="ld">서아: “잠깐, 준비하고 나갈게.”</div>
     <span class="where" id="where">📍 네온 거리</span>
     <span class="mood" id="moodTag">😐 평소</span>
@@ -274,6 +280,8 @@ nav button.on{color:var(--text)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="motion.js"></script>
+<script src="look.js"></script>
+<script src="alive.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -290,7 +298,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json")]);
+  const [c,f,m,st,it,kw,lk]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json")]);
+  DATA.look=lk;
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
@@ -375,19 +384,21 @@ const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
-  let R,scene,cam,md=null,cur=null,xsData=null,faces=[];
+  let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   function init(){
     R=new THREE.WebGLRenderer({antialias:true,alpha:true});
     R.setPixelRatio(Math.min(2,devicePixelRatio||1));R.outputEncoding=THREE.sRGBEncoding;
     scene=new THREE.Scene();
     cam=new THREE.PerspectiveCamera(30,1,.1,20);
-    scene.add(new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05));
+    const hemi=new THREE.HemisphereLight(0xfff1e6,0x2a2236,1.05);scene.add(hemi);
     const k=new THREE.DirectionalLight(0xffffff,.85);k.position.set(1.2,2,2.4);scene.add(k);
     const r=new THREE.DirectionalLight(0xb49cff,.7);r.position.set(-2,1.6,-1.5);scene.add(r);
-    $("#stage").prepend(R.domElement);
+    // 서아 모습(만화풍 명암·조명, data/look.json): 지후 모델과 ?look=old 는 예전 그대로
+    const jihu=qs.get("model")==="jihu",useLook=!jihu&&qs.get("look")!=="old",lookExtra=qs.get("look")!=="4a";
+    const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);
     // ?model=jihu : 카메라 구도 시험용으로 지후 모델을 띄움 (표정·몸짓 뼈 이름은 서아 기준이라 일부만 움직임)
-    new THREE.GLTFLoader().load(qs.get("model")==="jihu"?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>{
+    new THREE.GLTFLoader().load(jihu?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>dataReady.then(()=>{
       const inner=g.scene;
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.material.map)o.material.map.encoding=THREE.sRGBEncoding;
         if(o.morphTargetDictionary&&o.morphTargetDictionary.Fcl_ALL_Joy!==undefined)faces.push(o)}});
@@ -397,8 +408,11 @@ const Stage=(()=>{
       const root=new THREE.Group();root.add(inner);root.updateMatrixWorld(true);
       const bones={},rest={};
       root.traverse(o=>{if(o.isBone&&!bones[o.name]){bones[o.name]=o;const w=new THREE.Quaternion();o.getWorldQuaternion(w);rest[o.name]={local:[o.quaternion.x,o.quaternion.y,o.quaternion.z,o.quaternion.w],world:[w.x,w.y,w.z,w.w]}}});
+      if(useLook)lookInfo=Look.apply(DATA.look&&DATA.look.seoa,root,{hemi,key:k,back:r},{extra:lookExtra});
       md={root,bones,rest};scene.add(root);$("#ld").remove();
-    },undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
+      // 4-2A 살아 있게(머리카락·숨·시선): 서아만. ?alive=off 로 끔
+      if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive);aliveOn=true}
+    }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요."});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
   }
@@ -451,7 +465,7 @@ const Stage=(()=>{
     const cv=R.domElement,w=cv.clientWidth,h=cv.clientHeight;
     if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio()))){
       R.setSize(w,h,false);cam.aspect=w/h;tall=w/h<.8;cam.updateProjectionMatrix()}
-    camAt(now);
+    camAt(now);Look.tick(now,w,h);
     if(!md){R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
     if(cur){mt=t-cur.start;const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
@@ -460,6 +474,7 @@ const Stage=(()=>{
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(isXs&&xsData)xsApply(xsData,mt,XS[id]);
+    if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
     face(t);
     R.render(scene,cam);
   }
@@ -470,11 +485,37 @@ const Stage=(()=>{
     const eyesBusy=(tgt.Fcl_ALL_Joy||0)>.5||(tgt.Fcl_EYE_Joy||0)>.5;
     if(t>blinkAt&&blinkT<0){blinkT=t}
     if(blinkT>=0){const k=(t-blinkT)/.16;tgt.Fcl_EYE_Close=eyesBusy?0:Math.max(tgt.Fcl_EYE_Close||0,k<1?k:2-k);if(k>=2){blinkT=-1;blinkAt=t+2.2+Math.random()*3}}
-    if(t*1000<talkUntil){const m=.35+.3*Math.sin(t*19)*Math.sin(t*7.3);tgt.Fcl_MTH_A=Math.max(0,m)*(eyesBusy?.6:1)}
+    const tk=talkCfg(),vis=talkVis(tk);
+    mouth(t,tk,vis,tgt);
     const names=new Set([...Object.keys(faceW),...Object.keys(tgt)]);
-    for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
+    for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||vis.indexOf(n)>=0?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
   }
+  // 말할 때 입(4-2B): 입 모양(Fcl_MTH_A·I·U·E·O 중 모델에 있는 것)을 초당 rateHz 번 불규칙하게 바꾼다.
+  // 지금 감정 표정이 입을 쓰고 있으면(Fcl_ALL_…·Fcl_MTH_…) 그만큼 작게 섞어 표정이 깨지지 않게. 끝나면 closeSec 동안 부드럽게 다문다
+  const talkCfg=()=>(DATA.look&&DATA.look.seoa&&DATA.look.seoa.talk)||{};
+  let visList=null;const mw={};let mNext=0,mPick=null,mAmp=0;
+  function talkVis(tk){if(visList)return visList;if(!faces.length)return[];
+    visList=(tk.visemes||["Fcl_MTH_A","Fcl_MTH_I","Fcl_MTH_U","Fcl_MTH_E","Fcl_MTH_O"]).filter(n=>faces.some(f=>f.morphTargetDictionary[n]!==undefined));return visList}
+  let mLast=0;
+  function mouth(t,tk,vis,tgt){
+    const dt=mLast?Math.min(.1,t-mLast):1/60;mLast=t;
+    const on=t*1000<talkUntil;
+    if(on&&t>=mNext){const hz=tk.rateHz||[8,10],w=tk.weight||[.35,.8];
+      let n;do{n=vis[Math.floor(Math.random()*vis.length)]}while(vis.length>1&&n===mPick);
+      mPick=n;mAmp=w[0]+Math.random()*(w[1]-w[0]);
+      if(Math.random()<(tk.closeChance!=null?tk.closeChance:.15))mAmp*=.2;   // 가끔 거의 다문 순간(말 사이 쉼)
+      mNext=t+1/(hz[0]+Math.random()*(hz[1]-hz[0]))}
+    let busy=0;for(const k in tgt)if(/^Fcl_(ALL|MTH)_/.test(k)&&vis.indexOf(k)<0)busy=Math.max(busy,tgt[k]||0);
+    const damp=1-Math.min(1,busy)*(tk.emotionDamp!=null?tk.emotionDamp:.5);
+    const ks=1-Math.exp(-dt/(tk.blendSec||.04)),kc=1-Math.exp(-dt/(tk.closeSec||.12));
+    for(const n of vis){const goal=on&&n===mPick?mAmp*damp:0;const c=mw[n]||0;mw[n]=c+(goal-c)*(on?ks:kc);tgt[n]=Math.max(tgt[n]||0,mw[n])}
+  }
+  // 시선 피하기: 감정이 당황·수줍음(또는 수줍음 표정)이거나, 몸짓이 시선 피하기(m05)·등 돌리기(m10)
+  function avert(mid){const g=(DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive&&DATA.look.seoa.alive.gaze)||{};
+    if(mid&&(g.avertMotions||["m05","m10"]).indexOf(mid)>=0)return true;
+    if(faceKey&&(g.avertFaces||["shy"]).indexOf(faceKey)>=0)return true;
+    return !!(faceEmo&&new RegExp(g.avertEmotion||"당황|수줍|부끄").test(faceEmo))}
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
@@ -485,11 +526,13 @@ const Stage=(()=>{
     c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
     if(mid!==IDLE&&typeof View!=="undefined")View.motion(mid);
   }
-  // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접
-  function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
+  // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
+  function setFace(k,emo){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
   function talk(ms){talkUntil=performance.now()+ms}
+  // 대사 글자 수 → 입 움직이는 시간 (글자당 msPerChar, 최대 maxMs. 띄어쓰기는 세지 않음)
+  function talkFor(text){const tk=talkCfg(),n=String(text||"").replace(/\s+/g,"").length;if(n)talk(Math.min(tk.maxMs||4000,n*(tk.msPerChar||70)))}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n)};
+  return{init,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -522,7 +565,7 @@ const View=(()=>{
 let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
-function say(text,ms,sub){text=speechOnly(text);if(!text)return;if(!sub){Stage.talk(Math.min(4000,text.length*85));return}if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
+function say(text,ms,sub){text=speechOnly(text);if(!text)return;Stage.talkFor(text);if(!sub)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#rcap");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120))}
 // 선물 연출(한 번만): 애니메이션이 끝나면 go 를 바로 뗀다. 떼지 않으면 3D 칸을 앨범↔대화로 옮기거나(placeStage)
 // 숨겼다 다시 보일 때(display) 브라우저가 CSS 애니메이션을 처음부터 다시 재생한다 → 화면 이동 때마다 팝업이 다시 뜨던 원인
 let burstT;
@@ -531,13 +574,13 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
 ["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
-function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
+function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
 function setScene(i){clearTimeout(sceneBackT);if(!SCENES[i])i=0;S.scene=i;showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
 // 다시 보기 동안만 그때 장소를 보여 주고, 끝나면 대화의 원래 장소로
 function sceneForReplay(i,ms){clearTimeout(sceneBackT);showScene(i);sceneBackT=setTimeout(()=>showScene(S.scene),ms)}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
-function react(r,tag,sub){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t,0,sub);faceReset()}
+function react(r,tag,sub){Stage.play(r.m,{tag});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
 // ───────────────────────── 대화 ─────────────────────────
@@ -803,7 +846,7 @@ async function send(text){
   const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
   const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
-  react({m:mid||IDLE,f:v.face,t:v.line},learned?"✨ 선물로 배운 모습":"");
+  react({m:mid||IDLE,f:v.face,t:v.line,e:emo},learned?"✨ 선물로 배운 모습":"");
   firstSeen(mid);
   afterReply(v);
   // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
@@ -1049,7 +1092,12 @@ function start(){
   if(!S.story.location&&SCENES[S.scene||0])S.story.location=SCENES[S.scene||0].name;
   CH.forEach(c=>chatOf(c.id));
 }
-loadData().then(()=>{Stage.frameTo("normal",0);wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
+const dataReady=loadData();
+// 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
+function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
+  if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
+  d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();renderAlbum();setScene(S.scene||0);setTab("chat");pingLater()});
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 $("#giftBtn").onclick=()=>giftSheet();
 $("#backBtn").onclick=showList;
