@@ -36,7 +36,8 @@ const M=[
  ["m01","웃음","T0",0,"F","기쁨","pulse"],["m02","고개 끄덕이기","T0",0,"F","위로","nod"],["m03","놀라기","T0",0,"E","놀람","bounce"],["m04","한숨 쉬기","T0",0,"E","슬픔","sink"],["m05","시선 피하기","T0",0,"E","수줍음","lean"],["m06","허둥대기","T0",0,"D","수줍음","shake"],["m07","팔짱 끼기","T0",0,"E","분노","tilt"],
  ["m08","머리 쓰다듬기","T1",15,"D","위로","tilt"],["m09","툭 건네주기","T1",15,"D","장난","lean"],["m10","등 돌리기","T1",15,"D","슬픔","turn"],["m11","손 내밀기","T1",15,"C","위로","lean"],["m12","다가가기","T1",15,"C","설렘","zoom"],
  ["m13","손 흔들기","T1",20,"C","기쁨","sway",null,1],["m14","셀카 찍기","T1",20,"B","기쁨","flash","2026-11-01",1],["m15","다정하게 인사하기","T1",20,"B","설렘","nod",null,1],["m16","응원하기","T1",20,"B","위로","bounce",null,1],["m17","무심하게 공감하기","T1",20,"C","냉담","tilt",null,1],
- ["m18","감싸 안기","T2",40,"A","설렘","zoom"],["m19","자신감 있게 설득하기","T2",40,"A","자신감","lean"],["m20","도발하기","T2",45,"B","장난","shake","2026-11-08"],["m21","원투 펀치","T2",45,"A","분노","punch"],["m22","하트 챌린지","T2",50,"S","기쁨","heart"],["m23","바디웨이브 댄스","T2",50,"S","장난","dance"]
+ ["m18","감싸 안기","T2",40,"A","설렘","zoom"],["m19","자신감 있게 설득하기","T2",40,"A","자신감","lean"],["m20","도발하기","T2",45,"B","장난","shake","2026-11-08"],["m21","원투 펀치","T2",45,"A","분노","punch"],["m22","하트 챌린지","T2",50,"S","기쁨","heart"],["m23","바디웨이브 댄스","T2",50,"S","장난","dance"],
+ ["m24","부끄러워하기","T1",20,"B","수줍음","lean",null,1]
 ].map(a=>({id:a[0],name:a[1],tier:a[2],price:a[3],grade:a[4],emo:a[5],anim:a[6],released:a[7]||null,xs:!!a[8]}));
 const mBy=id=>M.find(m=>m.id===id);
 const mByName=n=>M.find(m=>m.name===n);
@@ -48,6 +49,38 @@ const J3D=(()=>{
   const ALIAS={Spine1:"Spine01",Spine2:"Spine02",Neck:"neck"};
   const norm=n=>{n=n.replace(/^mixamorig[:_]?/,"");return ALIAS[n]||n};
   let st=null,loading=null,cur=null,pending=null,want=null;const req={};
+  // ── XSTAGE 구매 모션 (FBX → JSON 변환본) ──
+  // JSON에는 뼈별 "기본 자세 대비 회전"(30fps)과 골반 이동이 들어 있어요. 캐릭터 기본 자세 차이를 맞춘 뒤 그대로 입혀요.
+  const XS={m24:"motions/xstage_embarrassing3.json"};
+  const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
+  const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
+  const xsReq={};
+  const xsLoad=id=>xsReq[id]||(xsReq[id]=fetch(XS[id]).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{d.al=new Map();return d}).catch(e=>{xsReq[id]=null;throw e}));
+  function xsAlign(md,d){
+    let a=d.al.get(md);if(a)return a;
+    const keep={};for(const n in md.bones){keep[n]=md.bones[n].quaternion.clone();const r=md.rest[n].local;md.bones[n].quaternion.set(r[0],r[1],r[2],r[3])}
+    const kp=md.root.position.clone();md.root.position.set(0,0,0);md.root.updateMatrixWorld(true);
+    const wp=n=>md.bones[n].getWorldPosition(new THREE.Vector3());
+    a={A:{},W:{},hipH:md.bones.Hips?wp("Hips").y:1};
+    for(const n of XORD){const b=md.bones[n],ch=md.bones[XCH[n]],dir=d.dir[n];if(!b)continue;
+      const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
+      a.A[n]=ch&&dir?new THREE.Quaternion().setFromUnitVectors(wp(XCH[n]).sub(wp(n)).normalize(),new THREE.Vector3(dir[0],dir[1],dir[2]).normalize()):new THREE.Quaternion()}
+    for(const n in keep)md.bones[n].quaternion.copy(keep[n]);md.root.position.copy(kp);md.root.updateMatrixWorld(true);
+    d.al.set(md,a);return a;
+  }
+  const xq=[0,0,0,0].map(()=>null);
+  function xsApply(md,d,mt){
+    if(!xq[0])for(let k=0;k<4;k++)xq[k]=new THREE.Quaternion();
+    const a=xsAlign(md,d),N=d.frames,f=Math.max(0,mt*d.fps),i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
+    const x=Math.max(0,Math.min(1,mt/.4,(d.duration-mt)/.5)),w=x*x*(3-2*x);
+    md.root.updateMatrixWorld(true);
+    for(const n of XORD){const b=md.bones[n],tr=d.tracks[n];if(!b||!tr||!a.A[n])continue;
+      const q=xq[0].set(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]).slerp(xq[1].set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]),u);
+      q.multiply(a.A[n]).multiply(a.W[n]);
+      b.parent.getWorldQuaternion(xq[2]);xq[3].copy(xq[2].invert()).multiply(q);
+      b.quaternion.slerp(xq[3],w);b.updateMatrixWorld(true)}
+    const h=d.hip;md.root.position.x+=(h[i*3]+(h[j*3]-h[i*3])*u)*a.hipH*w;md.root.position.y+=(h[i*3+1]+(h[j*3+1]-h[i*3+1])*u)*a.hipH*w;md.root.position.z+=(h[i*3+2]+(h[j*3+2]-h[i*3+2])*u)*a.hipH*w;
+  }
   const load=src=>new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s)});
   function init(){
     if(loading)return loading;
@@ -108,10 +141,12 @@ const J3D=(()=>{
     if(!c.isConnected||!st.model)return;
     const md=st.model;
     const t=now/1000;let id=null,mt=0;
-    if(cur){mt=t-cur.start;if(mt<RIG.M[cur.id].d)id=cur.id;else{cur=null;if(st.host){const cp=st.host.querySelector(".cap3");if(cp)cp.remove()}}}
-    const p=RIG.pose(md.rest,id,mt,t);
+    if(cur){mt=t-cur.start;const dur=XS[cur.id]?(cur.xs?cur.xs.duration:1e9):RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;if(st.host){const cp=st.host.querySelector(".cap3");if(cp)cp.remove()}}}
+    const xs=id&&XS[id]?cur.xs:null;
+    const p=RIG.pose(md.rest,XS[id]?null:id,mt,t);
     for(const b in p.local){const q=p.local[b];md.bones[b].quaternion.set(q[0],q[1],q[2],q[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
+    if(xs)xsApply(md,xs,mt);
     const w=c.parentNode.clientWidth,h=c.parentNode.clientHeight;
     if(w&&h&&(c.width!==Math.round(w*st.renderer.getPixelRatio())||c.height!==Math.round(h*st.renderer.getPixelRatio()))){st.renderer.setSize(w,h,false);st.cam.aspect=w/h;const tall=w/h<.8;st.cam.position.set(0,tall?1.15:1.3,tall?3.9:2.45);st.cam.lookAt(0,tall?1.0:1.2,0);st.cam.updateProjectionMatrix()}
     st.renderer.render(st.scene,st.cam);
@@ -129,6 +164,7 @@ const J3D=(()=>{
   function play(m){
     if(!st||!st.host||!st.host.isConnected||!st.model){pending=m;return}
     cur={id:m.id,start:performance.now()/1000};
+    if(XS[m.id]){const c0=cur;xsLoad(m.id).then(d=>{if(cur===c0){c0.xs=d;c0.start=performance.now()/1000}}).catch(()=>{if(cur===c0)cur=null})}
     const h=st.host;h.querySelectorAll(".cap3,.fx").forEach(x=>x.remove());
     h.insertAdjacentHTML("beforeend",`<span class="cap3">▶ ${m.name}</span>`+(FX[m.anim]?`<span class="fx">${FX[m.anim]}</span>`:""));
     if(m.anim==="flash"){setTimeout(()=>{h.classList.remove("flash");void h.offsetWidth;h.classList.add("flash")},1000)}
