@@ -371,3 +371,31 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent2);outlin
 .msg.u .say{color:#fff}
 /* 결정적 순간 배지는 화면에 표시하지 않음 */
 .kmo{display:none!important}
+
+/* ── 대화창: 상단 바 ── */
+.chatwrap>.modebar{order:-1;padding:2px 2px 8px;flex-wrap:nowrap}
+.chatwrap>.modebar .kbar{width:96px}
+
+/* ── 나눠 보기: 위 모션 / 아래 대화, 경계는 그라데이션으로 ── */
+.chatwrap>.stage3d{margin:0 -16px;border-radius:0;height:min(40vh,330px)}
+.chatwrap>.stage3d::before{content:"";position:absolute;left:0;right:0;top:0;height:16%;z-index:2;pointer-events:none;background:linear-gradient(to top,rgba(11,11,15,0),rgba(11,11,15,.6))}
+.chatwrap>.stage3d::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:34%;z-index:2;pointer-events:none;background:linear-gradient(to bottom,rgba(11,11,15,0) 0%,rgba(11,11,15,.7) 60%,var(--bg) 100%)}
+.chatwrap>.stage3d .tag3,.chatwrap>.stage3d .cap3{bottom:34px;z-index:3}
+.chatwrap>.stage3d .sw,.chatwrap>.stage3d .mtag,.chatwrap>.stage3d .fx{z-index:3}
+/* 대화 영역: 살짝만 겹치고, 글자는 또렷하게 */
+.chatwrap>.stage3d+.msgs{margin-top:-18px;padding-top:14px;position:relative;z-index:1;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 18px);mask-image:linear-gradient(to bottom,transparent 0,#000 18px)}
+.chatwrap .msgs{gap:10px}
+.chatwrap .msg{font-size:15px;line-height:1.6;max-width:84%}
+.chatwrap .msg.c{background:#22212c;border:1px solid rgba(255,255,255,.06)}
+.chatwrap .msg .narr{color:#b4b1c2;font-size:14px}
+.chatwrap .msg .say{color:#f4f2fa}
+.chatwrap .toolrow{padding-top:6px}
+.chatwrap .toolrow button{height:30px;font-size:12.5px}
+/* 상단 바를 모션 위에 겹쳐 올려 대화 공간 확보 */
+.chatwrap:has(>.stage3d){position:relative}
+.chatwrap:has(>.stage3d)>.modebar{position:absolute;top:8px;left:0;right:52px;z-index:4;padding:0 2px}
+.chatwrap:has(>.stage3d)>.modebar .mgrp small{color:#e6e1f0;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.chatwrap:has(>.stage3d)>.modebar .mseg{background:rgba(16,14,24,.6);border-color:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.chatwrap:has(>.stage3d)>.modebar .kbar{background:rgba(16,14,24,.6);border-color:rgba(255,255,255,.14)}
+.chatwrap>.stage3d{margin-top:-4px;height:min(38vh,310px)}
+.chatwrap>.stage3d .sw{top:8px}
