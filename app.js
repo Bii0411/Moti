@@ -18,7 +18,7 @@ const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.sc
 const BG3D={};
 function sil(c1,c2){const s=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs><rect width='260' height='300' fill='url(#g)'/><circle cx='130' cy='112' r='50' fill='rgba(0,0,0,.35)'/><path d='M40 300c6-70 46-108 90-108s84 38 90 108z' fill='rgba(0,0,0,.35)'/></svg>`;return "data:image/svg+xml,"+encodeURIComponent(s.replace(/'/g,'"'))}
 const CH=[
- {id:"doyun",name:"서도윤",img:IMG.doyun,hook:"비켜. 네가 하면 또 망가지잖아.",desc:"차갑게 밀어내면서, 위험한 순간엔 제일 먼저 당신 앞을 막아서는 남자.",tags:["나쁜놈","냉미남","혐관","츤데레"],chats:72.8,badge:"강한 맛",bg:"#2a0c14",route:"흑장미 대공가 루트",
+ {id:"doyun",name:"서도윤",img:IMG.doyun,hook:"비켜. 네가 하면 또 망가지잖아.",desc:"차갑게 밀어내면서, 위험한 순간엔 제일 먼저 당신 앞을 막아서는 남자.",tags:["나쁜놈","냉미남","혐관","츤데레"],chats:72.8,badge:"19+",bg:"#2a0c14",route:"흑장미 대공가 루트",
   intro:"*서류에서 눈을 떼지 않던 도윤이 펜을 내려놓았다. 낮게 가라앉은 시선이 천천히 당신에게 닿는다.*\n…또 왔군. 이번엔 쉽게 돌려보내지 않을 거다.",lines:["시끄럽군. …그래서, 다친 데는?","내가 걱정한 게 아니라, 네가 귀찮게 굴까 봐 그런 거다.","그 표정 하지 마. 신경 쓰이니까.","따라오지 마. …아니, 내 옆에서 떨어지지 마.","네가 웃으면 회의가 길어진다. 그러니까 그만 웃어.","오늘 밤은 늦었다. 데려다주지."]},
  {id:"jihu",name:"한지후",img:IMG.jihu,hook:"10년 전 그 편지, 아직 안 읽었지?",desc:"첫사랑, 기억을 잃은 연인, 호위기사. 어떤 이야기에서도 끝까지 당신 편.",tags:["첫사랑","다정남","순애","재회"],chats:41.2,badge:"3D",bg:"#2e1a0c",route:"잊힌 편지 루트",glow:"#4a3222",
   intro:"*창가에 기대 있던 지후가 고개를 돌렸다. 잠깐 멍하던 얼굴에 천천히 웃음이 번진다.*\n아, 왔구나. 기다리고 있었어. 꽤 오래.",lines:["괜찮아, 천천히 말해 줘. 나 여기 있을게.","이상하지. 처음 보는 것 같은데 익숙해.","오늘 하루는 어땠어? 하나도 빠짐없이 듣고 싶어.","네가 웃으니까, 뭔가 생각날 것 같아.","내가 지킬게. 기억이 안 나도, 그건 알 것 같아.","그 편지… 같이 읽어 줄래?"]},
