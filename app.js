@@ -186,6 +186,12 @@ function msgParts(t){
 }
 function fmtMsg(t){const ps=msgParts(t);if(ps.length===1&&ps[0].k==="d")return esc(ps[0].x);
   return ps.map(p=>`<p class="${p.k==="n"?"narr":"say"}">${esc(p.x)}</p>`).join("")}
+// 대사는 한 줄씩 따로 말풍선, 나레이션은 말풍선 밖 지문으로
+function msgHtml(m){
+  if(m.r==="sys")return `<div class="msg sys">${esc(m.t)}</div>`;
+  const act=m.a?`<div class="mact ${m.r}">▶ ${esc(m.a)}</div>`:"";
+  return act+msgParts(m.t).map(p=>p.k==="n"?`<div class="mnarr ${m.r}">${esc(p.x)}</div>`:`<div class="msg ${m.r}">${esc(p.x)}</div>`).join("");
+}
 function plainMsg(t){const ps=msgParts(t);const d=ps.filter(p=>p.k==="d");return (d.length?d:ps).map(p=>p.x).join(" ")}
 function speechOnly(t){return msgParts(t).filter(p=>p.k==="d").map(p=>p.x).join(" ")}
 const chatOnly=cid=>has3D(cid)&&S.vmode==="chat";
@@ -405,7 +411,7 @@ function renderChat(){
   S.read[c.id]=msgs.length;if(!S.last[c.id])S.last[c.id]=Date.now()-FIRST_MIN[c.id]*60000;save();renderNav();
   const co=chatOnly(c.id),csc=sceneOf(c.id);
   $("#view").innerHTML=`<div class="chatwrap ${co?"conly":""}" ${co&&csc?`style="--scn:url(${csc.img})"`:""}><div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp"><span class="kbar" aria-label="게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>${co?`<div class="cohd"><b>${c.name}</b><span></span><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`:has3D(c.id)?stage3dHtml(c,lv,b):`<div class="stage"><div class="figure" id="fig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div class="info"><b>${c.name}</b><div class="gauge" aria-label="두근 게이지 ${lv}/5">${"♥".repeat(lv)}${"♡".repeat(5-lv)}</div><small>인연 ${lv} · ${BONDL[lv]}</small><span class="mood">분위기: ${MOODS[b.mood]}</span></div><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`}
-  <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):`<div class="msg ${m.r}">${m.a?`<span class="act">▶ ${m.a}</span>`:""}${m.r==="sys"?esc(m.t):fmtMsg(m.t)}</div>`).join("")}</div>
+  <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):msgHtml(m)).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
   <div class="composer"><textarea id="ci" rows="1" name="moti-msg-${Date.now()}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="send" placeholder="${c.name}에게 말 걸기" aria-label="메시지"></textarea><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
   const m=$("#msgs");m.scrollTop=m.scrollHeight;if(has3D(c.id))J3D.mount($("#s3d"),c.id);
