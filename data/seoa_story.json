@@ -1,0 +1,48 @@
+{
+  "_원본": "서버 저장소 ddododo-lang/seoa-backand (feat/motion-chat-v2) yoon_seoa_prompt.md 의 단계 이름, 「장소 목록」, 「몸짓 해금 지도」, 단계 상승 규칙을 그대로 옮김",
+  "stageNames": ["신경전", "단골", "끌림", "고백 직전", "엇갈림", "연인"],
+  "stageUpMessage": "관계가 변했어요 · {name}",
+  "_affectionAt": "서버 v2: 다음 단계로 가는 호감도 기준 (engine._next_stage). 마이 화면 게이지에 씀",
+  "affectionAt": [0, 20, 40, 60, 75, 100],
+  "_countAt": "서버 v1·서버 없음: 대화 횟수로 단계를 올리는 기준 (기존 5단계 0·4·10·18·30을 6단계로 나눔)",
+  "countAt": [0, 4, 9, 15, 22, 30],
+  "_locations": "location 값은 서버와 1:1. temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체 (원래 파일명: bg_seoa_bar.jpg, bg_seoa_room.jpg)",
+  "locations": [
+    { "name": "바 '라스트 오더' 1층", "img": "bg_seoa_alley.jpg", "temp": true },
+    { "name": "바 '라스트 오더' 2층", "img": "bg_seoa_roof.jpg", "temp": true },
+    { "name": "네온 골목", "img": "bg_seoa_street.jpg" },
+    { "name": "비 내리는 골목", "img": "bg_seoa_rain.jpg" },
+    { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg" }
+  ],
+  "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
+  "ban": ["m14", "m16", "m22"],
+  "unlock": {
+    "stage": {
+      "1": { "motions": ["m02", "m03", "m04", "m07", "m17", "m20", "m12", "m11", "m01", "c02"], "text": "" },
+      "2": { "motions": ["m09", "c03"], "text": "서아가 처음으로 잔을 건네줬어요" },
+      "3": { "motions": ["m05", "m06", "c01", "c04"], "text": "서아가 처음으로 진심을 내비쳤어요" },
+      "4": { "motions": ["c05"], "text": "서아가 처음으로 이마를 맞댔어요" },
+      "5": { "motions": ["m10", "m13"], "text": "서아가 처음으로 등을 돌렸어요" },
+      "6": { "motions": ["m15"], "text": "서아가 처음으로 당신을 맞아 줬어요" }
+    },
+    "flag": {
+      "protect": { "motions": ["m21"], "text": "서아가 처음으로 당신 앞에서 싸웠어요" },
+      "tease": { "motions": ["m19"], "text": "서아가 처음으로 지지 않으려 했어요", "minStage": 2 },
+      "comfort": { "motions": ["m08"], "text": "서아가 처음으로 당신을 쓰다듬었어요" },
+      "pursue": { "motions": ["m18"], "text": "서아가 처음으로 안겼어요" }
+    },
+    "event": {
+      "ROOFTOP": { "motions": ["m23"], "text": "서아가 처음으로 춤을 보여 줬어요" }
+    }
+  },
+  "_hints": "추억 앨범 「처음 본 모습」에서 아직 안 열린 칸에 보여 줄 힌트. 원고 필요 (비어 있으면 ？ 만 보임)",
+  "hints": {
+    "m09": "", "c03": "",
+    "m05": "", "m06": "", "c01": "", "c04": "",
+    "c05": "",
+    "m10": "", "m13": "",
+    "m15": "",
+    "m21": "", "m19": "", "m08": "", "m18": "",
+    "m23": ""
+  }
+}

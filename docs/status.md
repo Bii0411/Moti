@@ -27,25 +27,43 @@
 - **시연 설정:** 서아 상태 강제, 생일, 장소(2곳), 💎 충전, 초기화
 - **XSTAGE 모션:** `m24 부끄러워하기`만 XSTAGE 데이터(`motions/xstage_embarrassing3.json`)로 재생, 나머지는 `motion.js`의 코드 몸짓
 
+## `step/2-v2-newapp` 브랜치 (2단계, main 병합 전)
+
+보고서: [reports/2-대화v2-새앱.md](reports/2-대화v2-새앱.md)
+
+- **서버 연결:** `data/config.json` `serverVersion`(기본 1, `?server=2`로 덮어쓰기), `apiUrl`(`?api=`로 덮어쓰기). 응답은 예전(`reply`)·v2(`action`·`dialogue`…) 두 형식 모두 처리
+- **매 답장 몸짓:** `motion_id` → 감정에 맞는 해금된 몸짓 → 대기 몸짓(m25). 같은 몸짓 연속 금지. 서아 전용 c01~c05, m25 추가(`motion.js`)
+- **표정:** 감정→표정 `data/emotion_face.json` (평온·도발·진심·질투·당황 추가)
+- **관계:** 6단계(신경전·단골·끌림·고백 직전·엇갈림·연인). 서버 v2는 `/judge` 판정, v1·서버 없음은 대화 횟수(0·4·9·15·22·30)
+- **해금:** `data/seoa_story.json` 해금 지도대로. 전신 구도로 처음 재생 + 토스트 + 기록
+- **추억 앨범:** 「처음 본 모습」(15칸) / 「선물 반응」(16칸) 두 칸
+- **인트로:** 서아 방에 처음 들어갈 때만, 서버 OPENING 원고(`data/seoa_intro.json`)를 문단별로 + m07 → m01 → m11
+- **장소:** 5곳(바 1층·바 2층·네온 골목·비 내리는 골목·바 옥상), 서버 `location`으로 전환
+- **이미지 필요:** 바 '라스트 오더' 1층(`bg_seoa_bar.jpg`), 2층(`bg_seoa_room.jpg`) — 지금은 `bg_seoa_alley.jpg`, `bg_seoa_roof.jpg`로 임시 대체
+- **원고 필요:** 앨범 「처음 본 모습」 안 열린 칸 힌트(`data/seoa_story.json` `hints`, 15개 모두 빈칸)
+
 ## 열려 있는 브랜치·PR
 
 | 저장소 | 브랜치 | PR | 상태 |
 | --- | --- | --- | --- |
 | Bii0411/Moti | `feat/motion-chat-v2` | [Bii0411/Moti#1](https://github.com/Bii0411/Moti/pull/1) 서아 대화 v2 | 열림. main과 `app.js`·`style.css` 충돌. 자세한 차이는 [v2-diff.md](v2-diff.md) |
+| Bii0411/Moti | `step/2-v2-newapp` | 없음 | 2단계 작업. 확인 후 main 병합 예정 |
 | ddododo-lang/seoa-backand | `feat/motion-chat-v2` | [ddododo-lang/seoa-backand#1](https://github.com/ddododo-lang/seoa-backand/pull/1) 상태 없는 /chat·/judge와 프롬프트 v2 | 열림 |
 
 ## 서버 배포 상태 (확인 가능한 범위)
 
 - 주소: `https://seoa-backand.onrender.com` — 응답함.
 - 공개된 API 목록(`/openapi.json`): `/chat`, `/sessions`, `/sessions/{sid}`, `/sessions/{sid}/chat`. **`/judge` 가 없다** → v2 서버는 아직 배포되지 않은 것으로 보인다.
-- 주의: v2 서버가 배포되면 `/chat` 응답이 `reply` 대신 `dialogue`로 바뀐다. 지금 `index.html`은 `reply`가 없으면 서버 응답을 버리고 예시 대사로 대답하므로, **서버 v2 배포 전에 앱 쪽 연결을 먼저 바꿔야 한다.**
+- 주의: v2 서버가 배포되면 `/chat` 응답이 `reply` 대신 `dialogue`로 바뀐다. main의 `index.html`은 `reply`가 없으면 서버 응답을 버리고 예시 대사로 대답하므로, **서버 v2 배포 전에 `step/2-v2-newapp`을 main에 병합해야 한다** (이 브랜치는 두 형식을 모두 읽는다). 배포 뒤 `data/config.json`의 `serverVersion`을 2로.
+- 2026-11-23 확인: 배포 서버 첫 요청이 25초 안에 답하지 않음(Render 깨어나는 시간). 두 번째부터 정상.
 - 앱: GitHub Pages `https://bii0411.github.io/Moti/` 응답 200.
 
 ## 남은 일
 
-- v2 기능을 새 `index.html` 구조에 맞게 다시 만들기 ([v2-diff.md](v2-diff.md)의 "다시 만들 것")
-- 코드 안 콘텐츠(대사·선물 반응·가격·관계 단계 이름 등)를 JSON으로 분리
-- 서아 장소 5곳 배경 중 바 1층·2층 전용 이미지 제작 (지금은 임시 이미지)
+- `step/2-v2-newapp` 확인 후 main 병합, 서버 v2 배포, `serverVersion` 2로
+- 아이폰 사파리 확인: 해금 순간 카메라, 새 표정 5개, 앨범 말줄임
+- **이미지 필요:** 바 '라스트 오더' 1층·2층 전용 배경 (지금은 임시 이미지)
+- **원고 필요:** 앨범 「처음 본 모습」 힌트 15개
+- 코드 안 콘텐츠(선물 반응·가격·예시 대사·다른 캐릭터 대사 등)를 JSON으로 분리 (이번엔 관계·해금·장소·인트로·표정·몸짓만 분리)
 - 외부 자산 출처 확인 ([CREDITS.md](CREDITS.md)의 "확인 필요")
-- `.gitignore` 없음 → `.env.local` 등 비밀 파일 제외 규칙 추가 필요
 - 기획 결정 전: 대화 화면 오버레이, 관계 진행 연출, 퀘스트와 힌트 ([plan.md](plan.md))
