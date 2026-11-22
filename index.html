@@ -420,11 +420,11 @@ const Stage=(()=>{
 let toastT;
 function toast(h,ms=2600){const t=$("#toast");t.innerHTML=h;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("on"),ms)}
 let bubT;
-function say(text,ms){text=speechOnly(text);if(!text)return;if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
+function say(text,ms,sub){text=speechOnly(text);if(!text)return;if(!sub){Stage.talk(Math.min(4000,text.length*85));return}if(text.length>70)text=text.slice(0,68).replace(/\s+\S*$/,"")+"…";const b=$("#bubble");b.textContent=text;b.classList.add("on");clearTimeout(bubT);bubT=setTimeout(()=>b.classList.remove("on"),ms||Math.max(3500,text.length*120));Stage.talk(Math.min(4000,text.length*85))}
 function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}
 function setScene(i){S.scene=i;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
-function react(r,tag){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t);faceReset()}
+function react(r,tag,sub){Stage.play(r.m,{tag});Stage.setFace(r.f);say(r.t,0,sub);faceReset()}
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
 // ───────────────────────── 대화 ─────────────────────────
@@ -599,7 +599,7 @@ function renderAlbum(fresh){
     <div class="slots">${SORDER.map(s=>{const k=g.id+":"+s,a=S.album[k];
       return a?`<button class="slot got ${fresh===k?"fresh":""}" data-k="${k}"><span class="e">${STATES[s].e}</span><span class="s">${STATES[s].ko}</span><span class="d">${MNAME[g.r[s].m]}</span><span class="d">${fmtD(a.at)}</span></button>`
               :`<button class="slot lock" data-lock="${k}"><span class="e">${STATES[s].e}</span><span class="s">？</span><span class="d">${STATES[s].ko}일 때</span></button>`}).join("")}</div></div>`).join("")}`;
-  $("#album").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const[gid,s]=b.dataset.k.split(":"),g=gBy(gid),a=S.album[b.dataset.k];setScene(a.scene||0);react(g.r[s],"📔 추억 다시 보기")});
+  $("#album").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const[gid,s]=b.dataset.k.split(":"),g=gBy(gid),a=S.album[b.dataset.k];setScene(a.scene||0);react(g.r[s],"📔 추억 다시 보기",true)});
   $("#album").querySelectorAll("[data-lock]").forEach(b=>b.onclick=()=>{const[gid,s]=b.dataset.lock.split(":"),g=gBy(gid);
     toast(`${STATES[s].e} 서아가 <b>${STATES[s].ko}</b>일 때 ${g.e} ${g.name}을(를) 주면…?<br><small>대화에서 선물해 보세요</small>`,3000);setTimeout(()=>{setTab("chat");openRoom("seoa");giftSheet(gid)},900)});
 }
@@ -624,7 +624,7 @@ function demoSheet(){
 const BOND=[{n:"낯선 손님",at:0},{n:"단골",at:4},{n:"작전 파트너",at:10},{n:"비밀을 아는 사람",at:18},{n:"유일한 사람",at:30}];
 const bondLv=()=>{let i=0;BOND.forEach((b,k)=>{if((S.bond||0)>=b.at)i=k});return i};
 function bondUp(){const before=bondLv();S.bond=(S.bond||0)+1;const after=bondLv();renderBond();
-  if(after>before){setTimeout(()=>{toast(`💗 관계가 깊어졌어요<br><b>${after+1}단계 · ${BOND[after].n}</b><br><small>선물이 아니라 대화로만 올라가요</small>`,3600);Stage.play("m12");Stage.setFace("shy");say("…이제 너한텐 숨길 게 별로 없네.");faceReset()},2600)}}
+  if(after>before){setTimeout(()=>{toast(`💗 관계가 깊어졌어요<br><b>${after+1}단계 · ${BOND[after].n}</b><br><small>선물이 아니라 대화로만 올라가요</small>`,3600);Stage.play("m12");Stage.setFace("shy");addMsg("c","…이제 너한텐 숨길 게 별로 없네.",{tag:"💗 관계 단계 상승"},"seoa");say("…이제 너한텐 숨길 게 별로 없네.");faceReset()},2600)}}
 function renderBond(){const i=bondLv(),nx=BOND[i+1];$("#bondChip").textContent=`💗 ${i+1}단계 · ${BOND[i].n}`;return{i,nx}}
 
 // ───────────────────────── 홈 ─────────────────────────
