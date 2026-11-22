@@ -395,7 +395,7 @@ function choiceHtml(c,m,i){
 // ── LLM 서버 주소 ─────────────────────────────────────────────
 // 내 컴퓨터에서 서버를 켰으면 http://localhost:8000 그대로 두면 돼요.
 // 서버를 인터넷에 올리면 그 주소로 바꿔요. 서버가 꺼져 있으면 미리 써 둔 대사로 대답해요.
-const API_URL="http://localhost:8000";
+const API_URL="https://seoa-backand.onrender.com";
 async function askAI(c,t,hist){
   const sc=sceneOf(c.id);const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),20000);
   try{
