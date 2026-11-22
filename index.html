@@ -332,6 +332,7 @@ nav button.on{color:var(--text)}
 <script src="motion.js"></script>
 <script src="look.js"></script>
 <script src="alive.js"></script>
+<script src="film.js"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -1431,6 +1432,7 @@ const dataReady=loadData();
 // 온보딩(7-A): 처음 실행일 때만(저장값 onboarded 가 없을 때). 데이터를 기다리지 않고 바로 덮어서 홈이 먼저 비치지 않게. ?skipintro=1 이면 건너뜀(개발용)
 const SKIP_INTRO=qs.get("skipintro")==="1";
 if(!S.onboarded&&!SKIP_INTRO)Onboard.open();
+if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film.js)
 // 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
