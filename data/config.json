@@ -1,5 +1,9 @@
 {
   "_설명": "serverVersion: 1 = 지금 배포 서버(예전 /chat, reply 응답), 2 = v2 서버(/chat·/judge, action·dialogue 응답). 주소 뒤 ?server=2 로 덮어쓸 수 있다. apiUrl 은 ?api=http://localhost:8000 으로 덮어쓸 수 있다.",
   "serverVersion": 1,
-  "apiUrl": "https://seoa-backand.onrender.com"
+  "apiUrl": "https://seoa-backand.onrender.com",
+  "_wake": "앱을 열 때 서버를 미리 깨우는 가벼운 요청(응답은 기다리지 않음). 서버가 깨어난 게 확인되기 전 첫 답장은 firstReplyWaitMs 까지 기다리며 waitText 를 보여 준다. 넘기면 예시 대사로 넘어간다.",
+  "wakePath": "/openapi.json",
+  "firstReplyWaitMs": 45000,
+  "waitText": "서아가 바에 들어오는 중…"
 }
