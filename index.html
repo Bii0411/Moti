@@ -275,14 +275,14 @@ const MNAME={...BASE,...SIGN};  // 나머지 몸짓 이름은 data/motions.json 
 const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 없을 때 (data/motions.json idle)
 
 // ── 데이터 파일 (data/*.json) ──
-const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},emotionMotion:{},faceEmotion:{}}};
+const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json")]);
-  if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;DATA.story=st;DATA.intro=it;
+  const [c,f,m,st,it,kw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json")]);
+  if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  if(!c||!f||!m||!st||!it)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+  if(!c||!f||!m||!st||!it||!kw)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 서버 버전: data/config.json → 주소 ?server=2 로 덮어쓰기. 서버 주소: ?api=http://localhost:8000
 const qs=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams()}})();
@@ -463,11 +463,11 @@ const Stage=(()=>{
     for(const n of names){const cw=faceW[n]||0,tw=tgt[n]||0,nw=n==="Fcl_EYE_Close"||n==="Fcl_MTH_A"?tw:cw+(tw-cw)*.12;faceW[n]=nw;
       for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=nw}}
   }
-  let lastMid=null;
+  let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
     cur={id:mid,start:performance.now()/1000};
-    if(mid!==IDLE)lastMid=mid;
+    if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
     if(mid===IDLE&&!o.tag){c.classList.remove("on");return}
     c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
@@ -477,7 +477,7 @@ const Stage=(()=>{
   function setFace(k){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})}}
   function talk(ms){talkUntil=performance.now()+ms}
   const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
-  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid};
+  return{init,play,setFace,talk,frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n)};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -492,7 +492,7 @@ const View=(()=>{
   function setBig(on,instant){
     const st=$("#stage"),ms=instant?0:(cfg().growMs||350);if(on===big)return;
     st.style.transition=`background-image .6s,height ${ms}ms ease`;
-    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=Math.round(window.innerHeight*(cfg().bigRatio||.64))+"px"}
+    if(on){h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.height=Math.round(window.innerHeight*(cfg().bigRatio||.54))+"px"}
     else{st.style.height=h0+"px";setTimeout(()=>{if(!big)st.style.height=""},ms+30)}
     big=on;keepBottom(ms+80);
   }
@@ -656,13 +656,23 @@ function unlockNext(){
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
-function motionList(){const last=Stage.last();return unlockedIds().filter(id=>id!==last&&canPlay(id)).map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
-// 이번 답장 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 없으면 null(대기 몸짓 유지). 직전과 같은 몸짓은 안 씀
-function pickMotion(want,emo){
-  const last=Stage.last(),ok=unlockedIds().filter(id=>id!==last&&canPlay(id));
-  if(want&&ok.includes(want))return want;
-  for(const tg of (DATA.motions.emotionMotion||{})[emo]||[]){const c=ok.filter(id=>mEmo(id)===tg);if(c.length)return c[Math.floor(Math.random()*c.length)]}
-  return null;
+// 반복 방지: 최근 recentLimit 번 안에 나온 몸짓은 고르지 않음 (data/motion_keywords.json)
+const recentMotions=()=>Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3);
+const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id))};
+function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
+// 답장의 지문: v2 action + 예전 형식의 *…* 부분
+const actionText=v=>[v.action||"",...msgParts(v.line).filter(p=>p.k==="n").map(p=>p.x)].join(" / ");
+// 이번 답장 몸짓: ① 서버가 준 몸짓(해금된 것만) → ② 지문의 행동 단어(먼저 나온 것) → ③ 없으면 null(대기 동작 유지)
+const MOTION_LOG=[];  // 확인용: 턴마다 지문과 고른 몸짓
+function pickMotion(want,act){
+  const ok=pickable();let r={mid:null,by:"없음"};
+  if(want&&ok.includes(want))r={mid:want,by:"서버"};
+  else{let at=Infinity;
+    for(const k of DATA.keywords.keywords||[]){if(!ok.includes(k.id))continue;
+      let t=act;for(const n of k.not||[])t=t.split(n).join(" ".repeat(n.length));  // not 에 든 말은 지움 (예: 코웃음 속 웃)
+      for(const w of k.words){const i=t.indexOf(w);if(i>=0&&i<at){at=i;r={mid:k.id,by:"단어",word:w}}}}}
+  MOTION_LOG.push({act,want,...r,recent:recentMotions()});
+  return r.mid;
 }
 async function askSeoa(text){
   const sm=serverVer()===2?null:await getSample();  // 서버 v2 시험 중엔 Claude 미리보기를 건너뜀
@@ -733,9 +743,9 @@ async function send(text){
   const v=await askSeoa(text);busy=false;waiting=false;
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
-  // 모든 답장에서 몸짓: 받은 몸짓 → 감정에 맞는 해금된 몸짓 → 대기 몸짓 유지
+  // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
-  const mid=pickMotion(v.motion,emo);
+  const mid=pickMotion(v.motion,actionText(v));
   const learned=!!mid&&S.learned.includes(mid);
   const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
   const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};

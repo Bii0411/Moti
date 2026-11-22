@@ -15,5 +15,5 @@
     "moveMs": 350
   },
   "_stage": "대화 화면에서 몸짓이 재생될 때 3D 칸을 화면 높이의 bigRatio 까지 growMs 동안 키우고, 몸짓이 끝나고 backDelayMs 뒤 되돌린다.",
-  "stage": { "bigRatio": 0.64, "growMs": 350, "backDelayMs": 1000 }
+  "stage": { "bigRatio": 0.54, "growMs": 350, "backDelayMs": 1000 }
 }
