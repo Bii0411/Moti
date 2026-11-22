@@ -1,12 +1,13 @@
 // moti 앱 기능 (캐릭터·대화·모션 피팅룸·지갑 등)
 const IMG={doyun:"card_doyun.jpg",jihu:"card_jihu.jpg",ijun:"card_ijun.jpg",haram:"card_haram.jpg",seoa:"card_seoa.jpg"};
 // 3D 모델: 지후(후보 2)·서아만. 나머지는 사진만 (3D 준비 중)
-const MODEL={jihu:"jihu.glb",seoa:"seoa_vroid.glb"};
+const MODEL={jihu:"jihu.glb",seoa:"seoa.glb"};
 // 3D 칸 뒤 장소 그림: 캐릭터마다 3곳. 대화에 장소 말이 나오면(kw) 배경이 바뀌어요
 const SCENES={
  seoa:[
-  {name:"네온 거리",img:"bg_seoa_street.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니|비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
-  {name:"도시 옥상",img:"bg_seoa_rooftop.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
+  {name:"네온 골목",img:"bg_seoa_alley.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니/,say:"이 골목은 카메라 사각지대야. 여기선 마음 놓고 걸어도 돼."},
+  {name:"비 내리는 골목",img:"bg_seoa_rain.jpg",kw:/비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
+  {name:"도시 옥상",img:"bg_seoa_roof.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
  ],
  jihu:[
   {name:"노을 진 교실",img:"bg_jihu_class.jpg",kw:/교실|수업|책상|칠판|방과\s?후|노을|해 질|오후/,say:"여기, 네 자리였잖아. 노을 질 때면 네가 늘 창밖을 봤어."},
@@ -14,7 +15,7 @@ const SCENES={
   {name:"학교 복도",img:"bg_jihu_hall.jpg",kw:/복도|사물함|나가자|나가서|걸어가|교문|하교|계단|산책/,say:"복도 끝까지 같이 걸을래? 예전에 매일 이렇게 걸었는데."}
  ]
 };
-const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.scene={});return L[m[cid]||0]||L[0]};
+const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.scene={});return L[m[cid]||0]};
 const BG3D={};
 function sil(c1,c2){const s=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs><rect width='260' height='300' fill='url(#g)'/><circle cx='130' cy='112' r='50' fill='rgba(0,0,0,.35)'/><path d='M40 300c6-70 46-108 90-108s84 38 90 108z' fill='rgba(0,0,0,.35)'/></svg>`;return "data:image/svg+xml,"+encodeURIComponent(s.replace(/'/g,'"'))}
 const CH=[
@@ -171,7 +172,7 @@ const J3D=(()=>{
   return{mount,play,init,_st:()=>st,busy:()=>!!cur||!!pending};
 })();
 const has3D=cid=>!!MODEL[cid];
-function stage3dHtml(c,lv,b,intro){const sc=sceneOf(c.id),from=!intro&&U.sceneFrom&&U.sceneFrom.cid===c.id?U.sceneFrom.img:null;if(!intro)U.sceneFrom=null;return `<div class="stage3d" id="${intro===3?"r3d":intro===2?"f3d":intro?"i3d":"s3d"}" style="background:${sc?`#140a24 url(${from||sc.img}) center 42%/cover no-repeat`:`radial-gradient(85% 75% at 50% 32%,${c.glow||"#4a3222"},#1a1520 72%)`}">${from?`<div class="scnfade" style="background-image:url(${sc.img})"></div>`:""}${sc?`<span class="where">📍 ${sc.name}</span>`:""}<div class="ld">${c.name}: “잠깐, 준비하고 나갈게.”</div>${intro?"":`<button class="chip sw" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button>`}<span class="tag3">3D</span></div>`}
+function stage3dHtml(c,lv,b,intro){const sc=sceneOf(c.id),from=!intro&&U.sceneFrom&&U.sceneFrom.cid===c.id?U.sceneFrom.img:null;if(!intro)U.sceneFrom=null;return `<div class="stage3d" id="${intro===3?"r3d":intro===2?"f3d":intro?"i3d":"s3d"}" style="background:${sc?`#140a24 url(${from||sc.img}) center 42%/cover no-repeat`:`radial-gradient(85% 75% at 50% 32%,${c.glow||"#4a3222"},#1a1520 72%)`}">${from?`<div class="scnfade" style="background-image:url(${sc.img})"></div>`:""}<div class="ld">${c.name}: “잠깐, 준비하고 나갈게.”</div>${intro?"":`<button class="chip sw" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button>`}<span class="tag3">3D</span></div>`}
 // ── 대사 / 나레이션 구분 ─────────────────────────────────────
 // *별표*로 감싼 부분 = 나레이션(행동·묘사), 나머지 = 캐릭터가 직접 하는 말.
 // 별표가 없고 따옴표(“ ” 또는 " ")가 있으면 따옴표 안 = 대사, 밖 = 나레이션으로 처리.
@@ -404,8 +405,7 @@ function renderChat(){
   const msgs=S.chats[c.id]||(S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}]);
   S.read[c.id]=msgs.length;if(!S.last[c.id])S.last[c.id]=Date.now()-FIRST_MIN[c.id]*60000;save();renderNav();
   const co=chatOnly(c.id),csc=sceneOf(c.id);
-  $("#view").innerHTML=`<div class="chatwrap ${co?"conly":""}" ${co&&csc?`style="--scn:url(${csc.img})"`:""}>${co?`<div class="cohd"><b>${c.name}</b><span>📍 ${csc?csc.name:""}</span><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`:has3D(c.id)?stage3dHtml(c,lv,b):`<div class="stage"><div class="figure" id="fig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div class="info"><b>${c.name}</b><div class="gauge" aria-label="두근 게이지 ${lv}/5">${"♥".repeat(lv)}${"♡".repeat(5-lv)}</div><small>인연 ${lv} · ${BONDL[lv]}</small><span class="mood">분위기: ${MOODS[b.mood]}</span></div><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`}
-  <div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp"><small>결정적 순간</small><span class="kbar" aria-label="결정적 순간 게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>
+  $("#view").innerHTML=`<div class="chatwrap ${co?"conly":""}" ${co&&csc?`style="--scn:url(${csc.img})"`:""}><div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp"><span class="kbar" aria-label="게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>${co?`<div class="cohd"><b>${c.name}</b><span></span><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`:has3D(c.id)?stage3dHtml(c,lv,b):`<div class="stage"><div class="figure" id="fig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div class="info"><b>${c.name}</b><div class="gauge" aria-label="두근 게이지 ${lv}/5">${"♥".repeat(lv)}${"♡".repeat(5-lv)}</div><small>인연 ${lv} · ${BONDL[lv]}</small><span class="mood">분위기: ${MOODS[b.mood]}</span></div><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`}
   <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):`<div class="msg ${m.r}">${m.a?`<span class="act">▶ ${m.a}</span>`:""}${m.r==="sys"?esc(m.t):fmtMsg(m.t)}</div>`).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
   <div class="composer"><textarea id="ci" rows="1" name="moti-msg-${Date.now()}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="send" placeholder="${c.name}에게 말 걸기" aria-label="메시지"></textarea><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
