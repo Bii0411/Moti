@@ -39,9 +39,59 @@
 .obgear svg{width:20px;height:20px}
 .obgear:active,.obgear.on{opacity:1;color:var(--text)}
 
-/* 입장권 임시(7-A) */
-.obtemp{align-items:center;justify-content:center;gap:18px;padding:24px}
-.obtemp .obguide{font-size:18px;font-weight:800}
+/* 입장권(7-B): 위쪽은 3D(대화방의 3D 그림판을 빌려 옴), 아래쪽은 밝은 입장권 카드가 3D 앞에 겹침 */
+.obticket{display:none}
+.obticket.on{display:block}
+.obstage{position:absolute;left:0;right:0;top:0;height:60%;pointer-events:none}
+.obstage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.obguide{position:absolute;left:0;right:0;top:calc(18px + env(safe-area-inset-top,0px));text-align:center;font-size:15px;font-weight:800;color:#e9e3f7;letter-spacing:-.2px;text-shadow:0 1px 8px #000a;transition:opacity .3s}
+.obguide.off{opacity:0}
+.obwelcome{position:absolute;left:50%;top:calc(12% + env(safe-area-inset-top,0px));transform:translate(-50%,8px) scale(.9);font-size:26px;font-weight:900;color:#fff;padding:8px 20px;border-radius:999px;background:#211b33cc;border:1px solid #c4b5fd88;box-shadow:0 0 22px #8b5cf666;opacity:0;pointer-events:none;white-space:nowrap}
+.obwelcome.on{animation:obWelcome 1.7s ease-out both}
+@keyframes obWelcome{0%{opacity:0;transform:translate(-50%,8px) scale(.9)}14%{opacity:1;transform:translate(-50%,0) scale(1.04)}24%{transform:translate(-50%,0) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px) scale(1)}}
+
+/* 카드: 아래쪽 펀치 칸과 점선으로 나뉘고, 양옆에 반원 홈(마스크로 뚫음) */
+.obcard{--pH:86px;position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:#f7f2e8;color:#1f1a29;border-radius:18px;transition:transform .45s ease,opacity .45s ease;
+  -webkit-mask:radial-gradient(circle 11px at 0 calc(100% - var(--pH)),#0000 10.5px,#000 11px) 0 0/51% 100% no-repeat,radial-gradient(circle 11px at 100% calc(100% - var(--pH)),#0000 10.5px,#000 11px) 100% 0/51% 100% no-repeat;
+  mask:radial-gradient(circle 11px at 0 calc(100% - var(--pH)),#0000 10.5px,#000 11px) 0 0/51% 100% no-repeat,radial-gradient(circle 11px at 100% calc(100% - var(--pH)),#0000 10.5px,#000 11px) 100% 0/51% 100% no-repeat}
+.obcard.leave{transform:translateY(-48px);opacity:0;pointer-events:none}
+.obcbody{padding:16px 16px 12px}
+.obchead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.obchead b{font-size:22px;font-weight:900;letter-spacing:-.3px}
+.obchead small{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#8a7f9c;white-space:nowrap}
+.obai{font-size:12.5px;line-height:1.5;color:#3b2f52;background:#ece4f7;border-left:3px solid var(--pri);border-radius:10px;padding:9px 11px;margin-bottom:10px;word-break:keep-all}
+.obchk{display:flex;align-items:center;gap:9px;min-height:34px;font-size:13.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1;min-width:0}
+.obchk input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.obchk .box{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid #b9aecb;background:#fff;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.obchk .box::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-1px) rotate(-45deg);opacity:0}
+.obchk input:checked+.box{background:var(--pri);border-color:var(--pri)}
+.obchk input:checked+.box::after{opacity:1}
+.obchk input:focus-visible+.box{outline:2px solid var(--pri2);outline-offset:2px}
+.obchk.all{font-size:15px;font-weight:800;padding-bottom:6px;margin-bottom:4px;border-bottom:1px solid #e4dbeb}
+.obrow{display:flex;align-items:center;gap:8px}
+.obview{flex:none;font-size:12px;color:#7b6f90;text-decoration:underline;padding:6px 2px}
+
+.obpunch{height:var(--pH);border-top:2px dashed #cdbfdc;margin:0 14px;display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .2s;outline:none}
+.obpunch.locked{opacity:.45}
+.obpunch.shake{animation:obShake .36s ease}
+@keyframes obShake{0%,100%{transform:none}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.obhole{flex:none;width:36px;height:36px;border-radius:50%;border:2px dashed #b9aecb;display:grid;place-items:center}
+.obhole i{width:30px;height:30px;border-radius:50%;background:var(--bg);box-shadow:inset 0 2px 4px #000;transform:scale(0)}
+.obpunch.punched .obhole{border-color:transparent}
+.obpunch.punched .obhole i{animation:obPunch .2s ease-out forwards}
+@keyframes obPunch{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+.obptx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.obptx b{font-size:15px;font-weight:800}
+.obpunch:not(.locked) .obptx b{color:var(--pri)}
+.obptx small{font-size:12px;color:#7b6f90}
+
+/* 약관 보기 시트 */
+.obscrim{position:absolute;inset:0;background:#0009;opacity:0;pointer-events:none;transition:opacity .25s;z-index:3}
+.obscrim.on{opacity:1;pointer-events:auto}
+.obsheet{position:absolute;left:0;right:0;bottom:0;z-index:4;background:#15131d;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom,0px));transform:translateY(105%);transition:transform .28s;display:flex;flex-direction:column;gap:12px;align-items:center}
+.obsheet.on{transform:none}
+.obsheet h3{align-self:stretch;font-size:17px}
+.obsheet p{align-self:stretch;font-size:14px;line-height:1.6;color:#cfc8e4;min-height:120px;word-break:keep-all}
 
 /* 로그인 */
 .oblogin{padding:0 24px calc(26px + env(safe-area-inset-bottom,0px));justify-content:flex-end}

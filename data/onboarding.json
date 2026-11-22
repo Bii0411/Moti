@@ -22,9 +22,7 @@
     "punchLocked": "필수 항목에 동의해 주세요",
     "punchReady": "탭해서 펀치",
     "punchSub": "입장권에 구멍을 뚫으면 입장해요",
-    "welcome": "어서 와요",
-    "_temp": "7-A 임시: 입장권 자리에 둔 다음 버튼(7-B에서 입장권으로 바뀜)",
-    "tempNext": "다음"
+    "welcome": "어서 와요"
   },
   "terms": {
     "_terms": "약관 보기 시트(시연용 임시). 본문은 원고의 임시 문구 하나를 두 약관에 같이 쓴다",
@@ -55,6 +53,30 @@
     "replay": "온보딩 다시 보기",
     "adultReset": "성인 인증 초기화"
   },
+  "_scene3d": "입장권 화면 위쪽 3D(7-B). 대화방의 3D 그림판을 빌려 와 서아를 다시 불러오지 않는다. frame = 카메라 구도(캐릭터 키 비율, data/config.json camera 와 같은 뜻: top·bottom 보여 줄 위·아래, width 최소 너비, lift). overlapPx = 3D 칸이 입장권 카드 위쪽 가장자리 아래로 들어가는 길이(허리가 카드 위로 보이게). fog = 안개 색과 시작·끝 거리(m, 카메라에서). face = 입장권 화면에서 서아 표정",
+  "scene3d": {
+    "frame": { "top": 1.12, "bottom": 0.72, "width": 0.6, "lift": 0.02 },
+    "overlapPx": 48,
+    "fog": { "color": "#110d1d", "near": 1.8, "far": 6.2 },
+    "face": "soft"
+  },
+  "_crowd": "서아 뒤 마네킹(코드로 만든 도형). people: x(왼쪽 −, 오른쪽 +)·z(뒤로 −, m)·height(키 m, 서아 1.72)·hair(long 긴 머리, short 짧은 머리, pony 묶은 머리, bun 올림 머리, twin 양갈래)·turn(몸 돌림, 라디안, 없으면 가운데를 보게). 흔드는 팔은 바깥쪽 팔. color 몸 색, hairColor 머리카락 색, emissive 아주 약한 자체 밝기, light 조명 받는 정도(0~1, 낮을수록 그림자처럼). breath 숨쉬기(sec 주기, scale 세로 크기 변화, bob 오르내림 m). wave 인사(ms 한 번 흔드는 시간, stepMs 마네킹 사이 간격, upRad 팔 드는 각도, wiggleRad 흔드는 폭, restRad 평소 팔 벌림)",
+  "crowd": {
+    "color": "#1c1630",
+    "hairColor": "#271e3f",
+    "emissive": "#000000",
+    "light": 0.85,
+    "people": [
+      { "x": -0.86, "z": -2.75, "height": 1.62, "hair": "long" },
+      { "x": -0.46, "z": -2.4, "height": 1.7, "hair": "short" },
+      { "x": 0.47, "z": -2.45, "height": 1.58, "hair": "pony" },
+      { "x": 0.88, "z": -2.8, "height": 1.66, "hair": "bun" }
+    ],
+    "breath": { "sec": 3.8, "scale": 0.006, "bob": 0.003 },
+    "wave": { "ms": 900, "stepMs": 100, "upRad": 2.3, "wiggleRad": 0.25, "restRad": 0.12 }
+  },
+  "_greet": "펀치 순간 인사. motion 서아 몸짓(m13 손 흔들기), face 표정, crowdDelayMs 마네킹이 흔들기 시작하는 때(펀치 기준), leaveMs 입장권이 위로 올라가며 사라지기 시작하는 때(서아 몸짓 2.2초가 끝날 즈음), leaveFadeMs 사라지는 시간(끝나면 로그인)",
+  "greet": { "motion": "m13", "face": "joy", "crowdDelayMs": 0, "leaveMs": 1700, "leaveFadeMs": 450 },
   "_timing": "시간 값(ms). fadeInMs 첫 화면 로고·소개가 나타나는 시간, preloadMaxWaitMs 서아 3D 준비를 기다리는 최대 시간(넘기면 서아 없이 넘어감), loginDemoDelayMs Google·카카오를 누른 뒤 안내 토스트를 보여 주고 넘어가기까지, adultVerifyMs 시연용 인증 로딩",
   "timing": { "fadeInMs": 600, "preloadMaxWaitMs": 15000, "loginDemoDelayMs": 1100, "adultVerifyMs": 1000 }
 }
