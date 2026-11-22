@@ -5,8 +5,7 @@ const MODEL={jihu:"jihu.glb",seoa:"seoa.glb"};
 // 3D 칸 뒤 장소 그림: 캐릭터마다 3곳. 대화에 장소 말이 나오면(kw) 배경이 바뀌어요
 const SCENES={
  seoa:[
-  {name:"네온 골목",img:"bg_seoa_alley.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니/,say:"이 골목은 카메라 사각지대야. 여기선 마음 놓고 걸어도 돼."},
-  {name:"비 내리는 골목",img:"bg_seoa_rain.jpg",kw:/비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
+  {name:"네온 거리",img:"bg_seoa_rain.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니|비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
   {name:"도시 옥상",img:"bg_seoa_roof.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
  ],
  jihu:[
@@ -15,7 +14,7 @@ const SCENES={
   {name:"학교 복도",img:"bg_jihu_hall.jpg",kw:/복도|사물함|나가자|나가서|걸어가|교문|하교|계단|산책/,say:"복도 끝까지 같이 걸을래? 예전에 매일 이렇게 걸었는데."}
  ]
 };
-const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.scene={});return L[m[cid]||0]};
+const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.scene={});return L[m[cid]||0]||L[0]};
 const BG3D={};
 function sil(c1,c2){const s=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs><rect width='260' height='300' fill='url(#g)'/><circle cx='130' cy='112' r='50' fill='rgba(0,0,0,.35)'/><path d='M40 300c6-70 46-108 90-108s84 38 90 108z' fill='rgba(0,0,0,.35)'/></svg>`;return "data:image/svg+xml,"+encodeURIComponent(s.replace(/'/g,'"'))}
 const CH=[
