@@ -3,18 +3,83 @@
   "seoa": {
     "_lights": "key = 주 조명(방향광). elevationDeg 는 캐릭터 기준 위쪽 각도, sideDeg 는 정면에서 옆으로 돈 각도(+ 는 화면 오른쪽). hemi = 환경광(하늘색 sky·땅색 ground·세기). back = 예전 뒤쪽 보라 조명(만화풍 명암에서는 띠가 하나 더 생겨 0으로 끔).",
     "lights": {
-      "key": { "color": "#FFF6EE", "intensity": 0.75, "elevationDeg": 45, "sideDeg": 35 },
-      "hemi": { "sky": "#FFF1E6", "ground": "#6A5A7A", "intensity": 0.4 },
-      "back": { "intensity": 0 }
+      "key": {
+        "color": "#FFF6EE",
+        "intensity": 0.75,
+        "elevationDeg": 45,
+        "sideDeg": 35
+      },
+      "hemi": {
+        "sky": "#FFF1E6",
+        "ground": "#6A5A7A",
+        "intensity": 0.4
+      },
+      "back": {
+        "intensity": 0
+      }
     },
     "_bands": "명암 단계 3개(그림자·중간·밝음). 경계는 빛과 면이 이루는 값(dot) 기준, -1(완전히 등짐)~1(정면으로 받음). edges[0] 아래는 그림자, edges[0]~edges[1] 은 중간, edges[1] 위는 밝음. mid 는 중간 단계가 그림자(0)와 밝음(1) 사이 어디인지.",
-    "bands": { "edges": [-0.05, 0.25], "mid": 0.55 },
+    "bands": {
+      "edges": [
+        -0.05,
+        0.25
+      ],
+      "mid": 0.55
+    },
     "_materials": "재질 이름(match 가 들어 있는 것)별 그림자 색. 위에서부터 먼저 맞는 것을 쓴다. shadow 는 그림자 부분에 곱해지는 색, mix 는 그 색을 얼마나 쓸지(0 = 그림자 없음, 1 = 그 색 그대로). normalBlend(얼굴만) 는 얼굴 명암을 공 모양 쪽으로 펴서 얼룩을 없애는 정도(0~1). 눈(_EYE)·눈썹·속눈썹·입(_FACE)은 여기 없어서 예전처럼 조명 무시.",
     "materials": [
-      { "key": "faceSkin", "match": "Face_00_SKIN", "shadow": "#F0C4BA", "mix": 0.6, "normalBlend": 0.7 },
-      { "key": "bodySkin", "match": "Body_00_SKIN", "shadow": "#E3A79A", "mix": 1 },
-      { "key": "cloth", "match": "_CLOTH", "shadow": "#6B5A8E", "mix": 0.75 },
-      { "key": "hair", "match": "_HAIR", "shadow": "#6B5A8E", "mix": 0.75 }
-    ]
+      {
+        "key": "faceSkin",
+        "match": "Face_00_SKIN",
+        "shadow": "#F0C4BA",
+        "mix": 0.6,
+        "normalBlend": 0.7
+      },
+      {
+        "key": "bodySkin",
+        "match": "Body_00_SKIN",
+        "shadow": "#E3A79A",
+        "mix": 1
+      },
+      {
+        "key": "cloth",
+        "match": "_CLOTH",
+        "shadow": "#6B5A8E",
+        "mix": 0.75
+      },
+      {
+        "key": "hair",
+        "match": "_HAIR",
+        "shadow": "#6B5A8E",
+        "mix": 0.75
+      }
+    ],
+    "_outline": "외곽선(4-B). 피부·옷·머리카락 메시를 같은 뼈대로 한 벌 더 만들어 뒷면만 그리고, 면 방향(노멀)으로 화면 px 만큼 부풀린다. parts 는 위 materials 의 key 중 외곽선을 넣을 것(눈·눈썹·입은 원래 없음. faceSkin 은 입 안·눈 둘레에 검은 얼룩이 생겨 뺌). 무거우면 hair 부터 뺀다. 주소 뒤 ?look=4a 를 붙이면 외곽선·테두리 빛 없이 4-A 모습.",
+    "outline": {
+      "color": "#2A2140",
+      "px": 1.25,
+      "parts": [
+        "bodySkin",
+        "cloth",
+        "hair"
+      ]
+    },
+    "_rim": "테두리 빛(4-B). 가장자리일수록 밝아지는 빛(프레넬)을 피부·옷·머리카락에 더한다. edges = 가장자리 정도(0 정면 ~ 1 완전 옆면) 중 빛이 시작·꽉 차는 지점, strength = 세기, fadeSec = 장소가 바뀔 때 색이 바뀌는 시간(초). byLocation 의 이름은 data/seoa_story.json locations 의 name 과 같아야 한다. 없는 장소는 default.",
+    "rim": {
+      "edges": [
+        0.62,
+        0.82
+      ],
+      "strength": 0.55,
+      "fadeSec": 1.2,
+      "default": "#FF7AC8",
+      "byLocation": {
+        "바 '라스트 오더' 1층": "#FF7AC8",
+        "바 '라스트 오더' 2층": "#FFB38A",
+        "네온 골목": "#7AD8FF",
+        "비 내리는 골목": "#8AB4FF",
+        "바 옥상": "#B89CFF"
+      }
+    }
   }
 }
