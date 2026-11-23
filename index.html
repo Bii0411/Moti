@@ -462,7 +462,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace}}
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0}}
   if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col||!ph)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
@@ -615,7 +615,9 @@ const Stage=(()=>{
   // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
   function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
     return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=null;if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
-  const xsDur=id=>{const x=XS[id];return (x.to!=null?x.to:(xsCache[id]?xsCache[id].duration:2))-x.from};
+  // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
+  const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
+  const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
   // XSTAGE 모션을 서아 뼈에 맞추기
   function xsAlign(d){
     if(d.al)return d.al;
@@ -630,8 +632,10 @@ const Stage=(()=>{
   }
   const q0=new THREE.Quaternion(),q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),q3=new THREE.Quaternion();
   function xsApply(d,mt,win){
-    const a=xsAlign(d),dur=win.to-win.from,tt=win.from+mt,N=d.frames,f=tt*d.fps,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
-    const x=Math.max(0,Math.min(1,mt/.5,(dur-mt)/.7)),w=x*x*(3-2*x);
+    const cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1);let tt=win.from+(win.repeat>1?mt%cyc:mt);if(win.skip&&tt>=win.skip[0])tt+=win.skip[1]-win.skip[0];
+    const a=xsAlign(d),N=d.frames,f=tt*d.fps,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
+    const C=((DATA.config&&DATA.config.stage)||{}),fi=win.fadeIn||C.xsFadeIn||.5,fo=win.fadeOut||C.xsFadeOut||.7;  // 처음·끝에 기본 자세와 섞는 시간(초)
+    const x=Math.max(0,Math.min(1,mt/fi,(dur-mt)/fo)),w=x*x*(3-2*x);
     md.root.updateMatrixWorld(true);
     for(const n of XORD){const b=md.bones[n],tr=d.tracks[n];if(!b||!tr)continue;
       q0.set(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]).slerp(q1.set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]),u).multiply(a.A[n]).multiply(a.W[n]);
@@ -647,7 +651,14 @@ const Stage=(()=>{
   // 캐릭터 키(발~머리 꼭대기) = Head 뼈 높이 + headTopK × (Head − 목) 길이. 모델마다 재서 구도 비율에 곱한다
   function height(){if(H0)return H0;if(!md)return 1.6;const y=n=>{const b=md.bones[n]||md.bones["mixamorig:"+n]||md.bones["mixamorig"+n];return b?b.getWorldPosition(new THREE.Vector3()).y:null};
     md.root.updateMatrixWorld(true);const h=y("Head"),nk=y("neck")||y("Neck");
-    return H0=h&&nk?h+(camCfg().headTopK||2.4)*(h-nk):1.6}
+    if(h)HY0=h;return H0=h&&nk?h+(camCfg().headTopK||2.4)*(h-nk):1.6}
+  // 25: 카메라가 머리를 따라 내려감(data/config.json camera.follow). 그 몸짓이 재생되는 동안만, 머리가 평소 높이(HY0)보다 내려간 만큼 × 몫.
+  // 위로는 따라가지 않음. smoothSec 동안 부드럽게 따라가고, 몸짓이 끝나면 같은 속도로 원래 구도로 돌아옴
+  let HY0=0,folY=0,folLast=0;const folV=new THREE.Vector3();
+  function followDy(now){const F=camCfg().follow||{},k=cur&&F.motions?+F.motions[cur.id]||0:0;
+    const dt=folLast?Math.min(.1,Math.max(0,now-folLast)/1000):0;folLast=now;
+    let goal=0;if(k&&md&&md.bones.Head){height();goal=Math.min(0,md.bones.Head.getWorldPosition(folV).y-HY0)*k}
+    folY+=(goal-folY)*(1-Math.exp(-dt/(F.smoothSec||.3)));if(Math.abs(folY)<1e-4&&!goal)folY=0;return folY}
   const camCfg=()=>(DATA.config&&DATA.config.camera)||{};
   const landscape=()=>{const a=$(".app");return a.clientWidth>a.clientHeight};
   // name: data/config.json camera 의 구도 이름, 또는 {top,bottom,width,lift} 직접(입장권 구도 등)
@@ -659,7 +670,8 @@ const Stage=(()=>{
     frNow={};for(const n of ["top","bottom","width","lift"])frNow[n]=(frFrom[n]||0)+((frTo[n]||0)-(frFrom[n]||0))*e;
     const H=height(),tn=Math.tan(cam.fov*Math.PI/360),range=(frNow.top-frNow.bottom)*H,cy=(frNow.top+frNow.bottom)/2*H;
     const d=Math.max(range/2/tn,(frNow.width||0)*H/2/(tn*cam.aspect));
-    cam.position.set(0,cy+frNow.lift*H,d);cam.lookAt(0,cy,0);
+    const dy=followDy(now);
+    cam.position.set(0,cy+dy+frNow.lift*H,d);cam.lookAt(0,cy+dy,0);
   }
   function frame(now){
     requestAnimationFrame(frame);
@@ -681,6 +693,7 @@ const Stage=(()=>{
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(isXs&&xsCache[id])xsApply(xsCache[id],mt,XS[id]);
     if(blend)blendStep(now);
+    keepPre();
     if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
     if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
     face(t);
@@ -729,6 +742,7 @@ const Stage=(()=>{
   function play(mid,o={}){
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
+    blendFromPre();  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게)
     cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1,name:o.name||null,ref:o.ref||null};
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.quiet)return;
@@ -780,6 +794,12 @@ const Stage=(()=>{
     if(md&&o.blendMs>0){const q={};for(const n in md.bones)q[n]=md.bones[n].quaternion.clone();blend={q,p:md.root.position.clone(),t0:performance.now(),ms:o.blendMs}}else blend=null;
     const sp=o.speed>0?o.speed:1,d=dur(mid);mt=Math.max(0,Math.min(d-.001,mt));
     cur={id:mid,start:performance.now()/1000-mt/sp,sp,name:o.name||null,ref:o.ref||null,loop:true,hold:mt}}
+  // 25: 매 프레임 「살아 있게」를 더하기 전 자세를 보관 → 새 몸짓을 시작할 때 이 자세에서 data/config.json stage.motionBlendMs 동안 섞음
+  // (살아 있게는 매 프레임 다시 더해지므로, 더한 뒤 자세에서 섞으면 숨·시선이 잠깐 두 번 더해짐)
+  const pre={q:{},p:null};
+  function keepPre(){for(const n in md.bones){if(/^J_Sec_/.test(n))continue;const q=pre.q[n]||(pre.q[n]=new THREE.Quaternion());q.copy(md.bones[n].quaternion)}(pre.p||(pre.p=new THREE.Vector3())).copy(md.root.position)}
+  function blendFromPre(){const ms=((DATA.config&&DATA.config.stage)||{}).motionBlendMs;if(!md||!pre.p||!(ms>0))return;
+    const q={};for(const n in pre.q)q[n]=pre.q[n].clone();blend={q,p:pre.p.clone(),t0:performance.now(),ms}}
   function blendStep(now){const k=Math.min(1,(now-blend.t0)/blend.ms),w=k*k*(3-2*k);
     for(const n in blend.q){const b=md.bones[n];if(b)b.quaternion.copy(blend.q[n].clone().slerp(b.quaternion,w))}
     md.root.position.lerpVectors(blend.p,md.root.position.clone(),w);if(k>=1)blend=null}
@@ -826,7 +846,7 @@ const Stage=(()=>{
   function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
     aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
-  return{outfit:k=>setOutfit(k),init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{outfit:k=>setOutfit(k),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
