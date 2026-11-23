@@ -47,6 +47,11 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .app.inalbum .cap{font-size:11px;padding:4px 9px}
 .burst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);font-size:56px;opacity:0;pointer-events:none}
 .burst.go{animation:burst 1.4s ease-out}
+/* 희귀·특별 새 몸짓 알림(9-B): 무대 위 글자 + (특별만) 무대를 살짝 어둡게. 글자·색·크기·투명도만, 전환(transition)이라 화면을 옮겨도 다시 재생되지 않음. 값 data/collection.json notify */
+.gradefx{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3;background:rgba(0,0,0,var(--gfDim,0));opacity:0;transition:opacity var(--gfFade,250ms)}
+.gradefx b{font-size:var(--gfSize,20px);color:var(--gfColor,#fff);font-weight:900;letter-spacing:.02em;background:#0d0b16cc;border-radius:14px;padding:6px 16px;transform:scale(.92);transition:transform var(--gfFade,250ms);text-align:center;word-break:keep-all}
+.gradefx.on{opacity:1}
+.gradefx.on b{transform:scale(1)}
 @keyframes burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}25%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-95%) scale(1)}}
 
 main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
@@ -234,6 +239,11 @@ nav button.on{color:var(--text)}
 .item .sp{font-size:11px;color:var(--gold);margin-top:2px}
 .item .rec{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;background:var(--gold);color:#000;border-radius:999px;padding:2px 7px}
 .item.focus{border-color:var(--gold)}
+/* 선물 창(9-A): 기분 맞춤 선물은 금색 테두리, 확률 줄, 천장 남은 횟수 */
+.item.match{border-color:#f5c66b99;background:linear-gradient(160deg,#2a2236,#1a1426)}
+.item .odds{font-size:11px;color:var(--sub);margin-top:4px;line-height:1.4;word-break:keep-all}
+.item.match .odds{color:#e9dcc0}
+.sheet .pity{font-size:12px;font-weight:700;color:var(--pri2);margin:-2px 0 10px}
 .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
 .row button{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 11px;background:var(--card)}
 .row button.on{background:var(--pri);border-color:var(--pri)}
@@ -297,6 +307,7 @@ nav button.on{color:var(--text)}
     <div class="bubble" id="bubble"></div>
     <span class="cap" id="cap"></span>
     <div class="burst" id="burst"></div>
+    <div class="gradefx" id="gradeFx" aria-live="polite"><b></b></div>
   </div>
 
   <main>
@@ -343,6 +354,7 @@ nav button.on{color:var(--text)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="motion.js"></script>
+<script src="gacha.js"></script>
 <script src="look.js"></script>
 <script src="alive.js"></script>
 <script src="film.js"></script>
@@ -354,22 +366,21 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 
 // 서아가 처음부터 쓰는 기본 모션 (관계로 얻는 것 · 무료)
 const BASE={m01:"웃음",m02:"고개 끄덕이기",m03:"놀라기",m04:"한숨 쉬기",m05:"시선 피하기",m06:"허둥대기",m07:"팔짱 끼기",m11:"손 내밀기",m12:"다가가기",m18:"감싸 안기"};
-// 선물로 새로 배우는 모션 (아이템에 딸린 모션)
-const SIGN={m15:"다정하게 인사하기",m16:"응원하기",m24:"부끄러워하기",m22:"하트 챌린지"};
-const MNAME={...BASE,...SIGN};  // 나머지 몸짓 이름은 data/motions.json 에서 채움
+const MNAME={...BASE};  // 나머지 몸짓 이름은 data/motions.json 에서 채움
 const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 없을 때 (data/motions.json idle)
 
 // ── 데이터 파일 (data/*.json) ──
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json")]);
+  if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  if(!c||!f||!m||!st||!it||!kw||!chs||!eps)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+  if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.tabFirst",{name:…}). 없으면 키 이름 그대로
 const UI=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.ui||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
@@ -402,29 +413,12 @@ const FACEKO={neutral:"무표정",joy:"활짝 웃음",fun:"웃음",soft:"살짝 
 const STATES={normal:{ko:"평소",e:"😐"},tired:{ko:"지침",e:"😮‍💨"},sulky:{ko:"삐짐",e:"😤"},birthday:{ko:"생일",e:"🎂"}};
 const SORDER=["normal","tired","sulky","birthday"];
 
-// 선물 = 겉으로는 아이템, 실제로는 반응 모션 + 표정 + 대사
-const GIFTS=[
- {id:"coffee",icon:"icons/gift_coffee.png",e:"☕",name:"커피",price:30,sign:"m15",fx:"☕",rec:"tired",
-  r:{normal:{m:"m15",f:"fun",t:"커피? …작전 중엔 카페인이 생명이지. 잘 마실게."},
-     tired:{m:"m02",f:"soft",t:"…딱 이게 필요했어. 어떻게 알았어?"},
-     sulky:{m:"m05",f:"sulky",t:"커피로 넘어가려고? …식기 전에 마실 거야. 너 때문 아니고."},
-     birthday:{m:"m15",f:"joy",t:"생일에 커피라니. 내일도 사 와. 생일 연장이야."}}},
- {id:"ramen",icon:"icons/gift_ramen.png",e:"🍜",name:"라멘",price:50,sign:"m16",fx:"🍜",rec:"normal",
-  r:{normal:{m:"m16",f:"joy",t:"라멘! …작전 끝나고 먹자던 거, 기억했어?"},
-     tired:{m:"m11",f:"soft",t:"같이 먹자. 혼자 먹는 라멘은 맛없거든."},
-     sulky:{m:"m07",f:"sulky",t:"라멘으로 넘어가려고? …곱빼기면 생각해 볼게."},
-     birthday:{m:"m16",f:"joy",t:"생일 라멘! 오늘은 국물까지 다 마실 거야."}}},
- {id:"flower",icon:"icons/gift_flower.png",e:"💐",name:"꽃다발",price:80,sign:"m24",fx:"🌸",rec:"sulky",
-  r:{normal:{m:"m24",f:"shy",t:"…꽃? 이런 거 받아 본 적 없는데. 보지 마, 얼굴 빨개졌으니까."},
-     tired:{m:"m12",f:"soft",t:"…고마워. 오늘 처음으로 웃었다."},
-     sulky:{m:"m05",f:"shy",t:"꽃은 반칙이지. …화 풀렸어. 됐어?"},
-     birthday:{m:"m24",f:"shy",t:"생일에 꽃이라니. …말려서 평생 간직할 거야."}}},
- {id:"ring",icon:"icons/gift_ring.png",e:"💍",name:"반지",price:200,sign:"m22",fx:"💗",rec:"birthday",
-  r:{normal:{m:"m22",f:"joy",t:"반지…? 너 무슨 뜻인지 알고 주는 거지? …나도 좋아."},
-     tired:{m:"m18",f:"shy",t:"…이거 끼고 있으면 아무리 힘들어도 버틸 수 있을 것 같아."},
-     sulky:{m:"m03",f:"surprised",t:"잠깐, 반지? 화내고 있었는데… 이러면 화를 어떻게 내."},
-     birthday:{m:"m18",f:"joy",t:"생일 선물이 반지라니. …평생 기억할 거야. 너도 그래야 돼."}}}
-];
+// 선물 4종(data/gifts.json, 9-A): 확률로 등급 → 그 등급의 선물 몸짓(data/collection.json). 뽑기 계산은 gacha.js
+let GIFT={moodBonus:{rare:10,from:"common"},pity:{count:10,min:"rare"},list:[]},GIFTS=[];
+// 명장면 수집(몸짓 도감, data/collection.json): 대화 몸짓 + 선물 몸짓 g01~g12. 기록은 S.col[id] = {at, line, scene, text?}
+let COL={items:[],grades:{},notify:{},gradeOrder:["common","rare","special"]};
+const colBy=id=>COL.items.find(x=>x.id===id);
+const pityLeft=()=>S.pity==null?GIFT.pity.count:S.pity;
 const gBy=id=>GIFTS.find(g=>g.id===id);
 // 캐릭터 목록은 data/characters.json(8-A). loadData 가 채운다. REC = 추천 탭 순서
 let CH=[],REC=[];
@@ -437,13 +431,17 @@ let SCENES=[{name:"",img:"bg_seoa_street.jpg"}];
 
 // ───────────────────────── 상태 (이 브라우저에만 저장) ─────────────────────────
 const KEY="moti_gift_proto_v2";
-// story: 서아 이야기 상태(서버 v2와 주고받음) · firsts: 처음 본 모습 기록 · unlocked: 판정·사건으로 열린 몸짓 · introDone: 인트로를 봤는지
+// story: 서아 이야기 상태(서버 v2와 주고받음) · col: 명장면 수집 기록(9단계, 예전 firsts) · pity: 선물 천장 남은 횟수 · unlocked: 판정·사건으로 열린 몸짓 · introDone: 인트로를 봤는지
 // rooms: 대화 목록에 보이는 대화방(6-C). 처음엔 비어 있고, 캐릭터 대화방에 들어가면(홈 카드 등) 생긴다
-const blank=()=>({v:2,bond:0,stories:{},plus:false,dia:500,album:{},learned:[],chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},firsts:[],unlocked:[],introDone:false});
+const blank=()=>({v:3,bond:0,stories:{},plus:false,dia:500,chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},col:{},pity:null,giftNext:null,unlocked:[],introDone:false});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){S=blank()}
 // 예전 저장값 옮기기: 장소 2곳(0 네온 거리, 1 도시 옥상) → 5곳(2 네온 골목, 4 바 옥상). 이미 대화하던 사람은 인트로를 건너뜀
-if(!S.v){const mv=i=>i===1?4:2;S.scene=mv(S.scene||0);for(const k in S.album||{})S.album[k].scene=mv(S.album[k].scene||0);
-  S.story=S.story||{};S.firsts=S.firsts||[];S.unlocked=S.unlocked||[];S.introDone=true;S.v=2}
+if(!S.v){const mv=i=>i===1?4:2;S.scene=mv(S.scene||0);
+  S.story=S.story||{};S.unlocked=S.unlocked||[];S.introDone=true;S.v=2}
+// 9단계: 예전 선물 리액션(album 16칸)·선물로 배운 몸짓(learned)은 옮기지 않고 버림. 명장면 기록(firsts)은 도감 기록(col)으로 합침
+if(S.v<3){S.col={};(S.firsts||[]).forEach(f=>{if(f&&f.mid&&!S.col[f.mid])S.col[f.mid]={at:f.at,line:f.line||"",text:f.text||"",scene:f.scene}});
+  delete S.album;delete S.learned;delete S.firsts;S.pity=null;S.giftNext=null;S.v=3}
+S.col=S.col||{};
 // 예전 저장값(6-C 전): 대화 목록은 사용자가 한마디라도 보낸 대화방만 남기고, 말 건 적 없는 대화방은 뺀다
 if(!Array.isArray(S.rooms)){S.rooms=Object.keys(S.chats||{}).filter(cid=>(S.chats[cid]||[]).some(m=>m.r==="u"));if(S.room&&!S.rooms.includes(S.room))S.room=null}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -549,7 +547,7 @@ const Stage=(()=>{
     if(extraTick)extraTick(now,w,h);
     if(!md){if(w&&h)R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
-    if(cur){mt=t-cur.start;const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
+    if(cur){mt=(t-cur.start)*(cur.sp||1);const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
@@ -598,16 +596,16 @@ const Stage=(()=>{
     if(faceKey&&(g.avertFaces||["shy"]).indexOf(faceKey)>=0)return true;
     return !!(faceEmo&&new RegExp(g.avertEmotion||"당황|수줍|부끄").test(faceEmo))}
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
-  // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사)
+  // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사) · o.speed: 재생 속도(9-A 선물 몸짓 임시 재생) · o.name: 3D 아래 표시 이름(선물 몸짓 이름)
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
-    cur={id:mid,start:performance.now()/1000};
+    cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1};
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
-    if(mid===IDLE&&!o.tag){c.classList.remove("on");return}
-    c.innerHTML=`▶ ${esc(MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
-    if(mid!==IDLE&&typeof View!=="undefined")View.motion(mid);
+    if(mid===IDLE&&!o.tag&&!o.name){c.classList.remove("on");return}
+    c.innerHTML=`▶ ${esc(o.name||MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
+    if((mid!==IDLE||o.name)&&typeof View!=="undefined")View.motion(mid,cur.sp);
   }
   // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
   function setFace(k,emo){faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
@@ -647,11 +645,11 @@ const View=(()=>{
     const room=st.offsetHeight+$("#log").clientHeight-(c.minLogPx!=null?c.minLogPx:80);
     return Math.round(Math.max(st.offsetHeight,Math.min(W*(c.bigAspect!=null?c.bigAspect:1),vh*(c.bigMaxRatio!=null?c.bigMaxRatio:.58),room)))}
   function rest(instant){clearTimeout(backT);tok++;setBig(false,instant);Stage.frameTo("normal",instant?0:undefined)}
-  function motion(mid){
+  function motion(mid,sp){
     const my=++tok;clearTimeout(backT);
     Stage.frameTo(mid==="m23"?"full":"motion");
     if(curTab==="chat"&&S.room==="seoa"&&!focused())setBig(true);
-    backT=setTimeout(()=>{if(my===tok)rest()},Stage.dur(mid)*1000+(cfg().backDelayMs!=null?cfg().backDelayMs:1000));
+    backT=setTimeout(()=>{if(my===tok)rest()},Stage.dur(mid)/(sp||1)*1000+(cfg().backDelayMs!=null?cfg().backDelayMs:1000));
   }
   return{motion,rest,isBig:()=>big};
 })();
@@ -767,11 +765,11 @@ async function askServer(cid,text){
   return readReply(j);
 }
 function allowedMotions(){const o={};for(const id of unlockedIds())o[id]=MNAME[id]||id;return o}
-// 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 + 선물로 배운 몸짓 (서아에게 안 맞는 몸짓 제외)
+// 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 (서아에게 안 맞는 몸짓 제외). 9단계에서 「선물로 배운 몸짓」은 없앰
 function unlockedIds(){
-  const U=DATA.story&&DATA.story.unlock;if(!U)return [...Object.keys(BASE),...S.learned.filter(id=>SIGN[id])];
+  const U=DATA.story&&DATA.story.unlock;if(!U)return Object.keys(BASE);
   const set=new Set();for(let k=1;k<=curStage();k++)((U.stage[k]||{}).motions||[]).forEach(id=>set.add(id));
-  (S.unlocked||[]).forEach(id=>set.add(id));S.learned.forEach(id=>set.add(id));
+  (S.unlocked||[]).forEach(id=>set.add(id));
   return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id));
 }
 
@@ -810,7 +808,7 @@ function runJudge(lastUser,lastReply,keep){
 // 해금: 처음 열린 몸짓만 기록(그때 대사와 함께) → 대화방에 있으면 전신 구도로 처음 재생 + 해금 문구 토스트
 let unlockQ=[],unlockBusy=false;
 function unlockShow(groups){
-  const seen=new Set(S.firsts.map(f=>f.mid));
+  const seen=new Set(Object.keys(S.col));
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
   const line=last?(last.act?`*${last.act}* `:"")+last.t:"";
   // 연출할 몸짓 하나: 단계 상승이면 대표 몸짓(lead), 판정·사건이면 그 몸짓. 한 번에 여럿이면 앞의 하나만
@@ -822,28 +820,41 @@ function unlockShow(groups){
     const id=cand.find(x=>!seen.has(x)&&canPlay(x));if(id)show={mid:id,text:g.text||""};
   }
   // 나머지는 「열렸지만 처음 보지 않음」: 대화에서 처음 재생될 때 firstSeen() 이 기록
-  if(show){S.firsts.push({mid:show.mid,text:show.text,line,at:Date.now(),scene:S.scene});unlockQ.push(show)}
+  if(show){if(colBy(show.mid))S.col[show.mid]={at:Date.now(),line,text:show.text,scene:S.scene};unlockQ.push(show)}
   save();if(curTab==="album")renderAlbum();
   if(!unlockBusy&&unlockQ.length)setTimeout(unlockNext,1400);  // 답장 몸짓이 먼저 보이게 조금 뒤에
 }
-// 열렸지만 아직 처음 보지 않은 몸짓 = 앨범 「처음 본 모습」 칸 중 해금됐고 기록이 없는 것
-const isSoon=mid=>!S.firsts.some(f=>f.mid===mid)&&firstSlots().some(x=>x.mid===mid)&&unlockedIds().includes(mid);
-// 대화에서 그 몸짓이 처음 재생됐을 때: 평소처럼 재생 + 작은 표시 + 그때 대사로 앨범 기록
-let firstChipT;
+// 열렸지만 아직 처음 보지 않은 대화 몸짓 = 앨범 대화 칸 중 해금됐고 기록이 없는 것
+const isSoon=mid=>!S.col[mid]&&(colBy(mid)||{}).source==="chat"&&unlockedIds().includes(mid);
+// 대화에서 그 몸짓이 처음 재생됐을 때(1단계 기본 몸짓 포함): 평소처럼 재생 + 등급 알림 + 그때 대사로 도감 기록
 function firstSeen(mid){
-  if(!mid||!isSoon(mid))return;
+  const it=mid&&colBy(mid);if(!it||it.source!=="chat"||S.col[mid])return;
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
-  S.firsts.push({mid,text:"",line:last?(last.act?`*${last.act}* `:"")+last.t:"",at:Date.now(),scene:S.scene});save();
-  const D=DATA.story||{},c=$("#firstChip");
-  c.textContent=(D.firstSeenText||"{name}").replace("{name}",MNAME[mid]||mid);
-  c.classList.add("on");clearTimeout(firstChipT);firstChipT=setTimeout(()=>c.classList.remove("on"),D.firstSeenMs||2000);
+  S.col[mid]={at:Date.now(),line:last?(last.act?`*${last.act}* `:"")+last.t:"",scene:S.scene};save();
+  notifyNew(it);
   if(curTab==="album")renderAlbum();
+}
+// 새 몸짓 알림(대화·선물 공통, 9-B): 일반 = 지금 작은 알림, 희귀·특별 = 무대 위 글자(크기·시간·색 data/collection.json notify)
+let firstChipT,gradeT;
+function notifyNew(it){
+  const D=DATA.story||{},N=(COL.notify||{})[it.grade];
+  if(!N){const c=$("#firstChip");c.textContent=(D.firstSeenText||"{name}").replace("{name}",it.name);
+    c.classList.add("on");clearTimeout(firstChipT);firstChipT=setTimeout(()=>c.classList.remove("on"),D.firstSeenMs||2000);return}
+  gradeFx(it,N);
+}
+function gradeFx(it,N){
+  const g=$("#gradeFx"),b=g.querySelector("b");
+  b.textContent=UI("collection.notify."+it.grade,{name:it.name});
+  g.style.setProperty("--gfSize",(N.fontPx||20)+"px");g.style.setProperty("--gfColor",N.color||"#fff");
+  g.style.setProperty("--gfDim",N.dim||0);g.style.setProperty("--gfFade",(N.fadeMs||250)+"ms");
+  g.classList.add("on");clearTimeout(gradeT);gradeT=setTimeout(()=>g.classList.remove("on"),N.ms||1500);
 }
 function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
   unlockBusy=true;
   if(curTab!=="chat"||S.room!=="seoa"){unlockQ=[];unlockBusy=false;return}  // 대화방 밖이면 기록만
   unlockFx(x.mid,x.text);
+  const it=colBy(x.mid);if(it&&(COL.notify||{})[it.grade])setTimeout(()=>gradeFx(it,COL.notify[it.grade]),400);  // 희귀·특별이면 무대 위 등급 알림도(9-B)
   setTimeout(unlockNext,Stage.dur(x.mid)*1000+700);
 }
 // 해금 연출(재생·표정·토스트). 시연 패널 「연출 미리보기」도 이것만 부름(기록 없음)
@@ -905,12 +916,11 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
 // Claude를 못 쓸 때의 예시 대사
 function localReply(t,allowed){
   const pick=a=>a[Math.floor(Math.random()*a.length)];
-  const L=allowed;
   if(/미안|잘못|사과/.test(t))return{line:"…알았어. 이번만 봐줄게. 다음엔 없어.",motion:"m05",face:"shy",mood:"normal"};
   if(/바보|싫어|짜증|꺼져|못생/.test(t))return{line:"…그래? 그럼 혼자 놀아.",motion:"m07",face:"sulky",mood:"sulky"};
   if(/힘들|피곤|지쳐|우울/.test(t))return{line:"이리 와. …오늘은 내가 옆에 있을게.",motion:"m11",face:"soft",mood:S.mood};
-  if(/붙었|합격|성공|해냈/.test(t))return L.m16?{line:"봐, 내가 된다 했지. 축하해!",motion:"m16",face:"joy",mood:"normal",learnedUse:true}:{line:"…축하해. 잘했어, 진짜로.",motion:"m01",face:"fun",mood:"normal"};
-  if(/좋아해|사랑/.test(t))return L.m24?{line:"갑자기 그런 말 하지 마. …나도야.",motion:"m24",face:"shy",mood:"normal"}:{line:"…갑자기 그런 말 하지 마. 심장 떨어지잖아.",motion:"m06",face:"shy",mood:"normal"};
+  if(/붙었|합격|성공|해냈/.test(t))return{line:"…축하해. 잘했어, 진짜로.",motion:"m01",face:"fun",mood:"normal"};
+  if(/좋아해|사랑/.test(t))return{line:"…갑자기 그런 말 하지 마. 심장 떨어지잖아.",motion:"m06",face:"shy",mood:"normal"};
   if(/옥상|야경|하늘|달/.test(t))return{line:"따라와. 이 도시에서 제일 높은 곳 보여 줄게.",motion:"m12",face:"soft",mood:S.mood,scene:4};
   if(/거리|골목|걷자|산책/.test(t))return{line:"손 줘. 길 잃으면 곤란하니까.",motion:"m11",face:"soft",mood:S.mood,scene:2};
   if(/작전|일|임무/.test(t))return{line:"오늘 작전 길었어. …라멘 한 그릇이면 살 것 같은데.",motion:"m04",face:"sorrow",mood:"tired"};
@@ -959,11 +969,9 @@ async function send(text){
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
   const mid=pickMotion(v.motion,actionText(v));
-  const learned=!!mid&&S.learned.includes(mid);
-  const tag=learned?`✨ 선물로 배운 모습 · ${MNAME[mid]}`:"";
-  const msg={...(tag?{tag}:{}),...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
+  const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
-  react({m:mid||IDLE,f:v.face,t:v.line,e:emo},learned?"✨ 선물로 배운 모습":"");
+  react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"");
   firstSeen(mid);
   afterReply(v);
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
@@ -988,40 +996,48 @@ function afterReply(v){
 // ───────────────────────── 선물 ─────────────────────────
 function openSheet(id){$("#scrim").classList.add("on");$(id).classList.add("on")}
 function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"))}
+// 선물 창(9-A, 원고 3절): 기분 안내 · 천장 남은 횟수 · 선물마다 기분 맞춤 표시와 확률 줄
+const gradeKo=g=>UI("collection.grade."+g);
 function giftSheet(focus){
-  const st=curState();
-  const got=g=>SORDER.filter(s=>S.album[g.id+":"+s]).length;
+  const st=curState(),B=GIFT.moodBonus||{};
+  const oddsLine=o=>UI("gift.odds",{a:o.common,b:o.rare,c:o.special});
   $("#giftSheet").innerHTML=`<h2>🎁 서아에게 선물하기</h2>
-  <p class="sub">지금 서아는 <b>${STATES[st].e} ${STATES[st].ko}</b> 상태예요. 같은 선물도 서아 상태에 따라 반응이 달라요.<br>${UI("gift.note",{special:"\u0000"}).split("\u0000").map(esc).join(`<b style="color:var(--gold)">${esc(UI("gift.special"))}</b>`)}</p>
-  <div class="items">${GIFTS.map(g=>`<button class="item ${focus===g.id?"focus":""}" data-g="${g.id}">
-    ${g.rec===st?`<span class="rec">지금 추천</span>`:""}
-    <img class="gi" src="${g.icon}" alt=""><b>${g.name}</b><div class="p">💎 ${g.price}</div>
-    <div class="c">반응 ${got(g)} / 4 발견</div>
-    <div class="sp">✨ ${S.learned.includes(g.sign)?"배운 모습: "+SIGN[g.sign]:"새 모습을 배울 수 있어요"}</div></button>`).join("")}</div>`;
+  <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].e+" "+STATES[st].ko,bonus:B.rare||0}))}</p>
+  <div class="pity">${esc(UI("gift.pity",{n:pityLeft()}))}</div>
+  <div class="items">${GIFTS.map(g=>{const m=g.rec===st,o=Gacha.odds(g,m,B);return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
+    ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}
+    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">💎 ${g.price}</div>
+    <div class="odds">${esc(oddsLine(o))}</div></button>`}).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
   openSheet("#giftSheet");
 }
+// 3D 무대 위 자막(대화방에서 선물 대사). 앨범 다시 보기는 3D 아래 칸(#rcap)
+let subT;
+function stageSub(text){text=speechOnly(text);const b=$("#bubble");if(!text||!b)return;b.textContent=text;b.classList.add("on");clearTimeout(subT);subT=setTimeout(()=>b.classList.remove("on"),Math.max(3500,text.length*120))}
+// 선물 몸짓 재생(임시 재생 설정 play: 몸짓·표정·속도)
+function playGift(it,o={}){const p=it.play||{};Stage.play(p.m,{name:it.name,speed:p.speed,tag:o.tag||""});Stage.setFace(p.f||"soft");faceReset()}
+// 선물 주기: 💎 빼기 → 확률로 등급(기분 맞춤·천장 반영, 시연 패널 「다음 선물 결과」가 있으면 그것) → 그 등급 선물 몸짓 하나 → 무대에서 재생 + 대사 자막 + 대화 기록 → 도감
 function give(id){
   const g=gBy(id),st=curState();
-  if(S.dia<g.price){toast("💎가 부족해요. 시연 설정에서 충전할 수 있어요");return}
+  if(S.dia<g.price){toast(esc(UI("gift.noDia")));return}
   closeSheets();setTab("chat");openRoom("seoa");
   S.dia-=g.price;
-  const r=g.r[st],key=g.id+":"+st,first=!S.album[key],firstItem=!S.learned.includes(g.sign);
-  S.album[key]={at:Date.now(),scene:S.scene};
-  if(firstItem)S.learned.push(g.sign);
-  addMsg("g",`${g.e} ${g.name}을(를) 선물했어요`);
+  const matched=g.rec===st,F=S.giftNext;S.giftNext=null;
+  let it=F&&F.item?colBy(F.item):null,grade=it?it.grade:F&&F.grade?F.grade:Gacha.rollGrade(Gacha.odds(g,matched,GIFT.moodBonus),pityLeft(),GIFT.pity);
+  if(!it)it=Gacha.pickItem(COL.items,grade);
+  S.pity=Gacha.nextPity(grade,pityLeft(),GIFT.pity);
+  const line=Gacha.line(g,grade,matched),isNew=!S.col[it.id];
+  if(isNew)S.col[it.id]={at:Date.now(),line,scene:S.scene};
+  save();renderTop();
   burst(g.icon);
   setTimeout(()=>{
-    react(r,first?"✨ 새 모습":"");
-    addMsg("c",r.t,{tag:`${STATES[st].e} ${STATES[st].ko}일 때의 ${g.name} 반응 · ${MNAME[r.m]} · ${FACEKO[r.f]}`});
-    if(st==="sulky"&&!S.force){S.mood="normal"}
+    playGift(it);stageSub(line);
+    addMsg("g",UI("gift.logTag",{gift:g.name,grade:gradeKo(grade)}));
+    addMsg("c",line,{gift:it.id});
+    if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계 단계·호감도는 그대로
     renderTop();save();
-    const msgs=[];
-    if(first)msgs.push(`${esc(UI("gift.albumSaved"))} <b>(${Object.keys(S.album).length} / 16)</b>`);
-    if(firstItem)msgs.push(`✨ 서아가 <b>${SIGN[g.sign]}</b>을(를) 배웠어요<br><small>이제 대화 중에도 이 모습을 보여 줘요</small>`);
-    if(!first)msgs.push(`이미 본 반응이에요. 다른 상황에 주면 새 반응이 나와요`);
-    toast(msgs.join("<br>"),3800);
-    renderAlbum(key);
+    if(isNew)notifyNew(it);else toast(esc(UI("collection.already")),2200);
+    if(curTab==="album")renderAlbum(it.id);
   },700);
 }
 
@@ -1039,35 +1055,30 @@ function renderAlbum(fresh){
   const seg=`<div class="aseg"><button data-seg="first" class="${albumSeg==="first"?"on":""}">${esc(UI("album.tabFirst"))}</button><button data-seg="gift" class="${albumSeg==="gift"?"on":""}">${esc(UI("album.tabGift"))}</button></div>`;
   const bindSeg=()=>$("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
   if(albumSeg==="first"){
-    const slots=firstSlots(),got=slots.filter(x=>S.firsts.some(f=>f.mid===x.mid)).length,hints=(DATA.story||{}).hints||{};
+    const slots=firstSlots(),got=slots.filter(x=>S.col[x.mid]).length,hints=(DATA.story||{}).hints||{};
     // 진행도 「명장면 수집 2 / 15」: 숫자 앞까지는 굵게, 숫자 부분은 금색 (문구 data/ui.json album.firstProgress)
     const pg=UI("album.firstProgress",{got,total:slots.length}),pi=(()=>{const m=/\d/.exec(pg);return m?m.index:pg.length})();
     $("#album").innerHTML=seg+`<div class="alh"><b>${esc(pg.slice(0,pi).trim())}</b><span>${esc(pg.slice(pi))}</span></div>
     <div class="prog"><i style="width:${slots.length?got/slots.length*100:0}%"></i></div>
-    <div class="slots" style="margin-top:12px">${slots.map(x=>{const f=S.firsts.find(y=>y.mid===x.mid);
+    <div class="slots" style="margin-top:12px">${slots.map(x=>{const f=S.col[x.mid];
       if(!f&&isSoon(x.mid))return `<button class="slot soon" data-h="${x.mid}"><span class="e">✨</span><span class="hint">${esc((DATA.story||{}).soonText||"")}</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}</button>`;
       return f?`<button class="slot got" data-f="${x.mid}"><span class="s">${esc(MNAME[x.mid]||x.mid)}</span><span class="ln">${esc(speechOnly(f.line)||f.text)}</span><span class="d">${fmtD(f.at)}</span></button>`
         :`<button class="slot lock" data-h="${x.mid}"><span class="e">👤</span>${hints[x.mid]?`<span class="hint">${esc(hints[x.mid])}</span>`:`<span class="s">？</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}`}</button>`}).join("")}</div>`;
     bindSeg();
-    $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{const f=S.firsts.find(y=>y.mid===b.dataset.f),ln=speechOnly(f.line||f.text);
+    $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{const f={mid:b.dataset.f,...S.col[b.dataset.f]},ln=speechOnly(f.line||f.text);
       const ms=Math.max(Stage.dur(f.mid)*1000,Math.max(3500,Math.min(ln.length,70)*120))+300;  // 몸짓과 자막 중 늦게 끝나는 쪽
       if(f.scene!=null)sceneForReplay(f.scene,ms);
       Stage.play(f.mid);Stage.setFace("shy");faceReset();say(f.line||f.text,0,true)});
     $("#album").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const h=hints[b.dataset.h];if(h)toast(esc(h),2600)});
     return;
   }
-  const n=Object.keys(S.album).length;
-  $("#album").innerHTML=seg+`<div class="alh"><b>서아의 모습</b><span>${n} / 16</span></div>
-  <div class="prog"><i style="width:${n/16*100}%"></i></div>
-  <p class="alnote">선물을 주면 서아의 반응이 여기 영구로 남아요. 카드를 누르면 그때 장소에서 서아가 다시 보여 줘요.<br>빈칸은 아직 못 본 모습이에요. 힌트를 보고 대화에서 선물해 보세요.</p>
-  ${GIFTS.map(g=>`<div class="grp"><h3><img class="gi s" src="${g.icon}" alt=""> ${g.name} <small>💎 ${g.price}</small><span class="sig">${S.learned.includes(g.sign)?"✨ 배운 모습: "+SIGN[g.sign]:""}</span></h3>
-    <div class="slots">${SORDER.map(s=>{const k=g.id+":"+s,a=S.album[k];
-      return a?`<button class="slot got ${fresh===k?"fresh":""}" data-k="${k}"><span class="e">${STATES[s].e}</span><span class="s">${STATES[s].ko}</span><span class="d">${MNAME[g.r[s].m]}</span><span class="d">${fmtD(a.at)}</span></button>`
-              :`<button class="slot lock" data-lock="${k}"><span class="e">${STATES[s].e}</span><span class="s">？</span><span class="d">${STATES[s].ko}일 때</span></button>`}).join("")}</div></div>`).join("")}`;
+  // 9-A 임시: 선물 몸짓 칸(9-B 에서 명장면 수집 하나로 합침)
+  const gl=COL.items.filter(x=>x.source==="gift"),gn=gl.filter(x=>S.col[x.id]).length;
+  $("#album").innerHTML=seg+`<div class="alh"><b>${esc(UI("album.tabGift"))}</b><span>${gn} / ${gl.length}</span></div>
+  <div class="prog"><i style="width:${gn/gl.length*100}%"></i></div>
+  <div class="slots" style="margin-top:12px">${gl.map(x=>S.col[x.id]?`<button class="slot got ${fresh===x.id?"fresh":""}" data-k="${x.id}"><span class="s">${esc(x.name)}</span><span class="d">${esc(gradeKo(x.grade))}</span><span class="d">${fmtD(S.col[x.id].at)}</span></button>`:`<button class="slot lock"><span class="e">👤</span><span class="d">${esc(gradeKo(x.grade))}</span></button>`).join("")}</div>`;
   bindSeg();
-  $("#album").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const[gid,s]=b.dataset.k.split(":"),g=gBy(gid),a=S.album[b.dataset.k];setScene(a.scene||0);react(g.r[s],"",true)});
-  $("#album").querySelectorAll("[data-lock]").forEach(b=>b.onclick=()=>{const[gid,s]=b.dataset.lock.split(":"),g=gBy(gid);
-    toast(`${STATES[s].e} 서아가 <b>${STATES[s].ko}</b>일 때 ${g.e} ${g.name}을(를) 주면…?<br><small>대화에서 선물해 보세요</small>`,3000);setTimeout(()=>{setTab("chat");openRoom("seoa");giftSheet(gid)},900)});
+  $("#album").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const it=colBy(b.dataset.k),a=S.col[it.id];sceneForReplay(a.scene||0,4000);playGift(it);say(a.line,0,true)});
 }
 
 // ───────────────────────── 시연 설정 패널 (5단계) ─────────────────────────
@@ -1105,7 +1116,7 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Object.assign(S,{bond:0,album:{},learned:[],mood:"normal",birthday:false,force:null,scene:0,story:{},firsts:[],unlocked:[],introDone:false,demoNext:null,placeLock:false});
+    Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
@@ -1113,7 +1124,7 @@ const Demo=(()=>{
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
-    album(){S.firsts=[];S.album={}}
+    album(){S.col={};S.pity=null;S.giftNext=null}
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
   // 온보딩(7-A): 다시 보기 = onboarded 만 지우고 첫 화면부터. 장면 0 「앱 처음 열기」 = 전체 초기화 후 첫 화면
@@ -1160,7 +1171,7 @@ const Demo=(()=>{
       const fl=st.stage_flags||[];
       h+=`<h4>${esc(T("sec.flags"))} <small>${esc(T("flagNote"))}</small></h4><div class="row">${((DATA.demo||{}).flags||[]).map(f=>B("flag",esc(f),{v:f,on:fl.includes(f)})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.place"))}</h4><div class="row">${SCENES.map((x,i)=>B("place",esc(x.name),{v:i,on:S.scene===i})).join("")}</div>`;
-      const ids=unlockedIds(),seen=new Set(S.firsts.map(f=>f.mid));
+      const ids=unlockedIds(),seen=new Set(Object.keys(S.col));
       h+=`<h4>${esc(T("sec.motions"))} <small>${esc(T("motionPlay"))}</small></h4><div class="row">${B("unlockAll",esc(T("unlockAll")))}${B("lockAll",esc(T("lockAll")))}</div>
         <div class="mlist">${allMotions().map(id=>{const o=ids.includes(id);return `<div class="mrow"><button data-a="play" data-v="${id}" class="pl ${o?"open":""}">${id} ${esc(MNAME[id]||id)}<i>${esc(o?T("motionOpen"):T("motionLocked"))}${seen.has(id)?" · "+esc(T("motionSeen")):""}</i></button>${B("preview",esc(T("motionPreview")),{v:id,cls:"pv",title:T("motionPreviewTitle")})}</div>`}).join("")}</div>`;
       h+=`<div class="keys">${esc(T("keysNote"))}</div>`;
@@ -1224,7 +1235,7 @@ const Scenes=(()=>{
       // 예약된 연출이 매번 다시 나오게: 이 장면 단계보다 위 몸짓·예약 사건 몸짓의 해금과 앨범 기록을 지움
       const drop=new Set();for(let k=(sc.stage||1)+1;k<=6;k++)(((DATA.story||{}).unlock||{stage:{}}).stage[k]||{motions:[]}).motions.forEach(id=>drop.add(id));
       if(sc.next&&sc.next.event)evMotions(sc.next.event).forEach(id=>drop.add(id));
-      S.firsts=S.firsts.filter(f=>!drop.has(f.mid));S.unlocked=S.unlocked.filter(id=>!drop.has(id));
+      drop.forEach(id=>delete S.col[id]);S.unlocked=S.unlocked.filter(id=>!drop.has(id));
       S.demoNext=sc.next||null;
       S.placeLock=!!sc.place;  // 이 장면 동안 장소는 장면 설정·서버 location 으로만 바뀜. 다른 장면(①·⑥)·전체 초기화에서 풀림
       Stage.setFace("neutral");setTab("chat");openRoom("seoa");
@@ -1355,11 +1366,11 @@ function startStory(id){
 
 // ───────────────────────── 마이 ─────────────────────────
 function renderMy(){
-  const {i,nx,pct}=renderBond();const n=Object.keys(S.album).length;
+  const {i,nx,pct}=renderBond();const n=COL.items.filter(x=>S.col[x.id]).length;
   $("#my").innerHTML=`<h2>나와 서아</h2>
   <div class="card"><h3>💗 관계 ${i+1}단계 · ${stageName(i+1)}</h3>
     <div class="bondbox"><div class="prog"><i style="width:${pct}%"></i></div><span>${nx?"다음: "+nx.n:"최고 단계"}</span></div>
-    <p class="alnote" style="margin:8px 0 0">관계는 <b>대화로만</b> 깊어져요. 선물로는 올라가지 않아요.<br>📔 서아의 모습 ${n}/16 · ✨ 배운 모습 ${S.learned.length}개</p></div>
+    <p class="alnote" style="margin:8px 0 0">관계는 <b>대화로만</b> 깊어져요. 선물로는 올라가지 않아요.<br>${esc(UI("my.collection",{n,total:COL.items.length}))}</p></div>
   <div class="card plus"><h3>✨ moti PLUS ${S.plus?"<small style='color:#6ee7b7'>· 이용 중</small>":""}</h3>
     <ul><li>💬 하루 대화 무제한 (무료는 하루 30번)</li><li>🧠 서아가 예전 대화까지 기억해요</li><li>📩 서아가 먼저 말을 걸어요</li><li>💎 매달 300 지급</li></ul>
     <button class="cta" id="plusBtn">${S.plus?"구독 해지 (시연)":"월 9,900원으로 시작 (시연)"}</button></div>
