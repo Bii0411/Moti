@@ -24,7 +24,7 @@
   "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
   "stage": { "bigAspect": 0.82, "bigMaxRatio": 0.50, "minLogPx": 80, "growMs": 700, "ease": "ease-in-out", "motionDelayMs": 250, "backDelayMs": 1500, "shrinkMs": 800, "pushIn": 0.08, "pushInMs": 600, "pushBackMs": 1200, "zoomCooldownTurns": 5 },
   "_outfits": "서아 의상(14단계). files = 의상별 모델 파일. 처음엔 ops(작전복), 관계 단계가 comfortStage(3 = 썸) 이상이고 privatePlaces 장소(0 = 바 1층 와인 바)에 있을 때만 private(흰 옷, 16단계: 배경과 세트). 특별 에피소드(data/episodes.json special)의 outfit 이 있으면 그 에피소드를 시작한 뒤로 그 의상(오프닝 다시 보기·다른 에피소드·초기화 때 풀림)",
-  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261124", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb?v=2", "dracula": "seoa_dracula.glb?v=3", "bar": "seoa_bar.glb" }, "comfortStage": 3, "privatePlaces": [0] },
+  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261124b", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb?v=2", "dracula": "seoa_dracula.glb?v=3", "bar": "seoa_bar.glb" }, "comfortStage": 3, "privatePlaces": [0] },
   "_keyMoment": "결정적 순간(17-1B). 서아 답장이 올 때 신호 중 하나라도 걸리면 화면 확대 없이 카메라만 다가감(stage.pushIn). 화면에 글자·숫자로 알리지 않음. 신호: 내 메시지 괄호 ( ) 안에 touchWords 단어 · 처음으로 nameWords(이름)·heartWords(마음 표현)가 나옴(각 한 번, 저장값 S.fx.once, 전체 초기화로 비움) · 마지막 대화 뒤 reunionHours 시간 넘어 첫 답장 · 답장에 감정 값이 있을 때 직전 감정과 다르고 strongEmotions 에 듦 · 서버 v2 판정의 호감 변화가 judgeAffection 이상이거나 새 플래그(다음 답장). 내 메시지 cooldownTurns 턴에 한 번까지. 답장에 몸짓이 없으면 emotionMotions(감정 → 몸짓, 열린 것만) → 지금 단계의 열린 몸짓 중 최근 3번에 안 나온 것. 고른 몸짓이 레어·시크릿이고 처음 보는 것이면 확대 규칙(stage.zoomCooldownTurns)이 우선",
   "keyMoment": {
     "cooldownTurns": 8,
