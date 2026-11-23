@@ -85,9 +85,62 @@
     "already": "이미 본 모습이에요"
   },
   "my": {
-    "_my": "마이 페이지 관계 카드 아래 줄. {n}·{total} = 모은 칸·전체 칸. plusPhotos = PLUS 혜택 줄(10단계, {plusCap} = data/photos.json slots.plusCap)",
+    "_my": "마이 페이지 카드 문구(12단계). lv·next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
     "collection": "명장면 수집 {n} / {total}",
-    "plusPhotos": "🖼 사진 {plusCap}장까지 저장"
+    "plusPhotos": "사진 {plusCap}장까지 저장",
+    "lv": "Lv.{n}",
+    "next": "다음 단계 · {name}",
+    "max": "최고 단계",
+    "bondNote1": "관계는 ",
+    "bondNoteB": "대화로만",
+    "bondNote2": " 깊어져요. 선물로는 올라가지 않아요.",
+    "collectionLabel": "명장면 수집",
+    "plusPrice": "9,900원",
+    "plusPer": "/ 월",
+    "plusOn": "이용 중",
+    "perks": [
+      {
+        "icon": "infinity",
+        "text": "하루 대화 무제한",
+        "sub": "무료는 하루 30번"
+      },
+      {
+        "icon": "history",
+        "text": "서아가 예전 대화까지 기억해요"
+      },
+      {
+        "icon": "message",
+        "text": "서아가 먼저 말을 걸어요"
+      },
+      {
+        "icon": "diamond",
+        "text": "매달 300 다이아 지급"
+      },
+      {
+        "icon": "photo",
+        "text": "사진 {plusCap}장까지 저장"
+      }
+    ],
+    "plusStart": "PLUS 시작하기",
+    "plusStop": "구독 해지",
+    "demoNote": "시연 버전이라 실제로 결제되지 않아요",
+    "chargeTitle": "다이아 충전",
+    "packs": [
+      {
+        "dia": 100,
+        "price": "7,000원"
+      },
+      {
+        "dia": 500,
+        "price": "35,000원",
+        "tag": "인기"
+      },
+      {
+        "dia": 1200,
+        "price": "84,000원"
+      }
+    ],
+    "chargeNote": "1다이아 = 70원 · 선물과 특별 에피소드에 써요"
   },
   "fn": {
     "_fn": "＋ 기능판(10단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md). gift·camera·photo = 기능 이름. open·close = ＋ 버튼의 접근성 이름(화면에는 아이콘만)",
