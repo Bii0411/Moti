@@ -1,0 +1,4 @@
+/* moti 사진(10단계): 촬영 화면 · 사진 시트 · 크게 보기. 코드 photos.js, 값 data/photos.json
+   blur·filter·그림자·그라데이션 없음(아이폰 사파리). 움직임은 투명도·transform 전환만 */
+.ic{width:24px;height:24px;display:block}
+
