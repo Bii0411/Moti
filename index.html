@@ -277,7 +277,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .roomhd{display:flex;align-items:center;gap:10px;padding:2px 12px 8px}
 .roomhd .bk{font-size:24px;padding:0 6px 2px 0;line-height:1}
 .roomhd .av{width:34px;height:34px;border-radius:50%;background:center 18%/cover}
-.roomhd b{font-size:15px}.roomhd small{font-size:11px;color:var(--sub);display:block}
+.roomhd b{font-size:15px}.roomhd small{font-size:11px;color:var(--sub);display:block}.roomhd small[hidden]{display:none}
 /* 16: 에피소드 중 「본 이야기로」 */
 .roomhd .thr{margin-left:auto;font-size:11px;font-weight:700;color:var(--pri2,#c4b5fd);border:1px solid #6d4bd1;border-radius:999px;padding:5px 10px;white-space:nowrap;max-width:52%;overflow:hidden;text-overflow:ellipsis}
 #room{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
@@ -653,12 +653,12 @@ const Stage=(()=>{
     md.root.updateMatrixWorld(true);const h=y("Head"),nk=y("neck")||y("Neck");
     if(h)HY0=h;return H0=h&&nk?h+(camCfg().headTopK||2.4)*(h-nk):1.6}
   // 25: 카메라가 머리를 따라 내려감(data/config.json camera.follow). 그 몸짓이 재생되는 동안만, 머리가 평소 높이(HY0)보다 내려간 만큼 × 몫.
-  // 위로는 따라가지 않음. smoothSec 동안 부드럽게 따라가고, 몸짓이 끝나면 같은 속도로 원래 구도로 돌아옴
+  // 위로는 따라가지 않음. 내려갈 때 smoothSec, 다시 올라갈 때 upSec(없으면 smoothSec)로 부드럽게 따라가고, 몸짓이 끝나면 원래 구도로 돌아옴
   let HY0=0,folY=0,folLast=0;const folV=new THREE.Vector3();
   function followDy(now){const F=camCfg().follow||{},k=cur&&F.motions?+F.motions[cur.id]||0:0;
     const dt=folLast?Math.min(.1,Math.max(0,now-folLast)/1000):0;folLast=now;
     let goal=0;if(k&&md&&md.bones.Head){height();goal=Math.min(0,md.bones.Head.getWorldPosition(folV).y-HY0)*k}
-    folY+=(goal-folY)*(1-Math.exp(-dt/(F.smoothSec||.3)));if(Math.abs(folY)<1e-4&&!goal)folY=0;return folY}
+    folY+=(goal-folY)*(1-Math.exp(-dt/(goal>folY&&F.upSec?F.upSec:(F.smoothSec||.3))));if(Math.abs(folY)<1e-4&&!goal)folY=0;return folY}  // 25-1: 다시 올라갈 때(일어설 때)는 upSec 로 더 빨리
   const camCfg=()=>(DATA.config&&DATA.config.camera)||{};
   const landscape=()=>{const a=$(".app");return a.clientWidth>a.clientHeight};
   // name: data/config.json camera 의 구도 이름, 또는 {top,bottom,width,lift} 직접(입장권 구도 등)
@@ -1884,7 +1884,7 @@ function openRoom(cid){
   S.room=cid;S.read[cid]=chatOf(cid).length;save();
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
-  $("#roomSub").textContent=cid==="seoa"?"3D · 표정 · 선물":"2D · 3D는 준비 중이에요";Thread.chip(cid);
+  Thread.chip(cid);  // 25-1: 이름 밑 설명 줄은 특별 에피소드 안에서만(data/ui.json thread.sub)
   $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
@@ -1917,8 +1917,10 @@ const Thread={
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
     const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");return !t},
   // 대화방 머리의 「본 이야기로」 단추(에피소드 중일 때만)
-  chip(cid){const b=$("#thrBtn");if(!b)return;const e=cid==="seoa"?this.ep():null;b.style.display=e?"":"none";if(!e)return;
-    b.textContent=UI("thread.back",{name:e.name});$("#roomSub").textContent=UI("thread.sub",{name:e.name});b.onclick=()=>{this.go("main");$("#roomSub").textContent="3D · 표정 · 선물";if(!chatOf("seoa").length)start();renderLog();Stage.setFace("soft");toast(esc(UI("thread.backToast")),1800)}}
+  // 대화방 이름 밑 설명 줄(25-1): 특별 에피소드 안에서만 thread.sub, 그 밖에는 비우고 숨김(이름만)
+  chip(cid){const b=$("#thrBtn");if(!b)return;const e=cid==="seoa"?this.ep():null;b.style.display=e?"":"none";
+    const sub=$("#roomSub");sub.textContent=e?UI("thread.sub",{name:e.name}):"";sub.hidden=!e;if(!e)return;
+    b.textContent=UI("thread.back",{name:e.name});b.onclick=()=>{this.go("main");if(!chatOf("seoa").length)start();renderLog();Stage.setFace("soft");toast(esc(UI("thread.backToast")),1800)}}
 };
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)

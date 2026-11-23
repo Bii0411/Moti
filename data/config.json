@@ -24,8 +24,8 @@
     "motion": { "top": 1.05, "bottom": 0.40, "width": 0.48, "lift": 0.03 },
     "full": { "top": 1.05, "bottom": -0.03, "width": 0.7, "lift": 0.03 },
     "moveMs": 350,
-    "_follow": "25: 몸짓이 재생되는 동안만 카메라가 서아 머리를 따라 내려감(위로는 안 따라감). motions = 몸짓 번호 → 따라가는 몫(1 = 머리가 내려간 만큼 그대로, 0.5 = 절반, 0 = 안 따라감). smoothSec = 따라가고 돌아오는 부드러움(초, 클수록 느림). 지금은 x16 몸 낮춰 경계하기만",
-    "follow": { "motions": { "x16": 0.85 }, "smoothSec": 0.35 },
+    "_follow": "25: 몸짓이 재생되는 동안만 카메라가 서아 머리를 따라 내려감(위로는 안 따라감). motions = 몸짓 번호 → 따라가는 몫(1 = 머리가 내려간 만큼 그대로, 0.5 = 절반, 0 = 안 따라감). smoothSec = 따라 내려가는 부드러움(초, 클수록 느림), upSec = 서아가 일어설 때 다시 올라가는 부드러움(25-1, 짧게 해야 일어서는 머리가 화면 위로 안 잘림). x16 몸 낮춰 경계하기, x02 허리 숙이기(25-1)",
+    "follow": { "motions": { "x16": 0.85, "x02": 0.85 }, "smoothSec": 0.35, "upSec": 0.1 },
     "_photo": "촬영 화면(10단계, 24단계에서 data/photos.json camera 를 옮겨 옴). 화면 가운데 3:4 틀(사진과 같은 비율) = 찍히는 범위. 구도는 캐릭터 키 비율(발=0, 머리 꼭대기=1): far = 가장 멀리(머리 위 여백 ~ 무릎 위, 이보다 멀어지지 않음), near = 가장 가까이(얼굴). 위아래 각도(pitch)를 바꿔도 틀의 위·아래 끝이 이 높이에 맞게 카메라 자리를 계산하므로 무릎 아래는 나오지 않는다. startZoom·startYawDeg·startPitchDeg = 처음 구도(zoom 0 = far, 1 = near). yawMaxDeg = 정면 기준 좌우 최대 각도, degPerPx = 가로로 1px 끌 때 도는 각도. pitchMinDeg ~ pitchMaxDeg = 위아래 각도(0 = 수평, + = 위에서 내려다봄, − = 아래에서 올려다봄. −5 = 눈높이보다 5도 아래, 30 = 위에서 30도), pitchDegPerPx = 세로로 1px 끌 때(아래로 끌면 위에서 내려다보는 쪽). pinchK = 두 손가락 벌린 비율(log) 1당 확대 양, wheelK = 휠 1당 확대 양. shadow = 발밑 그림자(가로·세로 m, 진하기). flashMs = 셔터 때 하얀 깜빡임, framePad = 틀 양옆 여백(px, 틀 밖은 어두운 단색). recentMs = 몸짓이 끝난 지 이 시간 안이면 그 몸짓을 반복. fly = 찍은 직후 틀 안 장면이 오른쪽 최근 사진 칸으로 날아가는 움직임(ms 동안, ease 곡선, 도착할 때 투명도 endOpacity) + 도착한 칸이 bounceScale 배로 살짝 커졌다 bounceMs 동안 돌아옴. transform·opacity 만 씀",
     "photo": {
       "recentMs": 1000,
