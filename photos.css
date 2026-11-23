@@ -53,6 +53,8 @@
 .pth{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--card);padding:0}
 .pth img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
 .pth.tall{grid-row:span 2;aspect-ratio:auto}
+/* 포토부스 사진(11): 세로로 긴 사진을 자르지 않고 칸 안에 다 보이게(남는 곳은 프레임 색) */
+.pth.tall img{object-fit:contain}
 .plike{position:absolute;right:5px;top:5px;color:var(--pink);background:#0009;border-radius:999px;padding:3px}
 .plike .ic{width:14px;height:14px}
 .plike svg path{fill:currentColor}

@@ -91,7 +91,7 @@ const Shot=(()=>{
     const thumb=await encode(scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
     return{full,thumb,w:W,h:H,place:sc.name,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
   }
-  return{take,loadImg};
+  return{take,loadImg,cover,dimLayer,encode,scaled};
 })();
 
 // ───────────────────────── 촬영 화면 ─────────────────────────
@@ -177,8 +177,10 @@ const Cam=(()=>{
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
   // 셔터 소리: 짧은 잡음 두 덩어리(찰-칵). 아이폰은 누른 그 순간(같은 작업) 안에서 소리 장치를 깨워야 해서 셔터 처리 맨 앞에서 부름
   let ac=null;
+  // 소리 장치 깨우기(포토부스: 「촬영」을 누른 순간에 깨워 두면 카운트다운 뒤 타이머에서도 소리가 남)
+  function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume()}catch(e){}return ac}
   function sound(){const s=PCFG().sound||{};if(s.on===false)return;
-    try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();const t=ac.currentTime+.01;
+    try{if(!audio())return;const t=ac.currentTime+.01;
       (s.clicks||[]).forEach(k=>{const n=Math.max(1,Math.ceil(ac.sampleRate*k.dur)),b=ac.createBuffer(1,n,ac.sampleRate),ch=b.getChannelData(0);
         for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
         const src=ac.createBufferSource();src.buffer=b;const f=ac.createBiquadFilter();f.type="bandpass";f.frequency.value=k.freq||3000;f.Q.value=k.q||1;
@@ -197,7 +199,7 @@ const Cam=(()=>{
     busy=false;render();
   }
   Photos.onChange(()=>{if(on)render()});
-  return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,state:()=>({yaw,zoom,info,paused}),view:(y,z)=>{yaw=y;zoom=z}};
+  return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,sound,audio,state:()=>({yaw,zoom,info,paused}),view:(y,z)=>{yaw=y;zoom=z}};
 })();
 
 // ───────────────────────── 사진 화면 ─────────────────────────
@@ -214,7 +216,7 @@ const PhotoUI=(()=>{
     el.innerHTML=`<div class="phd"><h2>${esc(T("title"))}</h2><span class="${n>=cap?"full":""}">${esc(T("count",{n,cap}))}</span></div>
       <div class="pprog ${n>=cap?"full":""}"><i style="width:${cap?Math.min(100,n/cap*100):0}%"></i></div>
       <div class="aseg pseg">${["all","liked","booth"].map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
-      ${L.length?`<div class="pgrid">${L.map(m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`).join("")}</div>`
+      ${L.length?`<div class="pgrid">${L.map(m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"${m.kind==="booth"&&m.frameColor?` style="background:${esc(m.frameColor)}"`:""}><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`).join("")}</div>`
         :`<p class="pempty">${esc(T("empty."+seg))}</p>`}
       <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${esc(T("growPrice",{price:c.stepPrice||50}))}</b></button>
         ${S.plus?"":`<button class="prow plus" data-p="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`;
@@ -277,7 +279,8 @@ const PhotoUI=(()=>{
     g.fillStyle=s.color||"rgba(255,255,255,.85)";g.fillText(txt,bx+px,by+bh/2);
     return await new Promise(r=>c.toBlob(r,"image/jpeg",.9))}
   const fname=m=>{const d=new Date(m.at);return `moti-${d.getFullYear()}${P2(d.getMonth()+1)}${P2(d.getDate())}-${P2(d.getHours())}${P2(d.getMinutes())}${P2(d.getSeconds())}.jpg`};
-  async function prepShare(id,b){const m=Photos.list().find(x=>x.id===id);const mb=await marked(b);if(vIds[vi]!==id)return;shareF={id,file:new File([mb],fname(m),{type:"image/jpeg"})};return shareF}
+  // 포토부스 사진(11)은 아래 줄에 이미 「moti · 윤서아」가 있어서 표시를 더 넣지 않음
+  async function prepShare(id,b){const m=Photos.list().find(x=>x.id===id);const mb=m&&m.kind==="booth"?b:await marked(b);if(vIds[vi]!==id)return;shareF={id,file:new File([mb],fname(m),{type:"image/jpeg"})};return shareF}
   // 공유 창을 열 수 있는지(?share=off 로 못 여는 브라우저 흉내)
   const canShare=f=>qs.get("share")!=="off"&&!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));
   async function share(){const m=curM();if(!m)return;
@@ -287,8 +290,8 @@ const PhotoUI=(()=>{
     try{await navigator.share({files:[f]})}catch(e){if(!e||e.name!=="AbortError")setMenu(true)}}
   function setMenu(v){menu=!!v;const el=$("#pvMenu");if(el)el.classList.toggle("on",menu)}
   async function download(){setMenu(false);const m=curM();if(!m)return;let f=shareF&&shareF.id===m.id?shareF.file:null;
-    if(!f){const r=await prepShare(m.id,await Photos.blob(m.id));f=r&&r.file}if(!f)return;
-    const u=URL.createObjectURL(f),a=document.createElement("a");a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+    if(!f){const r=await prepShare(m.id,await Photos.blob(m.id));f=r&&r.file}if(!f)return;saveFile(f)}
+  function saveFile(f){const u=URL.createObjectURL(f),a=document.createElement("a");a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
   // ── 지우기(확인 한 번) ──
   function askDelete(){const el=$("#pConfirm");
     el.innerHTML=`<div class="pcbox" role="alertdialog" aria-modal="true"><p>${esc(T("delConfirm"))}</p><div><button data-k="cancel">${esc(T("delCancel"))}</button><button data-k="ok" class="danger">${esc(T("delOk"))}</button></div></div>`;
@@ -309,5 +312,5 @@ const PhotoUI=(()=>{
     await Photos.addMany(items);return need}
   Photos.onChange(()=>{if(sheetOn())render()});
   // sharedBlob: 공유용 표시가 들어간 이미지(확인·보고서 캡처용)
-  return{sheet,render,fullSheet,view,fill,closeView,isViewOn:()=>V().classList.contains("on"),sharedBlob:async id=>marked(await Photos.blob(id))};
+  return{sheet,render,fullSheet,view,fill,closeView,canShare,saveFile,fname,isViewOn:()=>V().classList.contains("on"),sharedBlob:async id=>marked(await Photos.blob(id))};
 })();
