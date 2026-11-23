@@ -36,20 +36,22 @@
     "album": "앨범"
   },
   "gift": {
-    "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절). moodNote 의 {mood} = 지금 기분(이모지+이름), {bonus} = data/gifts.json moodBonus.rare. odds 의 {a}·{b}·{c} = 일반·희귀·특별 %(기분 맞춤 적용 뒤). pity 의 {n} = 천장 남은 횟수. logTag = 대화 기록에 남는 선물 결과 줄",
+    "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절). moodNote 의 {mood} = 지금 기분(이모지+이름), {bonus} = data/gifts.json moodBonus.rare. odds 의 {a}·{b}·{c} = 일반·희귀·특별 %(기분 맞춤 적용 뒤). pity 의 {n} = 천장 남은 횟수. logTag = 대화 기록에 남는 선물 결과 줄. title = 선물 창 제목(18)",
+    "title": "서아에게 선물하기",
     "moodNote": "지금 서아 {mood} · 맞는 선물은 레어 +{bonus}%p",
     "match": "기분 맞춤",
     "odds": "일반 {a}% · 레어 {b}% · 시크릿 {c}%",
     "pity": "{n}번 안에 레어 확정",
-    "noDia": "💎가 부족해요",
+    "noDia": "다이아가 부족해요",
     "logTag": "🎁 {gift} · {grade}"
   },
   "chat": {
-    "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김)",
-    "seoaFirst": "＋ 에서 선물하고 사진도 찍어요"
+    "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",
+    "seoaFirst": "＋ 에서 선물하고 사진도 찍어요",
+    "placeChanged": "장소가 바뀌었어요 · {place}"
   },
   "home": {
-    "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
+    "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시, storySceneTag 는 첫 장면 무대 위 표시(18)",
     "sorts": {
       "rec": "추천",
       "hot": "인기 랭킹",
@@ -67,9 +69,10 @@
     "soon": "곧 공개돼요",
     "specialNote": "이 이야기에서만 보는 모습이 있어요",
     "motion": "전용 모션 · {name}",
-    "storyStart": "📖 특별 이야기 「{name}」 시작",
-    "storyTag": "📖 이야기 전용 장면 · {name}",
-    "noDia": "💎가 부족해요"
+    "storyStart": "특별 이야기 「{name}」 시작",
+    "storyTag": "이야기 전용 장면 · {name}",
+    "storySceneTag": "이야기 장면",
+    "noDia": "다이아가 부족해요"
   },
   "collection": {
     "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). giftGrade = 선물 결과 카드 첫 줄({grade} 등급 이름, {gift} 선물 이름, 17-2). owned = 선물로 이미 모은 몸짓이 나왔을 때 카드 셋째 줄(17-2, 예전 already 「이미 본 모습이에요」 알림을 대신함)",
@@ -86,7 +89,7 @@
     "owned": "이미 모은 모습"
   },
   "my": {
-    "_my": "마이 페이지 카드 문구(12단계). lv·next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
+    "_my": "마이 페이지 카드 문구(12단계). charged = 충전 버튼을 눌렀을 때 알림({n} 다이아 개수, 18). lv·next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
     "collection": "명장면 수집 {n} / {total}",
     "plusPhotos": "사진 {plusCap}장까지 저장",
     "lv": "Lv.{n}",
@@ -97,6 +100,7 @@
     "bondNote2": " 쌓여요",
     "collectionLabel": "명장면 수집",
     "plusPrice": "9,900원",
+    "charged": "다이아 {n} 충전 (시연)",
     "plusPer": "/ 월",
     "plusOn": "이용 중",
     "perks": [
@@ -175,8 +179,8 @@
     "desc": "한 장 지우거나 칸을 늘려 주세요",
     "optDelete": "사진 하나 지우기",
     "optGrow": "칸 늘리기 +10 · 💎 {price}",
-    "optPlus": "✨ PLUS · 사진 {plusCap}장",
-    "noDia": "💎가 부족해요"
+    "optPlus": "PLUS · 사진 {plusCap}장",
+    "noDia": "다이아가 부족해요"
   },
   "photo": {
     "_photo": "사진 시트·크게 보기(10단계). count = 진행도({n}/{cap}). seg = 묶음 버튼, empty = 묶음별 빈 상태. growRow·growPrice·plusRow·plusPrice = 아래 줄. grown = 칸 늘린 뒤 알림. share·like·delete = 크게 보기 아이콘의 접근성 이름. info = 정보 줄 첫째 줄({name} 몸짓, 몸짓이 없으면 cam.idle), infoBooth = 포토부스 사진 정보 줄, date = 날짜 모양. mark = 공유 이미지 구석 표시. plusStart = PLUS 를 시작했을 때(마이 페이지와 같은 문구). ariaClose = 크게 보기 닫기 버튼 접근성 이름",
@@ -191,12 +195,12 @@
     "empty": {
       "all": "아직 사진이 없어요",
       "liked": "좋아요한 사진이 없어요.",
-      "booth": "앨범의 포토부스에서 네 컷 사진을 만들어 보세요.",
+      "booth": "포토부스에서 찍은 네 컷이 여기 모여요",
       "received": "아직 서아가 보낸 사진이 없어요."
     },
     "growRow": "칸 늘리기 +10",
     "growPrice": "💎 {price}",
-    "plusRow": "✨ PLUS · 사진 {plusCap}장",
+    "plusRow": "PLUS · 사진 {plusCap}장",
     "plusPrice": "월 9,900원",
     "grown": "사진 칸이 {cap}칸이 됐어요",
     "share": "공유하기",
@@ -211,7 +215,7 @@
     "deleted": "사진을 지웠어요",
     "download": "내려받기",
     "mark": "moti · 윤서아",
-    "plusStart": "✨ PLUS 시작 · 💎 300 지급",
+    "plusStart": "PLUS 시작 · 다이아 300 지급",
     "ariaClose": "닫기"
   },
   "booth": {
