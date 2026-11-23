@@ -75,14 +75,14 @@
       "top": 1.04, "bottom": 0.63, "width": 0.42, "lift": 0.1, "center": 1,
       "lens": { "neck": 0.3, "head": 0.7, "eyes": 1, "neckMax": 20, "headMax": 35, "eyeMax": 12 },
       "yaw": [-14, -8, 8, 14], "shift": [0], "bgX": [0.5],
-      "faces": ["soft", "fun", "joy", "shy"],
-      "avoid": ["m10", "m23", "m21", "m18", "c05", "m06"]
+      "faces": ["soft", "fun", "shy"],
+      "avoid": ["m10", "m23", "m21", "m18", "c05", "m06", "m09", "m11"]
     },
     "landscape": {
       "top": 1.32, "bottom": -0.18, "width": 1.25, "lift": 0.02, "center": 0,
       "yaw": [-42, -30, 30, 42], "shift": [0.2, -0.2], "bgX": [0.3, 0.5, 0.7],
       "faces": ["soft", "neutral"],
-      "avoid": ["m23", "m21", "c05", "m18", "m06"]
+      "avoid": ["m10", "m23", "m21", "c05", "m18", "m06"]
     }
   },
   "_moment": "몸짓을 멈출 순간(0~100%). 입장권 필름 사진(data/onboarding.json film.shots)에 값이 있으면 그 값 → data/booth.json moments → default",

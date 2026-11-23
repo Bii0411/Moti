@@ -209,16 +209,16 @@ const PhotoUI=(()=>{
   const T=(k,v)=>UI("photo."+k,v);
   const P2=n=>String(n).padStart(2,"0");
   const fmt=t=>{const d=new Date(t);return T("date",{y:d.getFullYear(),m:P2(d.getMonth()+1),d:P2(d.getDate()),hh:P2(d.getHours()),mm:P2(d.getMinutes())})};
-  const shown=()=>Photos.list().filter(m=>seg==="all"||(seg==="liked"&&m.liked)||(seg==="booth"&&m.kind==="booth"));
+  const shown=()=>Photos.list().filter(m=>seg==="all"||(seg==="liked"&&m.liked)||(seg==="booth"&&m.kind==="booth")||(seg==="received"&&m.kind==="received"));
+  const SEG=["all","liked","booth","received"];  // 12: 「받은 사진」 더함
   const sheetOn=()=>$("#photoSheet").classList.contains("on");
   function sheet(){render();if(!sheetOn()){closeSheets();openSheet("#photoSheet")}}
   function render(){
     const el=$("#photoSheet"),n=Photos.count(),cap=Photos.cap(),L=shown(),c=PCFG().slots||{};
     el.innerHTML=`<div class="phd"><h2>${esc(T("title"))}</h2><span class="${n>=cap?"full":""}">${esc(T("count",{n,cap}))}</span></div>
       <div class="pprog ${n>=cap?"full":""}"><i style="width:${cap?Math.min(100,n/cap*100):0}%"></i></div>
-      <div class="aseg pseg">${["all","liked","booth"].map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
-      ${L.length?`<div class="pgrid">${L.map(m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"${m.kind==="booth"&&m.frameColor?` style="background:${esc(m.frameColor)}"`:""}><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`).join("")}</div>`
-        :`<p class="pempty">${esc(T("empty."+seg))}</p>`}
+      <div class="aseg pseg">${SEG.map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
+      ${seg==="received"?received(L,cap):L.length?grid(L):`<p class="pempty">${esc(T("empty."+seg))}</p>`}
       <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${esc(T("growPrice",{price:c.stepPrice||50}))}</b></button>
         ${S.plus?"":`<button class="prow plus" data-p="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`;
     el.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{seg=b.dataset.seg;render()});
@@ -226,6 +226,17 @@ const PhotoUI=(()=>{
     el.querySelector('[data-p="grow"]').onclick=()=>Photos.buySlots();
     const pl=el.querySelector('[data-p="plus"]');if(pl)pl.onclick=()=>Photos.startPlus();
   }
+  const cell=m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"${m.kind==="booth"&&m.frameColor?` style="background:${esc(m.frameColor)}"`:""}><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`;
+  const grid=L=>`<div class="pgrid">${L.map(cell).join("")}</div>`;
+  // 받은 사진(12): 「단계 사진 n / 5」 진행도·막대 → 2~6단계 다섯 칸(못 받은 칸은 점선 「k단계 사진」) → 「그 밖에 받은 사진」 → 안내 한 줄
+  function received(L,cap){const R=(k,v)=>UI("seoaPhoto."+k,v),st=((typeof DATA!=="undefined"&&DATA.seoaPhoto)||{}).stage||[],tot=st.length||5;
+    const by={};L.forEach(m=>{if(m.stage&&!by[m.stage])by[m.stage]=m});const n=st.filter(o=>by[o.stage]).length,others=L.filter(m=>!m.stage);
+    return `<div class="rhd"><b>${esc(R("progress"))}</b><span>${esc(R("progressCount",{n,total:tot}))}</span></div>
+      <div class="pprog rprog"><i style="width:${tot?n/tot*100:0}%"></i></div>
+      <div class="rstage">${st.map(o=>{const m=by[o.stage];return m?`<button class="pth rgot" data-id="${m.id}"><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}<span class="rlab">${esc(R("stageLabel",{k:o.stage}))}</span></button>`
+        :`<div class="rslot"><span>${esc(R("slot",{k:o.stage}))}</span></div>`}).join("")}</div>
+      ${others.length?`<h3 class="rh3">${esc(R("others"))}</h3>${grid(others)}`:L.length?"":`<p class="pempty">${esc(R("empty"))}</p>`}
+      <p class="rnote">${esc(R("note",{cap}))}</p>`}
   // ── 가득 참 시트(셔터를 눌렀을 때, 카메라 안내 「칸 늘리기」) ──
   function fullSheet(){
     const el=$("#fullSheet"),c=PCFG().slots||{};
@@ -269,7 +280,8 @@ const PhotoUI=(()=>{
     if(vUrl)URL.revokeObjectURL(vUrl);vUrl=URL.createObjectURL(b);V().querySelector("#pvImg img").src=vUrl;
     shareF=null;prepShare(id,b);  // 공유 파일을 미리 만들어 둠(아이폰: 누른 순간 바로 공유 창을 열어야 함)
   }
-  function closeView(){V().classList.remove("on");setMenu(false);if(vUrl){URL.revokeObjectURL(vUrl);vUrl=null}$("#pvImg img").removeAttribute("src");shareF=null;if(sheetOn())render()}
+  // 12: 크게 보기를 한 번도 안 열었으면 #pvImg 가 없음(시연 장면 이동·초기화가 여기서 멈추던 문제)
+  function closeView(){V().classList.remove("on");setMenu(false);if(vUrl){URL.revokeObjectURL(vUrl);vUrl=null}const im=$("#pvImg img");if(im)im.removeAttribute("src");shareF=null;if(sheetOn())render()}
   function like(only){const m=curM();if(!m)return;if(only!==true){m.liked=!m.liked;Photos.setLiked(m.id,m.liked)}
     const b=$("#pvLike");b.classList.toggle("on",!!m.liked);b.setAttribute("aria-pressed",m.liked?"true":"false")}
   // ── 공유 ──
