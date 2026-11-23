@@ -143,6 +143,27 @@
       "stage": 1
     },
     {
+      "id": "x01",
+      "name": "짜증 내기",
+      "source": "chat",
+      "grade": "common",
+      "stage": 1
+    },
+    {
+      "id": "x11",
+      "name": "손 들어 막기",
+      "source": "chat",
+      "grade": "common",
+      "stage": 1
+    },
+    {
+      "id": "x02",
+      "name": "허리 숙이기",
+      "source": "chat",
+      "grade": "common",
+      "stage": 1
+    },
+    {
       "id": "m09",
       "name": "툭 건네주기",
       "source": "chat",
@@ -185,10 +206,24 @@
       "stage": 3
     },
     {
+      "id": "x15",
+      "name": "수줍게 걷기",
+      "source": "chat",
+      "grade": "rare",
+      "stage": 3
+    },
+    {
       "id": "c05",
       "name": "이마 맞대기",
       "source": "chat",
       "grade": "special",
+      "stage": 4
+    },
+    {
+      "id": "x09",
+      "name": "붙잡기",
+      "source": "chat",
+      "grade": "rare",
       "stage": 4
     },
     {
@@ -215,6 +250,13 @@
     {
       "id": "m21",
       "name": "원투 펀치",
+      "source": "chat",
+      "grade": "rare",
+      "flag": "protect"
+    },
+    {
+      "id": "x16",
+      "name": "몸 낮춰 경계하기",
       "source": "chat",
       "grade": "rare",
       "flag": "protect"

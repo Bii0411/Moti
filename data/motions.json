@@ -46,7 +46,7 @@
     "x08": { "name": "으스대며 도발하기", "file": "motions/xstage_macho_man_taunt5.json", "from": 0.05, "inPlace": true },
     "x12": { "name": "돌려차기", "file": "motions/xstage_round_house_kick_1.json", "from": 0.05, "inPlace": true }
   },
-  "_xstage": "XSTAGE 모션 데이터(진짜 모션). 몸짓 번호 → file(motions/ 안 JSON, tools/fbx2motion.mjs 로 FBX 에서 변환), from·to(재생 구간, 초. to 가 없으면 끝까지. 0초는 T자 기준 자세라 from 은 0.05 이상), inPlace(true 면 골반이 앞뒤·좌우로 움직이지 않음: 걷기·구르기처럼 화면 밖으로 나가는 모션). 2026-11-24 받은 XSTAGE 묶음 16개: 6개는 기존 몸짓에 연결(m07←Idle_Arms Crossed, m19←Proud Persuasion, m09←Handing out candy, m03←Shy Surprise, m04←Hold Forehead, m05←Rub Neck. 긴 모션은 핵심 구간만), x01·x02·x09·x11·x15·x16 은 아직 어느 몸짓에도 안 붙은 새 몸짓(이름·감정 임시, 시연 패널에서만 재생), x04·x07·x08·x12 는 xstageReserve 로 따로 뺌. 아직 어느 단계·선물에도 연결 안 됨",
+  "_xstage": "XSTAGE 모션 데이터(진짜 모션). 몸짓 번호 → file(motions/ 안 JSON, tools/fbx2motion.mjs 로 FBX 에서 변환), from·to(재생 구간, 초. to 가 없으면 끝까지. 0초는 T자 기준 자세라 from 은 0.05 이상), inPlace(true 면 골반이 앞뒤·좌우로 움직이지 않음: 걷기·구르기처럼 화면 밖으로 나가는 모션). 2026-11-24 받은 XSTAGE 묶음 16개: 6개는 기존 몸짓에 연결(m07←Idle_Arms Crossed, m19←Proud Persuasion, m09←Handing out candy, m03←Shy Surprise, m04←Hold Forehead, m05←Rub Neck. 긴 모션은 핵심 구간만), x01·x02·x09·x11·x15·x16 은 새 몸짓(25단계에서 대화에 붙임: x01·x11·x02 1단계, x15 3단계, x09 4단계, x16 판정 protect. 열리는 곳 data/seoa_story.json unlock, 키워드 data/motion_keywords.json), x04·x07·x08·x12 는 xstageReserve 로 따로 뺌",
   "xstage": {
     "m24": { "file": "motions/xstage_embarrassing3.json", "from": 1.2, "to": 8.5 },
     "x01": { "file": "motions/xstage_annoyance_1.json", "from": 0.05 },

@@ -1072,6 +1072,8 @@ function unlockedIds(){
   const U=DATA.story&&DATA.story.unlock;if(!U)return Object.keys(BASE);
   const set=new Set();for(let k=1;k<=curStage();k++)((U.stage[k]||{}).motions||[]).forEach(id=>set.add(id));
   (S.unlocked||[]).forEach(id=>set.add(id));
+  // 25: 판정·사건 묶음에 나중에 더한 몸짓(protect 의 x16 등)은 그 묶음의 몸짓 하나라도 이미 열렸으면 같이 열림(예전 저장값)
+  for(const sec of ["flag","event"])for(const k in U[sec]||{}){const M=U[sec][k].motions||[];if(M.some(id=>(S.unlocked||[]).includes(id)))M.forEach(id=>set.add(id))}
   return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id));
 }
 
