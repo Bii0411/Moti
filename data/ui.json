@@ -31,5 +31,32 @@
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김)",
     "seoaFirst": "🎁 버튼으로 서아에게 선물할 수 있어요 · 📔 앨범에 반응이 모여요"
+  },
+  "home": {
+    "_home": "홈 화면(8). sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
+    "seg": {
+      "home": "홈",
+      "rank": "랭킹"
+    },
+    "sorts": {
+      "rec": "추천",
+      "hot": "인기 랭킹",
+      "new": "신규",
+      "3d": "3D로 만나기"
+    },
+    "basic": "기본 에피소드",
+    "special": "특별 에피소드",
+    "btnStart": "시작",
+    "btnContinue": "이어하기",
+    "btnAdult": "19+ 인증",
+    "btnFree": "무료",
+    "btnPrice": "💎 {price}",
+    "btnOwned": "구매함",
+    "soon": "곧 공개돼요",
+    "specialNote": "에피소드를 사면 그 이야기 속 장면과 전용 모션을 볼 수 있어요.",
+    "motion": "✨ 에피소드 전용 모션: {name}",
+    "storyStart": "📖 특별 이야기 「{name}」 시작",
+    "storyTag": "📖 이야기 전용 장면 · {name}",
+    "noDia": "💎가 부족해요"
   }
 }
