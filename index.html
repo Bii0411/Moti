@@ -1248,7 +1248,7 @@ async function send(text){
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
   if(Thread.ep())v.scene=null;  // 16-3: 특별 에피소드 중에는 장소 고정(서버가 바 장소를 보내도 무시)
-  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
+  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
   let mid=pickMotion(v.motion,actionText(v));
@@ -1289,7 +1289,7 @@ const gradeKo=g=>UI("collection.grade."+g);
 function giftSheet(focus){
   const st=curState(),B=GIFT.moodBonus||{};
   const oddsLine=o=>UI("gift.odds",{a:o.common,b:o.rare,c:o.special});
-  $("#giftSheet").innerHTML=`<h2>🎁 서아에게 선물하기</h2>
+  $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
   <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].e+" "+STATES[st].ko,bonus:B.rare||0}))}</p>
   <div class="pity">${esc(UI("gift.pity",{n:pityLeft()}))}</div>
   <div class="items">${GIFTS.map(g=>{const m=g.rec===st,o=Gacha.odds(g,m,B);return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
@@ -1680,7 +1680,7 @@ function startStory(id){
   setScene(st.opening&&st.opening.startScene!=null?st.opening.startScene:st.scene);Outfit.sync();Stage.setFace(st.face||"soft");
   addMsg("sys",UI("home.storyStart",{name:st.name}),null,"seoa");
   if(st.opening&&st.opening.paragraphs){setTimeout(()=>runOpening(st.opening,()=>{const t=chatOf("seoa");const last=t[t.length-1];if(last)last.tag=UI("home.storyTag",{name:MNAME[st.m]});renderLog()}),300);return}
-  setTimeout(()=>{addMsg("c",st.line,{tag:UI("home.storyTag",{name:MNAME[st.m]})});react({m:st.m,f:st.f,t:st.line},"📖 이야기 장면")},600);
+  setTimeout(()=>{addMsg("c",st.line,{tag:UI("home.storyTag",{name:MNAME[st.m]})});react({m:st.m,f:st.f,t:st.line},UI("home.storySceneTag"))},600);
 }
 
 // ───────────────────────── 마이 ─────────────────────────
@@ -1705,8 +1705,8 @@ function renderMy(){
     <div class="packs">${packs}</div>
     <p class="alnote" style="margin:10px 0 0">${esc(UI("my.chargeNote"))}</p></div>
   <p class="alnote" style="text-align:center"><a href="v1.html" style="color:var(--sub)">이전 버전(v1) 보기</a></p>`;
-  $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast("✨ PLUS 시작 · 💎 300 지급")}save();renderTop();renderMy()};
-  $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(`💎 ${b.dataset.p} 충전 (시연)`)});
+  $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
+  $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:b.dataset.p})))});
 }
 
 // ───────────────────────── 탭 / 시작 ─────────────────────────
