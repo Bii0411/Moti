@@ -15,7 +15,7 @@
 | 파일 | 쓰는 곳 | 출처 | 비고 |
 | --- | --- | --- | --- |
 | `motions/xstage_embarrassing3.json` | `index.html`(m24 부끄러워하기), `xstage.html` | XSTAGE 구매 모션 「Lovely – Embarrassing 3」 (`xstage.html` 설명 기준). 라이선스 범위 **확인 필요** | 원본 `standard_Lovely - Embarrassing 3.fbx`에서 뼈 20개를 뽑아 변환. FBX는 저장소에 없음 |
-| `motions/xstage_*.json` 16개 (x01~x16) | `index.html`(data/motions.json xstage, 아직 단계·선물에 연결 안 됨) | XSTAGE 모션 묶음(`XSTAGE-Motion-0.zip`, 2026-11-24 받음): 「Annoyance_1」, 「Bent Over」, 「Blunt - Handing out candy 1」, 「Evade_Jog_Spin_R」, 「Hold Forehead」, 「Idle_Arms Crossed_male」, 「MOV_Dive Roll Breakfall」, 「Macho Man - Taunt5」, 「Maid_Grab」, 「Proud - Persuasion」, 「Raise Hand to Stop」, 「Round house Kick 1」, 「Rub Neck_One Hand」, 「Shy - Surprise1」, 「Shy Walk」, 「Stealth_Squat_Idle_Alert」. 라이선스 범위 **확인 필요** | 원본 `[standard] *.fbx`를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
+| `motions/xstage_*.json` 16개 (x01~x16) | `index.html`(data/motions.json xstage 12개, 아직 단계·선물에 연결 안 됨. x04·x07·x08·x12 는 xstageReserve 로 따로 둠) | XSTAGE 모션 묶음(`XSTAGE-Motion-0.zip`, 2026-11-24 받음): 「Annoyance_1」, 「Bent Over」, 「Blunt - Handing out candy 1」, 「Evade_Jog_Spin_R」, 「Hold Forehead」, 「Idle_Arms Crossed_male」, 「MOV_Dive Roll Breakfall」, 「Macho Man - Taunt5」, 「Maid_Grab」, 「Proud - Persuasion」, 「Raise Hand to Stop」, 「Round house Kick 1」, 「Rub Neck_One Hand」, 「Shy - Surprise1」, 「Shy Walk」, 「Stealth_Squat_Idle_Alert」. 라이선스 범위 **확인 필요** | 원본 `[standard] *.fbx`를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
 | `motion.js` m01~m25, c01~c05 | 전체 | 직접 만든 코드 몸짓 | 외부 자산 아님 |
 
 ## 그림
