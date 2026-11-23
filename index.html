@@ -1156,6 +1156,7 @@ async function send(text){
   Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
+  if(Thread.ep())v.scene=null;  // 16-3: 특별 에피소드 중에는 장소 고정(서버가 바 장소를 보내도 무시)
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
@@ -1680,7 +1681,7 @@ const Thread={
   // 다른 줄기로. 처음 들어가는 줄기면 true
   go(to){if(to===this.cur())return false;introT.forEach(clearTimeout);introT=[];busy=false;
     this.save();const t=(S.threads||{})[to],st=story();S.thread=to;
-    if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";setScene(t.scene)}
+    if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?e0.scene:t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
     const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");return !t},
   // 대화방 머리의 「본 이야기로」 단추(에피소드 중일 때만)
