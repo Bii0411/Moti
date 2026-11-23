@@ -33,11 +33,7 @@
     "seoaFirst": "🎁 버튼으로 서아에게 선물할 수 있어요 · 📔 앨범에 반응이 모여요"
   },
   "home": {
-    "_home": "홈 화면(8). sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
-    "seg": {
-      "home": "홈",
-      "rank": "랭킹"
-    },
+    "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
     "sorts": {
       "rec": "추천",
       "hot": "인기 랭킹",

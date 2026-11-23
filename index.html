@@ -150,7 +150,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hc .tx b{font-size:15px;line-height:1.35}
 .hc .tx p{font-size:12px;color:#cfc8e4;line-height:1.45}
 .hc .tx .tg{font-size:11px;color:var(--pri2)}
-.hseg{display:flex;gap:14px;margin:6px 0 12px}.hseg button{font-size:22px;font-weight:900;color:#5f5873}.hseg button.on{color:var(--text)}
 .srow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}.srow::-webkit-scrollbar{display:none}
 .srow>button{flex:0 0 auto}
 .pillchip{height:38px;padding:0 16px;border-radius:19px;border:1px solid var(--line);font-size:14px}
@@ -164,9 +163,9 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .ccard h3{margin:0 0 4px;font-size:15px;font-weight:900;line-height:1.35}
 .ccard p{margin:0 0 6px;color:var(--sub);font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ccard .tags{color:#6b6480;font-size:12px}
-/* 홈 카드 가로 넘기기(8-B). --ph = 카드 그림 높이(화면 높이에 맞춰 줄어듦: 844 → 224px, 667 → 199px, 8-1). 옆 카드는 크기·투명도만(blur 없음) */
+/* 홈 카드 가로 넘기기(8-B). --ph = 카드 그림 높이(화면 높이에 맞춰 줄어듦: 844 → 260px, 667 → 245px, 8-2). 옆 카드는 크기·투명도만(blur 없음) */
 /* 8-1: 카드 크기 값은 여기 한 곳. --hcMax 그림 최대 높이(390×844 에서 특별 에피소드 첫 칸까지 보이게), --hcMin 최소, --hcGap 화면 높이에서 뺄 값, --hcRatio 카드 폭 = 그림 높이 × 비율(그림 비율 유지) */
-.hcar{--hcMax:224px;--hcMin:170px;--hcGap:468px;--hcRatio:.84;--ph:clamp(var(--hcMin),calc(100dvh - var(--hcGap)),var(--hcMax));--cw:calc(var(--ph)*var(--hcRatio));position:relative;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:2px -14px 0;padding:4px calc(50% - var(--cw)/2) 6px;touch-action:pan-x pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.hcar{--hcMax:260px;--hcMin:170px;--hcGap:422px;--hcRatio:.84;--ph:clamp(var(--hcMin),calc(100dvh - var(--hcGap)),var(--hcMax));--cw:calc(var(--ph)*var(--hcRatio));position:relative;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:2px -14px 0;padding:4px calc(50% - var(--cw)/2) 6px;touch-action:pan-x pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
 .hcar::-webkit-scrollbar{display:none}
 .hcar.drag{scroll-snap-type:none;cursor:grabbing}
 .hcar.drag .hcard{transition:none}
@@ -187,10 +186,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .eb.adult{background:#e11d48}
 .story .eb{margin-left:auto}
 .epsoon{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--sub);font-size:13px}
-.rank{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 4px;border-bottom:1px solid var(--line)}
-.rank .n{width:22px;font-size:18px;font-weight:900;color:var(--pri2);text-align:center}
-.rank .av{width:54px;height:54px;border-radius:14px;background:center 18%/cover;flex:none}
-.rank .s{font-size:13px;color:var(--sub)}.rank .tg{font-size:12px;color:#6b6480}
 .empty{color:var(--sub);font-size:13px;padding:20px 0;text-align:center}
 .dmempty{display:flex;flex-direction:column;align-items:center;gap:14px;padding:64px 24px;text-align:center;color:var(--sub);font-size:14px;line-height:1.5;word-break:keep-all}
 .dmempty button{background:var(--pri);color:var(--text);font-weight:800;font-size:14px;border-radius:12px;padding:11px 20px}
@@ -1283,13 +1278,13 @@ function renderBond(){
 // ───────────────────────── 홈 ─────────────────────────
 // 에피소드 목록은 data/episodes.json(8-A): basic = 캐릭터별 기본 에피소드, special = 특별 에피소드(예전 STORIES)
 let EPS={basic:{},special:[]},STORIES=[];
-const H={seg:"home",sort:"rec",pick:null};
-// 홈 정렬(8-B): 추천 = data/characters.json recommend 순서, 인기 랭킹 = 대화 수, 신규 = NEW 먼저, 3D로 만나기 = 3D 표시만
+const H={sort:"rec",pick:null};  // 8-2: 홈/랭킹 전환(seg)과 랭킹 화면 없앰
+// 홈 정렬(8-B): 추천 = data/characters.json recommend 순서, 인기 랭킹 = 대화 수, 신규 = NEW 표시만(8-2: 정렬 → 거르기), 3D로 만나기 = 3D 표시만
 function homeList(){
   let list=[...CH];
   if(H.sort==="rec")list.sort((a,b)=>REC.indexOf(a.id)-REC.indexOf(b.id));
   if(H.sort==="hot")list.sort((a,b)=>b.chats-a.chats);
-  if(H.sort==="new")list.sort((a,b)=>(b.badge==="NEW")-(a.badge==="NEW"));
+  if(H.sort==="new")list=list.filter(c=>c.badge==="NEW");
   if(H.sort==="3d")list=list.filter(c=>c.badge==="3D");
   return list;
 }
@@ -1309,22 +1304,14 @@ function renderEps(cid){
   box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
 }
 function renderHome(){
-  const seg=`<div class="hseg"><button class="${H.seg==="home"?"on":""}" data-seg="home">${esc(UI("home.seg.home"))}</button><button class="${H.seg==="rank"?"on":""}" data-seg="rank">${esc(UI("home.seg.rank"))}</button></div>`;
   const h=$("#home");
-  if(H.seg==="rank"){
-    const r=[...CH].sort((a,b)=>b.chats-a.chats);
-    h.innerHTML=seg+`<h2 style="margin-top:0">이번 주 대화 랭킹 <small style="font-size:12px;color:var(--sub);font-weight:500">대화 수 기준</small></h2>`+r.map((c,i)=>`<button class="rank" data-c="${c.id}"><span class="n">${i+1}</span><span class="av" style="background-image:url(${c.img})"></span><span style="flex:1;min-width:0"><b>${c.name}</b><div class="s">${esc(c.hook)}</div><div class="tg">💬 ${c.chats}만 · ${c.tags.slice(0,2).map(t=>"#"+t).join(" ")}</div></span></button>`).join("");
-    h.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
-  }else{
-    const list=homeList(),sorts=["rec","hot","new","3d"];
-    if(!list.some(c=>c.id===H.pick))H.pick=list.length?list[0].id:null;
-    h.innerHTML=seg+`<div class="srow">${sorts.map(k=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${esc(UI("home.sorts."+k))}</button>`).join("")}</div>
-    <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
-    <div class="hdots" id="hDots">${list.map(c=>`<i${c.id===H.pick?' class="on"':""}></i>`).join("")}</div>
-    <div id="hEps"></div>`;
-    Car.mount($("#hCar"),list.map(c=>c.id));
-  }
-  h.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{H.seg=b.dataset.seg;renderHome()});
+  const list=homeList(),sorts=["rec","hot","new","3d"];
+  if(!list.some(c=>c.id===H.pick))H.pick=list.length?list[0].id:null;
+  h.innerHTML=`<div class="srow">${sorts.map(k=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${esc(UI("home.sorts."+k))}</button>`).join("")}</div>
+  <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
+  <div class="hdots" id="hDots">${list.map(c=>`<i${c.id===H.pick?' class="on"':""}></i>`).join("")}</div>
+  <div id="hEps"></div>`;
+  Car.mount($("#hCar"),list.map(c=>c.id));
   h.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{if(H.sort===b.dataset.sort)return;H.sort=b.dataset.sort;H.pick=null;h.scrollTop=0;renderHome()});  // 정렬을 바꾸면 그 순서의 첫 카드
 }
 // 카드 가로 넘기기(8-B): 브라우저 스크롤 + 가운데 맞춤 스냅(scroll-snap). 가운데에 가장 가까운 카드가 고른 카드.
