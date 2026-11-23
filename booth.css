@@ -18,10 +18,11 @@
 .bgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .bpv .camfull{top:8px}
 /* 촬영 중: 위쪽 「k / 4」, 가운데 카운트다운 숫자 */
-.bshotof{position:absolute;left:50%;top:10px;transform:translateX(-50%);font-size:13px;font-weight:800;color:#fff;background:#000a;padding:5px 12px;border-radius:999px;display:none;pointer-events:none}
-.bcount3{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);font-size:72px;font-weight:900;line-height:1;color:#fff;-webkit-text-stroke:2px #0008;opacity:0;pointer-events:none;transition:opacity .15s,transform .25s}
-.bcount3.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.bcount3.click{font-size:44px}
+.bshotof{position:absolute;left:50%;top:10px;transform:translateX(-50%);font-size:13px;font-weight:800;color:#fff;background:#000a;padding:5px 12px;border-radius:999px;display:none;pointer-events:none;z-index:3}
+.bshotof.on{display:block}
+.bcount3{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;display:grid;place-items:center;border-radius:50%;background:#000000a6;transform:scale(.8);font-size:60px;font-weight:900;line-height:1;color:#fff;opacity:0;pointer-events:none;transition:opacity .15s,transform .25s;z-index:3}
+.bcount3.on{opacity:1;transform:scale(1)}
+.bcount3.click{font-size:30px}
 
 /* 네 칸 썸네일 */
 .bthumbs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 16px 6px}
@@ -58,3 +59,27 @@
 .bthbot{flex:none;padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:#0d0b14}
 .bshoot{width:100%;height:50px;border-radius:14px;background:var(--pri);color:#fff;font-size:16px;font-weight:800;-webkit-tap-highlight-color:transparent}
 .bshoot:active{transform:scale(.98)}
+
+/* 촬영 중: 꾸미기 항목·버튼을 감추고 미리보기와 네 칸만 */
+.bth.shooting .bopts,.bth.shooting .bthbot{visibility:hidden}
+.bth.shooting .bth1{pointer-events:none}
+.bth.shooting .bpv{cursor:default}
+/* 한 칸 다시 찍기: 다른 칸·배경·프레임은 그대로 */
+.bth.retake .bcommon{display:none}
+
+/* 결과 · 완성 */
+.bres{display:none;flex:1;min-height:0;flex-direction:column;align-items:center;padding:0 16px 8px}
+.bth.result .bres{display:flex}
+.bth.result .bpvwrap,.bth.result .bthumbs,.bth.result .bopts{display:none}
+.bresnote{flex:none;font-size:12px;color:var(--sub);text-align:center;margin:2px 0 10px;word-break:keep-all}
+.bth.done .bresnote{visibility:hidden}
+.bstrip{position:relative;flex:none;border-radius:6px;overflow:hidden}
+.bstripc{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bcell{position:absolute;padding:0;background:transparent;border:2px solid transparent;border-radius:2px;-webkit-tap-highlight-color:transparent}
+.bcell:active{border-color:var(--pri)}
+.bth.done .bcell{pointer-events:none}
+.bbtns{display:flex;gap:8px}
+.bbtns>*{flex:1}
+.bsub{height:50px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:15px;font-weight:700;color:var(--text)}
+.bsaved{text-align:center;font-size:14px;font-weight:700;margin:0 0 10px;color:var(--text)}
+.bshw .bshoot{width:100%}

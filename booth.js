@@ -11,6 +11,7 @@ const Booth=(()=>{
   const frames=n=>new Promise(r=>{const f=()=>--n<=0?r():requestAnimationFrame(f);requestAnimationFrame(f)});
   let on=false,root=null,pv=null,gl=null,mode="edit",sel=0,retake=null,gen=0;
   let cells=[],common=null,thumbs=[],snapT=null;
+  let shots=[null,null,null,null],strip=null,stripAt=0,shareF=null,menu=false,perf={};
   const ptrs=new Map();let pinch=null,drag=null;
   const stopG=e=>e.preventDefault();
 
@@ -54,7 +55,7 @@ const Booth=(()=>{
     const top=L("top"),bot=L("bottom"),cy=(top+bot)/2*H,d=Math.max((top-bot)*H/2/tn,L("width")*H/2/(tn*aspect)),r=(c.yaw||0)*Math.PI/180;
     const o=Stage.center(z);
     cam.position.set(o.x+Math.sin(r)*d,cy+(C().lift||0)*H,o.z+Math.cos(r)*d);cam.lookAt(o.x,cy,o.z)}
-  function tick(now,w,h){if(on&&w&&h&&cells[sel]){const cam=Stage.three().cam;if(cam.view)cam.clearViewOffset();setCam(cam,w/h,cells[sel])}}
+  function tick(now,w,h){if(on&&w&&h&&cells[sel]&&mode!=="result"&&mode!=="done"){const cam=Stage.three().cam;if(cam.view)cam.clearViewOffset();setCam(cam,w/h,cells[sel])}}
   // 칸 k 를 서아에게: 그 몸짓의 그 순간에서 멈춤 + 표정. blendMs 동안 지금 자세에서 넘어감
   function apply(k,blendMs){const c=cells[k],x=colBy(c.pid),p=playOf(x);
     Stage.freeze(p.m,c.at/100*Stage.dur(p.m),{blendMs:blendMs||0,speed:p.speed,name:x?x.name:null,ref:x?x.id:null});
@@ -92,11 +93,11 @@ const Booth=(()=>{
           <span class="bshotof" id="bShotOf"></span><b class="bcount3" id="bCd"></b><div class="camflash" id="bFlash"></div></div></div>
         <div class="bthumbs" id="bThumbs"></div>
         <div class="bopts" id="bOpts"></div>
+        <div class="bres" id="bRes"><p class="bresnote" id="bResNote"></p><div class="bstrip" id="bStrip"></div></div>
       </div>
-      <div class="bthbot" id="bBot"><button class="bshoot" data-b="shoot"></button></div>`;
+      <div class="bthbot" id="bBot"></div>`;
     $(".app").appendChild(root);pv=root.querySelector("#bPv");gl=root.querySelector("#bGl");
     root.querySelector(".bthtop h2").textContent=T("title");root.querySelector('[data-b="back"]').textContent=T("back");
-    root.querySelector('[data-b="shoot"]').textContent=T("shoot");
     root.querySelector("#bFull p").textContent=UI("photoFull.notice");
     root.querySelector('[data-b="clear"]').textContent=UI("photoFull.clear");root.querySelector('[data-b="grow"]').textContent=UI("photoFull.grow");
     root.addEventListener("click",onClick);
@@ -113,7 +114,7 @@ const Booth=(()=>{
     pv.addEventListener("touchmove",stopG,{passive:false});
     pv.addEventListener("touchstart",e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
     pv.addEventListener("dblclick",stopG);
-    window.addEventListener("resize",()=>{if(on)layout()});
+    window.addEventListener("resize",()=>{if(on){layout();fitStrip()}});
   }
   const dist=()=>{const [a,b]=[...ptrs.values()];return Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};
   function base(){const c=cells[sel];pinch=ptrs.size>=2?{d:dist(),z:c.zoom}:null;const p=[...ptrs.values()][0];drag=ptrs.size===1?{x:p.x,yaw:c.yaw}:null}
@@ -152,7 +153,18 @@ const Booth=(()=>{
   // 각도 막대는 오른쪽으로 밀면 서아가 오른쪽을 보도록(막대 값 = −yaw)
   function syncAngle(){const c=cells[sel],a=root.querySelector("#bAng"),z=root.querySelector("#bZoom"),v=root.querySelector("#bAngV");
     if(a)a.value=String(-c.yaw);if(z)z.value=String(Math.round(c.zoom*100));if(v)v.textContent=angleText(c.yaw)}
-  function render(){renderTop();renderThumbs();renderOpts()}
+  // 맨 아래 버튼: 꾸미기 = 「촬영」, 결과 = 「다시 꾸미기 · 완성」, 완성 뒤 = 「공유하기 · 닫기」(공유 창을 못 열면 「내려받기」 작은 메뉴)
+  function renderBot(){const el=root.querySelector("#bBot");
+    if(mode==="result")el.innerHTML=`<div class="bbtns"><button class="bsub" data-b="redo">${esc(T("redo"))}</button><button class="bshoot" data-b="done">${esc(T("done"))}</button></div>`;
+    else if(mode==="done")el.innerHTML=`<p class="bsaved">${esc(T("saved"))}</p><div class="bbtns"><div class="pvsh bshw"><button class="bshoot" data-b="share">${esc(T("share"))}</button>
+      <div class="pvmenu" id="bMenu"><button data-b="download">${icon("down")}<span>${esc(UI("photo.download"))}</span></button></div></div><button class="bsub" data-b="close">${esc(T("close"))}</button></div>`;
+    else el.innerHTML=`<button class="bshoot" data-b="shoot">${esc(T("shoot"))}</button>`;
+    root.querySelector(".bthtop h2").textContent=mode==="result"||mode==="done"?T("resultTitle"):T("title")}
+  function setMode(m){mode=m;["shooting","result","done","retake"].forEach(c=>root.classList.remove(c));
+    if(m==="shoot")root.classList.add("shooting");else if(m==="result"||m==="done"){root.classList.add("result");if(m==="done")root.classList.add("done")}
+    if(m==="edit"&&retake!=null)root.classList.add("retake");
+    renderBot();renderTop()}
+  function render(){renderTop();renderThumbs();renderOpts();renderBot()}
 
   function pick(k){if(retake!=null&&k!==retake)return;if(k===sel)return;sel=k;apply(k,(B().shoot||{}).blendMs||500);renderThumbs();renderOpts();snapLater()}
   function onClick(e){const b=e.target.closest("button");if(!b||!root.contains(b))return;
@@ -161,6 +173,12 @@ const Booth=(()=>{
       if(k==="clear")return PhotoUI.sheet();
       if(k==="grow")return PhotoUI.fullSheet();
       if(k==="shoot")return shoot();
+      if(k==="redo")return redo();
+      if(k==="done")return finish();
+      if(k==="share")return share();
+      if(k==="download"){setMenu(false);if(shareF)PhotoUI.saveFile(shareF);return}
+      if(k==="close")return close();
+      if(k==="cell"&&mode==="result")return retakeCell(+b.dataset.k);
       return}
     if(mode!=="edit")return;
     if(b.dataset.k!=null)return pick(+b.dataset.k);
@@ -182,23 +200,90 @@ const Booth=(()=>{
     else if(t.id==="bAng"){c.yaw=-(+t.value);if(Math.abs(c.yaw)<=(C().frontSnapDeg!=null?C().frontSnapDeg:3))c.yaw=0;root.querySelector("#bAngV").textContent=angleText(c.yaw);snapLater(250)}
     else if(t.id==="bZoom"){c.zoom=+t.value/100;snapLater(250)}}
 
-  // ── 촬영(11-B 에서 채움) ──
-  function shoot(){if(Photos.full()){PhotoUI.fullSheet();return}}
+  // ── 촬영 ── 칸마다 위쪽 「k / 4」, 3·2·1(숫자 하나당 shoot.stepMs) → 찰칵(하얀 깜빡임 + 셔터 소리) → 서아가 다음 포즈로 넘어감
+  const cellSize=()=>{const st=B().strip||{},W=st.w||1200,pad=st.pad!=null?st.pad:48,cw=W-2*pad;return{cw,ch:Math.round(cw/cellAspect())}};
+  function flash(){const f=root.querySelector("#bFlash");f.style.transition="none";f.style.opacity=".9";void f.offsetWidth;f.style.transition=`opacity ${(B().shoot||{}).flashMs||260}ms ease-out`;f.style.opacity="0"}
+  async function shoot(){
+    if(mode!=="edit")return;
+    if(Photos.full()){PhotoUI.fullSheet();return}   // 사진 칸이 가득 차 있으면 [10]의 가득 참 시트부터
+    Cam.audio();                                      // 누른 순간 소리 장치를 깨움(아이폰: 카운트다운 뒤 타이머에서도 소리가 나게)
+    const list=retake!=null?[retake]:[0,1,2,3],my=++gen,sh=B().shoot||{},{cw,ch}=cellSize();
+    clearTimeout(snapT);ptrs.clear();setMenu(false);setMode("shoot");
+    const of=root.querySelector("#bShotOf"),cd=root.querySelector("#bCd"),nums=((DATA.ui||{}).booth||{}).countdown||["3","2","1"],t0=performance.now();
+    if(!perf.t0)perf.t0=t0;
+    for(let i=0;i<list.length;i++){const k=list[i];
+      const first=i===0&&sel===k;sel=k;renderThumbs();apply(k,first?0:(sh.blendMs||500));
+      of.textContent=T("shotOf",{k:k+1});of.classList.add("on");
+      await wait((first?0:(sh.blendMs||500))+(sh.settleMs||300));if(my!==gen)return;
+      for(const n of nums){cd.textContent=n;cd.className="bcount3";void cd.offsetWidth;cd.className="bcount3 on";await wait(sh.stepMs||800);if(my!==gen)return}
+      Cam.sound();const s0=performance.now();shots[k]=drawCell(k,cw,ch);perf.cellMs=Math.round(performance.now()-s0);
+      flash();cd.textContent=T("click");cd.className="bcount3 on click";
+      const tw=(B().preview||{}).thumbW||240,t=document.createElement("canvas");t.width=tw;t.height=Math.round(tw/cellAspect());t.getContext("2d").drawImage(shots[k],0,0,t.width,t.height);thumbs[k]=t;renderThumbs();
+      await wait(sh.clickMs||450);cd.className="bcount3";if(my!==gen)return}
+    of.classList.remove("on");perf.shootMs=Math.round(performance.now()-t0);
+    retake=null;showResult()}
+  // ── 결과: 네 칸을 세로로 이은 사진(프레임 색, 아래에 「날짜 · moti · 윤서아」) ──
+  const P2=n=>String(n).padStart(2,"0");
+  const frameOf=()=>(B().frames||[]).find(f=>f.id===common.frame)||{color:"#ffffff",text:"#4a4358"};
+  function compose(){const st=B().strip||{},W=st.w||1200,pad=st.pad!=null?st.pad:48,gap=st.gap!=null?st.gap:24,foot=st.foot!=null?st.foot:150,{cw,ch}=cellSize();
+    const H=pad+4*ch+3*gap+foot,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d"),fr=frameOf();
+    g.fillStyle=fr.color;g.fillRect(0,0,W,H);
+    shots.forEach((s,k)=>{if(s)g.drawImage(s,pad,pad+k*(ch+gap),cw,ch)});
+    stripAt=Date.now();const d=new Date(stripAt),date=(st.date||"{y}.{m}.{d}").replace("{y}",d.getFullYear()).replace("{m}",P2(d.getMonth()+1)).replace("{d}",P2(d.getDate()));
+    g.fillStyle=fr.text;g.font=`700 ${st.footSize||34}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;g.textAlign="center";g.textBaseline="middle";
+    g.fillText(T("foot",{date}),W/2,pad+4*ch+3*gap+foot/2);
+    return{c,W,H,pad,gap,cw,ch}}
+  function showResult(){
+    strip=compose();setMode("result");
+    const el=root.querySelector("#bStrip"),{c,W,H,pad,gap,cw,ch}=strip;
+    c.className="bstripc";el.innerHTML="";el.appendChild(c);el.style.aspectRatio=W+"/"+H;el.style.background=frameOf().color;
+    for(let k=0;k<4;k++){const b=document.createElement("button");b.className="bcell";b.dataset.b="cell";b.dataset.k=k;b.setAttribute("aria-label",T("cell",{k:k+1}));
+      b.style.cssText=`left:${pad/W*100}%;top:${(pad+k*(ch+gap))/H*100}%;width:${cw/W*100}%;height:${ch/H*100}%`;el.appendChild(b)}
+    root.querySelector("#bResNote").textContent=T("resultNote");fitStrip()}
+  // 세로로 긴 사진을 남은 높이에 맞춤
+  function fitStrip(){if(!root||!strip)return;const r=root.querySelector("#bRes"),el=root.querySelector("#bStrip");if(!r.clientHeight)return;
+    const n=root.querySelector("#bResNote"),hh=r.clientHeight-n.offsetHeight-20,w=Math.min(r.clientWidth-32,hh*strip.W/strip.H);el.style.width=Math.floor(w)+"px";el.style.height=Math.floor(w*strip.H/strip.W)+"px"}
+  // 결과에서 칸을 누르면 그 칸만 다시 꾸미고 다시 찍음(배경·프레임은 그대로)
+  function retakeCell(k){retake=k;gen++;setMode("edit");layout();sel=k;apply(k,0);Stage.faceNow();applyBg();renderThumbs();renderOpts();snapLater()}
+  function redo(){retake=null;gen++;setMode("edit");layout();sel=0;apply(0,0);renderThumbs();renderOpts();snapLater()}
+  // ── 완성: 사진에 저장(종류 booth, 1장으로 계산). 다시 찍은 컷들은 저장하지 않음 ──
+  async function finish(){
+    if(mode!=="result"||!strip)return;
+    if(Photos.full()){PhotoUI.fullSheet();return}
+    const my=gen,I=B().image||{},type=I.type||"image/jpeg",t0=performance.now();
+    const full=await Shot.encode(strip.c,type,I.quality||.9,I.minQuality||.6,I.maxKB||900);
+    const thumb=await Shot.encode(Shot.scaled(strip.c,I.thumbPx||720),type,I.thumbQuality||.75,.4,I.thumbMaxKB||120);
+    const t1=performance.now();
+    const meta={id:Photos.newId(),kind:"booth",at:stripAt||Date.now(),mid:null,mname:null,scene:null,place:null,liked:false,w:strip.W,h:strip.H,
+      frameColor:frameOf().color,bg:common.bg,cells:cells.map(c=>c.pid)};
+    const sv=await Photos.add(meta,full,thumb);if(my!==gen||!on)return;
+    perf.encodeMs=Math.round(t1-t0);perf.saveMs=sv.ms;perf.kb=Math.round(full.size/1024);perf.thumbKb=Math.round(thumb.size/1024);perf.w=strip.W;perf.h=strip.H;
+    perf.totalMs=perf.t0?Math.round(performance.now()-perf.t0):null;window.__boothPerf={...perf};perf={};
+    shareF=new File([full],PhotoUI.fname(meta),{type:full.type||"image/jpeg"});  // 완성본에 이미 표시가 있어서 그대로 공유
+    window.__boothLast={id:meta.id,blob:full};
+    setMode("done");fitStrip();
+    cells=[];  // 다음에 열면 기본 꾸밈부터
+  }
+  function setMenu(v){menu=!!v;const el=root&&root.querySelector("#bMenu");if(el)el.classList.toggle("on",menu)}
+  async function share(){const f=shareF;if(!f)return;
+    if(!PhotoUI.canShare(f)){setMenu(!menu);return}
+    try{await navigator.share({files:[f]})}catch(e){if(!e||e.name!=="AbortError")setMenu(true)}}
 
   async function open(){
     if(on)return;if(!root)build();
     await Stage.ready;if(on)return;
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤
-    gen++;on=true;mode="edit";retake=null;
-    if(!cells.length)defaults();else check();
-    root.classList.add("on");root.classList.remove("shooting","result","done");root.setAttribute("aria-hidden","false");
+    gen++;on=true;retake=null;shareF=null;strip=null;perf={};
+    if(!cells.length){defaults();shots=[null,null,null,null]}else check();
+    root.classList.add("on");root.setAttribute("aria-hidden","false");setMode("edit");
     Stage.lock(true);Stage.borrow(gl,null,tick);preload();layout();applyBg();
-    sel=0;apply(0,0);render();initThumbs();
+    sel=0;apply(0,0);render();root.querySelector("#bOpts").scrollTop=0;initThumbs();
     document.addEventListener("gesturestart",stopG,{passive:false});document.addEventListener("gesturechange",stopG,{passive:false});
   }
   function close(){
-    if(!on)return;on=false;gen++;clearTimeout(snapT);ptrs.clear();
+    if(!on)return;on=false;gen++;clearTimeout(snapT);ptrs.clear();setMenu(false);shareF=null;
+    if(mode==="done")cells=[];
     root.classList.remove("on");root.setAttribute("aria-hidden","true");
     document.removeEventListener("gesturestart",stopG);document.removeEventListener("gesturechange",stopG);
     Stage.lock(false);Stage.bg(null);Stage.release();
@@ -206,6 +291,8 @@ const Booth=(()=>{
     Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");
   }
   Photos.onChange(()=>{if(on)renderTop()});
+  // 메뉴 밖을 누르면 닫음
+  document.addEventListener("click",e=>{if(menu&&!e.target.closest("#bMenu")&&!e.target.closest('[data-b="share"]'))setMenu(false)});
   // refresh: 시연 패널(명장면 모두 열기)이 모은 몸짓을 바꿨을 때
-  return{open,close,isOpen:()=>on,refresh:()=>{if(on&&mode==="edit"){check();renderOpts()}},state:()=>({mode,sel,cells:cells.map(c=>({...c})),common:{...(common||{})}})};
+  return{open,close,isOpen:()=>on,refresh:()=>{if(on&&mode==="edit"){check();renderOpts()}},perf:()=>window.__boothPerf,state:()=>({mode,sel,retake,cells:cells.map(c=>({...c})),common:{...(common||{})}})};
 })();
