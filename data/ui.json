@@ -37,10 +37,10 @@
   },
   "gift": {
     "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절). moodNote 의 {mood} = 지금 기분(이모지+이름), {bonus} = data/gifts.json moodBonus.rare. odds 의 {a}·{b}·{c} = 일반·희귀·특별 %(기분 맞춤 적용 뒤). pity 의 {n} = 천장 남은 횟수. logTag = 대화 기록에 남는 선물 결과 줄",
-    "moodNote": "지금 서아는 {mood} 상태예요 · 기분에 맞는 선물은 희귀 확률 +{bonus}%p",
+    "moodNote": "지금 서아는 {mood} 상태예요 · 기분에 맞는 선물은 레어 확률 +{bonus}%p",
     "match": "기분 맞춤",
-    "odds": "일반 {a}% · 희귀 {b}% · 특별 {c}%",
-    "pity": "희귀 이상 확정까지 {n}번",
+    "odds": "일반 {a}% · 레어 {b}% · 시크릿 {c}%",
+    "pity": "레어 이상 확정까지 {n}번",
     "noDia": "💎가 부족해요",
     "logTag": "🎁 {gift} · {grade}"
   },
@@ -75,12 +75,12 @@
     "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). already = 선물로 이미 있는 몸짓이 나왔을 때",
     "grade": {
       "common": "일반",
-      "rare": "희귀",
-      "special": "특별"
+      "rare": "레어",
+      "special": "시크릿"
     },
     "notify": {
-      "rare": "희귀 · {name}",
-      "special": "특별 · {name}"
+      "rare": "레어 · {name}",
+      "special": "시크릿 · {name}"
     },
     "already": "이미 본 모습이에요"
   },

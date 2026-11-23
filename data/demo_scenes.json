@@ -4,8 +4,8 @@
   "titleMs": 2000,
   "scenes": [
     { "n": 1, "name": "첫 만남", "titleStage": 1, "reset": "seoa" },
-    { "n": 2, "name": "단골", "titleStage": 2, "stage": 1, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 2 } },
-    { "n": 3, "name": "끌림", "titleStage": 3, "stage": 2, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 3 } },
+    { "n": 2, "name": "티키타카", "titleStage": 2, "stage": 1, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 2 } },
+    { "n": 3, "name": "썸", "titleStage": 3, "stage": 2, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 3 } },
     { "n": 4, "name": "고백 직전", "titleStage": 4, "stage": 3, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 4 } },
     { "n": 5, "name": "옥상", "stage": 4, "place": "바 옥상", "mood": "normal", "next": { "event": "ROOFTOP" } },
     { "n": 6, "name": "앨범", "album": "all" }
