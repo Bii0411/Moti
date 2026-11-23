@@ -150,16 +150,10 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hc .tx b{font-size:15px;line-height:1.35}
 .hc .tx p{font-size:12px;color:#cfc8e4;line-height:1.45}
 .hc .tx .tg{font-size:11px;color:var(--pri2)}
-.hseg{display:flex;gap:14px;margin:6px 0 12px}.hseg button{font-size:22px;font-weight:900;color:#5f5873}.hseg button.on{color:var(--text)}
-.hsearch input{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:0 14px;font:inherit;font-size:14px;outline:none;margin-bottom:12px}
 .srow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}.srow::-webkit-scrollbar{display:none}
 .srow>button{flex:0 0 auto}
 .pillchip{height:38px;padding:0 16px;border-radius:19px;border:1px solid var(--line);font-size:14px}
 .pillchip.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
-.srow.tagrow{flex-wrap:wrap;overflow:visible;margin-bottom:14px}
-.fchip{height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line);font-size:13px;color:var(--sub)}
-.fchip.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ccard{border-radius:18px;overflow:hidden;background:var(--card);text-align:left;display:flex;flex-direction:column}
 .ccard .pic{aspect-ratio:262/300;background-size:cover;background-position:center 15%;position:relative}
 .ccard .pic::after{content:"";position:absolute;inset:auto 0 0;height:40%;background:linear-gradient(transparent,var(--card))}
@@ -169,10 +163,29 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .ccard h3{margin:0 0 4px;font-size:15px;font-weight:900;line-height:1.35}
 .ccard p{margin:0 0 6px;color:var(--sub);font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ccard .tags{color:#6b6480;font-size:12px}
-.rank{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 4px;border-bottom:1px solid var(--line)}
-.rank .n{width:22px;font-size:18px;font-weight:900;color:var(--pri2);text-align:center}
-.rank .av{width:54px;height:54px;border-radius:14px;background:center 18%/cover;flex:none}
-.rank .s{font-size:13px;color:var(--sub)}.rank .tg{font-size:12px;color:#6b6480}
+/* 홈 카드 가로 넘기기(8-B). --ph = 카드 그림 높이(화면 높이에 맞춰 줄어듦: 844 → 260px, 667 → 245px, 8-2). 옆 카드는 크기·투명도만(blur 없음) */
+/* 8-1: 카드 크기 값은 여기 한 곳. --hcMax 그림 최대 높이(390×844 에서 특별 에피소드 첫 칸까지 보이게), --hcMin 최소, --hcGap 화면 높이에서 뺄 값, --hcRatio 카드 폭 = 그림 높이 × 비율(그림 비율 유지) */
+.hcar{--hcMax:260px;--hcMin:170px;--hcGap:422px;--hcRatio:.84;--ph:clamp(var(--hcMin),calc(100dvh - var(--hcGap)),var(--hcMax));--cw:calc(var(--ph)*var(--hcRatio));position:relative;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:2px -14px 0;padding:4px calc(50% - var(--cw)/2) 6px;touch-action:pan-x pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.hcar::-webkit-scrollbar{display:none}
+.hcar.drag{scroll-snap-type:none;cursor:grabbing}
+.hcar.drag .hcard{transition:none}
+.hcard{flex:0 0 var(--cw);width:var(--cw);scroll-snap-align:center;scroll-snap-stop:always;border:2px solid transparent;transform:scale(.9);opacity:.5;transition:transform .22s,opacity .22s,border-color .22s;-webkit-tap-highlight-color:transparent}
+.hcard.on{transform:none;opacity:1;border-color:var(--pri2)}
+.hcard .pic{aspect-ratio:auto;height:var(--ph);-webkit-user-drag:none}
+.hcard .bd{padding:2px 12px 12px}
+.hcard .nm{display:block;font-size:13px;color:var(--pri2);font-weight:800;margin-bottom:2px}
+.hcard h3{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+.hcard .tags{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdots{display:flex;justify-content:center;gap:6px;margin:6px 0 2px}
+.hdots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s,background .2s}
+.hdots i.on{width:16px;background:var(--pri2)}
+#hEps h2{margin:10px 0 7px;font-size:15px}
+.ep{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ep .tx{flex:1;min-width:0}.ep b{font-size:14px}.ep p{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.4}
+.ep .eb,.story .eb{flex:none;height:32px;line-height:32px;padding:0 14px;border-radius:16px;background:var(--pri);color:#fff;font-size:13px;font-weight:800}
+.eb.adult{background:#e11d48}
+.story .eb{margin-left:auto}
+.epsoon{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--sub);font-size:13px}
 .empty{color:var(--sub);font-size:13px;padding:20px 0;text-align:center}
 .dmempty{display:flex;flex-direction:column;align-items:center;gap:14px;padding:64px 24px;text-align:center;color:var(--sub);font-size:14px;line-height:1.5;word-break:keep-all}
 .dmempty button{background:var(--pri);color:var(--text);font-weight:800;font-size:14px;border-radius:12px;padding:11px 20px}
@@ -350,12 +363,13 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json")]);
+  if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  if(!c||!f||!m||!st||!it||!kw)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+  if(!c||!f||!m||!st||!it||!kw||!chs||!eps)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.tabFirst",{name:…}). 없으면 키 이름 그대로
 const UI=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.ui||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
@@ -412,23 +426,12 @@ const GIFTS=[
      birthday:{m:"m18",f:"joy",t:"생일 선물이 반지라니. …평생 기억할 거야. 너도 그래야 돼."}}}
 ];
 const gBy=id=>GIFTS.find(g=>g.id===id);
-const CH=[
- {id:"doyun",name:"서도윤",img:"card_doyun.jpg",hook:"비켜. 네가 하면 또 망가지잖아.",desc:"차갑게 밀어내면서, 위험한 순간엔 제일 먼저 당신 앞을 막아서는 남자.",tags:["나쁜놈","냉미남","혐관","츤데레"],chats:72.8,badge:"",ageRating:19,
-  intro:"…또 왔군. 이번엔 쉽게 돌려보내지 않을 거다.",lines:["시끄럽군. …그래서, 다친 데는?","내가 걱정한 게 아니라, 네가 귀찮게 굴까 봐 그런 거다.","따라오지 마. …아니, 내 옆에서 떨어지지 마.","오늘 밤은 늦었다. 데려다주지."]},
- {id:"jihu",name:"한지후",img:"card_jihu.jpg",hook:"10년 전 그 편지, 아직 안 읽었지?",desc:"첫사랑, 기억을 잃은 연인, 호위기사. 어떤 이야기에서도 끝까지 당신 편.",tags:["첫사랑","다정남","순애","재회"],chats:41.2,badge:"3D",
-  intro:"아, 왔구나. 기다리고 있었어. 꽤 오래.",lines:["오늘 하루는 어땠어? 하나도 빠짐없이 듣고 싶어.","괜찮아, 천천히 말해 줘. 나 여기 있을게.","그 편지… 같이 읽어 줄래?","네가 웃으니까, 뭔가 생각날 것 같아."]},
- {id:"ijun",name:"이준",img:"card_ijun.jpg",hook:"방금 그거… 고백이에요? 확률적으로?",desc:"IQ 168, 생활력 0. 당신 앞에서만 계산이 자꾸 틀리는 허당 천재.",tags:["허당","천재","티키타카","코믹"],chats:18.9,badge:"",
-  intro:"아, 왔어요? 계산상으론 3분 늦었는데… 아니, 기다린 건 아니고요.",lines:["밥이요? 아, 어제 먹었어요. 아마도.","오늘 실험 결과: 당신이 웃으면 내 심박수가 12% 올라가요.","당신 앞에서만 계산이 틀려요. 원인 분석 중이에요."]},
- {id:"haram",name:"류하람",img:"card_haram.jpg",hook:"데뷔하면, 제일 먼저 너한테 보여줄게.",desc:"데뷔 D-30 연습생. 웃게 해 주면 춤으로 답한다.",tags:["연습생","성장","응원","하트챌린지"],chats:25.6,badge:"NEW",
-  intro:"잠깐, 머리 좀 정리하고! …됐다. 오늘도 보러 와 준 거야?",lines:["방금 안무 봤어? 엔딩요정 각 나왔지?","연습 끝나고 편의점 갈래? 내가 쏠게.","긴장돼서 손 떨려. 잠깐만 잡아 줄래?"]},
- {id:"seoa",name:"윤서아",img:"card_seoa.jpg",hook:"이 도시에서 날 아는 사람은 없어. …너 빼고.",desc:"요원, 해커, 특수부대 팀장. 이야기마다 정체도 옷도 바뀌는 직진 선배.",tags:["걸크러시","요원","해커","정체반전"],chats:33.1,badge:"3D",
-  intro:"…내가 처리할 수 있었는데. 근데, 꽤 멋있었어. 사장님. 이것도 처리해 줄래?",lines:[]}
-];
+// 캐릭터 목록은 data/characters.json(8-A). loadData 가 채운다. REC = 추천 탭 순서
+let CH=[],REC=[];
 const chBy=id=>CH.find(c=>c.id===id);
 // 연령 등급(7-C): ageRating 이 있는 캐릭터(서도윤 19)는 홈 카드 배지를 원고 문구(data/onboarding.json adult.badge)로, 인증 전에는 대화방 대신 인증 시트
 const needAdult=cid=>{const c=chBy(cid);return !!(c&&c.ageRating>=19&&!S.adult)};
 const badgeOf=c=>c.ageRating>=19?(Onboard.T("adult.badge")||c.ageRating+"+"):c.badge;
-const FIRST_MIN={doyun:3,jihu:12,ijun:27,haram:48,seoa:7};
 // 서아 장소 5곳 (data/seoa_story.json locations, 서버 location 값과 1:1). 못 불러오면 배경 하나로 버팀
 let SCENES=[{name:"",img:"bg_seoa_street.jpg"}];
 
@@ -692,7 +695,7 @@ function userParts(t){
   return out;
 }
 const userPlain=t=>userParts(t).map(p=>p.x).join(" ");
-function chatOf(cid){return S.chats[cid]||(S.chats[cid]=[{r:"c",t:chBy(cid).intro,at:Date.now()-FIRST_MIN[cid]*60000}])}
+function chatOf(cid){return S.chats[cid]||(S.chats[cid]=[{r:"c",t:chBy(cid).intro,at:Date.now()-((chBy(cid)||{}).firstMin||5)*60000}])}
 function addMsg(r,t,extra,cid){cid=cid||S.room||"seoa";const L=chatOf(cid);L.push({r,t,at:Date.now(),...(extra||{})});if(L.length>60)S.chats[cid]=L.slice(-60);
   if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
 function renderLog(){
@@ -1273,47 +1276,81 @@ function renderBond(){
   $("#bondChip").textContent=`💗 ${i+1}단계 · ${stageName(i+1)}`;return{i,nx,pct}}
 
 // ───────────────────────── 홈 ─────────────────────────
-const STORIES=[
- {id:"s1",name:"네온 옥상 잠입 작전",desc:"작전 전날 밤, 옥상에서 서아가 할 말이 있대요.",price:0,scene:4,m:"m12",f:"soft",line:"내일 작전 끝나면 할 말 있어. …근데 오늘 미리 연습해 봐도 돼?"},
- {id:"s2",name:"크리스마스 이브 정전",desc:"도시 전체가 정전된 밤, 서아와 단둘이.",price:150,scene:2,m:"m18",f:"shy",line:"정전이라 카메라도 다 꺼졌어. …지금은 아무도 안 봐. 이리 와."}
-];
-const H={seg:"home",q:"",sort:"rec",tag:""};
-function renderHome(){
-  const seg=`<div class="hseg"><button class="${H.seg==="home"?"on":""}" data-seg="home">홈</button><button class="${H.seg==="rank"?"on":""}" data-seg="rank">랭킹</button></div>`;
-  const eps=`<h2>📖 특별 에피소드</h2>
-  ${STORIES.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${st.name}</b><p>윤서아 · ${st.desc}</p><span class="mo">✨ 에피소드 전용 모션: ${MNAME[st.m]}</span></span>
-    <span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${S.stories[st.id]?"구매함":st.price?"💎 "+st.price:"무료 맛보기"}</span></button>`).join("")}
-  <p class="alnote" style="margin-top:6px">에피소드를 사면 그 이야기 속 장면과 전용 모션을 볼 수 있어요.</p>`;
-  if(H.seg==="rank"){
-    const r=[...CH].sort((a,b)=>b.chats-a.chats);
-    $("#home").innerHTML=seg+`<h2 style="margin-top:0">이번 주 대화 랭킹 <small style="font-size:12px;color:var(--sub);font-weight:500">대화 수 기준</small></h2>`+r.map((c,i)=>`<button class="rank" data-c="${c.id}"><span class="n">${i+1}</span><span class="av" style="background-image:url(${c.img})"></span><span style="flex:1;min-width:0"><b>${c.name}</b><div class="s">${esc(c.hook)}</div><div class="tg">💬 ${c.chats}만 · ${c.tags.slice(0,2).map(t=>"#"+t).join(" ")}</div></span></button>`).join("");
-  }else{
-    const tags=[...new Set(CH.flatMap(c=>c.tags))];
-    let list=CH.filter(c=>(!H.tag||c.tags.includes(H.tag))&&(!H.q||(c.name+c.hook+c.desc+c.tags.join("")).includes(H.q)));
-    if(H.sort==="hot")list=[...list].sort((a,b)=>b.chats-a.chats);
-    if(H.sort==="new")list=[...list].sort((a,b)=>(b.badge==="NEW")-(a.badge==="NEW"));
-    if(H.sort==="3d")list=list.filter(c=>c.badge==="3D");
-    const sorts=[["rec","추천"],["hot","인기 랭킹"],["new","신규"],["3d","3D로 만나기"]];
-    $("#home").innerHTML=seg+`<div class="hsearch"><input id="hq" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(H.q)}"></div>
-    <div class="srow">${sorts.map(([k,l])=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${l}</button>`).join("")}</div>
-    <div class="srow tagrow"><button class="fchip ${!H.tag?"on":""}" data-tag="">전체</button>${tags.map(t=>`<button class="fchip ${H.tag===t?"on":""}" data-tag="${t}">#${t}</button>`).join("")}</div>
-    ${list.length?`<div class="grid2">${list.map(c=>`<button class="ccard" data-c="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><h3>${esc(c.hook)}</h3><p>${esc(c.desc)}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("")}</div>`:`<div class="empty">맞는 캐릭터가 없어요.</div>`}
-    ${eps}`;
-    const q=$("#hq");q.oninput=()=>{H.q=q.value;const p=q.selectionStart;renderHome();const n=$("#hq");n.focus();n.setSelectionRange(p,p)};
-  }
-  const h=$("#home");
-  h.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{H.seg=b.dataset.seg;renderHome()});
-  h.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{H.sort=b.dataset.sort;renderHome()});
-  h.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{H.tag=b.dataset.tag;renderHome()});
-  h.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
-  h.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>startStory(b.dataset.s));
+// 에피소드 목록은 data/episodes.json(8-A): basic = 캐릭터별 기본 에피소드, special = 특별 에피소드(예전 STORIES)
+let EPS={basic:{},special:[]},STORIES=[];
+const H={sort:"rec",pick:null};  // 8-2: 홈/랭킹 전환(seg)과 랭킹 화면 없앰
+// 홈 정렬(8-B): 추천 = data/characters.json recommend 순서, 인기 랭킹 = 대화 수, 신규 = NEW 표시만(8-2: 정렬 → 거르기), 3D로 만나기 = 3D 표시만
+function homeList(){
+  let list=[...CH];
+  if(H.sort==="rec")list.sort((a,b)=>REC.indexOf(a.id)-REC.indexOf(b.id));
+  if(H.sort==="hot")list.sort((a,b)=>b.chats-a.chats);
+  if(H.sort==="new")list=list.filter(c=>c.badge==="NEW");
+  if(H.sort==="3d")list=list.filter(c=>c.badge==="3D");
+  return list;
 }
+// 에피소드 버튼 표시: 19+ 인증 전 → 「19+ 인증」, 기본은 대화방에 들어간 적 있으면 「이어하기」, 특별은 무료/💎/구매함
+const epAdult=()=>`<span class="eb adult">${esc(UI("home.btnAdult"))}</span>`;
+function renderEps(cid){
+  const box=$("#hEps");if(!box)return;
+  const c=chBy(cid);if(!c){box.innerHTML="";return}
+  const b=(EPS.basic||{})[cid],sp=STORIES.filter(s=>(s.char||"seoa")===cid),ad=needAdult(cid);
+  box.innerHTML=`<h2>${esc(UI("home.basic"))}</h2>
+  ${b?`<button class="ep" data-b="${cid}"><span class="tx"><b>${esc(b.title)}</b><p>${esc(b.situation)}</p></span>${ad?epAdult():`<span class="eb">${esc(S.rooms.includes(cid)?UI("home.btnContinue"):UI("home.btnStart"))}</span>`}</button>`:""}
+  <h2>${esc(UI("home.special"))}</h2>
+  ${sp.length?sp.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${esc(st.name)}</b><p>${esc(st.desc)}</p><span class="mo">${esc(UI("home.motion",{name:MNAME[st.m]||st.m}))}</span></span>
+    ${ad?epAdult():`<span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${esc(S.stories[st.id]?UI("home.btnOwned"):st.price?UI("home.btnPrice",{price:st.price}):UI("home.btnFree"))}</span>`}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
+  :`<div class="epsoon">${esc(UI("home.soon"))}</div>`}`;
+  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>enterRoom(x.dataset.b));  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
+  box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
+}
+function renderHome(){
+  const h=$("#home");
+  const list=homeList(),sorts=["rec","hot","new","3d"];
+  if(!list.some(c=>c.id===H.pick))H.pick=list.length?list[0].id:null;
+  h.innerHTML=`<div class="srow">${sorts.map(k=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${esc(UI("home.sorts."+k))}</button>`).join("")}</div>
+  <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
+  <div class="hdots" id="hDots">${list.map(c=>`<i${c.id===H.pick?' class="on"':""}></i>`).join("")}</div>
+  <div id="hEps"></div>`;
+  Car.mount($("#hCar"),list.map(c=>c.id));
+  h.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{if(H.sort===b.dataset.sort)return;H.sort=b.dataset.sort;H.pick=null;h.scrollTop=0;renderHome()});  // 정렬을 바꾸면 그 순서의 첫 카드
+}
+// 카드 가로 넘기기(8-B): 브라우저 스크롤 + 가운데 맞춤 스냅(scroll-snap). 가운데에 가장 가까운 카드가 고른 카드.
+// 옆 카드를 누르면 가운데로. 노트북: 마우스 휠(세로 휠은 한 장씩)·끌기. ←/→ 키는 시연 패널 단축키라 홈에서는 쓰지 않음
+const Car=(()=>{
+  let el=null,ids=[],cur=-1,raf=0,wheelAt=0,drag=null,moved=false;
+  const cards=()=>el?[...el.children]:[];
+  function nearest(){const mid=el.scrollLeft+el.clientWidth/2;let best=0,bd=1e9;cards().forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<bd){bd=d;best=i}});return best}
+  function mark(i){
+    cards().forEach((c,k)=>c.classList.toggle("on",k===i));
+    document.querySelectorAll("#hDots i").forEach((d,k)=>d.classList.toggle("on",k===i));
+    if(i!==cur){cur=i;H.pick=ids[i];renderEps(ids[i])}
+  }
+  function go(i,smooth=true){const c=cards()[i];if(!c)return;el.scrollTo({left:c.offsetLeft+c.offsetWidth/2-el.clientWidth/2,behavior:smooth?"smooth":"auto"});mark(i)}
+  function onMove(e){if(!drag||!el)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>5&&!moved){moved=true;el.classList.add("drag")}if(moved)el.scrollLeft=drag.l-dx}
+  function onUp(){if(!drag||!el){drag=null;return}const was=moved;drag=null;el.classList.remove("drag");if(was){go(nearest());setTimeout(()=>moved=false,0)}}
+  window.addEventListener("pointermove",onMove);window.addEventListener("pointerup",onUp);
+  function mount(node,list){
+    el=node;ids=list;cur=-1;drag=null;moved=false;
+    const i0=Math.max(0,ids.indexOf(H.pick));
+    go(i0,false);requestAnimationFrame(()=>{if(el===node)go(i0,false)});  // 탭이 막 보였을 때 한 번 더(크기 반영 뒤)
+    el.addEventListener("scroll",()=>{if(drag)return;cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>mark(nearest()))},{passive:true});
+    cards().forEach((c,k)=>c.onclick=e=>{if(moved){e.preventDefault();return}if(k!==cur)go(k)});  // 가운데 카드를 누르면 아무 일 없음(들어가기는 에피소드 버튼)
+    el.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight")e.preventDefault()});  // 카드에 포커스가 있어도 ←/→ 로 넘어가지 않게(시연 패널 단축키는 그대로 받음)
+    el.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;e.preventDefault();const t=performance.now();if(t-wheelAt<450)return;wheelAt=t;go(Math.max(0,Math.min(ids.length-1,cur+(e.deltaY>0?1:-1))))},{passive:false});
+    el.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"||e.button!==0)return;drag={x:e.clientX,l:el.scrollLeft};moved=false});  // 끌기는 마우스만(터치는 브라우저 스크롤)
+    el.addEventListener("dragstart",e=>e.preventDefault());
+  }
+  return{mount};
+})();
 function startStory(id){
-  const st=STORIES.find(x=>x.id===id);
-  if(st.price&&!S.stories[id]){if(S.dia<st.price){toast("💎가 부족해요");return}S.dia-=st.price}
-  S.stories[id]=1;save();renderTop();setTab("chat");openRoom("seoa");setScene(st.scene);
-  addMsg("sys",`📖 특별 이야기 「${st.name}」 시작`);
-  setTimeout(()=>{addMsg("c",st.line,{tag:"📖 이야기 전용 장면 · "+MNAME[st.m]});react({m:st.m,f:st.f,t:st.line},"📖 이야기 장면")},600);
+  const st=STORIES.find(x=>x.id===id);if(!st)return;
+  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
+  if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
+  // 8-1: 서아 오프닝을 아직 안 봤으면 본 것으로 처리하고 특별 에피소드 첫 대사만(기본 에피소드 「시작」은 그대로 오프닝부터)
+  if((st.char||"seoa")==="seoa"&&!S.introDone)S.introDone=true;
+  S.stories[id]=1;save();renderTop();setTab("chat");openRoom(st.char||"seoa");setScene(st.scene);
+  addMsg("sys",UI("home.storyStart",{name:st.name}));
+  setTimeout(()=>{addMsg("c",st.line,{tag:UI("home.storyTag",{name:MNAME[st.m]})});react({m:st.m,f:st.f,t:st.line},"📖 이야기 장면")},600);
 }
 
 // ───────────────────────── 마이 ─────────────────────────
@@ -1363,13 +1400,13 @@ function renderList(){
 function showList(){S.room=null;save();$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread()}
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
-function adultSheet(cid){
+function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
   const sh=$("#adultSheet"),T=k=>Onboard.T("adult."+k);
   sh.innerHTML=`<h2>${esc(T("title"))}</h2><p class="sub">${esc(T("desc"))}</p><button class="adbtn" id="adVerify" type="button"><span class="spin"></span><span>${esc(T("verify"))}</span></button><button class="adlater" id="adLater" type="button">${esc(T("later"))}</button>`;
   let busyV=false;
   $("#adLater").onclick=closeSheets;
   $("#adVerify").onclick=()=>{if(busyV)return;busyV=true;$("#adVerify").classList.add("loading");
-    setTimeout(()=>{S.adult={at:Date.now()};save();closeSheets();toast(esc(T("done")),2200);setTab("chat");openRoom(cid)},((DATA.onboarding||{}).timing||{}).adultVerifyMs||1000)};
+    setTimeout(()=>{S.adult={at:Date.now()};save();closeSheets();toast(esc(T("done")),2200);if(then)then();else{setTab("chat");openRoom(cid)}},((DATA.onboarding||{}).timing||{}).adultVerifyMs||1000)};
   openSheet("#adultSheet");
 }
 function openRoom(cid){
@@ -1422,7 +1459,7 @@ function headerNote(c,line){
 function start(){
   if(!S.chats.seoa||!S.chats.seoa.length){
     // 인트로 원고(data/seoa_intro.json)가 있으면 처음 들어갈 때 대화방 안에서 문단별로 보여 줌. 없으면 예전 한 줄 인트로
-    S.chats.seoa=[{r:"sys",t:UI("chat.seoaFirst")},...(DATA.intro&&!S.introDone?[]:[{r:"c",t:chBy("seoa").intro,at:Date.now()-FIRST_MIN.seoa*60000}])];
+    S.chats.seoa=[{r:"sys",t:UI("chat.seoaFirst")},...(DATA.intro&&!S.introDone?[]:[{r:"c",t:chBy("seoa").intro,at:Date.now()-(chBy("seoa").firstMin||7)*60000}])];
   }
   if(!S.story.stage)S.story.stage=1;
   if(!S.story.location&&SCENES[S.scene||0])S.story.location=SCENES[S.scene||0].name;
