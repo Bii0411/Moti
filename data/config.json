@@ -24,5 +24,5 @@
   "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
   "stage": { "bigAspect": 1, "bigMaxRatio": 0.58, "minLogPx": 80, "growMs": 350, "backDelayMs": 1000 },
   "_outfits": "서아 의상(14단계). files = 의상별 모델 파일. 처음엔 ops(작전복), 관계 단계가 comfortStage(3 = 썸) 이상이면 private(흰 옷). 특별 에피소드(data/episodes.json special)의 outfit 이 있으면 그 에피소드를 시작한 뒤로 그 의상(오프닝 다시 보기·다른 에피소드·초기화 때 풀림)",
-  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261122c", "private": "seoa_private.glb", "xmas": "seoa_xmas.glb", "dracula": "seoa_dracula.glb" }, "comfortStage": 3 }
+  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261122c", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb", "dracula": "seoa_dracula.glb?v=2" }, "comfortStage": 3 }
 }
