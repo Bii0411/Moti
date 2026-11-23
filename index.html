@@ -34,7 +34,15 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .bgdim.raw{display:none}
 .stage .ld{position:absolute;inset:0;display:grid;place-items:center;color:var(--sub);font-size:13px;background:#0008}
 .where{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
-.mood{position:absolute;right:10px;top:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px}
+/* 오른쪽 위 관계 단계·게이지·기분 태그(19). 색·시간 data/config.json bondTop·moodTag. 블러·그림자 없이 transform 띠만 */
+.btop{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
+.btop .bx{display:inline-flex;flex-direction:column;background:#000a;padding:5px 10px 6px;border-radius:10px}
+.btop .bx b{font-size:12px;font-weight:700;line-height:1.25;white-space:nowrap}
+.bgauge{position:relative;display:block;height:var(--gh,4px);margin-top:4px;border-radius:9px;overflow:hidden;background:var(--gt,#ffffff2e)}
+.bgauge i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:9px;background:var(--gc,#B4B2A9)}
+.bgauge em{position:absolute;left:0;top:0;bottom:0;width:var(--sw,40%);transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--sc,#fff),transparent);opacity:0}
+.mtag{font-size:10px;font-weight:700;line-height:1;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.mtag[hidden]{display:none}
 .cap{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font-size:12px;font-weight:700;background:#000b;padding:5px 11px;border-radius:999px;white-space:nowrap;opacity:0;transition:opacity .3s}
 .cap.on{opacity:1}
 .cap .new{color:var(--gold)}
@@ -43,7 +51,7 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 /* 앨범 다시 보기 자막: 3D 아래 칸 */
 .rcap{margin:8px 12px 0;min-height:0;max-height:0;overflow:hidden;background:#0d0b16;border:1px solid transparent;border-radius:14px;padding:0 12px;font-size:14px;line-height:1.45;opacity:0;transition:opacity .3s,max-height .3s,padding .3s}
 .rcap.on{opacity:1;max-height:120px;padding:10px 12px;border-color:#ffffff22}
-.app.inalbum .where,.app.inalbum .mood,.app.inalbum .bondchip{display:none}
+.app.inalbum .where,.app.inalbum .btop{display:none}
 .app.inalbum .cap{font-size:11px;padding:4px 9px}
 .burst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);font-size:56px;opacity:0;pointer-events:none}
 .burst.go{animation:burst 1.4s ease-out}
@@ -200,7 +208,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .packs button small{display:block;font-size:11px;color:var(--sub);font-weight:500;margin-top:2px}
 .bondbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
 .bondbox .prog{flex:1;margin:0}
-.bondchip{position:absolute;left:10px;top:40px;font-size:11px;font-weight:700;background:#000a;padding:4px 9px;border-radius:999px;color:#fbcfe8}
 .app.nostage .stage{display:none}
 .hcards{display:flex;flex-direction:column;gap:10px}
 .hc{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;text-align:left;width:100%}
@@ -363,8 +370,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
     <div class="bgdim" id="bgdim"></div>
     <div class="ld" id="ld">서아: “잠깐, 준비하고 나갈게.”</div>
     <span class="where" id="where">📍 네온 거리</span>
-    <span class="mood" id="moodTag">😐 평소</span>
-    <span class="bondchip" id="bondChip"></span>
+    <div class="btop" id="bondTop"><span class="bx"><b id="bondTxt"></b><span class="bgauge" id="bGauge"><i></i><em></em></span></span><span class="mtag" id="moodTag" hidden></span></div>
     <div class="bubble" id="bubble"></div>
     <span class="cap" id="cap"></span>
     <div class="burst" id="burst"></div>
@@ -932,7 +938,11 @@ function setScene(i){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){co
   if(!SCENES[i])i=0;S.scene=i;if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
 // 다시 보기 동안만 그때 장소를 보여 주고, 끝나면 대화의 원래 장소로
 function sceneForReplay(i,ms){clearTimeout(sceneBackT);showScene(i);sceneBackT=setTimeout(()=>showScene(S.scene),ms)}
-function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
+function renderTop(){$("#dia").textContent=S.dia;
+  // 19: 기분 태그 — 평소면 숨김, 지침·삐짐·생일이면 게이지 밑에 이름만(색 data/config.json moodTag)
+  const k=curState(),t=$("#moodTag"),M=((DATA.config||{}).moodTag||{})[k];
+  if(k==="normal"||!M){t.hidden=true;return}
+  t.hidden=false;t.textContent=STATES[k].ko;t.style.color=M.text||M.color;t.style.background=`linear-gradient(${M.bg},${M.bg}),#000a`}
 function react(r,tag,sub,kind){Stage.play(r.m,{tag,fx:Fx.pick(kind,r.m)});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
@@ -1258,7 +1268,7 @@ async function send(text){
   addMsg("c",v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
-  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,Fx.first(mid)||(keyM?"push":""));firstSeen(mid)}  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,Fx.first(mid)||(keyM?"push":""));firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   Demo.render();
   afterReply(v);
   SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
@@ -1271,8 +1281,12 @@ async function send(text){
     runJudge(text,turnText(talkOf("seoa").slice(-1)[0]),keep);
   }else if(!R)countStage();
   renderBond();renderTop();perfEnd(P);
-  if(prevMood!==S.mood&&!S.force&&!S.birthday){const g=GIFTS.find(x=>x.rec===S.mood);toast(`${STATES[S.mood].e} 서아가 <b>${STATES[S.mood].ko}</b> 상태가 됐어요`+(g&&S.mood!=="normal"?`<br><small>🎁 ${g.e} ${g.name}을(를) 주면 특별한 반응이 있을지도…?</small>`:""))}
+  if(prevMood!==S.mood&&!S.force&&!S.birthday)moodToast(S.mood);
 }
+// 기분 바뀜 알림(19): 「서아 기분 · {기분}」 / 「{선물}이라면 반응이 다를 거예요」(평소·맞는 선물 없음이면 첫 줄만). 문구 data/ui.json top
+function moodToast(k){const g=k!=="normal"&&GIFTS.find(x=>x.rec===k);
+  let l2="";if(g){l2=UI("top.moodGift",{gift:g.name});const c=g.name.charCodeAt(g.name.length-1)-0xAC00;if(c>=0&&c<11172&&c%28===0)l2=l2.split(g.name+"이라면").join(g.name+"라면")}
+  toast(`<b>${esc(UI("top.moodToast",{mood:STATES[k].ko}))}</b>`+(l2?`<br><small>${esc(l2)}</small>`:""))}
 // 답장 뒤 이야기 상태 갱신: 최근 서아 응답 3개(반복 방지), 장소, 쓴 사건 비우기
 function afterReply(v){
   const st=story(),last=talkOf("seoa").slice(-1)[0];
@@ -1598,7 +1612,37 @@ function renderBond(){
   const at=(v2?D.affectionAt:D.countAt)||[],val=v2?(story().affection||0):(S.bond||0);
   const nx=i<5?{n:stageName(i+2)}:null;
   const pct=!nx?100:at[i+1]!=null?Math.max(0,Math.min(100,(val-(at[i]||0))/((at[i+1]-(at[i]||0))||1)*100)):0;
-  $("#bondChip").textContent=`💗 ${i+1}단계 · ${stageName(i+1)}`;return{i,nx,pct}}
+  BondTop.draw(i+1,pct);return{i,nx,pct}}
+// 19: 대화 화면 오른쪽 위 「{n}단계 · {이름}」 + 얇은 게이지. 단계가 오르면 색이 바뀌며 0에서 새 값까지 다시 참.
+// 평소 답장으로 늘 때는 조용히 늘기만. 결정적 순간(17-1B)엔 shine() 으로 밝은 띠가 한 번 지나감. 값 data/config.json bondTop
+const BondTop=(()=>{
+  let last=null;
+  const C=()=>(DATA.config&&DATA.config.bondTop)||{};
+  function draw(n,pct){
+    const c=C(),g=$("#bGauge"),f=g.firstElementChild,col=(c.colors||{})[n]||"#B4B2A9";
+    $("#bondTxt").textContent=UI("top.bond",{n,name:stageName(n)});
+    g.style.setProperty("--gh",(c.gaugeH||4)+"px");if(c.track)g.style.setProperty("--gt",c.track);
+    const up=last&&n>last.n,same=last&&n===last.n&&last.pct===pct&&last.col===col;
+    if(same)return;
+    if(up){  // 단계 상승: 색은 colorMs, 게이지는 0 → 새 값 fillMs
+      f.style.transition="none";f.style.width="0%";void f.offsetWidth;
+      f.style.transition=`width ${c.fillMs||600}ms ease-out, background-color ${c.colorMs||600}ms ease`;
+    }else if(last)f.style.transition=`width ${c.growMs||500}ms ease-out, background-color ${c.colorMs||600}ms ease`;
+    else f.style.transition="none";
+    f.style.backgroundColor=col;f.style.width=pct+"%";
+    last={n,pct,col}}
+  let anim=null;
+  function shine(){
+    const s=C().shine||{},e=$("#bGauge").lastElementChild;
+    e.style.setProperty("--sw",((s.width||.4)*100)+"%");if(s.color)e.style.setProperty("--sc",s.color);
+    if(anim)anim.cancel();
+    if(!e.animate)return;
+    // 띠 폭(width)만큼 왼쪽 밖에서 시작해 게이지 오른쪽 밖으로. translateX % 는 띠 자기 폭 기준
+    const out=100/(s.width||.4);
+    anim=e.animate([{transform:"translateX(-100%)",opacity:1},{transform:`translateX(${out}%)`,opacity:1}],{duration:s.ms||800,easing:s.ease||"ease-in-out"});
+    anim.onfinish=()=>{anim=null}}
+  return{draw,shine,reset(){last=null}};
+})();
 
 // ───────────────────────── 홈 ─────────────────────────
 // 에피소드 목록은 data/episodes.json(8-A): basic = 캐릭터별 기본 에피소드, special = 특별 에피소드(예전 STORIES)
