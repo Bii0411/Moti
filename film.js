@@ -1,5 +1,5 @@
 // moti 입장권 배경 필름 띠(7-2). 설정은 data/onboarding.json film (값의 뜻은 _film).
-// Film     : 입장권 3D 장면 안에서 서아 뒤를 지나가는 필름 띠(휘어진 큰 띠, 설정으로 기운 얇은 띠도). 펀치 때 잠깐 밝고 빨라짐
+// Film     : 입장권 3D 장면 안에서 서아 뒤를 지나가는 필름 띠(21부터 곧은 가로 띠, 설정으로 휘어진 띠·기운 얇은 띠도). 펀치 때 잠깐 밝고 빨라짐
 // FilmShot : 개발용. 주소 ?filmshot=1&skipintro=1 → 앱의 3D 서아로 film.shots 몸짓을 하나씩 재생해 멈춘 사진을 찍고
 //            필름 칸처럼 이어 붙인 webp 를 만든다(화면에 보여 주고 내려받기 버튼). tools/filmshot.mjs 가 이걸로 파일을 저장한다.
 // 이 파일은 index.html 본 스크립트보다 먼저 불린다(FilmShot 이 시계를 먼저 바꿔 둬야 해서). Stage·DATA 는 함수 안에서만 쓴다.
@@ -130,7 +130,9 @@ const Film=(()=>{
       try{tex.anisotropy=Math.min(8,Stage.three().R.capabilities.getMaxAnisotropy())}catch(e){}
       group=new THREE.Group();group.name="obFilmGroup";
       const big=f.big||{},thin=f.thin||{};
-      const bigC=new THREE.CatmullRomCurve3((big.points||[[-1.6,.9,-1],[0,1.3,-2],[1.6,2,-3.5]]).map(V),false,"centripetal");
+      // 21: big.from·to 가 있으면 곧은 가로 띠(서아 가슴 높이 뒤). 없으면 예전처럼 points 곡선
+      const bigC=big.from&&big.to?new THREE.LineCurve3(V(big.from),V(big.to))
+        :new THREE.CatmullRomCurve3((big.points||[[-1.6,.9,-1],[0,1.3,-2],[1.6,2,-3.5]]).map(V),false,"centripetal");
       const thinC=new THREE.LineCurve3(V(thin.from||[-2,.8,-2.4]),V(thin.to||[2,1,-2.8]));
       // 사진은 큰 띠에만. 얇은 띠는 빈 필름(thin.blank 가 false 면 사진)
       const thinTex=thin.show===false?null:thin.blank===false?tex:blankTex(f);if(thinTex)thinTex.anisotropy=tex.anisotropy;

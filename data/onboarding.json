@@ -72,7 +72,7 @@
     "fog": { "color": "#110d1d", "near": 1.8, "far": 6.2 },
     "face": "soft"
   },
-  "_film": "입장권 3D 배경 필름 띠(7-2, film.js). character 이 표를 맞는 캐릭터, image 띠에 붙이는 사진 파일(몸짓 정지 사진을 필름 칸처럼 이어 붙인 webp). ── 사진 만들기: 로컬 서버(python -m http.server 8765)를 켜고 node tools/filmshot.mjs → image 에 저장(또는 브라우저로 ?filmshot=1&skipintro=1 을 열어 「내려받기」). shots 찍을 몸짓(id 몸짓, at 몸짓 재생 시간 중 몇 % 지점, face 표정), shotFrame 찍는 구도(data/config.json camera 와 같은 뜻), shotSettleSec 몸짓 전 표정·머리카락이 자리 잡는 시간(초), cell 칸 크기(w·h px, gap 칸 사이, margin 위아래 구멍 줄 높이, holesPerCell 칸마다 구멍 수, holeW·holeH·holeR 구멍 크기·모서리, bg 칸 배경, base 필름 바탕), quality webp 품질(0~1). ── 띠: tint 보라 색조(사진에 곱함), big 휘어진 큰 띠(points 곡선이 지나는 점 [x 왼쪽−·오른쪽+, y 높이, z 뒤로−] m, 서아는 원점·키 1.72), thin 기운 얇은 직선 띠(from·to 양 끝 점, blank 가 true 면 사진 없는 빈 필름 = 어두운 칸 blankColor 와 위아래 구멍만, cell 값으로 코드에서 그림. false 면 큰 띠와 같은 사진). 사진은 큰 띠에만. thin.show 가 false 면 얇은 띠를 만들지 않음(20단계: 큰 띠만, 큰 띠 밝기 0.62 → 0.43). 띠마다 width 폭(m, 사진 높이), speed 흐르는 속도(m/초, + 오른쪽→왼쪽, − 왼쪽→오른쪽), brightness 밝기(tint 에 곱함), opacity 불투명도(0~1), segments 곡선을 나누는 칸 수. 먼 쪽은 scene3d.fog 로 어두워짐. punch 펀치 순간(서아 손 흔들기와 같은 때): brightness 밝기 배율, speed 속도 배율, ms 원래대로 돌아오는 데 걸리는 시간, rise 배율이 꼭대기까지 오르는 비율(ms 중)",
+  "_film": "입장권 3D 배경 필름 띠(7-2, film.js). character 이 표를 맞는 캐릭터, image 띠에 붙이는 사진 파일(몸짓 정지 사진을 필름 칸처럼 이어 붙인 webp). ── 사진 만들기: 로컬 서버(python -m http.server 8765)를 켜고 node tools/filmshot.mjs → image 에 저장(또는 브라우저로 ?filmshot=1&skipintro=1 을 열어 「내려받기」). shots 찍을 몸짓(id 몸짓, at 몸짓 재생 시간 중 몇 % 지점, face 표정), shotFrame 찍는 구도(data/config.json camera 와 같은 뜻), shotSettleSec 몸짓 전 표정·머리카락이 자리 잡는 시간(초), cell 칸 크기(w·h px, gap 칸 사이, margin 위아래 구멍 줄 높이, holesPerCell 칸마다 구멍 수, holeW·holeH·holeR 구멍 크기·모서리, bg 칸 배경, base 필름 바탕), quality webp 품질(0~1). ── 띠: tint 보라 색조(사진에 곱함), big 큰 띠(21: from·to 가 있으면 두 점을 잇는 곧은 띠 [x 왼쪽−·오른쪽+, y 높이, z 뒤로−] m, 서아는 원점·키 1.72 → y 1.18 이 화면에서 가슴 높이(위아래 구멍 줄이 둘 다 입장권 카드 위로 보이는 높이). from·to 를 지우고 points 를 주면 그 점을 지나는 휘어진 띠), thin 기운 얇은 직선 띠(from·to 양 끝 점, blank 가 true 면 사진 없는 빈 필름 = 어두운 칸 blankColor 와 위아래 구멍만, cell 값으로 코드에서 그림. false 면 큰 띠와 같은 사진). 사진은 큰 띠에만. thin.show 가 false 면 얇은 띠를 만들지 않음(20단계: 큰 띠만, 큰 띠 밝기 0.62 → 0.43. 21단계: 곧은 가로 띠, 폭 0.5 → 0.75, 밝기 0.85, 속도 0.07 → 0.035, tint #9b80d6 → #ab96dc). 띠마다 width 폭(m, 사진 높이), speed 흐르는 속도(m/초, + 오른쪽→왼쪽, − 왼쪽→오른쪽), brightness 밝기(tint 에 곱함), opacity 불투명도(0~1), segments 곡선을 나누는 칸 수. 먼 쪽은 scene3d.fog 로 어두워짐. punch 펀치 순간(서아 손 흔들기와 같은 때): brightness 밝기 배율, speed 속도 배율, ms 원래대로 돌아오는 데 걸리는 시간, rise 배율이 꼭대기까지 오르는 비율(ms 중)",
   "film": {
     "character": "seoa",
     "image": "assets/onboarding/film_seoa.webp",
@@ -90,8 +90,15 @@
     "shotSettleSec": 1,
     "cell": { "w": 244, "h": 300, "gap": 12, "margin": 34, "holesPerCell": 6, "holeW": 14, "holeH": 10, "holeR": 2.5, "bg": "#15101f", "base": "#0b0911" },
     "quality": 0.8,
-    "tint": "#9b80d6",
-    "big": { "points": [[-1.2, 0.98, -0.6], [-0.48, 1.24, -0.96], [0.18, 1.56, -1.38], [0.72, 1.88, -1.76], [1.23, 2.25, -2.37], [1.77, 2.64, -3.14]], "width": 0.5, "speed": 0.07, "brightness": 0.43, "opacity": 0.82, "segments": 96 },
+    "tint": "#ab96dc",
+    "big": {
+      "from": [-2.4, 1.18, -0.9],
+      "to": [2.4, 1.18, -0.9],
+      "width": 0.75,
+      "speed": 0.035,
+      "brightness": 0.85,
+      "opacity": 0.9
+    },
     "thin": { "show": false, "blank": true, "blankColor": "#2a2140", "from": [-1.6, 0.86, -1.3], "to": [1.7, 1.2, -1.7], "width": 0.2, "speed": -0.1, "brightness": 0.45, "opacity": 0.75 },
     "punch": { "brightness": 2.2, "speed": 5, "ms": 1200, "rise": 0.08 }
   },
