@@ -190,19 +190,17 @@
     "noDia": "다이아가 부족해요"
   },
   "photo": {
-    "_photo": "사진 시트·크게 보기(10단계). count = 진행도({n}/{cap}). seg = 묶음 버튼, empty = 묶음별 빈 상태. growRow·growPrice·plusRow·plusPrice = 아래 줄. grown = 칸 늘린 뒤 알림. share·like·delete = 크게 보기 아이콘의 접근성 이름. info = 정보 줄 첫째 줄({name} 몸짓, 몸짓이 없으면 cam.idle), infoBooth = 포토부스 사진 정보 줄, date = 날짜 모양. mark = 공유 이미지 구석 표시. plusStart = PLUS 를 시작했을 때(마이 페이지와 같은 문구). ariaClose = 크게 보기 닫기 버튼 접근성 이름",
+    "_photo": "사진 시트·크게 보기(10단계). count = 진행도({n}/{cap}). seg = 묶음 버튼, empty = 묶음별 빈 상태. growRow·growPrice·plusRow·plusPrice = 아래 줄. grown = 칸 늘린 뒤 알림. share·like·delete = 크게 보기 아이콘의 접근성 이름. info = 정보 줄 첫째 줄({name} 몸짓, 몸짓이 없으면 cam.idle), infoBooth = 포토부스 사진 정보 줄(22단계에서 포토부스는 뺐지만 전에 찍은 사진을 보일 때 씀), date = 날짜 모양. mark = 공유 이미지 구석 표시. plusStart = PLUS 를 시작했을 때(마이 페이지와 같은 문구). ariaClose = 크게 보기 닫기 버튼 접근성 이름",
     "title": "사진",
     "count": "{n} / {cap}",
     "seg": {
       "all": "전체",
       "liked": "좋아요",
-      "booth": "포토부스",
       "received": "받은 사진"
     },
     "empty": {
       "all": "아직 사진이 없어요",
       "liked": "좋아요한 사진이 없어요.",
-      "booth": "포토부스에서 찍은 네 컷이 여기 모여요",
       "received": "아직 서아가 보낸 사진이 없어요."
     },
     "growRow": "칸 늘리기 +10",
@@ -224,59 +222,6 @@
     "mark": "moti · 윤서아",
     "plusStart": "PLUS 시작 · 다이아 300 지급",
     "ariaClose": "닫기"
-  },
-  "booth": {
-    "_booth": "포토부스(11단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md [11]). count = 위쪽 저장 칸({n}·{cap}), cell = 칸 꾸미기 제목({k} 칸 번호), sec = 항목 이름, angle = 각도 표시({deg}), bg = 단색 배경 이름(장소 배경은 장소 이름 그대로), frame = 프레임 이름, shotOf = 촬영 중 위쪽({k} / 4), count3·2·1·click = 카운트다운, foot = 사진 아래 줄(사진 안에 찍힘, {date} 모양은 data/booth.json strip.date). aria* = 화면에 글자가 없는 버튼의 접근성 이름. momentValue = 동작 순간 값 표시({n} 0~100)",
-    "albumBtn": "포토부스",
-    "title": "포토부스",
-    "back": "‹ 앨범",
-    "count": "사진 {n} / {cap}",
-    "cell": "{k}번 칸",
-    "sec": {
-      "pose": "포즈",
-      "moment": "동작 순간",
-      "face": "표정",
-      "angle": "각도",
-      "bg": "배경",
-      "frame": "프레임"
-    },
-    "poseNote": "모은 몸짓만",
-    "locked": "아직 못 모았어요",
-    "momentValue": "{n}%",
-    "angle": {
-      "front": "정면",
-      "left": "왼쪽 {deg}°",
-      "right": "오른쪽 {deg}°"
-    },
-    "bg": {
-      "white": "흰색",
-      "pink": "분홍",
-      "black": "검정",
-      "purple": "보라"
-    },
-    "frame": {
-      "white": "흰색",
-      "black": "검정",
-      "pink": "분홍"
-    },
-    "shoot": "촬영",
-    "shotOf": "{k} / 4",
-    "countdown": [
-      "3",
-      "2",
-      "1"
-    ],
-    "click": "찰칵",
-    "resultTitle": "완성",
-    "resultNote": "칸을 누르면 다시 찍어요",
-    "redo": "다시 꾸미기",
-    "done": "완성",
-    "saved": "사진에 저장했어요",
-    "share": "공유하기",
-    "close": "닫기",
-    "foot": "{date} · moti · 윤서아",
-    "ariaZoomOut": "멀리",
-    "ariaZoomIn": "가까이"
   },
   "seoaPhoto": {
     "_seoaPhoto": "서아가 먼저 보내는 사진(12단계, 원고 docs/drafts/12-서아가-보내는-사진-원고.md 4절). sending = 만드는 동안 대화 기록 맨 아래. saved = 사진 말풍선 아래 저장 알림, savedStage = 단계 사진일 때 덧붙임({n} 받은 단계 사진 수, {total} 5). info·infoStage = 크게 보기 정보 첫째 줄(둘째 줄은 날짜, data/ui.json photo.date). stageLabel = infoStage 의 {stage}. 사진 화면 「받은 사진」: progress·progressCount = 단계 사진 진행도, slot = 못 받은 단계 사진 칸, others = 그 밖에 받은 사진 제목, note = 안내 한 줄({cap} 사진 칸), empty = 빈 상태. aria = 사진 말풍선 접근성 이름",

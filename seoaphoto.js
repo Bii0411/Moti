@@ -3,7 +3,7 @@
 //             보내는 때: 단계 사진(관계 2~6단계로 오를 때) · 오랜만 사진 · 대화 중 가끔 · 시연 패널 「서아 사진 지금 받기」
 // 사진과 함께 오는 말은 원고에서만 고른다(대화 AI 가 만들지 않음). 서아 혼자, blur·filter 효과 없음.
 // 사진은 화면 밖에서 만든다: 대화 무대 그림판을 같은 작업 안에서 잠깐 큰 크기로 한 번 더 그리고 바로 되돌림(Stage.still, photos.js Shot 과 같은 방식)
-// photos.js·booth.js 다음, index.html 본 스크립트보다 먼저 불린다. S·DATA·Stage·UI 등은 함수 안에서만 쓴다.
+// photos.js 다음, index.html 본 스크립트보다 먼저 불린다. S·DATA·Stage·UI 등은 함수 안에서만 쓴다.
 
 const SeoaPhoto=(()=>{
   const D=()=>(typeof DATA!=="undefined"&&DATA.seoaPhoto)||{};
@@ -19,12 +19,12 @@ const SeoaPhoto=(()=>{
 
   // ── 사진 만들기 ──
   const filmShot=m=>((((DATA.onboarding||{}).film||{}).shots)||[]).find(s=>s.id===m);
-  function moment(mid){const fs=filmShot(mid);if(fs&&fs.at!=null)return fs.at;const bm=((DATA.booth||{}).moments||{}).byId||{};if(bm[mid]!=null)return bm[mid];const M=D().moment||{};return M.default!=null?M.default:50}
+  function moment(mid){const fs=filmShot(mid);if(fs&&fs.at!=null)return fs.at;const M=D().moment||{},bm=M.byId||{};if(bm[mid]!=null)return bm[mid];return M.default!=null?M.default:50}
   // 지금 열린 몸짓 중 하나(이 종류에서 피할 몸짓 빼고, 바로 앞 사진의 몸짓은 되도록 빼고)
   function pickMotion(K){const av=new Set(K.avoid||[]),s=st();
     let ids=unlockedIds().filter(id=>canPlay(id)&&!av.has(id));if(ids.length>1)ids=ids.filter(id=>id!==s.lastMid);
     return pick(ids)||IDLE}
-  // 구도: booth.js setCam 과 같은 계산 + lift(위에서 내려다보기) + shift(서아를 옆으로 비킴)
+  // 구도: 키 비율 top·bottom·width 가 들어오게 거리를 잡음(11단계 포토부스 구도와 같은 계산) + lift(위에서 내려다보기) + shift(서아를 옆으로 비킴)
   function setCam(cam,aspect,K,yaw,shift){
     const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),top=K.top,bot=K.bottom,cy=(top+bot)/2*H;
     const d=Math.max((top-bot)*H/2/tn,K.width*H/2/(tn*aspect)),r=yaw*Math.PI/180,o=Stage.center(K.center||0);
@@ -100,9 +100,9 @@ const SeoaPhoto=(()=>{
     o.stop=()=>{o.on=false;return{frames:o.n,maxGapMs:Math.round(o.max)}};return o}
 
   // ── 보낼 때 고르기 ──
-  // 대화방에 있고, 다른 일이 끝났을 때만 보냄: 답장 기다리는 중·인트로·해금 연출·몸짓 재생 중·카메라·포토부스·온보딩이면 기다림
+  // 대화방에 있고, 다른 일이 끝났을 때만 보냄: 답장 기다리는 중·인트로·해금 연출·몸짓 재생 중·카메라·온보딩이면 기다림
   const inRoom=()=>curTab==="chat"&&S.room==="seoa";
-  const idle=()=>inRoom()&&!Cam.isOpen()&&!Booth.isOpen()&&!(typeof Onboard!=="undefined"&&Onboard.isOpen())&&!busy&&!unlockBusy&&!unlockQ.length&&!Stage.recentMotion(0)&&!sending;
+  const idle=()=>inRoom()&&!Cam.isOpen()&&!(typeof Onboard!=="undefined"&&Onboard.isOpen())&&!busy&&!unlockBusy&&!unlockQ.length&&!Stage.recentMotion(0)&&!sending;
   function kick(ms){clearTimeout(loopT);loopT=setTimeout(check,ms!=null?ms:(D().waitMs||700))}
   function check(){const s=st();if(!s.pend.length||sending)return;
     if(!inRoom())return;  // 대화방에 들어오면 enter() 가 다시 부름
