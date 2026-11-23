@@ -191,7 +191,7 @@
     "loop": "{name} · 반복 중",
     "paused": "{name} · 멈춤",
     "idle": "기본 자세",
-    "help": "두 손가락으로 확대 · 옆으로 밀어서 돌리기",
+    "help": "두 손가락으로 확대 · 끌어서 돌리기",
     "saved": "사진에 저장했어요",
     "ariaClose": "나가기",
     "ariaShutter": "촬영",
