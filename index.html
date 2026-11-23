@@ -510,12 +510,23 @@ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 // 사용자가 그 캐릭터에게 한마디라도 보냈는지 (알림 보낼 캐릭터)
 const talkedTo=cid=>(S.chats[cid]||[]).some(m=>m.r==="u");
 const curState=()=>S.force||(S.birthday?"birthday":S.mood);
+// 서아 의상(14단계, data/config.json outfits): 처음엔 작전복, 관계가 comfortStage 단계(썸) 이상이면 흰 옷(사적).
+// 특별 에피소드에 outfit 이 있으면(크리스마스·드라큘라) 그 에피소드를 시작한 뒤로는 그 의상. 오프닝 다시 보기·다른 에피소드·초기화 때 풀림
+const Outfit={
+  cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261122c"},comfortStage:3},
+  url(k){const f=this.cfg().files||{};return f[k]||f.ops||"seoa_vroid.glb"},
+  want(){if(S.epOutfit&&(this.cfg().files||{})[S.epOutfit])return S.epOutfit;return curStage()>=(this.cfg().comfortStage||3)?"private":"ops"},
+  // 지금 상황에 맞는 의상으로. 처음 흰 옷으로 바뀌는 순간에는 서아 한마디(data/ui.json outfit.firstPrivate)
+  sync(){const k=this.want();if(typeof Stage!=="undefined"&&Stage.outfit)Stage.outfit(k);
+    if(k==="private"&&!S.privSeen&&S.introDone){S.privSeen=true;save();const t=UI("outfit.firstPrivate");if(t&&t!=="outfit.firstPrivate")setTimeout(()=>addMsg("c",t,{tag:UI("outfit.firstPrivateTag")},"seoa"),900)}}
+};
 
 // ───────────────────────── 3D 무대 ─────────────────────────
 const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부끄러워하기: XSTAGE 모션 중 핵심 구간만
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
+  let setOutfit=()=>{};  // 의상 바꾸기(14단계). init 안에서 채움
   let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();let xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
@@ -534,10 +545,13 @@ const Stage=(()=>{
     const jihu=qs.get("model")==="jihu",useLook=!jihu&&qs.get("look")!=="old",lookExtra=qs.get("look")!=="4a";
     const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);
     // ?model=jihu : 카메라 구도 시험용으로 지후 모델을 띄움 (표정·몸짓 뼈 이름은 서아 기준이라 일부만 움직임)
-    new THREE.GLTFLoader().load(jihu?"jihu.glb":"seoa_vroid.glb?v=20261122c",g=>dataReady.then(()=>{
-      const inner=g.scene;
+    // 서아 의상(14단계): data/config.json outfits 의 모델 파일. 처음 열 때 지금 상황에 맞는 의상(Outfit.want)으로 불러온다
+    // 모델을 하나 만들기: 크기 맞추기 · 뼈와 기본 자세 · 만화풍 명암(Look). 의상마다 한 번만 만들고 바꿀 때는 다시 씀
+    const built={};
+    function build(g){
+      const inner=g.scene,fc=[];
       inner.traverse(o=>{if(o.isMesh){o.frustumCulled=false;if(o.material.map)o.material.map.encoding=THREE.sRGBEncoding;
-        if(o.morphTargetDictionary&&o.morphTargetDictionary.Fcl_ALL_Joy!==undefined)faces.push(o)}});
+        if(o.morphTargetDictionary&&o.morphTargetDictionary.Fcl_ALL_Joy!==undefined)fc.push(o)}});
       const box=new THREE.Box3();inner.traverse(o=>{if(o.isSkinnedMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox)}});
       const sc=1.72/(box.max.y-box.min.y),c=box.getCenter(new THREE.Vector3());
       inner.scale.setScalar(sc);inner.position.set(-c.x*sc,-box.min.y*sc,-c.z*sc);
@@ -545,13 +559,29 @@ const Stage=(()=>{
       const bones={},rest={};
       root.traverse(o=>{if(o.isBone&&!bones[o.name]){bones[o.name]=o;const w=new THREE.Quaternion();o.getWorldQuaternion(w);rest[o.name]={local:[o.quaternion.x,o.quaternion.y,o.quaternion.z,o.quaternion.w],world:[w.x,w.y,w.z,w.w]}}});
       if(useLook)lookInfo=Look.apply(DATA.look&&DATA.look.seoa,root,{hemi,key:k,back:r},{extra:lookExtra});
-      md={root,bones,rest};scene.add(root);$("#ld").remove();
-      // 4-2A 살아 있게(머리카락·숨·시선): 서아만. ?alive=off 로 끔
+      return{root,bones,rest,faces:fc};
+    }
+    // 만든 모델을 무대에 올림(이전 모델은 내림). 살아 있게(Alive)는 새 뼈로 다시 시작, 키·XSTAGE 맞춤값은 새로 잰다
+    function mount(m){
+      if(md&&md.root!==m.root){scene.remove(md.root)}
+      if(md){m.root.position.copy(md.root.position)}
+      md={root:m.root,bones:m.bones,rest:m.rest};faces=m.faces;H0=0;if(xsData)xsData.al=null;
+      scene.add(m.root);
       if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
+    }
+    const loadOutfit=key=>built[key]||(built[key]=new Promise((ok,no)=>new THREE.GLTFLoader().load(Outfit.url(key),g=>ok(build(g)),undefined,no)));
+    let outfitNow=null,outfitWant=null;
+    // 의상 바꾸기: 같은 의상이면 그대로. 불러오는 동안 또 바뀌면 마지막 것만 올림
+    setOutfit=key=>{if(jihu||!key)return;outfitWant=key;if(key===outfitNow)return;
+      loadOutfit(key).then(m=>{if(outfitWant!==key)return;outfitNow=key;mount(m);try{R.compile(scene,cam)}catch(e){}}).catch(()=>{})};
+    dataReady.then(()=>{const first=jihu?null:Outfit.want();outfitWant=first;
+      (jihu?new Promise((ok,no)=>new THREE.GLTFLoader().load("jihu.glb",g=>ok(build(g)),undefined,no)):loadOutfit(first)).then(m=>{
+      outfitNow=first;mount(m);$("#ld").remove();
+      if(!jihu&&outfitWant!==first)setOutfit(outfitWant);  // 불러오는 동안 상황이 바뀌었으면 맞는 의상으로
       // 셰이더를 미리 만들어 둠: 3D 칸이 처음 보일 때(입장권·서아 대화방) 멈칫하지 않게
       try{R.compile(scene,cam)}catch(e){}
       readyMs=Math.round(performance.now()-T0);readyFn(true);
-    }),undefined,()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요.";readyFn(false)});
+    }).catch(()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요.";readyFn(false)})});
     fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
     requestAnimationFrame(frame);
   }
@@ -764,7 +794,7 @@ const Stage=(()=>{
   function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
     aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
-  return{init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{outfit:k=>setOutfit(k),init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1288,7 +1318,7 @@ const Demo=(()=>{
   function replayOnboard(){cancel();delete S.onboarded;save();setTab("home");Onboard.open();refresh();reveal()}
   function firstOpen(){cancel();RESET.all();refresh();reveal()}
   // 오프닝 다시 보기: 서아 대화를 비우고 오프닝부터 (관계·앨범은 그대로)
-  function opening(){cancel();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;story().recent_lines=[];S.introDone=false;start();
+  function opening(){cancel();S.epOutfit=null;S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;story().recent_lines=[];S.introDone=false;start();
     setTab("chat");openRoom("seoa");refresh();reveal()}
   function setMood(k){S.force=null;S.birthday=k==="birthday";if(k!=="birthday")S.mood=k;
     Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");faceReset();refresh()}
@@ -1456,6 +1486,7 @@ const Scenes=(()=>{
 // ───────────────────────── 관계 (대화로만 오름) ─────────────────────────
 // 단계는 story().stage (서버 v2 판정 또는 대화 횟수). 게이지: v2는 호감도, 아니면 대화 횟수 기준
 function renderBond(){
+  Outfit.sync();  // 관계 단계가 바뀌면 의상도(14)
   const i=curStage()-1,D=DATA.story||{},v2=serverVer()===2;
   const at=(v2?D.affectionAt:D.countAt)||[],val=v2?(story().affection||0):(S.bond||0);
   const nx=i<5?{n:stageName(i+2)}:null;
@@ -1535,7 +1566,7 @@ function startStory(id){
   if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
   // 8-1: 서아 오프닝을 아직 안 봤으면 본 것으로 처리하고 특별 에피소드 첫 대사만(기본 에피소드 「시작」은 그대로 오프닝부터)
   if((st.char||"seoa")==="seoa"&&!S.introDone)S.introDone=true;
-  S.stories[id]=1;save();renderTop();setTab("chat");openRoom(st.char||"seoa");setScene(st.scene);
+  S.stories[id]=1;S.epOutfit=st.outfit||null;save();renderTop();setTab("chat");openRoom(st.char||"seoa");setScene(st.scene);Outfit.sync();  // 에피소드 전용 의상(14)
   addMsg("sys",UI("home.storyStart",{name:st.name}));
   setTimeout(()=>{addMsg("c",st.line,{tag:UI("home.storyTag",{name:MNAME[st.m]})});react({m:st.m,f:st.f,t:st.line},"📖 이야기 장면")},600);
 }
