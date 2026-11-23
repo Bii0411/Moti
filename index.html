@@ -849,7 +849,8 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
-function setScene(i){clearTimeout(sceneBackT);if(!SCENES[i])i=0;S.scene=i;if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
+function setScene(i){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene])i=e.scene}  // 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
+  if(!SCENES[i])i=0;S.scene=i;if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
 // 다시 보기 동안만 그때 장소를 보여 주고, 끝나면 대화의 원래 장소로
 function sceneForReplay(i,ms){clearTimeout(sceneBackT);showScene(i);sceneBackT=setTimeout(()=>showScene(S.scene),ms)}
 function renderTop(){$("#dia").textContent=S.dia;const st=STATES[curState()];$("#moodTag").textContent=`${st.e} ${st.ko}`}
