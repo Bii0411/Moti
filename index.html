@@ -874,7 +874,40 @@ const Fx={
     return fx},
   // 처음 보는 대화 몸짓이면 등급에 맞는 종류(레어·시크릿 = zoom, 일반 = push), 아니면 ""
   first(mid){const it=mid&&colBy(mid);if(!it||it.source!=="chat"||S.col[mid])return "";return it.grade==="common"?"push":"zoom"},
-  clearZoom(){const f=this.st();f.zoomAt=null;save()}
+  clearZoom(){const f=this.st();f.zoomAt=null;f.keyAt=null;save()},  // 시연 장면 이동: 확대·결정적 순간 쿨다운 모두 비움
+  // ── 결정적 순간(17-1B): 화면 확대 없이 카메라만 다가감. 화면에 글자로 알리지 않음(이유는 시연 패널에만) ──
+  // 신호: 괄호 행동이 닿음 · 처음 이름/마음 표현(각 한 번) · 다시 만남(reunionHours 뒤 첫 답장) · 감정이 강하게 바뀜(답장에 감정 값이 있을 때) · 판정(서버 v2, 다음 답장)
+  // 내 메시지 cooldownTurns(8) 턴에 한 번까지. 시연 패널 「다음 답장 결정적 순간으로」는 쿨다운 무시. 값·단어·감정→몸짓 표 data/config.json keyMoment
+  K:()=>(DATA.config&&DATA.config.keyMoment)||{},
+  keyLeft(){const f=this.st(),cd=this.K().cooldownTurns!=null?this.K().cooldownTurns:8;return f.keyAt==null?0:Math.max(0,cd-(f.turn-f.keyAt))},
+  // text 내 메시지, v 답장, prevAt 이번 내 메시지 전 마지막 대화 시각. 결정적 순간이면 {k 이유 종류, w 단어·감정 등}, 아니면 null
+  key(text,v,prevAt){
+    const f=this.st(),K=this.K(),has=(t,L)=>(L||[]).find(w=>t.includes(w));
+    if(Cam.isOpen()||(typeof Booth!=="undefined"&&Booth.isOpen()))return null;  // 촬영·포토부스 중엔 세지 않음(오프닝 중엔 보내기가 막혀 있음)
+    const sig=[];
+    const inner=(String(text).match(/[(（][^)）]*[)）]/g)||[]).join(" ");
+    const tw=inner&&has(inner,K.touchWords);if(tw)sig.push({k:"touch",w:tw});
+    const o=f.once||(f.once={});
+    if(!o.name&&has(text,K.nameWords)){o.name=true;sig.push({k:"name"})}
+    if(!o.heart){const w=has(text,K.heartWords);if(w){o.heart=true;sig.push({k:"heart",w})}}
+    if(prevAt&&Date.now()-prevAt>(K.reunionHours!=null?K.reunionHours:6)*3600e3)sig.push({k:"reunion"});
+    if(v.emotion){const e=String(v.emotion);if(f.emo&&e!==f.emo){const w=has(e,K.strongEmotions);if(w)sig.push({k:"emotion",w})}f.emo=e}
+    if(f.keyNext){sig.push(f.keyNext);f.keyNext=null}
+    let why=null;
+    if(f.keyForce){f.keyForce=false;why=sig[0]||{k:"force"}}
+    else if(sig.length&&!this.keyLeft())why=sig[0];
+    if(why){f.keyAt=f.turn;f.last={...why,turn:f.turn}}
+    save();return why},
+  // 결정적 순간인데 답장에 몸짓이 없을 때: ② 그 순간 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓 중 최근 3번에 안 나온 것(없으면 열린 몸짓 전체)
+  keyMotion(emo){
+    const ok=pickable(),any=L=>{const c=(L||[]).filter(id=>ok.includes(id));return c.length?c[Math.floor(Math.random()*c.length)]:null};
+    if(emo){const E=this.K().emotionMotions||{};for(const k in E)if(String(emo).includes(k)){const m=any(E[k]);if(m)return m}}
+    const U=DATA.story&&DATA.story.unlock;return any(U&&U.stage[curStage()]&&U.stage[curStage()].motions)||any(ok)},
+  // 서버 v2 판정 뒤: 호감 변화가 judgeAffection 이상이거나 새 플래그가 생기면 다음 답장을 결정적 순간으로
+  judged(delta,flags){const K=this.K();
+    if(flags&&flags.length)this.st().keyNext={k:"flag",w:flags[0]};
+    else if(delta>=(K.judgeAffection!=null?K.judgeAffection:5))this.st().keyNext={k:"affection",w:"+"+delta};
+    save()}
 };
 
 // ───────────────────────── 화면 공용 ─────────────────────────
@@ -1030,7 +1063,7 @@ function runJudge(lastUser,lastReply,keep){
   const recent=talkOf("seoa").slice(-24).map(m=>({r:m.r,t:turnText(m)}));
   const need=(S.bond||0)%6===0;
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state||gen!==GEN)return;Object.assign(st,j.state);if(keep)st.stage=keep;const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN)return;const aff0=st.affection||0;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
@@ -1187,6 +1220,7 @@ async function send(text){
   text=(text||"").trim();if(!text||busy)return;
   const room=S.room||"seoa";
   const P=perfStart();
+  const prevAt=room==="seoa"?chatOf("seoa").reduce((t,m)=>(m.r==="u"||m.r==="c"||m.r==="g"||m.r==="ph")&&m.at?Math.max(t,m.at):t,0):0;  // 17-1B: 다시 만남
   $("#inp").value="";autoGrow();addMsg("u",text,null,room);busy=true;renderLog();
   if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;addMsg("c",line,null,room);perfEnd(P);return}
   if(!Cam.isOpen())Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저). 촬영 중엔 촬영 화면 몸짓 그대로(10-B)
@@ -1209,12 +1243,15 @@ async function send(text){
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",`📍 장소가 바뀌었어요 · ${SCENES[v.scene].name}`,null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
-  const mid=pickMotion(v.motion,actionText(v));
+  let mid=pickMotion(v.motion,actionText(v));
+  // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
+  const keyM=Fx.key(text,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
-  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,Fx.first(mid));firstSeen(mid)}  // 17-1A: 처음 보는 몸짓만(레어·시크릿 확대, 일반 카메라만)
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,Fx.first(mid)||(keyM?"push":""));firstSeen(mid)}  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+  Demo.render();
   afterReply(v);
   SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
@@ -1407,6 +1444,11 @@ const Demo=(()=>{
       <div class="row">${B("giftNext",esc(T("none")),{v:"",on:!S.giftNext})}${Gacha.ORDER.map(g=>B("giftNext",esc(gradeKo(g)),{v:"grade:"+g,on:GN.grade===g})).join("")}</div>
       <div class="row">${gItems.map(x=>B("giftNext",esc(x.id+" "+x.name),{v:"item:"+x.id,on:GN.item===x.id})).join("")}</div>
       <div class="row">${B("pityReset",esc(T("pityReset")))}${B("giftOpenAll",esc(T("giftOpenAll")))}${B("giftClear",esc(T("giftClear")))}</div>`;
+    // 연출(17-1): 다음 답장을 결정적 순간으로 · 확대 쿨다운 비우기 · 남은 쿨다운과 마지막 결정적 순간의 이유(화면에는 안 보임)
+    const F=Fx.st(),kl=F.last;
+    h+=`<h4>${esc(T("sec.fx"))} <small>${esc(T("fxLeft",{z:Fx.zoomLeft(),k:Fx.keyLeft(),t:F.turn}))}</small></h4>
+      <div class="row">${B("keyForce",esc(T("keyForce")),{on:F.keyForce})}${B("zoomClear",esc(T("zoomClear")))}</div>
+      <div class="kv">${esc(T("keyLast",{why:kl?T("keyWhy."+kl.k,{w:kl.w||""}):T("none"),turn:kl?kl.turn:"-"}))}</div>`;
     // 사진(10-C): 견본 사진으로 칸 수까지 채우기 · 모두 비우기
     h+=`<h4>${esc(T("sec.photo"))} <small>${esc(T("photoFilled",{n:Photos.count(),cap:Photos.cap()}))}</small></h4>
       <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}${B("colOpenAll",esc(T("colOpenAll")))}${B("seoaPhotoNow",esc(T("seoaPhotoNow")))}</div>`;
@@ -1440,6 +1482,8 @@ const Demo=(()=>{
     if(a==="dia"){S.dia+=500;toast(esc(T("diaToast")),1600);return refresh()}
     if(a==="mood")return setMood(v);
     if(a==="giftNext"){const [k,x]=(v||"").split(":");S.giftNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
+    if(a==="keyForce"){const F=Fx.st();F.keyForce=!F.keyForce;save();return refresh()}
+    if(a==="zoomClear"){const F=Fx.st();F.zoomAt=null;F.keyAt=null;save();toast(esc(T("zoomCleared")),1600);return refresh()}
     if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
     if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
     // 11: 명장면 모두 열기(포토부스 포즈 시연용). 대화 몸짓은 대사 없이 기록, 선물 몸짓은 「선물 몸짓 모두 열기」와 같게
