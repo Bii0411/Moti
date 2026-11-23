@@ -1150,7 +1150,7 @@ const Demo=(()=>{
   // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
   function cancel(){
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
-    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();Fn.set(false);
+    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#rcap","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
     View.rest(true);Stage.play(IDLE);
   }
@@ -1220,6 +1220,9 @@ const Demo=(()=>{
       <div class="row">${B("giftNext",esc(T("none")),{v:"",on:!S.giftNext})}${Gacha.ORDER.map(g=>B("giftNext",esc(gradeKo(g)),{v:"grade:"+g,on:GN.grade===g})).join("")}</div>
       <div class="row">${gItems.map(x=>B("giftNext",esc(x.id+" "+x.name),{v:"item:"+x.id,on:GN.item===x.id})).join("")}</div>
       <div class="row">${B("pityReset",esc(T("pityReset")))}${B("giftOpenAll",esc(T("giftOpenAll")))}${B("giftClear",esc(T("giftClear")))}</div>`;
+    // 사진(10-C): 견본 사진으로 칸 수까지 채우기 · 모두 비우기
+    h+=`<h4>${esc(T("sec.photo"))} <small>${esc(T("photoFilled",{n:Photos.count(),cap:Photos.cap()}))}</small></h4>
+      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}</div>`;
     if(DEBUG){
       const q=qs.get("server");
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
@@ -1252,6 +1255,8 @@ const Demo=(()=>{
     if(a==="giftNext"){const [k,x]=(v||"").split(":");S.giftNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
     if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
     if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
+    if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
+    if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
     if(a==="giftClear"){COL.items.forEach(x=>{if(x.source==="gift")delete S.col[x.id]});toast(esc(T("giftClear")),1600);return refresh()}
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
     if(a==="reset")return reset(v);

@@ -200,5 +200,114 @@ const Cam=(()=>{
   return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,state:()=>({yaw,zoom,info,paused}),view:(y,z)=>{yaw=y;zoom=z}};
 })();
 
-// ───────────────────────── 사진 화면 (10-C 에서 채움) ─────────────────────────
-const PhotoUI={sheet(){},render(){},fullSheet(){},view(){},closeView(){},fill:async()=>0,isViewOn:()=>false};
+// ───────────────────────── 사진 화면 ─────────────────────────
+const PhotoUI=(()=>{
+  let seg="all",vIds=[],vi=0,vUrl=null,shareF=null,menu=false,sw=null;
+  const T=(k,v)=>UI("photo."+k,v);
+  const P2=n=>String(n).padStart(2,"0");
+  const fmt=t=>{const d=new Date(t);return T("date",{y:d.getFullYear(),m:P2(d.getMonth()+1),d:P2(d.getDate()),hh:P2(d.getHours()),mm:P2(d.getMinutes())})};
+  const shown=()=>Photos.list().filter(m=>seg==="all"||(seg==="liked"&&m.liked)||(seg==="booth"&&m.kind==="booth"));
+  const sheetOn=()=>$("#photoSheet").classList.contains("on");
+  function sheet(){render();if(!sheetOn()){closeSheets();openSheet("#photoSheet")}}
+  function render(){
+    const el=$("#photoSheet"),n=Photos.count(),cap=Photos.cap(),L=shown(),c=PCFG().slots||{};
+    el.innerHTML=`<div class="phd"><h2>${esc(T("title"))}</h2><span class="${n>=cap?"full":""}">${esc(T("count",{n,cap}))}</span></div>
+      <div class="pprog ${n>=cap?"full":""}"><i style="width:${cap?Math.min(100,n/cap*100):0}%"></i></div>
+      <div class="aseg pseg">${["all","liked","booth"].map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
+      ${L.length?`<div class="pgrid">${L.map(m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`).join("")}</div>`
+        :`<p class="pempty">${esc(T("empty."+seg))}</p>`}
+      <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${esc(T("growPrice",{price:c.stepPrice||50}))}</b></button>
+        ${S.plus?"":`<button class="prow plus" data-p="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`;
+    el.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{seg=b.dataset.seg;render()});
+    el.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>view(b.dataset.id));
+    el.querySelector('[data-p="grow"]').onclick=()=>Photos.buySlots();
+    const pl=el.querySelector('[data-p="plus"]');if(pl)pl.onclick=()=>Photos.startPlus();
+  }
+  // ── 가득 참 시트(셔터를 눌렀을 때, 카메라 안내 「칸 늘리기」) ──
+  function fullSheet(){
+    const el=$("#fullSheet"),c=PCFG().slots||{};
+    el.innerHTML=`<h2>${esc(UI("photoFull.title"))}</h2><p class="sub">${esc(UI("photoFull.desc"))}</p>
+      <div class="fopts"><button data-o="del">${esc(UI("photoFull.optDelete"))}</button><button data-o="grow">${esc(UI("photoFull.optGrow",{price:c.stepPrice||50}))}</button>
+      ${S.plus?"":`<button data-o="plus" class="plus">${esc(UI("photoFull.optPlus",{plusCap:c.plusCap||200}))}</button>`}</div>`;
+    el.querySelector('[data-o="del"]').onclick=()=>{closeSheets();sheet()};
+    el.querySelector('[data-o="grow"]').onclick=()=>{if(Photos.buySlots())closeSheets()};
+    const pl=el.querySelector('[data-o="plus"]');if(pl)pl.onclick=()=>{Photos.startPlus();closeSheets()};
+    closeSheets();openSheet("#fullSheet");
+  }
+  // ── 크게 보기 ──
+  const V=()=>$("#pView");
+  function view(id){vIds=shown().map(m=>m.id);vi=Math.max(0,vIds.indexOf(id));build();V().classList.add("on");show()}
+  function build(){const v=V();if(v.dataset.built)return;v.dataset.built="1";
+    v.innerHTML=`<div class="pvtop"><button class="pvx" data-v="close" aria-label="${esc(T("ariaClose"))}">${icon("close")}</button></div>
+      <div class="pvimg" id="pvImg"><img alt=""></div>
+      <div class="pvinfo"><b id="pvL1"></b><small id="pvL2"></small></div>
+      <div class="pvbar"><div class="pvsh"><button data-v="share" aria-label="${esc(T("share"))}">${icon("share")}</button>
+        <div class="pvmenu" id="pvMenu"><button data-v="download">${icon("down")}<span>${esc(T("download"))}</span></button></div></div>
+        <button data-v="like" id="pvLike" aria-label="${esc(T("like"))}">${icon("heart")}</button><button data-v="delete" aria-label="${esc(T("delete"))}">${icon("trash")}</button></div>`;
+    v.addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b){if(menu&&!e.target.closest(".pvmenu"))setMenu(false);return}
+      const k=b.dataset.v;if(k!=="share"&&k!=="download")setMenu(false);
+      if(k==="close")closeView();else if(k==="share")share();else if(k==="download")download();else if(k==="like")like();else if(k==="delete")askDelete()});
+    const im=v.querySelector("#pvImg");
+    im.addEventListener("pointerdown",e=>{sw={x:e.clientX,y:e.clientY}});
+    im.addEventListener("pointerup",e=>{if(!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy))go(dx<0?1:-1)});
+    im.addEventListener("pointercancel",()=>{sw=null});
+    im.addEventListener("dragstart",e=>e.preventDefault());
+  }
+  function go(k){const n=vi+k;if(n<0||n>=vIds.length)return;vi=n;show()}
+  const curM=()=>Photos.list().find(m=>m.id===vIds[vi]);
+  async function show(){const m=curM();if(!m){closeView();return}setMenu(false);
+    $("#pvL1").textContent=m.kind==="booth"?T("infoBooth",{date:fmt(m.at)}):T("info",{name:m.mname||UI("cam.idle"),place:m.place||""});
+    $("#pvL2").textContent=m.kind==="booth"?"":fmt(m.at);
+    like(true);
+    const id=m.id,b=await Photos.blob(id);if(vIds[vi]!==id||!b)return;
+    if(vUrl)URL.revokeObjectURL(vUrl);vUrl=URL.createObjectURL(b);V().querySelector("#pvImg img").src=vUrl;
+    shareF=null;prepShare(id,b);  // 공유 파일을 미리 만들어 둠(아이폰: 누른 순간 바로 공유 창을 열어야 함)
+  }
+  function closeView(){V().classList.remove("on");setMenu(false);if(vUrl){URL.revokeObjectURL(vUrl);vUrl=null}$("#pvImg img").removeAttribute("src");shareF=null;if(sheetOn())render()}
+  function like(only){const m=curM();if(!m)return;if(only!==true){m.liked=!m.liked;Photos.setLiked(m.id,m.liked)}
+    const b=$("#pvLike");b.classList.toggle("on",!!m.liked);b.setAttribute("aria-pressed",m.liked?"true":"false")}
+  // ── 공유 ──
+  // 공유하는 이미지에만 구석에 「moti · 윤서아」(앱 안 사진에는 없음)
+  async function marked(b){const img=await new Promise(res=>{const u=URL.createObjectURL(b),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);res(null)};i.src=u});
+    if(!img)return b;const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext("2d");g.drawImage(img,0,0);
+    const s=PCFG().share||{},W=c.width,fs=Math.round(W*(s.sizeK||.026)),mg=Math.round(W*(s.marginK||.03)),txt=T("mark");
+    g.font=`700 ${fs}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;g.textBaseline="middle";
+    const tw=g.measureText(txt).width,px=Math.round(fs*.6),bh=Math.round(fs*1.7),bw=Math.round(tw+px*2),bx=W-mg-bw,by=c.height-mg-bh;
+    g.fillStyle=s.bg||"rgba(0,0,0,.32)";g.beginPath();g.roundRect?g.roundRect(bx,by,bw,bh,bh/2):g.rect(bx,by,bw,bh);g.fill();
+    g.fillStyle=s.color||"rgba(255,255,255,.85)";g.fillText(txt,bx+px,by+bh/2);
+    return await new Promise(r=>c.toBlob(r,"image/jpeg",.9))}
+  const fname=m=>{const d=new Date(m.at);return `moti-${d.getFullYear()}${P2(d.getMonth()+1)}${P2(d.getDate())}-${P2(d.getHours())}${P2(d.getMinutes())}${P2(d.getSeconds())}.jpg`};
+  async function prepShare(id,b){const m=Photos.list().find(x=>x.id===id);const mb=await marked(b);if(vIds[vi]!==id)return;shareF={id,file:new File([mb],fname(m),{type:"image/jpeg"})};return shareF}
+  // 공유 창을 열 수 있는지(?share=off 로 못 여는 브라우저 흉내)
+  const canShare=f=>qs.get("share")!=="off"&&!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));
+  async function share(){const m=curM();if(!m)return;
+    let f=shareF&&shareF.id===m.id?shareF.file:null;
+    if(!f){const r=await prepShare(m.id,await Photos.blob(m.id));f=r&&r.file}if(!f)return;
+    if(!canShare(f)){setMenu(!menu);return}
+    try{await navigator.share({files:[f]})}catch(e){if(!e||e.name!=="AbortError")setMenu(true)}}
+  function setMenu(v){menu=!!v;const el=$("#pvMenu");if(el)el.classList.toggle("on",menu)}
+  async function download(){setMenu(false);const m=curM();if(!m)return;let f=shareF&&shareF.id===m.id?shareF.file:null;
+    if(!f){const r=await prepShare(m.id,await Photos.blob(m.id));f=r&&r.file}if(!f)return;
+    const u=URL.createObjectURL(f),a=document.createElement("a");a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+  // ── 지우기(확인 한 번) ──
+  function askDelete(){const el=$("#pConfirm");
+    el.innerHTML=`<div class="pcbox" role="alertdialog" aria-modal="true"><p>${esc(T("delConfirm"))}</p><div><button data-k="cancel">${esc(T("delCancel"))}</button><button data-k="ok" class="danger">${esc(T("delOk"))}</button></div></div>`;
+    el.classList.add("on");
+    el.onclick=async e=>{const b=e.target.closest("[data-k]");if(!b&&e.target!==el)return;el.classList.remove("on");if(!b||b.dataset.k!=="ok")return;
+      const m=curM();if(!m)return;await Photos.remove(m.id);toast(esc(T("deleted")),1800);
+      vIds=vIds.filter(x=>x!==m.id);if(!vIds.length){closeView();return}vi=Math.min(vi,vIds.length-1);show()}}
+  // ── 시연 패널 ──
+  // 사진 가득 채우기: 견본 사진(지금 장소·자세, data/photos.json demo.yaws 각도)을 찍어 돌려 쓰며 칸 수까지
+  async function fill(){await Stage.ready;const need=Photos.cap()-Photos.count();if(need<=0)return 0;
+    const ys=(PCFG().demo||{}).yaws||[0],shots=[];
+    // 견본마다 다른 장소(지금 장소부터)·각도. 정보 줄의 장소는 그 견본을 찍은 장소
+    for(let i=0;i<ys.length;i++){const si=(S.scene+i)%SCENES.length,r=await Shot.take(si,(cam,a)=>Cam.setCam(cam,a,ys[i],0),{shadow:!Cam.isOpen()});
+      shots.push({full:await new Response(r.full).arrayBuffer(),thumb:await new Response(r.thumb).arrayBuffer(),type:r.full.type,size:r.full.size,w:r.w,h:r.h,scene:si,place:r.place})}
+    const ids=COL.items.filter(x=>x.source==="chat").map(x=>x.id),now=Date.now(),items=[];
+    for(let k=0;k<need;k++){const s=shots[k%shots.length],mid=k%4===3?null:ids[k%ids.length],id=Photos.newId()+k;
+      items.push({m:{id,kind:"camera",at:now-(k+1)*3600e3,mid,mname:mid?MNAME[mid]||mid:null,scene:s.scene,place:s.place,liked:k%5===0,w:s.w,h:s.h,type:s.type,size:s.size,thumbType:s.type,thumb:s.thumb},f:{id,data:s.full}})}
+    await Photos.addMany(items);return need}
+  Photos.onChange(()=>{if(sheetOn())render()});
+  // sharedBlob: 공유용 표시가 들어간 이미지(확인·보고서 캡처용)
+  return{sheet,render,fullSheet,view,fill,closeView,isViewOn:()=>V().classList.contains("on"),sharedBlob:async id=>marked(await Photos.blob(id))};
+})();
