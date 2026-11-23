@@ -1,10 +1,23 @@
 {
   "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
   "album": {
-    "_album": "앨범 탭. tabFirst = 해금 기록 칸(예전 「처음 본 모습」), tabGift = 선물 반응 칸. firstProgress 의 {got}·{total} 은 모은 수·전체 수. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
-    "tabFirst": "명장면",
-    "tabGift": "선물 리액션",
-    "firstProgress": "명장면 수집 {got} / {total}",
+    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, progress = 진행도 왼쪽 글(묶음별), count = 진행도 오른쪽({n} 모은 칸, {total} 그 묶음 전체), hint = 개별 힌트(data/seoa_story.json hints)가 없는 잠긴 칸. 등급 이름은 collection.grade. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "title": "명장면 수집",
+    "seg": {
+      "all": "전체",
+      "chat": "대화",
+      "gift": "선물"
+    },
+    "progress": {
+      "all": "전체 몸짓",
+      "chat": "대화 몸짓",
+      "gift": "선물 몸짓"
+    },
+    "count": "{n} / {total}",
+    "hint": {
+      "chat": "대화에서 만나요",
+      "gift": "선물로 만나요"
+    },
     "unlockTag": "🔓 새 명장면",
     "unlockSaved": "📔 명장면에 기록됐어요"
   },

@@ -91,10 +91,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .prog{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin:6px 0 4px}
 .prog i{display:block;height:100%;background:linear-gradient(90deg,#8b5cf6,#f472b6);border-radius:9px;transition:width .5s}
 .alnote{font-size:12px;color:var(--sub);margin-bottom:12px;line-height:1.5}
-.grp{margin-bottom:14px}
-.grp h3{font-size:14px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.grp h3 small{color:var(--sub);font-weight:500;font-size:12px}
-.grp h3 .sig{margin-left:auto;font-size:11px;color:var(--gold);font-weight:700}
 .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .slot{aspect-ratio:3/4;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;text-align:center;font-size:11px;position:relative;overflow:hidden}
 .slot .e{font-size:24px}
@@ -115,6 +111,18 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .firstchip{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-6px);background:#211b33e6;border:1px solid #f5c66b88;color:var(--gold);font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;opacity:0;transition:opacity .25s,transform .25s;z-index:29;white-space:nowrap;pointer-events:none}
 .firstchip.on{opacity:1;transform:translate(-50%,0)}
 .slot.fresh{animation:fresh 1.6s ease-out}
+/* 명장면 수집(9-B): 한 줄 3칸, 왼쪽 위 등급(색으로 구분), 얻은 칸 테두리도 등급 색 */
+.colh{font-size:16px;margin:2px 0 10px}
+.alh.col{justify-content:space-between;margin-top:2px}
+.alh.col b{font-size:13px;color:var(--sub);font-weight:700}
+.slots.c3{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.slots.c3 .slot{aspect-ratio:auto;min-height:132px;padding:24px 6px 8px;justify-content:flex-start;gap:4px}
+.slot .gr{position:absolute;left:6px;top:6px;font-size:10px;font-weight:800;color:var(--gc,#a7b0c4);border:1px solid var(--gc,#a7b0c4);border-radius:999px;padding:1px 6px;line-height:1.3}
+.slots.c3 .slot.got{border-color:var(--gc,#6d4bd1)}
+.slots.c3 .slot .e{font-size:22px}
+.slots.c3 .slot .s{font-size:12px;line-height:1.3;word-break:keep-all}
+.slot .d.pl{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slots.c3 .slot.lock .gr{opacity:.75}
 @keyframes fresh{0%{box-shadow:0 0 0 0 #f5c66b}60%{box-shadow:0 0 0 6px #f5c66b55}100%{box-shadow:0 0 0 0 transparent}}
 
 /* 홈 · 마이 */
@@ -235,13 +243,11 @@ nav button.on{color:var(--text)}
 .burst img{width:120px;height:120px;border-radius:24px;box-shadow:0 0 30px #a78bfa88}
 .item b{display:block;font-size:14px;margin-top:4px}
 .item .p{font-size:12px;color:var(--pri2);font-weight:700}
-.item .c{font-size:11px;color:var(--sub);margin-top:4px}
-.item .sp{font-size:11px;color:var(--gold);margin-top:2px}
 .item .rec{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;background:var(--gold);color:#000;border-radius:999px;padding:2px 7px}
 .item.focus{border-color:var(--gold)}
 /* 선물 창(9-A): 기분 맞춤 선물은 금색 테두리, 확률 줄, 천장 남은 횟수 */
 .item.match{border-color:#f5c66b99;background:linear-gradient(160deg,#2a2236,#1a1426)}
-.item .odds{font-size:11px;color:var(--sub);margin-top:4px;line-height:1.4;word-break:keep-all}
+.item .odds{font-size:10.5px;letter-spacing:-.02em;color:var(--sub);margin-top:4px;line-height:1.4;white-space:nowrap}
 .item.match .odds{color:#e9dcc0}
 .sheet .pity{font-size:12px;font-weight:700;color:var(--pri2);margin:-2px 0 10px}
 .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
@@ -382,7 +388,7 @@ async function loadData(){
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
   if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
-// 화면 문구(data/ui.json): UI("album.tabFirst",{name:…}). 없으면 키 이름 그대로
+// 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
 const UI=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.ui||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
 // 서버 버전: data/config.json → 주소 ?server=2 로 덮어쓰기. 서버 주소: ?api=http://localhost:8000
 const qs=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new URLSearchParams()}})();
@@ -1043,42 +1049,38 @@ function give(id){
 
 // ───────────────────────── 앨범 ─────────────────────────
 const fmtD=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
-// 앨범 두 칸: 처음 본 모습(해금 기록) / 선물 반응
-let albumSeg="first";
-function firstSlots(){  // 해금 지도에서 1단계(처음부터) 몸짓을 뺀 칸, 지도 순서대로
-  const U=DATA.story&&DATA.story.unlock;if(!U)return [];const out=[];
-  for(const k of Object.keys(U.stage).sort())if(k!=="1")U.stage[k].motions.forEach(mid=>out.push({mid,stage:+k}));
-  for(const sec of ["flag","event"])for(const k in U[sec])U[sec][k].motions.forEach(mid=>out.push({mid}));
-  return out.filter((x,i,a)=>a.findIndex(y=>y.mid===x.mid)===i);
-}
+// 명장면 수집(9-B): 위 3D 무대 + 「전체 / 대화 / 선물」 묶음 + 진행도 + 몸짓 칸(한 줄 3칸). 칸 순서 = 대화 → 선물, 그 안에서 일반 → 희귀 → 특별
+let albumSeg="all";
+const SEGS=["all","chat","gift"];
+function colList(seg){const O=COL.gradeOrder||Gacha.ORDER,src=["chat","gift"];
+  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===seg)
+    .sort((a,b)=>src.indexOf(a.x.source)-src.indexOf(b.x.source)||O.indexOf(a.x.grade)-O.indexOf(b.x.grade)||a.i-b.i).map(o=>o.x)}
 function renderAlbum(fresh){
-  const seg=`<div class="aseg"><button data-seg="first" class="${albumSeg==="first"?"on":""}">${esc(UI("album.tabFirst"))}</button><button data-seg="gift" class="${albumSeg==="gift"?"on":""}">${esc(UI("album.tabGift"))}</button></div>`;
-  const bindSeg=()=>$("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
-  if(albumSeg==="first"){
-    const slots=firstSlots(),got=slots.filter(x=>S.col[x.mid]).length,hints=(DATA.story||{}).hints||{};
-    // 진행도 「명장면 수집 2 / 15」: 숫자 앞까지는 굵게, 숫자 부분은 금색 (문구 data/ui.json album.firstProgress)
-    const pg=UI("album.firstProgress",{got,total:slots.length}),pi=(()=>{const m=/\d/.exec(pg);return m?m.index:pg.length})();
-    $("#album").innerHTML=seg+`<div class="alh"><b>${esc(pg.slice(0,pi).trim())}</b><span>${esc(pg.slice(pi))}</span></div>
-    <div class="prog"><i style="width:${slots.length?got/slots.length*100:0}%"></i></div>
-    <div class="slots" style="margin-top:12px">${slots.map(x=>{const f=S.col[x.mid];
-      if(!f&&isSoon(x.mid))return `<button class="slot soon" data-h="${x.mid}"><span class="e">✨</span><span class="hint">${esc((DATA.story||{}).soonText||"")}</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}</button>`;
-      return f?`<button class="slot got" data-f="${x.mid}"><span class="s">${esc(MNAME[x.mid]||x.mid)}</span><span class="ln">${esc(speechOnly(f.line)||f.text)}</span><span class="d">${fmtD(f.at)}</span></button>`
-        :`<button class="slot lock" data-h="${x.mid}"><span class="e">👤</span>${hints[x.mid]?`<span class="hint">${esc(hints[x.mid])}</span>`:`<span class="s">？</span>${x.stage?`<span class="d">${esc(stageName(x.stage))}</span>`:""}`}</button>`}).join("")}</div>`;
-    bindSeg();
-    $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{const f={mid:b.dataset.f,...S.col[b.dataset.f]},ln=speechOnly(f.line||f.text);
-      const ms=Math.max(Stage.dur(f.mid)*1000,Math.max(3500,Math.min(ln.length,70)*120))+300;  // 몸짓과 자막 중 늦게 끝나는 쪽
-      if(f.scene!=null)sceneForReplay(f.scene,ms);
-      Stage.play(f.mid);Stage.setFace("shy");faceReset();say(f.line||f.text,0,true)});
-    $("#album").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const h=hints[b.dataset.h];if(h)toast(esc(h),2600)});
-    return;
-  }
-  // 9-A 임시: 선물 몸짓 칸(9-B 에서 명장면 수집 하나로 합침)
-  const gl=COL.items.filter(x=>x.source==="gift"),gn=gl.filter(x=>S.col[x.id]).length;
-  $("#album").innerHTML=seg+`<div class="alh"><b>${esc(UI("album.tabGift"))}</b><span>${gn} / ${gl.length}</span></div>
-  <div class="prog"><i style="width:${gn/gl.length*100}%"></i></div>
-  <div class="slots" style="margin-top:12px">${gl.map(x=>S.col[x.id]?`<button class="slot got ${fresh===x.id?"fresh":""}" data-k="${x.id}"><span class="s">${esc(x.name)}</span><span class="d">${esc(gradeKo(x.grade))}</span><span class="d">${fmtD(S.col[x.id].at)}</span></button>`:`<button class="slot lock"><span class="e">👤</span><span class="d">${esc(gradeKo(x.grade))}</span></button>`).join("")}</div>`;
-  bindSeg();
-  $("#album").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const it=colBy(b.dataset.k),a=S.col[it.id];sceneForReplay(a.scene||0,4000);playGift(it);say(a.line,0,true)});
+  if(!SEGS.includes(albumSeg))albumSeg="all";
+  const L=colList(albumSeg),got=L.filter(x=>S.col[x.id]).length,hints=(DATA.story||{}).hints||{},G=COL.grades||{};
+  const gc=x=>(G[x.grade]&&G[x.grade].color)||"#a7b0c4";
+  const badge=x=>`<span class="gr">${esc(gradeKo(x.grade))}</span>`;
+  const place=a=>a.scene!=null&&SCENES[a.scene]?SCENES[a.scene].name:"";
+  $("#album").innerHTML=`<h2 class="colh">${esc(UI("album.title"))}</h2>
+  <div class="aseg">${SEGS.map(k=>`<button data-seg="${k}" class="${albumSeg===k?"on":""}">${esc(UI("album.seg."+k))}</button>`).join("")}</div>
+  <div class="alh col"><b>${esc(UI("album.progress."+albumSeg))}</b><span>${esc(UI("album.count",{n:got,total:L.length}))}</span></div>
+  <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
+  <div class="slots c3">${L.map(x=>{const a=S.col[x.id];
+    if(a)return `<button class="slot got ${fresh===x.id?"fresh":""}" style="--gc:${gc(x)}" data-f="${x.id}">${badge(x)}<span class="e">${x.source==="gift"?"🎁":"💬"}</span><span class="s">${esc(x.name)}</span><span class="d">${fmtD(a.at)}</span><span class="d pl">${esc(place(a))}</span></button>`;
+    const soon=x.source==="chat"&&isSoon(x.id),h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
+    return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${soon?"✨":"👤"}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
+  $("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
+  $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>replayCol(b.dataset.f));
+  $("#album").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const x=colBy(b.dataset.h),h=hints[x.id]||UI("album.hint."+x.source);toast(esc(h),2600)});
+}
+// 얻은 칸 다시 보기: 그때 장소에서 그 몸짓 + 대사 자막(3D 아래 칸). 장소는 다시 보기 동안만
+function replayCol(id){
+  const x=colBy(id),a=S.col[id];if(!x||!a)return;
+  const t=a.line||a.text||"",ln=speechOnly(t),gift=x.source==="gift",m=gift?(x.play||{}).m:x.id,sp=gift?((x.play||{}).speed||1):1;
+  const ms=Math.max(Stage.dur(m)/sp*1000,Math.max(3500,Math.min(ln.length,70)*120))+300;  // 몸짓과 자막 중 늦게 끝나는 쪽
+  if(a.scene!=null)sceneForReplay(a.scene,ms);
+  if(gift)playGift(x);else{Stage.play(x.id);Stage.setFace("shy");faceReset()}
+  say(t,0,true);
 }
 
 // ───────────────────────── 시연 설정 패널 (5단계) ─────────────────────────
@@ -1097,7 +1099,7 @@ const Demo=(()=>{
   function cancel(){
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
     introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();
-    ["#toast","#firstChip","#rcap"].forEach(s=>$(s).classList.remove("on"));
+    ["#toast","#firstChip","#rcap","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
     View.rest(true);Stage.play(IDLE);
   }
   function refresh(){save();renderTop();renderBond();
@@ -1124,7 +1126,7 @@ const Demo=(()=>{
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
-    album(){S.col={};S.pity=null;S.giftNext=null}
+    album(){S.col={}}
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
   // 온보딩(7-A): 다시 보기 = onboarded 만 지우고 첫 화면부터. 장면 0 「앱 처음 열기」 = 전체 초기화 후 첫 화면
@@ -1137,7 +1139,7 @@ const Demo=(()=>{
   function setMood(k){S.force=null;S.birthday=k==="birthday";if(k!=="birthday")S.mood=k;
     Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");faceReset();refresh()}
   // ── 몸짓 ──
-  const allMotions=()=>{const a=[...stageMotions(1),...firstSlots().map(x=>x.mid)],ban=(DATA.story||{}).ban||[];return a.filter((x,i)=>a.indexOf(x)===i&&!ban.includes(x))};
+  const allMotions=()=>COL.items.filter(x=>x.source==="chat").map(x=>x.id);  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외)
   function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
   function toChat(){setTab("chat");if(S.room!=="seoa")openRoom("seoa");const i=$("#inp");if(document.activeElement===i)i.blur();reveal()}
   function playMotion(mid){toChat();Stage.play(mid)}
@@ -1160,6 +1162,12 @@ const Demo=(()=>{
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
     h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",esc(T("dia")))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${STATES[k].e} ${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
+    // 선물(9-B): 다음 선물 결과(등급 또는 선물 몸짓, 다음 선물 한 번에만) · 천장 초기화 · 선물 몸짓 모두 열기 · 비우기
+    const GN=S.giftNext||{},gItems=COL.items.filter(x=>x.source==="gift");
+    h+=`<h4>${esc(T("giftNext"))} <small>${esc(UI("gift.pity",{n:pityLeft()}))}</small></h4>
+      <div class="row">${B("giftNext",esc(T("none")),{v:"",on:!S.giftNext})}${Gacha.ORDER.map(g=>B("giftNext",esc(gradeKo(g)),{v:"grade:"+g,on:GN.grade===g})).join("")}</div>
+      <div class="row">${gItems.map(x=>B("giftNext",esc(x.id+" "+x.name),{v:"item:"+x.id,on:GN.item===x.id})).join("")}</div>
+      <div class="row">${B("pityReset",esc(T("pityReset")))}${B("giftOpenAll",esc(T("giftOpenAll")))}${B("giftClear",esc(T("giftClear")))}</div>`;
     if(DEBUG){
       const q=qs.get("server");
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
@@ -1189,6 +1197,10 @@ const Demo=(()=>{
     if(a==="resetAll")return reset("all");  // 한 번 누르면 바로(7-1)
     if(a==="dia"){S.dia+=500;toast(esc(T("diaToast")),1600);return refresh()}
     if(a==="mood")return setMood(v);
+    if(a==="giftNext"){const [k,x]=(v||"").split(":");S.giftNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
+    if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
+    if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
+    if(a==="giftClear"){COL.items.forEach(x=>{if(x.source==="gift")delete S.col[x.id]});toast(esc(T("giftClear")),1600);return refresh()}
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
     if(a==="reset")return reset(v);
     if(a==="stage"){setStage(+v);return refresh()}
@@ -1224,7 +1236,7 @@ const Scenes=(()=>{
     const sc=L()[n-1];if(!sc)return;
     DS.scene=n;saveDS();Demo.cancel();Onboard.hide();  // 온보딩 중이면 저장 없이 닫고 장면으로
     S.placeLock=false;
-    if(sc.album){setTab("album");albumSeg=sc.album;renderAlbum();Demo.render();Demo.reveal();chapter(sc);return}  // 상태는 그대로
+    if(sc.album){albumSeg=sc.album;setTab("album");Demo.render();Demo.reveal();chapter(sc);return}  // 상태는 그대로
     if(sc.reset==="seoa"){Demo.resetSeoa();setTab("chat");openRoom("seoa")}  // 서아 전체 초기화 → 오프닝
     else{
       S.chats.seoa=[{r:"sys",t:title(sc)}];S.read.seoa=1;S.introDone=true;if(S.sid)delete S.sid.seoa;
@@ -1386,7 +1398,7 @@ function renderMy(){
 let curTab="chat";
 function placeStage(){const st=$("#stage");if(curTab==="album")$("#stageSlotAlbum").appendChild(st);else $("#stageSlot").appendChild(st);
   st.style.display=(curTab==="album"||(curTab==="chat"&&S.room==="seoa"))?"":"none"}
-function setTab(t){curTab=t;View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){curTab=t;View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
   placeStage();
