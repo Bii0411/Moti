@@ -70,8 +70,20 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .msg .tag{display:inline-block;margin-top:5px;font-size:11px;color:var(--gold);font-weight:700}
 .typing{color:var(--sub)}
 .bar{display:flex;gap:8px;padding:8px 12px 12px;align-items:flex-end;min-width:0}
-.gbtn{width:48px;height:48px;border-radius:50%;background:#000 url(icons/gift_button.png) center/cover;flex:none;position:relative;box-shadow:0 0 12px #a78bfa66}
-.gbtn .dot{position:absolute;right:-2px;top:-2px;background:var(--gold);color:#000;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px}
+/* ＋ 기능판(10-A): ＋ 버튼(누르면 ×) → 입력칸 아래(키보드 자리)에 한 줄 4칸. 아이콘은 모두 같은 선 아이콘(굵기 1.8, 둥근 끝)·같은 칸·같은 글자.
+   선물하기만 칸 바탕을 보라 강조색으로(크기·모양은 같고 색으로만). 빛·그라데이션·입체·반짝이는 테두리 없음 */
+.fnbtn{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:#d9d2ee;-webkit-tap-highlight-color:transparent}
+.fnbtn svg{width:24px;height:24px;display:block;transition:transform .2s}
+.fnbtn.on svg{transform:rotate(45deg)}
+.fnp{flex:none;max-height:0;overflow:hidden;transition:max-height .22s ease;background:#0e0c16}
+.fnp.on{max-height:calc(140px + env(safe-area-inset-bottom,0px))}
+.fngrid{display:grid;grid-template-columns:repeat(4,1fr);padding:10px 8px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.fni{display:flex;flex-direction:column;align-items:center;gap:7px;padding:6px 0;-webkit-tap-highlight-color:transparent}
+.fni .tile{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:#1d1a27;color:#d9d2ee;transition:transform .1s}
+.fni .tile svg{width:26px;height:26px;display:block}
+.fni.gift .tile{background:var(--pri);color:#fff}
+.fni b{font-size:12px;font-weight:600;color:#cfc8e4}
+.fni:active .tile{transform:scale(.95)}
 /* 여러 줄 입력창: 엔터는 줄바꿈, 4줄까지 커지고 그 이상은 안에서 스크롤 (autoGrow). 16px = 아이폰 자동 확대 방지 */
 .inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;line-height:22px;outline:none;resize:none;display:block;height:46px;max-height:112px;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
 /* 안내 문구가 길어 두 줄: 글자만 13px로 줄이고(입력 글자는 16px 그대로) 빈 칸일 때만 위아래 여백을 줄여 46px 안에 넣음 */
@@ -294,6 +306,7 @@ nav button.on{color:var(--text)}
 .chapter.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
 </style>
 <link rel="stylesheet" href="onboarding.css">
+<link rel="stylesheet" href="photos.css">
 </head>
 <body>
 <div class="app">
@@ -325,11 +338,16 @@ nav button.on{color:var(--text)}
       <div class="log" id="log"></div>
       <div class="quick" id="quick"></div>
       <div class="bar">
-        <button class="gbtn" id="giftBtn" aria-label="선물하기"></button>
+        <button class="fnbtn" id="fnBtn" aria-expanded="false" aria-controls="fnPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         <button class="abtn" id="actBtn" aria-label="행동 묘사 넣기">( )<br>행동</button>
         <textarea class="inp" id="inp" rows="1" placeholder="서아에게 말 걸기" autocomplete="off" enterkeyhint="enter"></textarea>
         <button class="send" id="sendBtn" aria-label="보내기">↑</button>
       </div>
+      <div class="fnp" id="fnPanel" aria-hidden="true"><div class="fngrid">
+        <button class="fni gift" data-fn="gift"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4.5" rx="1.2"/><path d="M5.5 12.5V20h13v-7.5M12 8v12M12 8C10.6 4.6 6.8 4.4 6.8 6.6 6.8 8 9.2 8 12 8zM12 8c1.4-3.4 5.2-3.6 5.2-1.4C17.2 8 14.8 8 12 8z"/></svg></span><b></b></button>
+        <button class="fni" data-fn="camera"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9.5A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13.3" r="3.4"/></svg></span><b></b></button>
+        <button class="fni" data-fn="photo"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.2"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 15.5l-4.6-4.6-9.4 8.6"/></svg></span><b></b></button>
+      </div></div>
       </div>
     </section>
     <section class="view" id="vHome"><div class="page" id="home"></div></section>
@@ -351,6 +369,10 @@ nav button.on{color:var(--text)}
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="giftSheet"></div>
   <div class="sheet adsheet" id="adultSheet" role="dialog" aria-modal="true"></div>
+  <div class="sheet psheet" id="photoSheet" role="dialog" aria-modal="true"></div>
+  <div class="sheet" id="fullSheet" role="dialog" aria-modal="true"></div>
+  <div class="pview" id="pView" role="dialog" aria-modal="true"></div>
+  <div class="pconfirm" id="pConfirm"></div>
   <div class="toast" id="toast"></div>
   <div class="firstchip" id="firstChip"></div>
   <div class="chapter" id="chapter"></div>
@@ -364,6 +386,7 @@ nav button.on{color:var(--text)}
 <script src="look.js"></script>
 <script src="alive.js"></script>
 <script src="film.js"></script>
+<script src="photos.js"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -379,14 +402,15 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json")]);
+  DATA.photos=ph||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
+  if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col||!ph)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
 const UI=(k,vars)=>{let v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,DATA.ui||{});if(typeof v!=="string")v=k;for(const n in vars||{})v=v.split("{"+n+"}").join(vars[n]);return v};
@@ -460,7 +484,7 @@ const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
-  let R,scene,cam,md=null,cur=null,xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
+  let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();let xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
   let readyFn;const ready=new Promise(r=>readyFn=r);const T0=performance.now();let readyMs=null;
@@ -553,12 +577,17 @@ const Stage=(()=>{
     if(extraTick)extraTick(now,w,h);
     if(!md){if(w&&h)R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
-    if(cur){mt=(t-cur.start)*(cur.sp||1);const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;if(mt<dur)id=cur.id;else{cur=null;$("#cap").classList.remove("on")}}
+    // 10-B 촬영 화면: cur.loop = 끝나면 처음부터 다시, cur.hold = 그 순간에 멈춤(멈춘 시각을 붙잡아 둠). 끝난 몸짓은 lastEnd 에 남김(끝난 지 1초 안이면 촬영 화면이 이어받음)
+    if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
+      mt=(t-cur.start)*(cur.sp||1);const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;
+      if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
+      else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now};cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(isXs&&xsData)xsApply(xsData,mt,XS[id]);
+    if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
     if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
     face(t);
     if(w&&h)R.render(scene,cam);  // 3D 칸이 안 보일 때(홈·마이, 온보딩 첫 화면)는 그리지 않음
@@ -605,7 +634,7 @@ const Stage=(()=>{
   // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사) · o.speed: 재생 속도(9-A 선물 몸짓 임시 재생) · o.name: 3D 아래 표시 이름(선물 몸짓 이름)
   function play(mid,o={}){
     if(!RIG.M[mid]&&!XS[mid])return;
-    cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1};
+    cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1,name:o.name||null,ref:o.ref||null};
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
@@ -625,7 +654,27 @@ const Stage=(()=>{
   function release(){const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
     scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null}
   function fog(color,near,far){scene.fog.color.set(color);scene.fog.near=near;scene.fog.far=far}
-  return{init,ready,readyMs:()=>readyMs,borrow,release,fog,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  // ── 촬영 화면(10-B) ──
+  // 지금 몸짓(대기 몸짓 제외) 또는 끝난 지 ms 안의 몸짓. {id, sp, name(선물 몸짓 이름), ref(선물 몸짓 도감 id)}
+  function recentMotion(ms){const p=x=>({id:x.id,sp:x.sp||1,name:x.name||null,ref:x.ref||null});
+    if(cur&&cur.id!==IDLE)return p(cur);
+    if(lastEnd&&lastEnd.id!==IDLE&&performance.now()-lastEnd.at<=ms)return p(lastEnd);return null}
+  // x 몸짓을 반복(지금 그 몸짓이 재생 중이면 그 자리에서 이어서). null 이면 기본 자세
+  function camLoop(x){if(!x){cur=null;return}if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
+    cur={id:x.id,start:performance.now()/1000,sp:x.sp||1,name:x.name,ref:x.ref,loop:true}}
+  // 촬영 화면이 돌 중심(바닥 x·z): k 0 = 몸(뿌리) ~ 1 = 머리 뼈. 가까이 볼수록 얼굴이 가운데 오게
+  function center(k){if(!md)return{x:0,z:0};const r=md.root.position,hb=md.bones.Head;if(!hb||!k)return{x:r.x,z:r.z};
+    const h=hb.getWorldPosition(shV);return{x:r.x+(h.x-r.x)*k,z:r.z+(h.z-r.z)*k}}
+  function hold(on){if(!cur)return;cur.hold=on?(performance.now()/1000-cur.start)*(cur.sp||1):null}
+  // 발밑 그림자: 가운데가 진하고 가장자리로 옅어지는 원(그림 한 장, 블러 아님). 엉덩이 뼈 바로 아래 바닥을 따라감
+  function shadow(on,c){c=c||{};
+    if(on&&!shadowM){const cv=document.createElement("canvas");cv.width=cv.height=128;const g=cv.getContext("2d"),gr=g.createRadialGradient(64,64,0,64,64,64);
+      gr.addColorStop(0,"rgba(0,0,0,1)");gr.addColorStop(.5,"rgba(0,0,0,.55)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);
+      shadowM=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,fog:false}));
+      shadowM.rotation.x=-Math.PI/2;shadowM.renderOrder=-3;shadowM.frustumCulled=false;shadowM.name="camShadow"}
+    if(!shadowM)return;
+    if(on){shadowM.scale.set(c.w||.78,c.d||.5,1);shadowM.material.opacity=c.alpha!=null?c.alpha:.5;scene.add(shadowM)}else scene.remove(shadowM)}
+  return{init,ready,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -859,6 +908,7 @@ function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
   unlockBusy=true;
   if(curTab!=="chat"||S.room!=="seoa"){unlockQ=[];unlockBusy=false;return}  // 대화방 밖이면 기록만
+  if(Cam.isOpen()){unlockQ.unshift(x);unlockBusy=false;return}  // 촬영 중이면 나올 때까지 미룸(10-B, Cam.close 가 다시 부름)
   unlockFx(x.mid,x.text);
   const it=colBy(x.mid);if(it&&(COL.notify||{})[it.grade])setTimeout(()=>gradeFx(it,COL.notify[it.grade]),400);  // 희귀·특별이면 무대 위 등급 알림도(9-B)
   setTimeout(unlockNext,Stage.dur(x.mid)*1000+700);
@@ -955,7 +1005,7 @@ async function send(text){
   const P=perfStart();
   $("#inp").value="";autoGrow();addMsg("u",text,null,room);busy=true;renderLog();
   if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;addMsg("c",line,null,room);perfEnd(P);return}
-  Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저)
+  if(!Cam.isOpen())Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저). 촬영 중엔 촬영 화면 몸짓 그대로(10-B)
   P.typing=performance.now();
   const g0=GEN;
   if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
@@ -977,8 +1027,9 @@ async function send(text){
   const mid=pickMotion(v.motion,actionText(v));
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
   addMsg("c",v.line,msg,"seoa");
-  react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"");
-  firstSeen(mid);
+  // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
+  if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"");firstSeen(mid)}
   afterReply(v);
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
   const R=S.demoNext;let keep=null;
@@ -1021,7 +1072,7 @@ function giftSheet(focus){
 let subT;
 function stageSub(text){text=speechOnly(text);const b=$("#bubble");if(!text||!b)return;b.textContent=text;b.classList.add("on");clearTimeout(subT);subT=setTimeout(()=>b.classList.remove("on"),Math.max(3500,text.length*120))}
 // 선물 몸짓 재생(임시 재생 설정 play: 몸짓·표정·속도)
-function playGift(it,o={}){const p=it.play||{};Stage.play(p.m,{name:it.name,speed:p.speed,tag:o.tag||""});Stage.setFace(p.f||"soft");faceReset()}
+function playGift(it,o={}){const p=it.play||{};Stage.play(p.m,{name:it.name,speed:p.speed,tag:o.tag||"",ref:it.id});Stage.setFace(p.f||"soft");faceReset()}
 // 선물 주기: 💎 빼기 → 확률로 등급(기분 맞춤·천장 반영, 시연 패널 「다음 선물 결과」가 있으면 그것) → 그 등급 선물 몸짓 하나 → 무대에서 재생 + 대사 자막 + 대화 기록 → 도감
 function give(id){
   const g=gBy(id),st=curState();
@@ -1099,7 +1150,7 @@ const Demo=(()=>{
   // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
   function cancel(){
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
-    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();
+    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#rcap","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
     View.rest(true);Stage.play(IDLE);
   }
@@ -1123,7 +1174,7 @@ const Demo=(()=>{
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
-    all(){S=blank();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
+    all(){S=blank();Photos.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
@@ -1169,6 +1220,9 @@ const Demo=(()=>{
       <div class="row">${B("giftNext",esc(T("none")),{v:"",on:!S.giftNext})}${Gacha.ORDER.map(g=>B("giftNext",esc(gradeKo(g)),{v:"grade:"+g,on:GN.grade===g})).join("")}</div>
       <div class="row">${gItems.map(x=>B("giftNext",esc(x.id+" "+x.name),{v:"item:"+x.id,on:GN.item===x.id})).join("")}</div>
       <div class="row">${B("pityReset",esc(T("pityReset")))}${B("giftOpenAll",esc(T("giftOpenAll")))}${B("giftClear",esc(T("giftClear")))}</div>`;
+    // 사진(10-C): 견본 사진으로 칸 수까지 채우기 · 모두 비우기
+    h+=`<h4>${esc(T("sec.photo"))} <small>${esc(T("photoFilled",{n:Photos.count(),cap:Photos.cap()}))}</small></h4>
+      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}</div>`;
     if(DEBUG){
       const q=qs.get("server");
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
@@ -1201,6 +1255,8 @@ const Demo=(()=>{
     if(a==="giftNext"){const [k,x]=(v||"").split(":");S.giftNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
     if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
     if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
+    if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
+    if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
     if(a==="giftClear"){COL.items.forEach(x=>{if(x.source==="gift")delete S.col[x.id]});toast(esc(T("giftClear")),1600);return refresh()}
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
     if(a==="reset")return reset(v);
@@ -1385,7 +1441,7 @@ function renderMy(){
     <div class="bondbox"><div class="prog"><i style="width:${pct}%"></i></div><span>${nx?"다음: "+nx.n:"최고 단계"}</span></div>
     <p class="alnote" style="margin:8px 0 0">관계는 <b>대화로만</b> 깊어져요. 선물로는 올라가지 않아요.<br>${esc(UI("my.collection",{n,total:COL.items.length}))}</p></div>
   <div class="card plus"><h3>✨ moti PLUS ${S.plus?"<small style='color:#6ee7b7'>· 이용 중</small>":""}</h3>
-    <ul><li>💬 하루 대화 무제한 (무료는 하루 30번)</li><li>🧠 서아가 예전 대화까지 기억해요</li><li>📩 서아가 먼저 말을 걸어요</li><li>💎 매달 300 지급</li></ul>
+    <ul><li>💬 하루 대화 무제한 (무료는 하루 30번)</li><li>🧠 서아가 예전 대화까지 기억해요</li><li>📩 서아가 먼저 말을 걸어요</li><li>💎 매달 300 지급</li><li>${esc(UI("my.plusPhotos",{plusCap:((DATA.photos||{}).slots||{}).plusCap||200}))}</li></ul>
     <button class="cta" id="plusBtn">${S.plus?"구독 해지 (시연)":"월 9,900원으로 시작 (시연)"}</button></div>
   <div class="card"><h3>💎 충전 <small style="color:var(--sub);font-weight:500">· 현재 ${S.dia}</small></h3>
     <div class="packs"><button data-p="100">💎 100<small>7,000원</small></button><button data-p="500">💎 500<small>35,000원</small></button><button data-p="1200">💎 1,200<small>84,000원</small></button></div>
@@ -1399,7 +1455,7 @@ function renderMy(){
 let curTab="chat";
 function placeStage(){const st=$("#stage");if(curTab==="album")$("#stageSlotAlbum").appendChild(st);else $("#stageSlot").appendChild(st);
   st.style.display=(curTab==="album"||(curTab==="chat"&&S.room==="seoa"))?"":"none"}
-function setTab(t){curTab=t;View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){curTab=t;Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
   placeStage();
@@ -1421,7 +1477,7 @@ function renderList(){
     <span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`).join("");
   $("#dmList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
 }
-function showList(){S.room=null;save();$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread()}
+function showList(){Fn.set(false);S.room=null;save();$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread()}
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
 function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
@@ -1440,7 +1496,7 @@ function openRoom(cid){
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   $("#roomSub").textContent=cid==="seoa"?"3D · 표정 · 선물":"2D · 3D는 준비 중이에요";
-  $("#giftBtn").style.display=cid==="seoa"?"":"none";$("#quick").style.display=cid==="seoa"?"":"none";
+  $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
   if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
@@ -1454,7 +1510,7 @@ function runIntro(){
   P.forEach((t,k)=>introT.push(setTimeout(()=>{
     addMsg("c",t,{intro:true},"seoa");
     const cue=(I.cues||[]).find(c=>c.at===k);
-    if(S.room==="seoa"&&curTab==="chat"){if(cue)Stage.play(cue.motion);const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
+    if(S.room==="seoa"&&curTab==="chat"&&!Cam.isOpen()){if(cue)Stage.play(cue.motion);const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
     if(k===P.length-1){busy=false;renderLog()}
   },400+k*gap)));
 }
@@ -1498,9 +1554,19 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
-$("#giftBtn").onclick=()=>giftSheet();
+// ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
+const Fn=(()=>{let on=false;
+  function set(v){on=!!v;const p=$("#fnPanel"),b=$("#fnBtn");if(!p)return;p.classList.toggle("on",on);p.setAttribute("aria-hidden",on?"false":"true");
+    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
+    if(on){const i=$("#inp");if(document.activeElement===i)i.blur();const L=$("#log");setTimeout(()=>{L.scrollTop=L.scrollHeight},240)}}
+  function run(k){set(false);if(k==="gift")giftSheet();else if(k==="camera")Cam.open();else if(k==="photo")PhotoUI.sheet()}
+  return{set,toggle:()=>set(!on),run,isOn:()=>on}})();
+$("#fnBtn").onclick=()=>Fn.toggle();
+document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.onclick=()=>Fn.run(b.dataset.fn));
+$("#inp").addEventListener("pointerdown",()=>Fn.set(false));
 $("#backBtn").onclick=showList;
 $("#scrim").onclick=closeSheets;
 $("#sendBtn").onclick=()=>send($("#inp").value);
@@ -1512,7 +1578,7 @@ $("#actBtn").addEventListener("pointerdown",e=>e.preventDefault());
 $("#actBtn").onclick=()=>{const t=$("#inp"),a=t.selectionStart??t.value.length,b=t.selectionEnd??a;
   t.focus();t.setRangeText("("+t.value.slice(a,b)+")",a,b,"start");t.setSelectionRange(a+1,a+1+(b-a));autoGrow()};
 Stage.init();
-$("#inp").addEventListener("focus",()=>{if(View.isBig())View.rest()});
+$("#inp").addEventListener("focus",()=>{Fn.set(false);if(View.isBig())View.rest()});
 // 대화 목록이 맨 아래를 보고 있었으면, 3D가 커져 목록이 줄어들어도 맨 아래(최신 말풍선)를 유지
 let logStick=true;$("#log").addEventListener("scroll",()=>{const L=$("#log");logStick=L.scrollHeight-L.scrollTop-L.clientHeight<40});
 if(window.ResizeObserver)new ResizeObserver(()=>{if(logStick){const L=$("#log");L.scrollTop=L.scrollHeight}}).observe($("#log"));

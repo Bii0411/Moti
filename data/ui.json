@@ -46,7 +46,7 @@
   },
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김)",
-    "seoaFirst": "🎁 버튼으로 서아에게 선물할 수 있어요 · 📔 앨범에 반응이 모여요"
+    "seoaFirst": "＋ 로 선물하거나 서아를 찍어 보세요 · 처음 보는 몸짓은 앨범에 모여요"
   },
   "home": {
     "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
@@ -85,7 +85,77 @@
     "already": "이미 본 모습이에요"
   },
   "my": {
-    "_my": "마이 페이지 관계 카드 아래 줄. {n}·{total} = 모은 칸·전체 칸",
-    "collection": "명장면 수집 {n} / {total}"
+    "_my": "마이 페이지 관계 카드 아래 줄. {n}·{total} = 모은 칸·전체 칸. plusPhotos = PLUS 혜택 줄(10단계, {plusCap} = data/photos.json slots.plusCap)",
+    "collection": "명장면 수집 {n} / {total}",
+    "plusPhotos": "🖼 사진 {plusCap}장까지 저장"
+  },
+  "fn": {
+    "_fn": "＋ 기능판(10단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md). gift·camera·photo = 기능 이름. open·close = ＋ 버튼의 접근성 이름(화면에는 아이콘만)",
+    "gift": "선물하기",
+    "camera": "카메라",
+    "photo": "사진",
+    "open": "기능 열기",
+    "close": "기능 닫기"
+  },
+  "cam": {
+    "_cam": "촬영 화면(10단계). count 의 {n}·{cap} = 저장한 사진 수·칸 수. loop·paused 의 {name} = 몸짓 이름. aria* = 아이콘 버튼의 접근성 이름(화면에는 아이콘만)",
+    "close": "✕",
+    "count": "사진 {n} / {cap}",
+    "loop": "{name} · 반복 중",
+    "paused": "{name} · 멈춤",
+    "idle": "기본 자세",
+    "help": "두 손가락으로 확대 · 옆으로 밀어서 돌리기",
+    "saved": "사진에 저장했어요",
+    "ariaClose": "나가기",
+    "ariaShutter": "촬영",
+    "ariaPause": "멈춤",
+    "ariaPlay": "다시 재생",
+    "ariaLast": "사진"
+  },
+  "photoFull": {
+    "_photoFull": "사진 칸이 가득 찼을 때(카메라·포토부스 공통). notice·clear·grow = 들어갈 때 안내 한 줄과 옆 버튼, title·desc·opt* = 셔터를 눌렀을 때 시트. {price} = data/photos.json slots.stepPrice, {plusCap} = slots.plusCap",
+    "notice": "사진 칸이 가득 찼어요. 저장하려면 1칸이 필요해요.",
+    "clear": "칸 비우기",
+    "grow": "칸 늘리기",
+    "title": "사진 칸이 가득 찼어요",
+    "desc": "사진을 저장할 1칸을 먼저 마련해 주세요.",
+    "optDelete": "사진 하나 지우기",
+    "optGrow": "칸 늘리기 +10 · 💎 {price}",
+    "optPlus": "✨ PLUS · 사진 {plusCap}장",
+    "noDia": "💎가 부족해요"
+  },
+  "photo": {
+    "_photo": "사진 시트·크게 보기(10단계). count = 진행도({n}/{cap}). seg = 묶음 버튼, empty = 묶음별 빈 상태. growRow·growPrice·plusRow·plusPrice = 아래 줄. grown = 칸 늘린 뒤 알림. share·like·delete = 크게 보기 아이콘의 접근성 이름. info = 정보 줄 첫째 줄({name} 몸짓, 몸짓이 없으면 cam.idle), infoBooth = 포토부스 사진 정보 줄, date = 날짜 모양. mark = 공유 이미지 구석 표시. plusStart = PLUS 를 시작했을 때(마이 페이지와 같은 문구). ariaClose = 크게 보기 닫기 버튼 접근성 이름",
+    "title": "사진",
+    "count": "{n} / {cap}",
+    "seg": {
+      "all": "전체",
+      "liked": "좋아요",
+      "booth": "포토부스"
+    },
+    "empty": {
+      "all": "아직 찍은 사진이 없어요. ＋ 의 카메라로 서아를 찍어 보세요.",
+      "liked": "좋아요한 사진이 없어요.",
+      "booth": "앨범의 포토부스에서 네 컷 사진을 만들어 보세요."
+    },
+    "growRow": "칸 늘리기 +10",
+    "growPrice": "💎 {price}",
+    "plusRow": "✨ PLUS · 사진 {plusCap}장",
+    "plusPrice": "월 9,900원",
+    "grown": "사진 칸이 {cap}칸이 됐어요",
+    "share": "공유하기",
+    "like": "좋아요",
+    "delete": "지우기",
+    "info": "{name} · {place}",
+    "infoBooth": "포토부스 · {date}",
+    "date": "{y}.{m}.{d} {hh}:{mm}",
+    "delConfirm": "이 사진을 지울까요?",
+    "delOk": "지우기",
+    "delCancel": "취소",
+    "deleted": "사진을 지웠어요",
+    "download": "내려받기",
+    "mark": "moti · 윤서아",
+    "plusStart": "✨ PLUS 시작 · 💎 300 지급",
+    "ariaClose": "닫기"
   }
 }

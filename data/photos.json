@@ -1,0 +1,27 @@
+{
+  "_설명": "사진(10단계). 저장 칸·사진 크기·촬영 화면 값. 문구는 data/ui.json fn·cam·photoFull·photo. 코드는 photos.js",
+  "_slots": "저장 칸. free = 무료 칸, step·stepPrice = 💎 로 한 번에 늘리는 칸 수와 값(영구), plusCap = PLUS 이용 중 칸 수(산 칸이 더 많으면 그쪽). PLUS 를 끄면 칸이 줄어도 사진은 지우지 않고, 칸이 생길 때까지 새로 저장만 막는다",
+  "slots": { "free": 20, "step": 10, "stepPrice": 50, "plusCap": 200 },
+  "_image": "저장하는 사진. aspect 3:4, 긴 변 longPx. type 은 image/jpeg(아이폰 사파리는 webp 로 저장을 못 하고, 공유·사진 앱 호환도 jpeg 가 안전). quality 에서 시작해 maxKB 를 넘으면 0.08씩 낮춤(minQuality 까지). thumb* = 목록에 쓰는 작은 사진(긴 변 thumbPx)",
+  "image": { "aspect": [3, 4], "longPx": 1440, "type": "image/jpeg", "quality": 0.86, "minQuality": 0.5, "maxKB": 300, "thumbPx": 400, "thumbQuality": 0.72, "thumbMaxKB": 60 },
+  "_camera": "촬영 화면. recentMs = 몸짓이 끝난 지 이 시간 안이면 그 몸짓을 반복. yawMaxDeg = 정면 기준 좌우로 도는 최대 각도, degPerPx = 한 손가락 1px 당 도는 각도. far·near = 가장 멀리(전신)·가장 가까이(얼굴) 구도(캐릭터 키 비율, data/config.json camera 와 같은 뜻). pinchK = 두 손가락 벌린 비율(log) 1당 확대 양, wheelK = 휠 1당 확대 양. lift = 카메라를 화면 중심보다 올리는 값. shadow = 발밑 그림자(가로·세로 m, 진하기). flashMs = 셔터 때 하얀 깜빡임, helpMs = 처음 한 번 도움말",
+  "camera": {
+    "recentMs": 1000,
+    "yawMaxDeg": 60,
+    "degPerPx": 0.35,
+    "far": { "top": 1.07, "bottom": -0.05, "width": 0.8 },
+    "near": { "top": 1.03, "bottom": 0.8, "width": 0.26 },
+    "pinchK": 0.75,
+    "wheelK": 0.0012,
+    "lift": 0.01,
+    "shadow": { "w": 0.78, "d": 0.5, "alpha": 0.5 },
+    "flashMs": 260,
+    "helpMs": 3000
+  },
+  "_sound": "셔터 소리(코드로 만듦, 외부 파일 없음). clicks = 짧은 잡음 덩어리(시작 at초, 길이 dur초, 가운데 주파수 freq, 세기 gain)",
+  "sound": { "on": true, "volume": 0.9, "clicks": [ { "at": 0, "dur": 0.035, "freq": 4200, "q": 0.9, "gain": 0.55 }, { "at": 0.075, "dur": 0.06, "freq": 2100, "q": 1.1, "gain": 0.4 } ] },
+  "_share": "공유하는 사진에만 들어가는 표시(문구는 data/ui.json photo.mark). sizeK = 사진 폭 대비 글자 크기, marginK = 가장자리 여백(폭 대비)",
+  "share": { "sizeK": 0.026, "marginK": 0.03, "color": "rgba(255,255,255,0.85)", "bg": "rgba(0,0,0,0.32)" },
+  "_demo": "시연 패널 「사진 가득 채우기」: 견본 사진을 yaws 각도로 찍어 돌려 쓰며 칸 수까지 채운다",
+  "demo": { "yaws": [-28, 0, 28] }
+}

@@ -26,6 +26,13 @@
 | `card_doyun.jpg`, `card_haram.jpg`, `card_ijun.jpg`, `card_jihu.jpg`, `card_seoa.jpg` | 캐릭터 카드 | **확인 필요** |
 | `icons/gift_button.png`, `icons/gift_coffee.png`, `icons/gift_flower.png`, `icons/gift_ramen.png`, `icons/gift_ring.png` | 선물 버튼·아이콘 | 커밋 `040b5ed`「받은 디자인 이미지」. 만든 사람 **확인 필요** |
 | `assets/onboarding/film_seoa.webp` | 입장권 3D 배경 필름 띠 (`film.js`) | 앱에서 직접 찍은 그림(7-2, `tools/filmshot.mjs`). 서아 모델 `seoa_vroid.glb` + 코드 몸짓(`motion.js`)을 렌더링한 것이라 서아 모델의 출처·라이선스를 따름 |
+| ＋ 기능판·촬영 화면·사진 화면 아이콘(＋·선물·카메라·사진·멈춤·재생·공유·하트·휴지통·내려받기·닫기) | `index.html`, `photos.js` (10단계) | 코드 안 SVG 로 직접 그림(선 굵기 1.8, 둥근 끝). 외부 아이콘 세트 쓰지 않음 |
+
+## 소리
+
+| 이름 | 쓰는 곳 | 출처 |
+| --- | --- | --- |
+| 셔터 소리 | `photos.js` 촬영 화면 (10단계) | Web Audio 로 코드에서 만든 짧은 잡음(값 `data/photos.json sound`). 외부 소리 파일 없음 |
 
 ## 라이브러리·폰트 (저장소에 파일 없음, CDN으로 불러옴)
 
