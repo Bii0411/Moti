@@ -519,7 +519,8 @@ const Outfit={
   cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261122c"},comfortStage:3},
   url(k){const f=this.cfg().files||{};return f[k]||f.ops||"seoa_vroid.glb"},
   // 16: 본 이야기의 흰 옷은 친해진 뒤(comfortStage) 와인 바(privatePlaces 장소)에서만. 배경과 세트
-  want(){if(S.epOutfit&&(this.cfg().files||{})[S.epOutfit])return S.epOutfit;const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
+  want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit])return S.epOutfit;  // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
+const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
   // 지금 상황에 맞는 의상으로. 처음 흰 옷으로 바뀌는 순간에는 서아 한마디(data/ui.json outfit.firstPrivate)
   sync(){const k=this.want();if(typeof Stage!=="undefined"&&Stage.outfit)Stage.outfit(k);
     if(k==="private"&&!S.privSeen&&S.introDone){S.privSeen=true;save();const t=UI("outfit.firstPrivate");if(t&&t!=="outfit.firstPrivate")setTimeout(()=>addMsg("c",t,{tag:UI("outfit.firstPrivateTag")},"seoa"),900)}}
