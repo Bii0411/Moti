@@ -63,7 +63,7 @@
     "seoa": "서아만",
     "chat": "대화만",
     "bond": "관계만",
-    "album": "앨범만"
+    "album": "컬렉션만"
   },
   "resetToast": "초기화했어요 · {name}",
   "affectionNote": "0~100",
@@ -83,7 +83,7 @@
   "lockAll": "전부 잠그기 (1단계로)",
   "motionOpen": "열림",
   "motionLocked": "잠김",
-  "motionSeen": "앨범",
+  "motionSeen": "컬렉션",
   "motionPlay": "누르면 대화 화면에서 재생",
   "motionPreview": "연출",
   "motionPreviewTitle": "해금 연출 미리보기 (상태는 그대로)",
@@ -97,7 +97,7 @@
   "photoFill": "사진 가득 채우기",
   "photoClear": "사진 비우기",
   "photoFilled": "사진 {n} / {cap}",
-  "colOpenAll": "명장면 모두 열기",
+  "colOpenAll": "무빙 카드 모두 열기",
   "seoaPhotoNow": "서아 사진 지금 받기",
   "_fx": "연출(17-1, 항상 보임): 다음 답장 한 번을 쿨다운과 상관없이 결정적 순간으로 · 확대·결정적 순간 쿨다운 비우기 · 남은 쿨다운({z} 확대, {k} 결정적 순간, {t} 지금까지 내 메시지 수) · 마지막 결정적 순간의 이유(keyWhy, {w} 단어·감정 등, {turn} 몇 번째 메시지). 화면에는 보이지 않고 패널에만",
   "keyForce": "다음 답장 결정적 순간으로",

@@ -1,4 +1,4 @@
-// moti 선 아이콘 묶음(21, 23에서 search·sort·back·close, 24에서 plus 추가). 화면에 보이던 이모지 대신 쓰는 SVG 를 여기 한 곳에 모아 index.html·photos.js 등이 같이 쓴다.
+// moti 선 아이콘 묶음(21, 23에서 search·sort·back·close, 24에서 plus, 26에서 info(동그라미 안 !) 추가). 화면에 보이던 이모지 대신 쓰는 SVG 를 여기 한 곳에 모아 index.html·photos.js 등이 같이 쓴다.
 // 선 아이콘: 선 굵기 1.8, 둥근 끝, 채우지 않음, 색 = currentColor(둘레 글자 색을 따름). 모양은 Tabler Icons(MIT)를 옮기거나 직접 그림
 // Icon.svg(이름, 크기)  : 선 아이콘 하나
 // Icon.gem(크기)        : 다이아 재화 아이콘(12단계 마이 페이지에서 직접 그린 것, 색 채움). 문구 안의 {gem} 자리를 Icon.fill 이 이것으로 바꿈
@@ -15,6 +15,7 @@ const Icon=(()=>{
     back:'<path d="M15 5l-7 7 7 7"/>',
     plus:'<path d="M12 5v14"/><path d="M5 12h14"/>',
     close:'<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4.5"/><path d="M12 16h.01"/>',
     gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9.5 3 11 5.5 12 8c1-2.5 2.5-5 4.5-5a2.5 2.5 0 0 1 0 5"/>'
   };
   const svg=(n,sz=16)=>`<svg class="li li-${n}" width="${sz}" height="${sz}" ${A}>${P[n]||""}</svg>`;
