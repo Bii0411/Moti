@@ -516,7 +516,7 @@ const curState=()=>S.force||(S.birthday?"birthday":S.mood);
 // 서아 의상(14단계, data/config.json outfits): 처음엔 작전복, 관계가 comfortStage 단계(썸) 이상이면 흰 옷(사적).
 // 특별 에피소드에 outfit 이 있으면(크리스마스·드라큘라) 그 에피소드를 시작한 뒤로는 그 의상. 오프닝 다시 보기·다른 에피소드·초기화 때 풀림
 const Outfit={
-  cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261122c"},comfortStage:3},
+  cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261124"},comfortStage:3},
   url(k){const f=this.cfg().files||{};return f[k]||f.ops||"seoa_vroid.glb"},
   // 16: 본 이야기의 흰 옷은 친해진 뒤(comfortStage) 와인 바(privatePlaces 장소)에서만. 배경과 세트
   want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit])return S.epOutfit;  // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
