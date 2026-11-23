@@ -1046,20 +1046,30 @@ function readReply(j){
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
   return null;
 }
+// /chat 보내기: 서버가 바로 실패(5xx)하면 serverRetry.delayMs 뒤 한 번 더(남은 시간이 minLeftMs 이상일 때만). 시간 초과는 다시 보내지 않음
+async function postChat(body){
+  const R=DATA.config.serverRetry||{},t0=performance.now(),wait=replyWait();
+  let j=await post("/chat",body,wait);
+  if(!j&&lastRaw&&lastRaw.error==="http"&&lastRaw.status>=500){
+    await new Promise(r=>setTimeout(r,R.delayMs!=null?R.delayMs:1500));
+    const left=wait-(performance.now()-t0);
+    if(left>=(R.minLeftMs!=null?R.minLeftMs:5000)){console.info("서버 실패 → 한 번 더",lastRaw.status);j=await post("/chat",body,left)}}
+  return j;
+}
 async function askServer(cid,text){
   if(noServer())return null;  // 시연 패널 「서버 없음」: 바로 예시 대사
   if(serverVer()===2){
     // v2 요청: 최근 16턴, 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
     const pn=photoNote(cid,hist);
-    const j=await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
+    const j=await postChat({char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
     if(j&&pn)SeoaPhoto.noteDone();
     return readReply(j);
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
   const pn=photoNote(cid,hist);
   const motions=cid==="seoa"?Object.values(allowedMotions()):[];
-  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.filter(x=>!x.episode).map(x=>x.name):[],motions},replyWait());
+  const j=await postChat({char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.filter(x=>!x.episode).map(x=>x.name):[],motions},replyWait());
   if(j&&j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
   if(j&&pn)SeoaPhoto.noteDone();
   return readReply(j);
@@ -1239,6 +1249,9 @@ function localReply(t,allowed){
   if(/옥상|야경|하늘|달/.test(t))return{line:"따라와. 이 도시에서 제일 높은 곳 보여 줄게.",motion:"m12",face:"soft",mood:S.mood,scene:4};
   if(/거리|골목|걷자|산책/.test(t))return{line:"손 줘. 길 잃으면 곤란하니까.",motion:"m11",face:"soft",mood:S.mood,scene:2};
   if(/작전|일|임무/.test(t))return{line:"오늘 작전 길었어. …라멘 한 그릇이면 살 것 같은데.",motion:"m04",face:"sorrow",mood:"tired"};
+  // 키워드가 안 걸리면: 어느 대화에도 어울리는 「다시 말해 봐」 한 줄, 몸짓 없음 (data/config.json fallbackReply)
+  const F=DATA.config.fallbackReply||{};
+  if(F.line)return{line:F.line,motion:null,face:F.face||"soft",mood:S.mood};
   return pick([{line:"쉿. 이 층 카메라는 내가 다 꺼 놨어.",motion:"m05",face:"soft",mood:S.mood},{line:"방금 그 표정, 기록해 둘게. 내 전용 파일에.",motion:"m01",face:"fun",mood:S.mood},{line:"…너랑 있으면 시간 가는 줄 모르겠어.",motion:"m02",face:"soft",mood:S.mood}]);
 }
 async function askOther(cid,text){
