@@ -1,14 +1,14 @@
 {
   "_설명": "포토부스(11단계). 네 칸 사진의 크기·구도·카운트다운·배경·프레임 값. 문구는 data/ui.json booth. 코드는 booth.js",
-  "_strip": "완성 사진(네 칸을 세로로 이은 한 장). w = 사진 폭(px), pad = 왼쪽·오른쪽·위 여백, gap = 칸 사이, foot = 아래 줄 자리 높이, cellAspect = 한 칸 가로:세로. 칸 크기 = (w − 2×pad) × cellAspect. footSize = 아래 줄 글자 크기(px), date = 아래 줄 날짜 모양",
-  "strip": { "w": 1200, "pad": 48, "gap": 24, "foot": 150, "cellAspect": [4, 3], "footSize": 34, "date": "{y}.{m}.{d}" },
+  "_strip": "완성 사진(네 칸을 세로로 이은 한 장). w = 사진 폭(px), pad = 왼쪽·오른쪽·위 여백, gap = 칸 사이, foot = 아래 줄 자리 높이, cellAspect = 한 칸 가로:세로. 칸 크기 = (w − 2×pad) × cellAspect. footSize = 아래 줄 글자 크기(px), footWeight = 아래 줄 보통 굵기, footBold = 아래 줄에서 굵게 쓸 낱말, footBoldWeight = 그 낱말 굵기, date = 아래 줄 날짜 모양",
+  "strip": { "w": 1200, "pad": 48, "gap": 24, "foot": 180, "cellAspect": [4, 3], "footSize": 44, "footWeight": 500, "footBold": "moti", "footBoldWeight": 800, "date": "{y}.{m}.{d}" },
   "_image": "저장하는 완성 사진. jpeg, quality 에서 시작해 maxKB 를 넘으면 0.08씩 낮춤(minQuality 까지). thumb* = 사진 목록에 쓰는 작은 사진(긴 변 thumbPx, 세로로 긴 모양이라 카메라 사진보다 큼)",
   "image": { "type": "image/jpeg", "quality": 0.9, "minQuality": 0.6, "maxKB": 900, "thumbPx": 720, "thumbQuality": 0.75, "thumbMaxKB": 120 },
   "_preview": "꾸미기 화면 네 칸 썸네일 크기(px, 칸 비율과 같게)",
   "preview": { "thumbW": 240 },
-  "_camera": "구도. zoom 0 = far(무릎 위) ~ 1 = near(상반신). 값은 캐릭터 키 비율(data/config.json camera 와 같은 뜻). yawMaxDeg = 정면 기준 좌우 최대 각도, degPerPx = 미리보기를 끌 때 1px 당 각도, pinchK·wheelK = 두 손가락·휠 확대 양, frontSnapDeg = 이 각도 안이면 정면으로 붙임",
+  "_camera": "구도. zoom 0 = far(무릎 위, 머리 위에 손을 들어도 잘리지 않게 키의 약 8% 여유) ~ 1 = near(상반신). 값은 캐릭터 키 비율(data/config.json camera 와 같은 뜻). yawMaxDeg = 정면 기준 좌우 최대 각도, degPerPx = 미리보기를 끌 때 1px 당 각도, pinchK·wheelK = 두 손가락·휠 확대 양, frontSnapDeg = 이 각도 안이면 정면으로 붙임",
   "camera": {
-    "far": { "top": 1.05, "bottom": 0.34, "width": 0.62 },
+    "far": { "top": 1.11, "bottom": 0.34, "width": 0.62 },
     "near": { "top": 1.05, "bottom": 0.55, "width": 0.45 },
     "lift": 0,
     "yawMaxDeg": 60,
@@ -18,7 +18,7 @@
     "frontSnapDeg": 3
   },
   "_shoot": "촬영 연출(ms). stepMs = 카운트다운 숫자 하나당 시간, clickMs = 「찰칵」이 보이는 시간, flashMs = 하얀 깜빡임, blendMs = 다음 포즈로 넘어가는 시간(꾸미기 화면에서 포즈를 바꿀 때도), settleMs = 넘어간 뒤 카운트다운을 시작하기 전 쉬는 시간",
-  "shoot": { "stepMs": 800, "clickMs": 450, "flashMs": 260, "blendMs": 500, "settleMs": 300 },
+  "shoot": { "stepMs": 600, "clickMs": 450, "flashMs": 260, "blendMs": 500, "settleMs": 300 },
   "_bgs": "단색 배경(3D 장면 배경색으로 칠함). 이름은 data/ui.json booth.bg. 장소 배경은 가 본 장소(data/seoa_story.json locations) 그림",
   "bgs": [
     { "id": "white", "color": "#f7f5fa" },

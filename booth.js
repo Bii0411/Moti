@@ -230,8 +230,13 @@ const Booth=(()=>{
     g.fillStyle=fr.color;g.fillRect(0,0,W,H);
     shots.forEach((s,k)=>{if(s)g.drawImage(s,pad,pad+k*(ch+gap),cw,ch)});
     stripAt=Date.now();const d=new Date(stripAt),date=(st.date||"{y}.{m}.{d}").replace("{y}",d.getFullYear()).replace("{m}",P2(d.getMonth()+1)).replace("{d}",P2(d.getDate()));
-    g.fillStyle=fr.text;g.font=`700 ${st.footSize||34}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;g.textAlign="center";g.textBaseline="middle";
-    g.fillText(T("foot",{date}),W/2,pad+4*ch+3*gap+foot/2);
+    // 아래 줄: 「{date} · moti · 윤서아」 중 굵게 할 낱말(strip.footBold)만 굵게, 나머지는 보통 굵기로 이어서 가운데 맞춤(11-1)
+    const FF='"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif',fs=st.footSize||34,bw=st.footBold||"moti",txt=T("foot",{date}),
+      fN=`${st.footWeight||500} ${fs}px ${FF}`,fB=`${st.footBoldWeight||800} ${fs}px ${FF}`,i=bw?txt.indexOf(bw):-1,
+      parts=i<0?[[txt,fN]]:[[txt.slice(0,i),fN],[bw,fB],[txt.slice(i+bw.length),fN]];
+    g.fillStyle=fr.text;g.textAlign="left";g.textBaseline="middle";
+    const ws=parts.map(([t,f])=>{g.font=f;return g.measureText(t).width}),tw=ws.reduce((a,b)=>a+b,0);
+    let x=(W-tw)/2;const y=pad+4*ch+3*gap+foot/2;parts.forEach(([t,f],k)=>{g.font=f;g.fillText(t,x,y);x+=ws[k]});
     return{c,W,H,pad,gap,cw,ch}}
   function showResult(){
     strip=compose();setMode("result");
