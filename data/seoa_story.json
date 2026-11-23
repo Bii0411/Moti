@@ -6,13 +6,15 @@
   "affectionAt": [0, 20, 40, 60, 75, 100],
   "_countAt": "서버 v1·서버 없음: 대화 횟수로 단계를 올리는 기준 (기존 5단계 0·4·10·18·30을 6단계로 나눔)",
   "countAt": [0, 4, 9, 15, 22, 30],
-  "_locations": "location 값은 서버와 1:1. temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체 (원래 파일명: bg_seoa_bar.jpg, bg_seoa_room.jpg)",
+  "_locations": "location 값은 서버와 1:1. temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체 (원래 파일명: bg_seoa_room.jpg). 15단계: 바 1층 전용 배경(bg_seoa_bar.jpg) 들어옴. episode=true 는 특별 에피소드 전용 장소(5 드라큘라의 성, 6 크리스마스 거리) — 서버 장소 목록에는 없음",
   "locations": [
-    { "name": "바 '라스트 오더' 1층", "img": "bg_seoa_alley.jpg", "temp": true },
+    { "name": "바 '라스트 오더' 1층", "img": "bg_seoa_bar.jpg" },
     { "name": "바 '라스트 오더' 2층", "img": "bg_seoa_roof.jpg", "temp": true },
     { "name": "네온 골목", "img": "bg_seoa_street.jpg" },
     { "name": "비 내리는 골목", "img": "bg_seoa_rain.jpg" },
-    { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg" }
+    { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg" },
+    { "name": "드라큘라의 성", "img": "bg_seoa_castle.jpg", "episode": true },
+    { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "episode": true }
   ],
   "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
   "ban": ["m14", "m16", "m22"],
