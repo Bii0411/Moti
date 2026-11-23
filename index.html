@@ -418,6 +418,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script src="film.js"></script>
 <script src="photos.js"></script>
 <script src="booth.js"></script>
+<script src="seoaphoto.js"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -433,8 +434,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,bt]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/booth.json")]);
-  DATA.photos=ph||{};DATA.booth=bt||{};
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,bt,sp]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/booth.json"),get("data/seoa_photo.json")]);
+  DATA.photos=ph||{};DATA.booth=bt||{};DATA.seoaPhoto=sp||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
@@ -724,7 +725,46 @@ const Stage=(()=>{
   function faceNow(){Object.keys(faceW).forEach(n=>{faceW[n]=faceT[n]||0});for(const n in faceT)faceW[n]=faceT[n]}
   // 3D 장면 배경색(단색 배경). null 이면 투명(뒤의 장소 그림이 보임)
   function bg(c){scene.background=c?new THREE.Color(c):null}
-  return{init,ready,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  // ── 서아가 보내는 사진(12) ──
+  // 몸짓 mid 의 mt 초 순간 자세 + 표정 fk(눈 뜬 채, 입 다문 채)로 서아를 잠깐 세우고 draw() 를 부른 뒤, 같은 작업 안에서 원래대로 되돌린다.
+  // 화면(대화 무대)은 다음 프레임에 원래 자세로 다시 그려지므로 바뀐 자세가 보이지 않는다(그사이 브라우저가 화면을 그리지 않음).
+  // 머리카락(J_Sec_)은 지금 흔들림 값 그대로 둠(기본 자세로 돌리면 몸을 뚫을 수 있어서). o.shadow: 발밑 그림자, o.place: 테두리 빛 장소
+  const qSave=()=>{const q={};for(const n in md.bones)q[n]=md.bones[n].quaternion.clone();return q};
+  function still(mid,mt,fk,draw,o={}){
+    if(!md)return false;
+    const keepQ=qSave(),keepP=md.root.position.clone(),keepM=faces.map(f=>f.morphTargetInfluences.slice()),hadShadow=!!(shadowM&&shadowM.parent);
+    const rimBack=o.place!=null&&typeof Look!=="undefined"&&Look.rimFor?Look.rimFor(o.place):()=>{};
+    try{
+      const isXs=!!XS[mid],d=dur(mid);mt=Math.max(0,Math.min(d-.001,mt||0));
+      const p=RIG.pose(md.rest,isXs?null:mid,mt,performance.now()/1000);
+      for(const b in p.local){if(/^J_Sec_/.test(b))continue;const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
+      md.root.position.set(p.off[0],p.off[1],p.off[2]);
+      if(isXs&&xsData)xsApply(xsData,mt,XS[mid]);
+      md.root.updateMatrixWorld(true);
+      const F=FACE[fk]||FACE.soft||{},names=new Set([...Object.keys(faceW),...Object.keys(F),"Fcl_EYE_Close",...talkVis(talkCfg())]);
+      for(const n of names){const v=n==="Fcl_EYE_Close"?0:(F[n]||0);for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=v}}
+      if(o.shadow){shadow(true,o.shadow);const hb=md.bones.Hips,hp=hb?hb.getWorldPosition(new THREE.Vector3()):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
+      draw();
+    }finally{
+      for(const n in keepQ)md.bones[n].quaternion.copy(keepQ[n]);md.root.position.copy(keepP);md.root.updateMatrixWorld(true);
+      faces.forEach((f,i)=>{const a=keepM[i];for(let k=0;k<a.length;k++)f.morphTargetInfluences[k]=a[k]});
+      if(o.shadow&&!hadShadow)shadow(false);rimBack();
+    }
+    return true;
+  }
+  // still 의 draw 안에서만: 목·머리·눈을 target(월드 좌표, 보통 카메라 자리) 쪽으로 돌림(셀카 「렌즈를 봄」). 뼈마다 몫 k, 최대 각도 maxDeg
+  // 뼈의 앞(기본 자세에서 +Z, 카메라 쪽)이 지금 어디를 보는지 = 지금 월드 회전 · 기본 자세 월드 회전⁻¹ 로 +Z 를 돌린 것
+  const AXZ=new THREE.Vector3(0,0,1);
+  function aimBone(name,target,k,maxDeg){const b=md.bones[name],r=md.rest[name];if(!b||!r||!b.parent||!k)return;
+    const wq=b.getWorldQuaternion(new THREE.Quaternion()),rw=new THREE.Quaternion(r.world[0],r.world[1],r.world[2],r.world[3]);
+    const fwd=AXZ.clone().applyQuaternion(wq.clone().multiply(rw.invert())).normalize(),want=target.clone().sub(b.getWorldPosition(new THREE.Vector3())).normalize();
+    const d=new THREE.Quaternion().setFromUnitVectors(fwd,want),ang=2*Math.acos(Math.min(1,Math.abs(d.w)));
+    const t=Math.min(k,ang>1e-4?maxDeg*Math.PI/180/ang:1),dq=new THREE.Quaternion().slerp(d,t);
+    const pq=b.parent.getWorldQuaternion(new THREE.Quaternion()).invert();b.quaternion.copy(pq.multiply(dq.multiply(wq)));b.updateMatrixWorld(true)}
+  function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
+    aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
+    ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
+  return{init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -805,9 +845,10 @@ function renderLog(){
   const L=$("#log");
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
+    m.r==="ph"?SeoaPhoto.bubble(m):
     m.r==="c"?(m.act?`<div class="mnarr">${esc(m.act)}</div>`:"")+msgParts(m.t).map((p,i,a)=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
     :m.r==="u"?userParts(m.t).map(p=>p.k==="n"?`<div class="mnarr u">${esc(p.x)}</div>`:`<div class="msg u">${esc(p.x)}</div>`).join("")
-    :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+(busy?`<div class="msg c typing">${esc(waiting&&!serverAwake&&DATA.config.waitText||"서아가 입력 중…")}</div>`:"");
+    :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+SeoaPhoto.sendingHtml()+(busy?`<div class="msg c typing">${esc(waiting&&!serverAwake&&DATA.config.waitText||"서아가 입력 중…")}</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
 const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
@@ -861,14 +902,21 @@ async function askServer(cid,text){
   if(serverVer()===2){
     // v2 요청: 최근 16턴, 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
-    return readReply(await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait()));
+    const pn=photoNote(cid,hist);
+    const j=await post("/chat",{char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
+    if(j&&pn)SeoaPhoto.noteDone();
+    return readReply(j);
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
+  const pn=photoNote(cid,hist);
   const motions=cid==="seoa"?Object.values(allowedMotions()):[];
   const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions},replyWait());
   if(j&&j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
+  if(j&&pn)SeoaPhoto.noteDone();
   return readReply(j);
 }
+// 서아가 사진을 보낸 뒤(12) 다음 요청: 대화 기록 끝(이번 내 메시지 앞)에 원고 5절의 한 줄을 서아 쪽 기록처럼 덧붙임. 화면에는 보이지 않음
+function photoNote(cid,hist){const n=cid==="seoa"&&SeoaPhoto.note();if(n)hist.push({r:"c",t:n});return n}
 function allowedMotions(){const o={};for(const id of unlockedIds())o[id]=MNAME[id]||id;return o}
 // 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 (서아에게 안 맞는 몸짓 제외). 9단계에서 「선물로 배운 몸짓」은 없앰
 function unlockedIds(){
@@ -887,6 +935,7 @@ function stageUp(from,to,q){
   for(let n=from+1;n<=to;n++){
     addMsg("sys",((DATA.story||{}).stageUpMessage||"{name}").replace("{name}",stageName(n)),null,"seoa");
     const g=DATA.story&&DATA.story.unlock.stage[n];if(g)q.push(g);
+    SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진
   }
   renderBond();
 }
@@ -992,7 +1041,8 @@ async function askSeoa(text){
   const sm=serverVer()===2||noServer()?null:await getSample();  // 서버 v2 시험 중·서버 없음 모드엔 Claude 미리보기를 건너뜀
   const allowed=allowedMotions();
   if(sm){
-    const hist=chatOf("seoa").filter(m=>m.r==="u"||m.r==="c"||m.r==="g").slice(-10).map(m=>(m.r==="u"?"유저: ":m.r==="g"?"[유저가 선물함] ":"서아: ")+m.t).join("\n");
+    const pn=SeoaPhoto.note();  // 12: 사진을 보낸 뒤면 이번 내 메시지 바로 앞에 원고 5절 한 줄
+    const hist=chatOf("seoa").filter(m=>m.r==="u"||m.r==="c"||m.r==="g").slice(-10).map(m=>(m.r==="u"?"유저: ":m.r==="g"?"[유저가 선물함] ":"서아: ")+m.t).slice(0,pn?-1:undefined).concat(pn?["서아: "+pn]:[]).join("\n");
     const prompt=`너는 캐릭터 채팅 앱 moti의 캐릭터 "윤서아"다.
 설정: 네온 시티의 요원이자 해커, 특수부대 팀장. 유저는 뒷골목 가게 사장이고, 서아에게 유저는 유일하게 마음을 여는 사람이다. 말투는 짧고 쿨한 반말, 겉은 시크하지만 유저에게만 다정함이 새어 나온다(츤데레). 대사는 1~2문장, 40자 안팎.
 현재 서아 상태: ${STATES[curState()].ko}. 장소: ${SCENES[S.scene].name}.
@@ -1009,7 +1059,7 @@ ${hist||"(없음)"}
 JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scene":null}`;
     try{
       const v=await sm.json(prompt,{modelTier:"quick",cache:false});
-      if(v&&v.line){if(!allowed[v.motion])v.motion="m02";if(!FACE[v.face])v.face="soft";if(!STATES[v.mood]||v.mood==="birthday")v.mood=S.mood;return v}
+      if(v&&v.line){if(pn)SeoaPhoto.noteDone();if(!allowed[v.motion])v.motion="m02";if(!FACE[v.face])v.face="soft";if(!STATES[v.mood]||v.mood==="birthday")v.mood=S.mood;return v}
     }catch(e){if(e&&e.code==="not_granted"){sampleFn=null;$("#aiTag").textContent=""}}
   }
   const j=await askServer("seoa",text);
@@ -1081,6 +1131,7 @@ async function send(text){
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
   else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"");firstSeen(mid)}
   afterReply(v);
+  SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
   const R=S.demoNext;let keep=null;
   if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
@@ -1273,7 +1324,7 @@ const Demo=(()=>{
       <div class="row">${B("pityReset",esc(T("pityReset")))}${B("giftOpenAll",esc(T("giftOpenAll")))}${B("giftClear",esc(T("giftClear")))}</div>`;
     // 사진(10-C): 견본 사진으로 칸 수까지 채우기 · 모두 비우기
     h+=`<h4>${esc(T("sec.photo"))} <small>${esc(T("photoFilled",{n:Photos.count(),cap:Photos.cap()}))}</small></h4>
-      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}${B("colOpenAll",esc(T("colOpenAll")))}</div>`;
+      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}${B("colOpenAll",esc(T("colOpenAll")))}${B("seoaPhotoNow",esc(T("seoaPhotoNow")))}</div>`;
     if(DEBUG){
       const q=qs.get("server");
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
@@ -1309,6 +1360,7 @@ const Demo=(()=>{
     // 11: 명장면 모두 열기(포토부스 포즈 시연용). 대화 몸짓은 대사 없이 기록, 선물 몸짓은 「선물 몸짓 모두 열기」와 같게
     if(a==="colOpenAll"){let gi=0;COL.items.forEach(x=>{if(S.col[x.id])return;if(x.source==="gift"){const g=GIFTS[gi++%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}else S.col[x.id]={at:Date.now(),line:"",scene:S.scene}});
       toast(esc(T("colOpenAll")),1600);if(typeof Booth!=="undefined")Booth.refresh();return refresh()}
+    if(a==="seoaPhotoNow"){toChat();SeoaPhoto.now();return}  // 12: 지금 단계 묶음에서 바로 한 장
     if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
     if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
     if(a==="giftClear"){COL.items.forEach(x=>{if(x.source==="gift")delete S.col[x.id]});toast(esc(T("giftClear")),1600);return refresh()}
@@ -1360,6 +1412,7 @@ const Scenes=(()=>{
       if(sc.next&&sc.next.event)evMotions(sc.next.event).forEach(id=>drop.add(id));
       drop.forEach(id=>delete S.col[id]);S.unlocked=S.unlocked.filter(id=>!drop.has(id));
       S.demoNext=sc.next||null;
+      SeoaPhoto.sceneReset(sc.stage||1);  // 12: 예약된 단계 상승 때 단계 사진이 다시 오게
       S.placeLock=!!sc.place;  // 이 장면 동안 장소는 장면 설정·서버 location 으로만 바뀜. 다른 장면(①·⑥)·전체 초기화에서 풀림
       Stage.setFace("neutral");setTab("chat");openRoom("seoa");
     }
@@ -1522,7 +1575,7 @@ function setTab(t){curTab=t;Fn.set(false);Cam.close();Booth.close();View.rest(tr
   if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
   placeStage();
   if(t==="album")renderAlbum();if(t==="home")renderHome();if(t==="my")renderMy()}
-const unreadOf=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(m=>m.r==="c").length};
+const unreadOf=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(m=>m.r==="c"||m.r==="ph").length};
 function fmtTime(t){const m=Math.round((Date.now()-t)/60000);return m<1?"방금":m<60?m+"분 전":Math.round(m/60)+"시간 전"}
 // 안 읽은 수는 대화 목록에 있는 대화방만
 function renderUnread(){const n=CH.filter(c=>S.rooms.includes(c.id)).reduce((a,c)=>a+(S.room===c.id&&curTab==="chat"?0:unreadOf(c.id)),0);const b=$("#navUnread");b.style.display=n?"":"none";b.textContent=n;
@@ -1535,7 +1588,7 @@ function renderList(){
   const rows=CH.filter(c=>S.rooms.includes(c.id)).map(c=>{const L=chatOf(c.id).filter(m=>m.r!=="sys"),last=L[L.length-1];return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
   const tot=rows.reduce((a,r)=>a+r.u,0);$("#dmUnread").textContent=tot?`안 읽은 메시지 ${tot}`:"";
   $("#dmList").innerHTML=rows.map(({c,last,u})=>`<button class="dm" data-c="${c.id}"><span class="av" style="background-image:url(${c.img})">${c.badge==="3D"&&c.id==="seoa"?"<i>3D</i>":""}</span>
-    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.r==="u"?userPlain(last.t):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
+    <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${last?(last.r==="u"?"나: ":last.r==="g"?"🎁 ":last.r==="ph"?"🖼 ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.r==="u"?userPlain(last.t):last.t):c.id==="seoa"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}</span></span>
     <span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`).join("");
   $("#dmList").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
 }
@@ -1562,6 +1615,7 @@ function openRoom(cid){
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
   if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
+  if(cid==="seoa")SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
 }
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)
@@ -1617,7 +1671,7 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;

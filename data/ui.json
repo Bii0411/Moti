@@ -184,12 +184,14 @@
     "seg": {
       "all": "전체",
       "liked": "좋아요",
-      "booth": "포토부스"
+      "booth": "포토부스",
+      "received": "받은 사진"
     },
     "empty": {
       "all": "아직 찍은 사진이 없어요. ＋ 의 카메라로 서아를 찍어 보세요.",
       "liked": "좋아요한 사진이 없어요.",
-      "booth": "앨범의 포토부스에서 네 컷 사진을 만들어 보세요."
+      "booth": "앨범의 포토부스에서 네 컷 사진을 만들어 보세요.",
+      "received": "아직 서아가 보낸 사진이 없어요."
     },
     "growRow": "칸 늘리기 +10",
     "growPrice": "💎 {price}",
@@ -263,5 +265,21 @@
     "foot": "{date} · moti · 윤서아",
     "ariaZoomOut": "멀리",
     "ariaZoomIn": "가까이"
+  },
+  "seoaPhoto": {
+    "_seoaPhoto": "서아가 먼저 보내는 사진(12단계, 원고 docs/drafts/12-서아가-보내는-사진-원고.md 4절). sending = 만드는 동안 대화 기록 맨 아래. saved = 사진 말풍선 아래 저장 알림, savedStage = 단계 사진일 때 덧붙임({n} 받은 단계 사진 수, {total} 5). info·infoStage = 크게 보기 정보 첫째 줄(둘째 줄은 날짜, data/ui.json photo.date). stageLabel = infoStage 의 {stage}. 사진 화면 「받은 사진」: progress·progressCount = 단계 사진 진행도, slot = 못 받은 단계 사진 칸, others = 그 밖에 받은 사진 제목, note = 안내 한 줄({cap} 사진 칸), empty = 빈 상태. aria = 사진 말풍선 접근성 이름",
+    "sending": "서아가 사진을 보내는 중…",
+    "saved": "🖼 받은 사진에 저장됐어요",
+    "savedStage": " · 단계 사진 {n} / {total}",
+    "info": "서아가 보낸 사진 · {place}",
+    "infoStage": "{stage} · {name}",
+    "stageLabel": "{k}단계",
+    "progress": "단계 사진",
+    "progressCount": "{n} / {total}",
+    "slot": "{k}단계 사진",
+    "others": "그 밖에 받은 사진",
+    "note": "받은 사진은 사진 칸({cap}장)에 포함되지 않아요",
+    "empty": "아직 서아가 보낸 사진이 없어요.",
+    "aria": "서아가 보낸 사진 크게 보기"
   }
 }

@@ -126,5 +126,8 @@ const Look=(()=>{
     else rimNow.copy(rimTo);
     RIM.color.value.copy(rimNow);
   }
-  return{apply,setPlace,tick};
+  // 12: 서아가 보내는 사진을 그 장소 테두리 빛으로 한 번 그릴 때. 바로 그 색으로 바꾸고 되돌리는 함수를 돌려줌(화면의 부드러운 전환은 건드리지 않음)
+  function rimFor(name){if(!rimOn||!rimCfg)return()=>{};const keep=RIM.color.value.clone(),h=(rimCfg.byLocation&&rimCfg.byLocation[name])||rimCfg.default;
+    RIM.color.value.copy(lin(hex(h)));return()=>RIM.color.value.copy(keep)}
+  return{apply,setPlace,tick,rimFor};
 })();

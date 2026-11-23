@@ -96,3 +96,23 @@
 .pcbox div{display:flex;gap:8px}
 .pcbox button{flex:1;height:42px;border-radius:11px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
 .pcbox .danger{background:#ef4444;border-color:#ef4444;color:#fff}
+
+/* ── 서아가 보낸 사진(12): 대화 기록의 사진 말풍선(사진 작게 + 아래 메시지 말풍선 + 저장 알림 줄) ── */
+.phmsg{flex:none;align-self:flex-start;width:52%;max-width:200px;aspect-ratio:3/4;border-radius:16px;border-top-left-radius:6px;overflow:hidden;background:var(--card);border:1px solid var(--line);padding:0;display:block;-webkit-tap-highlight-color:transparent}
+.phmsg img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.phmsg.gone{aspect-ratio:auto;height:0;border:0;margin:0}
+.phmsg+.msg.c{margin-top:-2px}
+.phsave{flex:none;align-self:flex-start;font-size:11px;color:var(--sub);padding:0 4px;margin-top:-2px}
+
+/* ── 사진 화면 「받은 사진」(12): 단계 사진 진행도 + 2~6단계 다섯 칸 + 그 밖에 받은 사진 ── */
+.pseg button{font-size:12.5px;padding:0 2px;white-space:nowrap}
+.rhd{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.rhd b{font-size:13px;color:var(--sub);font-weight:700}
+.rhd span{margin-left:auto;font-size:13px;font-weight:800;color:var(--pri2)}
+.rprog{margin:6px 0 10px}
+.rstage{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.rslot{aspect-ratio:3/4;border-radius:8px;border:1.5px dashed #ffffff33;display:grid;place-items:center;text-align:center;padding:4px}
+.rslot span{font-size:10.5px;line-height:1.3;color:var(--sub);word-break:keep-all}
+.rgot .rlab{position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;padding:3px 0;background:#0009;text-align:center}
+.rh3{font-size:13px;color:var(--sub);font-weight:700;margin:16px 0 8px}
+.rnote{font-size:12px;color:var(--sub);margin:12px 0 4px;line-height:1.5}
