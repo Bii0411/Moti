@@ -37,7 +37,10 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 /* 오른쪽 위 관계 단계·게이지·기분 태그(19). 색·시간 data/config.json bondTop·moodTag. 블러·그림자 없이 transform 띠만 */
 .btop{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
 .btop .bx{display:inline-flex;flex-direction:column;background:#000a;padding:5px 10px 6px;border-radius:10px}
-.btop .bx b{font-size:12px;font-weight:700;line-height:1.25;white-space:nowrap}
+.btop #bondTxt{font-size:12px;font-weight:700;line-height:1.25;white-space:nowrap}
+/* 21: 단계 = 선 하트 안 숫자(5 엇갈림은 금 간 선). 하트 선·숫자 색 = 그 단계 게이지 색, 단계가 오르면 colorMs 동안 바뀜 */
+.btop .brow{display:flex;align-items:center;gap:5px}
+#bondHeart{display:inline-flex;transition:color var(--hc,600ms) ease}
 .bgauge{position:relative;display:block;height:var(--gh,4px);margin-top:4px;border-radius:9px;overflow:hidden;background:var(--gt,#ffffff2e)}
 .bgauge i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:9px;background:var(--gc,#B4B2A9)}
 .bgauge em{position:absolute;left:0;top:0;bottom:0;width:var(--sw,40%);transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--sc,#fff),transparent);opacity:0}
@@ -181,7 +184,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .card .cta{margin-top:10px;width:100%;padding:11px;border-radius:12px;background:var(--pri);font-weight:800;font-size:14px}
 .card.plus{background:#17132a;border-color:#3b2f6b}
 .mbh{display:flex;align-items:center;gap:8px;margin-bottom:12px}.mbh b{font-size:16px}
-.mbh .lv{font-size:11.5px;font-weight:800;color:#f0a6c8;background:rgba(244,114,182,.12);border-radius:6px;padding:2px 7px}
+.mbh .lv{display:inline-flex;--hn:10px}
 .mbh .nx{margin-left:auto;font-size:12px;color:var(--sub)}
 .mybond .prog i{background:#f472b6}
 .mrow{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}.mrow b{color:var(--text);font-weight:700}
@@ -369,8 +372,8 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
   <div class="stage" id="stage">
     <div class="bgdim" id="bgdim"></div>
     <div class="ld" id="ld">서아: “잠깐, 준비하고 나갈게.”</div>
-    <span class="where" id="where">📍 네온 거리</span>
-    <div class="btop" id="bondTop"><span class="bx"><b id="bondTxt"></b><span class="bgauge" id="bGauge"><i></i><em></em></span></span><span class="mtag" id="moodTag" hidden></span></div>
+    <span class="where" id="where">네온 거리</span>
+    <div class="btop" id="bondTop"><span class="bx"><span class="brow" id="bondRow"><span id="bondHeart"></span><b id="bondTxt"></b></span><span class="bgauge" id="bGauge"><i></i><em></em></span></span><span class="mtag" id="moodTag" hidden></span></div>
     <div class="bubble" id="bubble"></div>
     <span class="cap" id="cap"></span>
     <div class="burst" id="burst"></div>
@@ -429,6 +432,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="icons.js"></script>
 <script src="motion.js"></script>
 <script src="gacha.js"></script>
 <script src="look.js"></script>
@@ -932,7 +936,7 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
 ["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
-function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent="📍 "+SCENES[i].name;Look.setPlace(SCENES[i].name)}
+function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
 function setScene(i){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene])i=e.scene}  // 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
   if(!SCENES[i])i=0;S.scene=i;if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
@@ -1304,11 +1308,11 @@ function giftSheet(focus){
   const st=curState(),B=GIFT.moodBonus||{};
   const oddsLine=o=>UI("gift.odds",{a:o.common,b:o.rare,c:o.special});
   $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
-  <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].e+" "+STATES[st].ko,bonus:B.rare||0}))}</p>
+  <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].ko,bonus:B.rare||0}))}</p>
   <div class="pity">${esc(UI("gift.pity",{n:pityLeft()}))}</div>
   <div class="items">${GIFTS.map(g=>{const m=g.rec===st,o=Gacha.odds(g,m,B);return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}
-    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">💎 ${g.price}</div>
+    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div>
     <div class="odds">${esc(oddsLine(o))}</div></button>`}).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
   openSheet("#giftSheet");
@@ -1362,10 +1366,10 @@ function renderAlbum(fresh){
   <div class="alh col"><b>${esc(UI("album.progress."+albumSeg))}</b><span>${esc(UI("album.count",{n:got,total:L.length}))}</span></div>
   <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
   <div class="slots c3">${L.map(x=>{const a=S.col[x.id];
-    if(a)return `<button class="slot got ${fresh===x.id?"fresh":""}" style="--gc:${gc(x)}" data-f="${x.id}">${badge(x)}<span class="e">${x.source==="gift"?"🎁":"💬"}</span><span class="s">${esc(x.name)}</span><span class="d">${fmtD(a.at)}</span><span class="d pl">${esc(place(a))}</span></button>`;
+    if(a)return `<button class="slot got ${fresh===x.id?"fresh":""}" style="--gc:${gc(x)}" data-f="${x.id}">${badge(x)}<span class="e">${Icon.svg(x.source==="gift"?"gift":"chat",24)}</span><span class="s">${esc(x.name)}</span><span class="d">${fmtD(a.at)}</span><span class="d pl">${esc(place(a))}</span></button>`;
     const soon=x.source==="chat"&&x.stage!==1&&isSoon(x.id),  // 9-1: 1단계(처음부터 열린) 몸짓은 「수집 대기 중」 대신 잠긴 칸
       h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
-    return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${soon?"✨":"👤"}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
+    return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${Icon.svg(soon?"sparkle":"lock",24)}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
   $("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
   $("#boothBtn").onclick=()=>Booth.open();
   $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>replayCol(b.dataset.f));
@@ -1458,8 +1462,8 @@ const Demo=(()=>{
     h+=Scenes.html(T,B);
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",esc(T("dia")))}</div>`;
-    h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${STATES[k].e} ${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 선물(9-B): 다음 선물 결과(등급 또는 선물 몸짓, 다음 선물 한 번에만) · 천장 초기화 · 선물 몸짓 모두 열기 · 비우기
     const GN=S.giftNext||{},gItems=COL.items.filter(x=>x.source==="gift");
     h+=`<h4>${esc(T("giftNext"))} <small>${esc(UI("gift.pity",{n:pityLeft()}))}</small></h4>
@@ -1501,7 +1505,7 @@ const Demo=(()=>{
     if(a==="adultReset"){delete S.adult;if(S.room&&needAdult(S.room)){S.room=null;if(curTab==="chat")showList()}toast(esc(T("resetToast",{name:OT("demo.adultReset")})),1800);return refresh()}
     if(a==="scene0")return firstOpen();
     if(a==="resetAll")return reset("all");  // 한 번 누르면 바로(7-1)
-    if(a==="dia"){S.dia+=500;toast(esc(T("diaToast")),1600);return refresh()}
+    if(a==="dia"){S.dia+=500;toast(Icon.fill(esc(T("diaToast"))),1600);return refresh()}
     if(a==="mood")return setMood(v);
     if(a==="giftNext"){const [k,x]=(v||"").split(":");S.giftNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
     if(a==="keyForce"){const F=Fx.st();F.keyForce=!F.keyForce;save();return refresh()}
@@ -1615,12 +1619,15 @@ function renderBond(){
   BondTop.draw(i+1,pct);return{i,nx,pct}}
 // 19: 대화 화면 오른쪽 위 「{n}단계 · {이름}」 + 얇은 게이지. 단계가 오르면 색이 바뀌며 0에서 새 값까지 다시 참.
 // 평소 답장으로 늘 때는 조용히 늘기만. 결정적 순간(17-1B)엔 shine() 으로 밝은 띠가 한 번 지나감. 값 data/config.json bondTop
+const bondColor=n=>(((DATA.config||{}).bondTop||{}).colors||{})[n]||"#B4B2A9";  // 21: 단계 색(하트·게이지 같이)
 const BondTop=(()=>{
   let last=null;
   const C=()=>(DATA.config&&DATA.config.bondTop)||{};
   function draw(n,pct){
     const c=C(),g=$("#bGauge"),f=g.firstElementChild,col=(c.colors||{})[n]||"#B4B2A9";
     $("#bondTxt").textContent=UI("top.bond",{n,name:stageName(n)});
+    const h=$("#bondHeart");if(!last||last.n!==n){h.innerHTML=Icon.heart(n,20);h.setAttribute("role","img");h.setAttribute("aria-label",UI("top.bondAria",{n}))}
+    h.style.setProperty("--hc",(last?(c.colorMs||600):0)+"ms");h.style.color=col;  // 21: 하트 선·숫자 = 게이지 색, 같은 colorMs 로 바뀜
     g.style.setProperty("--gh",(c.gaugeH||4)+"px");if(c.track)g.style.setProperty("--gt",c.track);
     const up=last&&n>last.n,same=last&&n===last.n&&last.pct===pct&&last.col===col;
     if(same)return;
@@ -1667,7 +1674,7 @@ function renderEps(cid){
   ${b?`<button class="ep" data-b="${cid}"><span class="tx"><b>${esc(b.title)}</b><p>${esc(b.situation)}</p></span>${ad?epAdult():`<span class="eb">${esc(S.rooms.includes(cid)?UI("home.btnContinue"):UI("home.btnStart"))}</span>`}</button>`:""}
   <h2>${esc(UI("home.special"))}</h2>
   ${sp.length?sp.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${esc(st.name)}</b><p>${esc(st.desc)}</p><span class="mo">${esc(UI("home.motion",{name:MNAME[st.m]||st.m}))}</span></span>
-    ${ad?epAdult():`<span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${esc(S.stories[st.id]?UI("home.btnOwned"):st.price?UI("home.btnPrice",{price:st.price}):UI("home.btnFree"))}</span>`}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
+    ${ad?epAdult():`<span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${Icon.fill(esc(S.stories[st.id]?UI("home.btnOwned"):st.price?UI("home.btnPrice",{price:st.price}):UI("home.btnFree")),12)}</span>`}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
   :`<div class="epsoon">${esc(UI("home.soon"))}</div>`}`;
   box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{if(x.dataset.b==="seoa")Thread.go("main");enterRoom(x.dataset.b)});  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
   box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
@@ -1677,7 +1684,7 @@ function renderHome(){
   const list=homeList(),sorts=["rec","hot","new","3d"];
   if(!list.some(c=>c.id===H.pick))H.pick=list.length?list[0].id:null;
   h.innerHTML=`<div class="srow">${sorts.map(k=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${esc(UI("home.sorts."+k))}</button>`).join("")}</div>
-  <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
+  <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">${Icon.svg("chat",12)} ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
   <div class="hdots" id="hDots">${list.map(c=>`<i${c.id===H.pick?' class="on"':""}></i>`).join("")}</div>
   <div id="hEps"></div>`;
   Car.mount($("#hCar"),list.map(c=>c.id));
@@ -1730,15 +1737,15 @@ function startStory(id){
 // ───────────────────────── 마이 ─────────────────────────
 // 마이 페이지 라인 아이콘(12단계). 선 굵기 1.8, 둥근 끝. 모양은 Tabler Icons(MIT)를 옮김
 const MYI={"infinity": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9.828 9.172a4 4 0 1 0 0 5.656 10 10 0 0 0 2.172-2.828 10 10 0 0 1 2.172-2.828 4 4 0 1 1 0 5.656 10 10 0 0 1-2.172-2.828 10 10 0 0 0-2.172-2.828\"/></svg>", "history": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8v4l2 2\"/><path d=\"M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5\"/></svg>", "message": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 20l1.3-3.9c-2.324-3.437-1.426-7.872 2.1-10.374 3.526-2.501 8.59-2.296 11.845.48 3.255 2.777 3.695 7.266 1.029 10.501-2.666 3.235-7.615 4.215-11.574 2.293L3 20\"/></svg>", "diamond": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 5h12l3 5-8.5 9.5a.7.7 0 0 1-1 0L3 10l3-5\"/><path d=\"M10 12l-2-2.2.6-1\"/></svg>", "photo": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 8h.01\"/><path d=\"M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z\"/><path d=\"M3 16l5-5c.928-.893 2.072-.893 3 0l5 5\"/><path d=\"M14 14l1-1c.928-.893 2.072-.893 3 0l3 3\"/></svg>"};
-// 다이아 재화 아이콘(12단계, 직접 그림). 💎 이모지 대신 마이 페이지 재화 표시에 씀
-const GEM=(sz=16)=>`<svg class="gem" width="${sz}" height="${sz}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z" fill="#7c5cff"/><path d="M2 9h20L12 21z" fill="#5b3fd6"/><path d="M6 3l3 6h6l3-6" fill="#a993ff"/><path d="M9 9l3 12 3-12z" fill="#6d4cf0"/></svg>`;
+// 다이아 재화 아이콘(12단계, 직접 그림). 💎 이모지 대신 재화 표시에 씀
+const GEM=Icon.gem;  // 21: 아이콘은 icons.js 한 곳으로 옮김
 function renderMy(){
   const {i,nx,pct}=renderBond();const n=COL.items.filter(x=>S.col[x.id]).length;const M=(DATA.ui||{}).my||{};
   const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
   const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
   const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
   $("#my").innerHTML=`<h2>나와 서아</h2>
-  <div class="card mybond"><div class="mbh"><span class="lv">${esc(UI("my.lv",{n:i+1}))}</span><b>${esc(stageName(i+1))}</b><span class="nx">${esc(nx?UI("my.next",{name:nx.n}):UI("my.max"))}</span></div>
+  <div class="card mybond"><div class="mbh"><span class="lv" style="color:${bondColor(i+1)}" aria-label="${esc(UI("my.lv",{n:i+1}))}" role="img">${Icon.heart(i+1,24)}</span><b>${esc(stageName(i+1))}</b><span class="nx">${esc(nx?UI("my.next",{name:nx.n}):UI("my.max"))}</span></div>
     <div class="prog"><i style="width:${pct}%"></i></div>
     <p class="alnote" style="margin:10px 0 0">${esc(UI("my.bondNote1"))}<b>${esc(UI("my.bondNoteB"))}</b>${esc(UI("my.bondNote2"))}</p>
     <div class="mrow"><span>${esc(UI("my.collectionLabel"))}</span><b>${n} / ${COL.items.length}</b></div></div>

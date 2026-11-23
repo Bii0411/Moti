@@ -219,7 +219,7 @@ const PhotoUI=(()=>{
       <div class="pprog ${n>=cap?"full":""}"><i style="width:${cap?Math.min(100,n/cap*100):0}%"></i></div>
       <div class="aseg pseg">${SEG.map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
       ${seg==="received"?received(L,cap):L.length?grid(L):`<p class="pempty">${esc(T("empty."+seg))}</p>`}
-      <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${esc(T("growPrice",{price:c.stepPrice||50}))}</b></button>
+      <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${Icon.fill(esc(T("growPrice",{price:c.stepPrice||50})))}</b></button>
         ${S.plus?"":`<button class="prow plus" data-p="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`;
     el.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{seg=b.dataset.seg;render()});
     el.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>view(b.dataset.id));
@@ -241,7 +241,7 @@ const PhotoUI=(()=>{
   function fullSheet(){
     const el=$("#fullSheet"),c=PCFG().slots||{};
     el.innerHTML=`<h2>${esc(UI("photoFull.title"))}</h2><p class="sub">${esc(UI("photoFull.desc"))}</p>
-      <div class="fopts"><button data-o="del">${esc(UI("photoFull.optDelete"))}</button><button data-o="grow">${esc(UI("photoFull.optGrow",{price:c.stepPrice||50}))}</button>
+      <div class="fopts"><button data-o="del">${esc(UI("photoFull.optDelete"))}</button><button data-o="grow">${Icon.fill(esc(UI("photoFull.optGrow",{price:c.stepPrice||50})))}</button>
       ${S.plus?"":`<button data-o="plus" class="plus">${esc(UI("photoFull.optPlus",{plusCap:c.plusCap||200}))}</button>`}</div>`;
     el.querySelector('[data-o="del"]').onclick=()=>{closeSheets();sheet()};
     el.querySelector('[data-o="grow"]').onclick=()=>{if(Photos.buySlots())closeSheets()};
