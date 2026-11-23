@@ -562,6 +562,8 @@ const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"H
 const Stage=(()=>{
   let setOutfit=()=>{},loadOutfit=()=>Promise.reject(),outfitNow=null;  // 의상 바꾸기(14단계)·의상 모델 불러오기(26-1 카드). init 안에서 채움
   const outfitDone=new Set();  // 다 불러온 의상(26-1: 카드 확대 때 불러오기 표시를 띄울지)
+  // 26-2: 의상 모델은 메모리에 최대 2개(지금 대화방 의상 + 마지막으로 연 카드 의상). 나머지는 내려놓음(prune). 카드 그림을 만드는 동안은 그 의상을 붙잡아 둠(use)
+  let prune=()=>0,cardKeep=null,listModels=()=>[];const pins={};
   let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();const xsCache={},xsWait={};let faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
@@ -604,11 +606,22 @@ const Stage=(()=>{
       scene.add(m.root);
       if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
     }
-    loadOutfit=key=>{if(jihu)return Promise.reject(new Error("jihu"));return built[key]||(built[key]=new Promise((ok,no)=>new THREE.GLTFLoader().load(Outfit.url(key),g=>{const m=build(g);outfitDone.add(key);ok(m)},undefined,e=>{delete built[key];no(e)})))};
+    const models={};listModels=()=>Object.keys(models);  // 다 불러온 모델(내려놓기용)
+    loadOutfit=key=>{if(jihu)return Promise.reject(new Error("jihu"));return built[key]||(built[key]=new Promise((ok,no)=>new THREE.GLTFLoader().load(Outfit.url(key),g=>{const m=build(g);if(!built[key])return ok(m);models[key]=m;outfitDone.add(key);ok(m)},undefined,e=>{delete built[key];no(e)})))};
+    // 모델 내려놓기: geometry·material·texture 를 GPU 에서 풀고 캐시에서 뺌. 다시 필요하면 loadOutfit 이 새로 불러옴(두 번째는 브라우저 캐시)
+    function dispose(m){const tex=new Set(),mats=new Set();
+      m.root.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.skeleton&&o.skeleton.dispose)o.skeleton.dispose();
+        (Array.isArray(o.material)?o.material:o.material?[o.material]:[]).forEach(x=>mats.add(x))});
+      mats.forEach(x=>{for(const k in x){const v=x[k];if(v&&v.isTexture)tex.add(v)}x.dispose()});tex.forEach(t=>t.dispose());
+      if(m.root.parent)m.root.parent.remove(m.root)}
+    prune=()=>{const keep=new Set([Outfit.want(),cardKeep,outfitNow,outfitWant].filter(Boolean));let n=0;
+      for(const k of Object.keys(models)){if(keep.has(k)||pins[k]>0)continue;if(md&&md.root===models[k].root)continue;
+        dispose(models[k]);delete models[k];delete built[k];outfitDone.delete(k);n++}
+      return n};
     let outfitWant=null;
     // 의상 바꾸기: 같은 의상이면 그대로. 불러오는 동안 또 바뀌면 마지막 것만 올림
     setOutfit=key=>{if(jihu||!key)return;outfitWant=key;if(key===outfitNow)return;
-      loadOutfit(key).then(m=>{if(outfitWant!==key)return;outfitNow=key;mount(m);try{R.compile(scene,cam)}catch(e){}}).catch(()=>{})};
+      loadOutfit(key).then(m=>{if(outfitWant!==key)return;outfitNow=key;mount(m);try{R.compile(scene,cam)}catch(e){}prune()}).catch(()=>{})};
     dataReady.then(()=>{const first=jihu?null:Outfit.want();outfitWant=first;
       (jihu?new Promise((ok,no)=>new THREE.GLTFLoader().load("jihu.glb",g=>ok(build(g)),undefined,no)):loadOutfit(first)).then(m=>{
       outfitNow=first;mount(m);$("#ld").remove();
@@ -623,7 +636,7 @@ const Stage=(()=>{
   }
   // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
   function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
-    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new Map();if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
+    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new WeakMap();if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
   const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
@@ -860,7 +873,9 @@ const Stage=(()=>{
   function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
     aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
-  return{outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
+  const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────

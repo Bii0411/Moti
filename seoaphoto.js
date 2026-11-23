@@ -37,7 +37,10 @@ const SeoaPhoto=(()=>{
     await Stage.ready;
     const P={...(((DATA.photos||{}).image)||{}),...(spec.image||{})},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
     const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img);
-    const model=spec.outfit&&spec.outfit!==Stage.outfitNow()?await Stage.model(spec.outfit).catch(()=>null):null;
+    // 26-2: 다른 의상 모델은 그리는 동안 붙잡아 둠(내려놓기 prune 에서 빠짐). 다 그리면 놓고, 쓰지 않으면 바로 내려놓음
+    const pin=spec.outfit&&spec.outfit!==Stage.outfitNow()?spec.outfit:null;if(pin)Stage.use(pin,1);
+    try{
+    const model=pin?await Stage.model(pin).catch(()=>null):null;
     const mid=spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
     const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
     const yaw=pick(K.yaw)||0,shift=pick(K.shift)||0,bgX=pick(K.bgX);
@@ -57,6 +60,7 @@ const SeoaPhoto=(()=>{
     const thumb=await Shot.encode(Shot.scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
     st().lastMid=mid;
     return{full,thumb,w:W,h:H,mid,face,yaw,shift,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
+    }finally{if(pin)Stage.use(pin,-1)}
   }
 
   // ── 보낼 사진 고르기(원고에서만) ──
