@@ -1,4 +1,4 @@
-// moti 선 아이콘 묶음(21). 화면에 보이던 이모지 대신 쓰는 SVG 를 여기 한 곳에 모아 index.html·photos.js 등이 같이 쓴다.
+// moti 선 아이콘 묶음(21, 23에서 search·sort·back·close 추가). 화면에 보이던 이모지 대신 쓰는 SVG 를 여기 한 곳에 모아 index.html·photos.js 등이 같이 쓴다.
 // 선 아이콘: 선 굵기 1.8, 둥근 끝, 채우지 않음, 색 = currentColor(둘레 글자 색을 따름). 모양은 Tabler Icons(MIT)를 옮기거나 직접 그림
 // Icon.svg(이름, 크기)  : 선 아이콘 하나
 // Icon.gem(크기)        : 다이아 재화 아이콘(12단계 마이 페이지에서 직접 그린 것, 색 채움). 문구 안의 {gem} 자리를 Icon.fill 이 이것으로 바꿈
@@ -10,6 +10,10 @@ const Icon=(()=>{
     lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><path d="M12 15v2"/>',
     sparkle:'<path d="M12 3c.6 4.4 2.6 6.4 7 7-4.4.6-6.4 2.6-7 7-.6-4.4-2.6-6.4-7-7 4.4-.6 6.4-2.6 7-7z"/><path d="M19 16c.2 1.4.9 2.1 2.3 2.3-1.4.2-2.1.9-2.3 2.3-.2-1.4-.9-2.1-2.3-2.3 1.4-.2 2.1-.9 2.3-2.3z"/>',
     chat:'<path d="M8 9h8"/><path d="M8 13h6"/><path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-5l-5 3v-3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/>',
+    search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/>',
+    sort:'<path d="M4 8l3.5-3.5L11 8"/><path d="M7.5 4.5v15"/><path d="M20 16l-3.5 3.5L13 16"/><path d="M16.5 19.5v-15"/>',
+    back:'<path d="M15 5l-7 7 7 7"/>',
+    close:'<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
     gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9.5 3 11 5.5 12 8c1-2.5 2.5-5 4.5-5a2.5 2.5 0 0 1 0 5"/>'
   };
   const svg=(n,sz=16)=>`<svg class="li li-${n}" width="${sz}" height="${sz}" ${A}>${P[n]||""}</svg>`;

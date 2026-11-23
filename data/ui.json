@@ -58,12 +58,28 @@
     "placeChanged": "장소가 바뀌었어요 · {place}"
   },
   "home": {
-    "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시, storySceneTag 는 첫 장면 무대 위 표시(18)",
+    "_home": "홈 화면(8, 23). 23에서 위에서 아래로: 검색 → 이어서 대화(continue) → 특별 에피소드 줄(specialRow) → 캐릭터 찾기(find, 태그 칩 tagChips + 정렬 버튼 sorts). search = 검색 칸 안내, searchEmpty = 검색 결과 없음, all = 칩 「전체」, newTag = 새 특별 에피소드 표시, sortLabel = 정렬 버튼 읽기용 이름, back = 캐릭터 화면 뒤로 가기 읽기용 이름. sorts = 정렬 버튼이 도는 순서(추천 → 인기 → 신규). basic·special = 캐릭터 화면 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시, storySceneTag 는 첫 장면 무대 위 표시(18)",
+    "search": "캐릭터, 태그 검색",
+    "searchEmpty": "찾는 캐릭터가 없어요",
+    "continue": "이어서 대화",
+    "specialRow": "특별 에피소드",
+    "find": "캐릭터 찾기",
+    "all": "전체",
+    "tagChips": [
+      "사이버펑크",
+      "혐관",
+      "첫사랑",
+      "티키타카",
+      "연습생"
+    ],
+    "newTag": "NEW",
+    "sortLabel": "정렬",
+    "back": "홈으로",
+    "close": "검색 닫기",
     "sorts": {
       "rec": "추천",
-      "hot": "인기 랭킹",
-      "new": "신규",
-      "3d": "3D로 만나기"
+      "hot": "인기",
+      "new": "신규"
     },
     "basic": "기본 에피소드",
     "special": "특별 에피소드",
