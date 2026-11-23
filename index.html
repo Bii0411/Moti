@@ -457,6 +457,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace}}
   if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col||!ph)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
@@ -540,12 +541,13 @@ const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortSta
 };
 
 // ───────────────────────── 3D 무대 ─────────────────────────
-const XS={m24:{url:"motions/xstage_embarrassing3.json",from:1.2,to:8.5}}; // 부끄러워하기: XSTAGE 모션 중 핵심 구간만
+// XSTAGE 모션(진짜 모션 데이터): data/motions.json 의 xstage 에서 채움. 몸짓 번호 → {file, from, to(초), inPlace(골반 수평 이동 없앰)}
+const XS={};
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
   let setOutfit=()=>{};  // 의상 바꾸기(14단계). init 안에서 채움
-  let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();let xsData=null,faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
+  let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();const xsCache={},xsWait={};let faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
   let readyFn;const ready=new Promise(r=>readyFn=r);const T0=performance.now();let readyMs=null;
@@ -583,7 +585,7 @@ const Stage=(()=>{
     function mount(m){
       if(md&&md.root!==m.root){scene.remove(md.root)}
       if(md){m.root.position.copy(md.root.position)}
-      md={root:m.root,bones:m.bones,rest:m.rest};faces=m.faces;H0=0;if(xsData)xsData.al=null;
+      md={root:m.root,bones:m.bones,rest:m.rest};faces=m.faces;H0=0;for(const k in xsCache)xsCache[k].al=null;
       scene.add(m.root);
       if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
     }
@@ -600,9 +602,14 @@ const Stage=(()=>{
       try{R.compile(scene,cam)}catch(e){}
       readyMs=Math.round(performance.now()-T0);readyFn(true);
     }).catch(()=>{$("#ld").textContent="3D를 불러오지 못했어요. 새로고침해 주세요.";readyFn(false)})});
-    fetch(XS.m24.url).then(r=>r.json()).then(d=>{d.al=null;xsData=d}).catch(()=>{});
+    // XSTAGE 모션 파일: 3D 준비가 끝나면 뒤에서 하나씩 미리 받아 둠(재생할 때 기다리지 않게)
+    ready.then(()=>Object.keys(XS).reduce((p,id)=>p.then(()=>xsLoad(id)),Promise.resolve()));
     requestAnimationFrame(frame);
   }
+  // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
+  function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
+    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=null;if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
+  const xsDur=id=>{const x=XS[id];return (x.to!=null?x.to:(xsCache[id]?xsCache[id].duration:2))-x.from};
   // XSTAGE 모션을 서아 뼈에 맞추기
   function xsAlign(d){
     if(d.al)return d.al;
@@ -624,7 +631,7 @@ const Stage=(()=>{
       q0.set(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]).slerp(q1.set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]),u).multiply(a.A[n]).multiply(a.W[n]);
       b.parent.getWorldQuaternion(q2);q3.copy(q2.invert()).multiply(q0);b.quaternion.slerp(q3,w);b.updateMatrixWorld(true)}
     const h=d.hip,ip=k=>(h[i*3+k]+(h[j*3+k]-h[i*3+k])*u)*a.hipH*w;
-    md.root.position.x+=ip(0);md.root.position.y+=ip(1);md.root.position.z+=ip(2);
+    if(!win.inPlace){md.root.position.x+=ip(0);md.root.position.z+=ip(2)}md.root.position.y+=ip(1);
   }
   // 카메라 구도 (data/config.json camera): normal 상반신 · motion 허벅지 중간 · full 전신(춤)
   // 구도 = 모델(키 1.72m로 맞춤)에서 보여 줄 위·아래 높이(top·bottom)와 최소 너비(width), 카메라를 눈높이보다 올리는 값(lift).
@@ -659,14 +666,14 @@ const Stage=(()=>{
     const t=now/1000;let id=null,mt=0;
     // 10-B 촬영 화면: cur.loop = 끝나면 처음부터 다시, cur.hold = 그 순간에 멈춤(멈춘 시각을 붙잡아 둠). 끝난 몸짓은 lastEnd 에 남김(끝난 지 1초 안이면 촬영 화면이 이어받음)
     if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
-      mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?XS[cur.id].to-XS[cur.id].from:RIG.M[cur.id].d;
+      mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?xsDur(cur.id):RIG.M[cur.id].d;
       if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
       else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now};cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
-    if(isXs&&xsData)xsApply(xsData,mt,XS[id]);
+    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,XS[id]);
     if(blend)blendStep(now);
     if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
     if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
@@ -717,6 +724,7 @@ const Stage=(()=>{
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
     cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1,name:o.name||null,ref:o.ref||null};
+    if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
@@ -729,7 +737,7 @@ const Stage=(()=>{
   function talk(ms){if(locked)return;talkUntil=performance.now()+ms}
   // 대사 글자 수 → 입 움직이는 시간 (글자당 msPerChar, 최대 maxMs. 띄어쓰기는 세지 않음)
   function talkFor(text){const tk=talkCfg(),n=String(text||"").replace(/\s+/g,"").length;if(n)talk(Math.min(tk.maxMs||4000,n*(tk.msPerChar||70)))}
-  const dur=mid=>XS[mid]?XS[mid].to-XS[mid].from:RIG.M[mid]?RIG.M[mid].d:2;
+  const dur=mid=>XS[mid]?xsDur(mid):RIG.M[mid]?RIG.M[mid].d:2;
   // 온보딩(7-B): 3D 그림판(canvas)을 다른 칸으로 잠깐 빌려줌 → 모델을 두 번 불러오지 않는다. release 로 대화 3D 칸에 돌려놓음
   let extraTick=null;
   function borrow(el,frame,tick){el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0)}
@@ -787,7 +795,7 @@ const Stage=(()=>{
       const p=RIG.pose(md.rest,isXs?null:mid,mt,performance.now()/1000);
       for(const b in p.local){if(/^J_Sec_/.test(b))continue;const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
       md.root.position.set(p.off[0],p.off[1],p.off[2]);
-      if(isXs&&xsData)xsApply(xsData,mt,XS[mid]);
+      if(isXs&&xsCache[mid])xsApply(xsCache[mid],mt,XS[mid]);
       md.root.updateMatrixWorld(true);
       const F=FACE[fk]||FACE.soft||{},names=new Set([...Object.keys(faceW),...Object.keys(F),"Fcl_EYE_Close",...talkVis(talkCfg())]);
       for(const n of names){const v=n==="Fcl_EYE_Close"?0:(F[n]||0);for(const f of faces){const ix=f.morphTargetDictionary[n];if(ix!==undefined)f.morphTargetInfluences[ix]=v}}
@@ -1447,7 +1455,7 @@ const Demo=(()=>{
   function setMood(k){S.force=null;S.birthday=k==="birthday";if(k!=="birthday")S.mood=k;
     Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");faceReset();refresh()}
   // ── 몸짓 ──
-  const allMotions=()=>COL.items.filter(x=>x.source==="chat").map(x=>x.id);  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외)
+  const allMotions=()=>{const c=COL.items.filter(x=>x.source==="chat").map(x=>x.id);return [...c,...Object.keys(XS).filter(id=>!c.includes(id))]};  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외) + 아직 아무 데도 안 붙은 XSTAGE 모션(미리보기용)
   function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
   function toChat(){setTab("chat");if(S.room!=="seoa")openRoom("seoa");const i=$("#inp");if(document.activeElement===i)i.blur();reveal()}
   function playMotion(mid){toChat();Stage.play(mid,{fx:Fx.pick("view",mid)})}
