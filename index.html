@@ -146,11 +146,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .slot.fresh{animation:fresh 1.6s ease-out}
 /* 명장면 수집(9-B): 한 줄 3칸, 왼쪽 위 등급(색으로 구분), 얻은 칸 테두리도 등급 색 */
 .colh{font-size:16px;margin:2px 0 10px}
-/* 포토부스 버튼(11-A): 명장면 수집 제목 오른쪽 */
-.colhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 10px}
-.colhd .colh{margin:0}
-.boothbtn{flex:none;height:32px;padding:0 13px;border-radius:10px;background:#1d1a27;border:1px solid #7c5cff;color:var(--text);font-size:13px;font-weight:700}
-.boothbtn:active{background:#2a2540}
 .alh.col{justify-content:space-between;margin-top:2px}
 .alh.col b{font-size:13px;color:var(--sub);font-weight:700}
 .slots.c3{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
@@ -358,7 +353,6 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 </style>
 <link rel="stylesheet" href="onboarding.css">
 <link rel="stylesheet" href="photos.css">
-<link rel="stylesheet" href="booth.css">
 </head>
 <body>
 <div class="app">
@@ -439,7 +433,6 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script src="alive.js"></script>
 <script src="film.js"></script>
 <script src="photos.js"></script>
-<script src="booth.js"></script>
 <script src="seoaphoto.js"></script>
 <script src="onboarding.js"></script>
 <script>
@@ -456,8 +449,8 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
 async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,bt,sp]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/booth.json"),get("data/seoa_photo.json")]);
-  DATA.photos=ph||{};DATA.booth=bt||{};DATA.seoaPhoto=sp||{};
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json")]);
+  DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
@@ -896,7 +889,7 @@ const Fx={
   // text 내 메시지, v 답장, prevAt 이번 내 메시지 전 마지막 대화 시각. 결정적 순간이면 {k 이유 종류, w 단어·감정 등}, 아니면 null
   key(text,v,prevAt){
     const f=this.st(),K=this.K(),has=(t,L)=>(L||[]).find(w=>t.includes(w));
-    if(Cam.isOpen()||(typeof Booth!=="undefined"&&Booth.isOpen()))return null;  // 촬영·포토부스 중엔 세지 않음(오프닝 중엔 보내기가 막혀 있음)
+    if(Cam.isOpen())return null;  // 촬영 중엔 세지 않음(오프닝 중엔 보내기가 막혀 있음)
     const sig=[];
     const inner=(String(text).match(/[(（][^)）]*[)）]/g)||[]).join(" ");
     const tw=inner&&has(inner,K.touchWords);if(tw)sig.push({k:"touch",w:tw});
@@ -1375,7 +1368,7 @@ function renderAlbum(fresh){
   const gc=x=>(G[x.grade]&&G[x.grade].color)||"#a7b0c4";
   const badge=x=>`<span class="gr">${esc(gradeKo(x.grade))}</span>`;
   const place=a=>a.scene!=null&&SCENES[a.scene]?SCENES[a.scene].name:"";
-  $("#album").innerHTML=`<div class="colhd"><h2 class="colh">${esc(UI("album.title"))}</h2><button class="boothbtn" id="boothBtn">${esc(UI("booth.albumBtn"))}</button></div>
+  $("#album").innerHTML=`<h2 class="colh">${esc(UI("album.title"))}</h2>
   <div class="aseg">${SEGS.map(k=>`<button data-seg="${k}" class="${albumSeg===k?"on":""}">${esc(UI("album.seg."+k))}</button>`).join("")}</div>
   <div class="alh col"><b>${esc(UI("album.progress."+albumSeg))}</b><span>${esc(UI("album.count",{n:got,total:L.length}))}</span></div>
   <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
@@ -1385,7 +1378,6 @@ function renderAlbum(fresh){
       h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
     return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${Icon.svg(soon?"sparkle":"lock",24)}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
   $("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
-  $("#boothBtn").onclick=()=>Booth.open();
   $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>replayCol(b.dataset.f));
   $("#album").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const x=colBy(b.dataset.h),h=hints[x.id]||UI("album.hint."+x.source);toast(esc(h),2600)});
 }
@@ -1414,7 +1406,7 @@ const Demo=(()=>{
   // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
   function cancel(){
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
-    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();Booth.close();PhotoUI.closeView();Fn.set(false);
+    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#rcap","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
     View.rest(true);Stage.play(IDLE);
   }
@@ -1526,9 +1518,9 @@ const Demo=(()=>{
     if(a==="zoomClear"){const F=Fx.st();F.zoomAt=null;F.keyAt=null;save();toast(esc(T("zoomCleared")),1600);return refresh()}
     if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
     if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
-    // 11: 명장면 모두 열기(포토부스 포즈 시연용). 대화 몸짓은 대사 없이 기록, 선물 몸짓은 「선물 몸짓 모두 열기」와 같게
+    // 11: 명장면 모두 열기(앨범 시연용). 대화 몸짓은 대사 없이 기록, 선물 몸짓은 「선물 몸짓 모두 열기」와 같게
     if(a==="colOpenAll"){let gi=0;COL.items.forEach(x=>{if(S.col[x.id])return;if(x.source==="gift"){const g=GIFTS[gi++%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}else S.col[x.id]={at:Date.now(),line:"",scene:S.scene}});
-      toast(esc(T("colOpenAll")),1600);if(typeof Booth!=="undefined")Booth.refresh();return refresh()}
+      toast(esc(T("colOpenAll")),1600);return refresh()}
     if(a==="seoaPhotoNow"){toChat();SeoaPhoto.now();return}  // 12: 지금 단계 묶음에서 바로 한 장
     if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
     if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
@@ -1778,7 +1770,7 @@ function renderMy(){
 let curTab="chat";
 function placeStage(){const st=$("#stage");if(curTab==="album")$("#stageSlotAlbum").appendChild(st);else $("#stageSlot").appendChild(st);
   st.style.display=(curTab==="album"||(curTab==="chat"&&S.room==="seoa"))?"":"none"}
-function setTab(t){curTab=t;Fn.set(false);Cam.close();Booth.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){curTab=t;Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$("#rcap").classList.remove("on");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
   placeStage();

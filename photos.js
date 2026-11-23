@@ -209,8 +209,8 @@ const PhotoUI=(()=>{
   const T=(k,v)=>UI("photo."+k,v);
   const P2=n=>String(n).padStart(2,"0");
   const fmt=t=>{const d=new Date(t);return T("date",{y:d.getFullYear(),m:P2(d.getMonth()+1),d:P2(d.getDate()),hh:P2(d.getHours()),mm:P2(d.getMinutes())})};
-  const shown=()=>Photos.list().filter(m=>seg==="all"||(seg==="liked"&&m.liked)||(seg==="booth"&&m.kind==="booth")||(seg==="received"&&m.kind==="received"));
-  const SEG=["all","liked","booth","received"];  // 12: 「받은 사진」 더함
+  const shown=()=>Photos.list().filter(m=>seg==="all"||(seg==="liked"&&m.liked)||(seg==="received"&&m.kind==="received"));
+  const SEG=["all","liked","received"];  // 12: 「받은 사진」 더함. 22: 「포토부스」 묶음 뺌(전에 찍은 포토부스 사진은 「전체」에)
   const sheetOn=()=>$("#photoSheet").classList.contains("on");
   function sheet(){render();if(!sheetOn()){closeSheets();openSheet("#photoSheet")}}
   function render(){
@@ -295,7 +295,7 @@ const PhotoUI=(()=>{
     g.fillStyle=s.color||"rgba(255,255,255,.85)";g.fillText(txt,bx+px,by+bh/2);
     return await new Promise(r=>c.toBlob(r,"image/jpeg",.9))}
   const fname=m=>{const d=new Date(m.at);return `moti-${d.getFullYear()}${P2(d.getMonth()+1)}${P2(d.getDate())}-${P2(d.getHours())}${P2(d.getMinutes())}${P2(d.getSeconds())}.jpg`};
-  // 포토부스 사진(11)은 아래 줄에 이미 「moti · 윤서아」가 있어서 표시를 더 넣지 않음
+  // 포토부스 사진(11, 22단계에서 포토부스는 뺐지만 전에 찍은 사진은 남음)은 아래 줄에 이미 「moti · 윤서아」가 있어서 표시를 더 넣지 않음
   async function prepShare(id,b){const m=Photos.list().find(x=>x.id===id);const mb=m&&m.kind==="booth"?b:await marked(b);if(vIds[vi]!==id)return;shareF={id,file:new File([mb],fname(m),{type:"image/jpeg"})};return shareF}
   // 공유 창을 열 수 있는지(?share=off 로 못 여는 브라우저 흉내)
   const canShare=f=>qs.get("share")!=="off"&&!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));
