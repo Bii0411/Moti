@@ -19,10 +19,10 @@
     "full": { "top": 1.05, "bottom": -0.03, "width": 0.7, "lift": 0.03 },
     "moveMs": 350
   },
-  "_stage": "몸짓 재생 중 3D 확대(17-C·D). 특별한 순간(처음 보는 몸짓·단계 상승 대표 몸짓·선물 반응·오프닝·특별 에피소드 시작·시연 장면의 해금 연출)에만 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게 한다. 평소 답장 몸짓은 크기·카메라 그대로. 화면이 낮아 대화 목록이 minLogPx(px) 아래로 줄어들면 그만큼만 키운다. 몸짓은 커지기 시작하고 motionDelayMs 뒤 시작. 몸짓이 끝나고 backDelayMs 뒤 shrinkMs 동안 되돌린다. ease = 크기 바뀌는 곡선(CSS), 카메라는 같은 시간 동안 부드럽게 시작하고 멈춘다(smoothstep).",
+  "_stage": "몸짓 연출(17-C·D, 17-1A). 확대 = 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게(대화 목록이 minLogPx 아래로 줄면 그만큼만). 몸짓은 커지기 시작하고 motionDelayMs 뒤 시작, 끝나고 backDelayMs 뒤 shrinkMs 동안 되돌림. ease = 크기 곡선(CSS). 확대하는 때: 관계 단계 상승 대표 몸짓(늘)·선물 반응·레어/시크릿 몸짓을 처음 볼 때, 내 메시지 zoomCooldownTurns 턴에 한 번까지(단계 상승은 쿨다운과 상관없이 확대하고 쿨다운을 다시 셈). 쿨다운 안이거나 일반 몸짓을 처음 볼 때·결정적 순간은 화면 그대로 카메라만 pushIn(평소 구도의 8%)만큼 pushInMs 동안 다가갔다가 몸짓이 끝나고 backDelayMs 뒤 pushBackMs 동안 돌아옴. 오프닝·특별 에피소드 첫 장면·평소 답장은 그대로.",
   "_notify": "다른 캐릭터가 먼저 말 거는 알림(6-C). 알림 사이 최소 간격 minGapMs(3분) + 0~jitterMs 무작위, 헤더에 보이는 시간 showMs. 예전에는 45~75초마다였다. 문구는 data/ui.json notify",
   "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
-  "stage": { "bigAspect": 0.82, "bigMaxRatio": 0.50, "minLogPx": 80, "growMs": 700, "ease": "ease-in-out", "motionDelayMs": 250, "backDelayMs": 1500, "shrinkMs": 800 },
+  "stage": { "bigAspect": 0.82, "bigMaxRatio": 0.50, "minLogPx": 80, "growMs": 700, "ease": "ease-in-out", "motionDelayMs": 250, "backDelayMs": 1500, "shrinkMs": 800, "pushIn": 0.08, "pushInMs": 600, "pushBackMs": 1200, "zoomCooldownTurns": 5 },
   "_outfits": "서아 의상(14단계). files = 의상별 모델 파일. 처음엔 ops(작전복), 관계 단계가 comfortStage(3 = 썸) 이상이고 privatePlaces 장소(0 = 바 1층 와인 바)에 있을 때만 private(흰 옷, 16단계: 배경과 세트). 특별 에피소드(data/episodes.json special)의 outfit 이 있으면 그 에피소드를 시작한 뒤로 그 의상(오프닝 다시 보기·다른 에피소드·초기화 때 풀림)",
   "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261124", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb?v=2", "dracula": "seoa_dracula.glb?v=3", "bar": "seoa_bar.glb" }, "comfortStage": 3, "privatePlaces": [0] }
 }
