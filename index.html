@@ -145,16 +145,12 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .slot.fresh{animation:fresh 1.6s ease-out}
 /* 명장면 수집(9-B): 한 줄 3칸, 왼쪽 위 등급(색으로 구분), 얻은 칸 테두리도 등급 색 */
 .colh{font-size:16px;margin:2px 0 10px;display:flex;align-items:center;gap:6px}
-/* 26: 제목 옆 (!) 버튼 · 소개 창 · 얻은 칸 작은 창(#mini 안) */
+/* 26: 제목 옆 (!) 버튼 · 소개 창(#mini 안). 26-1: 얻은 칸 작은 창은 카드 확대(cards.css)로 바뀜 */
 .colinfo{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;color:var(--sub);margin:-4px 0;-webkit-tap-highlight-color:transparent}
 .colintro p{font-size:14px;line-height:1.5;margin:0 2px 10px;word-break:keep-all}
 .colintro ul{margin:0 0 12px;padding:10px 12px 10px 28px;background:#ffffff0a;border-radius:12px;font-size:13px;line-height:1.7;color:var(--text)}
 .colintro .ft{font-size:12px;color:var(--sub)}
 .colintro .ok{display:block;width:100%;height:44px;margin-top:4px;border-radius:12px;background:var(--pri);color:var(--text);font-size:14px;font-weight:800}
-.colpop{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.colpop .gr{font-size:11px;font-weight:800;color:var(--gc);border:1px solid var(--gc);border-radius:999px;padding:1px 7px;line-height:1.35}
-.colpop .d{font-size:12px;color:var(--sub)}
-.colpop p{flex-basis:100%;margin:6px 0 2px;padding:10px 12px;background:#ffffff0a;border-radius:12px;font-size:14px;line-height:1.5;word-break:keep-all}
 .alh.col{justify-content:space-between;margin-top:2px}
 .alh.col b{font-size:13px;color:var(--sub);font-weight:700}
 .slots.c3{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
@@ -366,6 +362,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 </style>
 <link rel="stylesheet" href="onboarding.css">
 <link rel="stylesheet" href="photos.css">
+<link rel="stylesheet" href="cards.css">
 </head>
 <body>
 <div class="app">
@@ -447,6 +444,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script src="film.js"></script>
 <script src="photos.js"></script>
 <script src="seoaphoto.js"></script>
+<script src="cards.js"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -507,9 +505,11 @@ const SORDER=["normal","tired","sulky","birthday"];
 
 // 선물 4종(data/gifts.json, 9-A): 확률로 등급 → 그 등급의 선물 몸짓(data/collection.json). 뽑기 계산은 gacha.js
 let GIFT={moodBonus:{rare:10,from:"common"},pity:{count:10,min:"rare"},list:[]},GIFTS=[];
-// 명장면 수집(몸짓 도감, data/collection.json): 대화 몸짓 + 선물 몸짓 g01~g12. 기록은 S.col[id] = {at, line, scene, text?}
+// 명장면 수집(몸짓 도감, data/collection.json): 대화 몸짓 + 선물 몸짓 g01~g12. 기록은 S.col[id] = {at, line, scene, text?, char, outfit, thread, stage}
+// 26-1 무빙 카드: 처음 본 순간의 캐릭터·의상·이야기 줄기(main 또는 에피소드 id)·관계 단계를 같이 남기고(seenNow), 카드 그림은 cards.js 가 따로 저장
 let COL={items:[],grades:{},notify:{},gradeOrder:["common","rare","special"]};
 const colBy=id=>COL.items.find(x=>x.id===id);
+const seenNow=(o={})=>({at:Date.now(),scene:S.scene,char:"seoa",outfit:Outfit.want(),thread:Thread.cur(),stage:curStage(),...o});
 const pityLeft=()=>S.pity==null?GIFT.pity.count:S.pity;
 const gBy=id=>GIFTS.find(g=>g.id===id);
 // 캐릭터 목록은 data/characters.json(8-A). loadData 가 채운다. REC = 추천 탭 순서
@@ -560,7 +560,8 @@ const XS={};
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
-  let setOutfit=()=>{};  // 의상 바꾸기(14단계). init 안에서 채움
+  let setOutfit=()=>{},loadOutfit=()=>Promise.reject(),outfitNow=null;  // 의상 바꾸기(14단계)·의상 모델 불러오기(26-1 카드). init 안에서 채움
+  const outfitDone=new Set();  // 다 불러온 의상(26-1: 카드 확대 때 불러오기 표시를 띄울지)
   let R,scene,cam,md=null,cur=null,lastEnd=null,shadowM=null;const shV=new THREE.Vector3();const xsCache={},xsWait={};let faces=[],lookInfo=null,aliveOn=false,aliveInfo=null,faceKey=null,faceEmo="";
   const faceW={};let faceT={},talkUntil=0,blinkAt=1.5,blinkT=-1;
   // 준비 끝(모델·명암·살아 있게까지). 실패해도 풀림(ok=false). 온보딩 첫 화면이 이걸 기다린다(7-A)
@@ -599,12 +600,12 @@ const Stage=(()=>{
     function mount(m){
       if(md&&md.root!==m.root){scene.remove(md.root)}
       if(md){m.root.position.copy(md.root.position)}
-      md={root:m.root,bones:m.bones,rest:m.rest};faces=m.faces;H0=0;for(const k in xsCache)xsCache[k].al=null;
+      md={root:m.root,bones:m.bones,rest:m.rest};faces=m.faces;H0=0;
       scene.add(m.root);
       if(!jihu&&qs.get("alive")!=="off"&&DATA.look&&DATA.look.seoa&&DATA.look.seoa.alive){aliveInfo=Alive.init(md,DATA.look.seoa.alive,{colliders:qs.get("colliders")==="1"});aliveOn=true}
     }
-    const loadOutfit=key=>built[key]||(built[key]=new Promise((ok,no)=>new THREE.GLTFLoader().load(Outfit.url(key),g=>ok(build(g)),undefined,no)));
-    let outfitNow=null,outfitWant=null;
+    loadOutfit=key=>{if(jihu)return Promise.reject(new Error("jihu"));return built[key]||(built[key]=new Promise((ok,no)=>new THREE.GLTFLoader().load(Outfit.url(key),g=>{const m=build(g);outfitDone.add(key);ok(m)},undefined,e=>{delete built[key];no(e)})))};
+    let outfitWant=null;
     // 의상 바꾸기: 같은 의상이면 그대로. 불러오는 동안 또 바뀌면 마지막 것만 올림
     setOutfit=key=>{if(jihu||!key)return;outfitWant=key;if(key===outfitNow)return;
       loadOutfit(key).then(m=>{if(outfitWant!==key)return;outfitNow=key;mount(m);try{R.compile(scene,cam)}catch(e){}}).catch(()=>{})};
@@ -622,13 +623,14 @@ const Stage=(()=>{
   }
   // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
   function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
-    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=null;if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
+    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new Map();if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
   const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
   // XSTAGE 모션을 서아 뼈에 맞추기
+  // 26-1: 맞춤값은 모델(의상)마다 따로 보관(카드 그림을 다른 의상 모델로 그릴 때 섞이지 않게)
   function xsAlign(d){
-    if(d.al)return d.al;
+    const hit=d.al.get(md.root);if(hit)return hit;
     const keep={};for(const n in md.bones){keep[n]=md.bones[n].quaternion.clone();const r=md.rest[n].local;md.bones[n].quaternion.set(r[0],r[1],r[2],r[3])}
     const kp=md.root.position.clone();md.root.position.set(0,0,0);md.root.updateMatrixWorld(true);
     const wp=n=>md.bones[n].getWorldPosition(new THREE.Vector3());
@@ -636,7 +638,7 @@ const Stage=(()=>{
     for(const n of XORD){const b=md.bones[n],dir=d.dir[n];if(!b)continue;const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
       a.A[n]=md.bones[XCH[n]]&&dir?new THREE.Quaternion().setFromUnitVectors(wp(XCH[n]).sub(wp(n)).normalize(),new THREE.Vector3(...dir).normalize()):new THREE.Quaternion()}
     for(const n in keep)md.bones[n].quaternion.copy(keep[n]);md.root.position.copy(kp);md.root.updateMatrixWorld(true);
-    return d.al=a;
+    d.al.set(md.root,a);return a;
   }
   const q0=new THREE.Quaternion(),q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),q3=new THREE.Quaternion();
   function xsApply(d,mt,win){
@@ -820,8 +822,11 @@ const Stage=(()=>{
   // 화면(대화 무대)은 다음 프레임에 원래 자세로 다시 그려지므로 바뀐 자세가 보이지 않는다(그사이 브라우저가 화면을 그리지 않음).
   // 머리카락(J_Sec_)은 지금 흔들림 값 그대로 둠(기본 자세로 돌리면 몸을 뚫을 수 있어서). o.shadow: 발밑 그림자, o.place: 테두리 빛 장소
   const qSave=()=>{const q={};for(const n in md.bones)q[n]=md.bones[n].quaternion.clone();return q};
+  // 26-1: o.model = 다른 의상 모델(Stage.model 이 돌려준 것). 그 모델을 잠깐 무대에 올려 그리고 원래 모델로 되돌림
   function still(mid,mt,fk,draw,o={}){
     if(!md)return false;
+    const swap=o.model&&o.model.root!==md.root?{md,faces,H0,HY0}:null;
+    if(swap){scene.remove(md.root);md={root:o.model.root,bones:o.model.bones,rest:o.model.rest};faces=o.model.faces;H0=0;scene.add(md.root)}
     const keepQ=qSave(),keepP=md.root.position.clone(),keepM=faces.map(f=>f.morphTargetInfluences.slice()),hadShadow=!!(shadowM&&shadowM.parent);
     const rimBack=o.place!=null&&typeof Look!=="undefined"&&Look.rimFor?Look.rimFor(o.place):()=>{};
     try{
@@ -839,6 +844,7 @@ const Stage=(()=>{
       for(const n in keepQ)md.bones[n].quaternion.copy(keepQ[n]);md.root.position.copy(keepP);md.root.updateMatrixWorld(true);
       faces.forEach((f,i)=>{const a=keepM[i];for(let k=0;k<a.length;k++)f.morphTargetInfluences[k]=a[k]});
       if(o.shadow&&!hadShadow)shadow(false);rimBack();
+      if(swap){scene.remove(md.root);md=swap.md;faces=swap.faces;H0=swap.H0;HY0=swap.HY0;scene.add(md.root)}
     }
     return true;
   }
@@ -854,7 +860,7 @@ const Stage=(()=>{
   function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
     aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
-  return{outfit:k=>setOutfit(k),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1163,7 +1169,7 @@ function unlockShow(groups){
     const id=cand.find(x=>!seen.has(x)&&canPlay(x));if(id)show={mid:id,text:g.text||"",kind:g.lead?"stage":((colBy(id)||{}).grade==="common"?"push":"zoom")};  // 17-1A: 단계 상승 = 늘 확대, 판정·사건 몸짓은 등급대로
   }
   // 나머지는 「열렸지만 처음 보지 않음」: 대화에서 처음 재생될 때 firstSeen() 이 기록
-  if(show){if(colBy(show.mid))S.col[show.mid]={at:Date.now(),line,text:show.text,scene:S.scene};unlockQ.push(show)}
+  if(show){if(colBy(show.mid)){S.col[show.mid]=seenNow({line,text:show.text});Cards.capture(show.mid)}unlockQ.push(show)}
   save();if(curTab==="album")renderAlbum();
   if(!unlockBusy&&unlockQ.length)setTimeout(unlockNext,1400);  // 답장 몸짓이 먼저 보이게 조금 뒤에
 }
@@ -1173,7 +1179,7 @@ const isSoon=mid=>!S.col[mid]&&(colBy(mid)||{}).source==="chat"&&unlockedIds().i
 function firstSeen(mid){
   const it=mid&&colBy(mid);if(!it||it.source!=="chat"||S.col[mid])return;
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
-  S.col[mid]={at:Date.now(),line:last?(last.act?`*${last.act}* `:"")+last.t:"",scene:S.scene};save();
+  S.col[mid]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(mid);
   notifyNew(it);
   if(curTab==="album")renderAlbum();
 }
@@ -1406,7 +1412,7 @@ function give(id){
   if(!it)it=Gacha.pickItem(COL.items,grade);
   S.pity=Gacha.nextPity(grade,pityLeft(),GIFT.pity);
   const line=Gacha.line(g,grade,matched),isNew=!S.col[it.id];
-  if(isNew)S.col[it.id]={at:Date.now(),line,scene:S.scene};
+  if(isNew){S.col[it.id]=seenNow({line});Cards.capture(it.id)}
   save();renderTop();
   burst(g.icon);
   setTimeout(()=>{
@@ -1423,41 +1429,36 @@ function give(id){
 // ───────────────────────── 앨범 ─────────────────────────
 const fmtD=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
 // 명장면 수집(9-B): 위 3D 무대 + 「전체 / 대화 / 선물」 묶음 + 진행도 + 몸짓 칸(한 줄 3칸). 칸 순서 = 대화 → 선물, 그 안에서 일반 → 희귀 → 특별
-let albumSeg="all";
+let albumSeg="all",colChar="seoa";
 const SEGS=["all","chat","gift"];
 function colList(seg){const O=COL.gradeOrder||Gacha.ORDER,src=["chat","gift"];
   return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===seg)
     .sort((a,b)=>src.indexOf(a.x.source)-src.indexOf(b.x.source)||O.indexOf(a.x.grade)-O.indexOf(b.x.grade)||a.i-b.i).map(o=>o.x)}
 function renderAlbum(fresh){
   if(!SEGS.includes(albumSeg))albumSeg="all";
-  const L=colList(albumSeg),got=L.filter(x=>S.col[x.id]).length,hints=(DATA.story||{}).hints||{},G=COL.grades||{};
-  const gc=x=>(G[x.grade]&&G[x.grade].color)||"#a7b0c4";
-  const badge=x=>`<span class="gr">${esc(gradeKo(x.grade))}</span>`;
-  const place=a=>a.scene!=null&&SCENES[a.scene]?SCENES[a.scene].name:"";
+  // 26-1: 캐릭터 칩 줄(카드가 있는 캐릭터만, 하나뿐이면 숨김). 지금 컬렉션 칸은 모두 서아 것
+  const chars=[...new Set(Object.values(S.col).map(a=>(a&&a.char)||"seoa"))].filter(c=>chBy(c));if(!chars.includes(colChar))colChar=chars[0]||"seoa";
+  const L=colList(albumSeg).filter(x=>{const a=S.col[x.id];return a?(a.char||"seoa")===colChar:colChar==="seoa"}),got=L.filter(x=>S.col[x.id]).length,hints=(DATA.story||{}).hints||{};
   $("#album").innerHTML=`<h2 class="colh">${esc(UI("album.title"))}<button class="colinfo" data-info="1" aria-label="${esc(UI("album.infoAria"))}">${Icon.svg("info",18)}</button></h2>
+  ${chars.length>1?`<div class="mcchips" role="tablist" aria-label="${esc(UI("album.card.chipsAria"))}">${chars.map(c=>`<button data-ch="${c}" class="${c===colChar?"on":""}">${esc(chBy(c).name)}</button>`).join("")}</div>`:""}
   <div class="aseg">${SEGS.map(k=>`<button data-seg="${k}" class="${albumSeg===k?"on":""}">${esc(UI("album.seg."+k))}</button>`).join("")}</div>
   <div class="alh col"><b>${esc(UI("album.progress."+albumSeg))}</b><span>${esc(UI("album.count",{n:got,total:L.length}))}</span></div>
   <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
-  <div class="slots c3">${L.map(x=>{const a=S.col[x.id];
-    if(a)return `<button class="slot got ${fresh===x.id?"fresh":""}" style="--gc:${gc(x)}" data-f="${x.id}">${badge(x)}<span class="e">${Icon.svg(x.source==="gift"?"gift":"chat",24)}</span><span class="s">${esc(x.name)}</span><span class="d">${fmtD(a.at)}</span><span class="d pl">${esc(place(a))}</span></button>`;
-    const soon=x.source==="chat"&&x.stage!==1&&isSoon(x.id),  // 9-1: 1단계(처음부터 열린) 몸짓은 「수집 대기 중」 대신 잠긴 칸
-      h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
-    return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${Icon.svg(soon?"sparkle":"lock",24)}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
-  $("#album").querySelector("[data-info]").onclick=colIntro;
-  $("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
-  $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>replayCol(b.dataset.f));
-  $("#album").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const x=colBy(b.dataset.h),h=hints[x.id]||UI("album.hint."+x.source);toast(esc(h),2600)});
+  ${Cards.grid(L)}`;
+  const A=$("#album");Cards.hydrate(A);
+  if(fresh){const f=A.querySelector(`.mc[data-f="${fresh}"]`);if(f)f.classList.add("fresh")}
+  A.querySelector("[data-info]").onclick=colIntro;
+  A.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
+  A.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{colChar=b.dataset.ch;renderAlbum()});
+  // 26-1: 모은 카드 = 카드 확대(이전/다음은 지금 보이는 모은 카드 순서), 못 본·잠긴 카드 = 힌트
+  const ids=L.filter(x=>S.col[x.id]).map(x=>x.id);
+  A.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>Cards.open(b.dataset.f,ids));
+  A.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{const x=colBy(b.dataset.h),h=hints[x.id]||UI("album.hint."+x.source);toast(esc(h),2600)});
 }
 // 소개 창(26): 컬렉션 탭에 처음 들어갈 때 한 번(S.colIntro) + 제목 옆 (!) 버튼. 문구 data/ui.json album.intro
 function colIntro(){const I=k=>UI("album.intro."+k),L=((DATA.ui||{}).album||{}).intro||{};
   Mini.open(I("title"),`<div class="colintro"><p>${esc(I("body"))}</p><ul>${(L.list||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul><p class="ft">${esc(I("foot"))}</p><button class="ok" data-ok="1">${esc(I("ok"))}</button></div>`,
     m=>{m.querySelector("[data-ok]").onclick=Mini.close})}
-// 얻은 칸 누르기(26 임시, 26-1 카드 확대 전까지): 3D 재생 없이 작은 창에 등급·이름·얻은 날·장소·그때 대사
-function replayCol(id){
-  const x=colBy(id),a=S.col[id];if(!x||!a)return;
-  const G=COL.grades||{},gc=(G[x.grade]&&G[x.grade].color)||"#a7b0c4",ln=speechOnly(a.line||a.text||""),pl=a.scene!=null&&SCENES[a.scene]?SCENES[a.scene].name:"";
-  Mini.open(x.name,`<div class="colpop" style="--gc:${gc}"><span class="gr">${esc(gradeKo(x.grade))}</span><span class="d">${esc([fmtD(a.at),pl].filter(Boolean).join(" · "))}</span>${ln?`<p>${esc(ln)}</p>`:""}</div>`);
-}
 
 // ───────────────────────── 시연 설정 패널 (5단계) ─────────────────────────
 // 헤더 오른쪽 위 톱니바퀴(6-B, 단축키 D)로 열고 닫음. 항상: 장면 바로가기·서버 깨우기·오프닝·전체 초기화·💎·기분. ?debug=1 일 때만 나머지.
@@ -1474,7 +1475,7 @@ const Demo=(()=>{
   // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
   function cancel(){
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
-    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cam.close();PhotoUI.closeView();Fn.set(false);
+    introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cards.close();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
     View.rest(true);Stage.play(IDLE);
   }
@@ -1494,15 +1495,15 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null});
+    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
-    all(){S=blank();Photos.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
+    all(){S=blank();Photos.clear();Cards.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
-    album(){S.col={};delete S.colIntro}  // 26: 소개 창도 다시 뜸
+    album(){S.col={};delete S.colIntro;Cards.clear()}  // 26: 소개 창도 다시 뜸 · 26-1: 카드 그림도 지움
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
   // 온보딩(7-A): 다시 보기 = onboarded 만 지우고 첫 화면부터. 장면 0 「앱 처음 열기」 = 전체 초기화 후 첫 화면
@@ -1585,10 +1586,10 @@ const Demo=(()=>{
     if(a==="keyForce"){const F=Fx.st();F.keyForce=!F.keyForce;save();return refresh()}
     if(a==="zoomClear"){const F=Fx.st();F.zoomAt=null;F.keyAt=null;save();toast(esc(T("zoomCleared")),1600);return refresh()}
     if(a==="pityReset"){S.pity=null;toast(esc(T("pityReset")),1600);return refresh()}
-    if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}});toast(esc(T("giftOpenAll")),1600);return refresh()}
+    if(a==="giftOpenAll"){COL.items.filter(x=>x.source==="gift").forEach((x,i)=>{if(!S.col[x.id]){const g=GIFTS[i%GIFTS.length];S.col[x.id]=seenNow({line:g?Gacha.line(g,x.grade,false):""})}});Cards.fill();toast(esc(T("giftOpenAll")),1600);return refresh()}
     // 11: 명장면 모두 열기(앨범 시연용). 대화 몸짓은 대사 없이 기록, 선물 몸짓은 「선물 몸짓 모두 열기」와 같게
-    if(a==="colOpenAll"){let gi=0;COL.items.forEach(x=>{if(S.col[x.id])return;if(x.source==="gift"){const g=GIFTS[gi++%GIFTS.length];S.col[x.id]={at:Date.now(),line:g?Gacha.line(g,x.grade,false):"",scene:S.scene}}else S.col[x.id]={at:Date.now(),line:"",scene:S.scene}});
-      toast(esc(T("colOpenAll")),1600);return refresh()}
+    if(a==="colOpenAll"){let gi=0;COL.items.forEach(x=>{if(S.col[x.id])return;if(x.source==="gift"){const g=GIFTS[gi++%GIFTS.length];S.col[x.id]=seenNow({line:g?Gacha.line(g,x.grade,false):""})}else S.col[x.id]=seenNow({line:""})});
+      Cards.fill();toast(esc(T("colOpenAll")),1600);return refresh()}
     if(a==="seoaPhotoNow"){toChat();SeoaPhoto.now();return}  // 12: 지금 단계 묶음에서 바로 한 장
     if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
     if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
@@ -1639,7 +1640,7 @@ const Scenes=(()=>{
       // 예약된 연출이 매번 다시 나오게: 이 장면 단계보다 위 몸짓·예약 사건 몸짓의 해금과 앨범 기록을 지움
       const drop=new Set();for(let k=(sc.stage||1)+1;k<=6;k++)(((DATA.story||{}).unlock||{stage:{}}).stage[k]||{motions:[]}).motions.forEach(id=>drop.add(id));
       if(sc.next&&sc.next.event)evMotions(sc.next.event).forEach(id=>drop.add(id));
-      drop.forEach(id=>delete S.col[id]);S.unlocked=S.unlocked.filter(id=>!drop.has(id));
+      drop.forEach(id=>delete S.col[id]);Cards.remove("seoa",[...drop]);S.unlocked=S.unlocked.filter(id=>!drop.has(id));
       S.demoNext=sc.next||null;
       SeoaPhoto.sceneReset(sc.stage||1);  // 12: 예약된 단계 상승 때 단계 사진이 다시 오게
       S.placeLock=!!sc.place;  // 이 장면 동안 장소는 장면 설정·서버 location 으로만 바뀜. 다른 장면(①·⑥)·전체 초기화에서 풀림
@@ -1855,11 +1856,11 @@ let curTab="chat";
 // 26: 컬렉션 탭에는 3D 무대가 없다(칸 목록이 화면 전체). 무대는 서아 대화방에서만
 function placeStage(){const st=$("#stage");$("#stageSlot").appendChild(st);
   st.style.display=(curTab==="chat"&&S.room==="seoa")?"":"none"}
-function setTab(t){if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
   placeStage();
-  if(t==="album"){renderAlbum();if(!S.colIntro){S.colIntro=1;save();colIntro()}}if(t==="home")renderHome();if(t==="my")renderMy()}
+  if(t==="album"){renderAlbum();Cards.fill();if(!S.colIntro){S.colIntro=1;save();colIntro()}}if(t==="home")renderHome();if(t==="my")renderMy()}
 const unreadOf=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(m=>m.r==="c"||m.r==="ph").length};
 function fmtTime(t){const m=Math.round((Date.now()-t)/60000);return m<1?"방금":m<60?m+"분 전":Math.round(m/60)+"시간 전"}
 // 안 읽은 수는 대화 목록에 있는 대화방만
@@ -1987,7 +1988,7 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;

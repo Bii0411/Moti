@@ -31,11 +31,15 @@ const SeoaPhoto=(()=>{
     const rx=Math.cos(r)*shift*H,rz=-Math.sin(r)*shift*H;  // 카메라 오른쪽 방향으로 shift 만큼(서아는 사진에서 왼쪽으로)
     cam.position.set(o.x+Math.sin(r)*d+rx,cy+(K.lift||0)*H,o.z+Math.cos(r)*d+rz);cam.lookAt(o.x+rx,cy,o.z+rz)}
   // spec: {scene, shot}. 돌려주는 값: 큰 사진·작은 사진(jpeg), 고른 몸짓, 걸린 시간
+  // 26-1 무빙 카드(cards.js)도 이것을 씀: spec.mid 몸짓 고정 · spec.face 표정 · spec.K 구도 직접 · spec.image {aspect, longPx, quality, minQuality, maxKB} 크기 ·
+  //   spec.outfit 그 의상 모델로(대화 무대의 의상은 그대로) · spec.card 면 큰 사진 한 장만(작은 사진 없음, 마지막 몸짓 기록 안 바꿈)
   async function make(spec){
     await Stage.ready;
-    const P=((DATA.photos||{}).image)||{},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const K=((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img);
-    const mid=pickMotion(K),mt=moment(mid)/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=ff&&faces.includes(ff.face)?ff.face:pick(faces);
+    const P={...(((DATA.photos||{}).image)||{}),...(spec.image||{})},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
+    const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img);
+    const model=spec.outfit&&spec.outfit!==Stage.outfitNow()?await Stage.model(spec.outfit).catch(()=>null):null;
+    const mid=spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
+    const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
     const yaw=pick(K.yaw)||0,shift=pick(K.shift)||0,bgX=pick(K.bgX);
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
     g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img)Shot.cover(g,img,W,H,bgX!=null?bgX:.5,.4);Shot.dimLayer(g,W,H);
@@ -45,10 +49,11 @@ const SeoaPhoto=(()=>{
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
         R.render(scene,cam);g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
       finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
-    },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name});
+    },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name,model});
     if(!ok)throw new Error("서아 모델이 아직 없음");
     const t1=performance.now(),type=P.type||"image/jpeg";
     const full=await Shot.encode(c,type,P.quality||.86,P.minQuality||.5,P.maxKB||300);
+    if(spec.card)return{full,w:W,h:H,mid,face,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
     const thumb=await Shot.encode(Shot.scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
     st().lastMid=mid;
     return{full,thumb,w:W,h:H,mid,face,yaw,shift,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
