@@ -19,10 +19,21 @@
     "full": { "top": 1.05, "bottom": -0.03, "width": 0.7, "lift": 0.03 },
     "moveMs": 350
   },
-  "_stage": "대화 화면에서 몸짓이 재생될 때 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」(1 = 정사각형)까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게 한다(6-B, 예전: 화면 높이의 54%). 화면이 낮아 대화 목록이 minLogPx(px, 말풍선 두 줄) 아래로 줄어들면 그만큼만 키운다. 몸짓이 끝나고 backDelayMs 뒤 되돌린다.",
+  "_stage": "몸짓 연출(17-C·D, 17-1A). 확대 = 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게(대화 목록이 minLogPx 아래로 줄면 그만큼만). 몸짓은 커지기 시작하고 motionDelayMs 뒤 시작, 끝나고 backDelayMs 뒤 shrinkMs 동안 되돌림. ease = 크기 곡선(CSS). 확대하는 때: 관계 단계 상승 대표 몸짓(늘)·선물 반응·레어/시크릿 몸짓을 처음 볼 때, 내 메시지 zoomCooldownTurns 턴에 한 번까지(단계 상승은 쿨다운과 상관없이 확대하고 쿨다운을 다시 셈). 쿨다운 안이거나 일반 몸짓을 처음 볼 때·결정적 순간은 화면 그대로 카메라만 pushIn(평소 구도의 8%)만큼 pushInMs 동안 다가갔다가 몸짓이 끝나고 backDelayMs 뒤 pushBackMs 동안 돌아옴. 오프닝·특별 에피소드 첫 장면·평소 답장은 그대로.",
   "_notify": "다른 캐릭터가 먼저 말 거는 알림(6-C). 알림 사이 최소 간격 minGapMs(3분) + 0~jitterMs 무작위, 헤더에 보이는 시간 showMs. 예전에는 45~75초마다였다. 문구는 data/ui.json notify",
   "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
-  "stage": { "bigAspect": 1, "bigMaxRatio": 0.58, "minLogPx": 80, "growMs": 350, "backDelayMs": 1000 },
+  "stage": { "bigAspect": 0.82, "bigMaxRatio": 0.50, "minLogPx": 80, "growMs": 700, "ease": "ease-in-out", "motionDelayMs": 250, "backDelayMs": 1500, "shrinkMs": 800, "pushIn": 0.08, "pushInMs": 600, "pushBackMs": 1200, "zoomCooldownTurns": 5 },
   "_outfits": "서아 의상(14단계). files = 의상별 모델 파일. 처음엔 ops(작전복), 관계 단계가 comfortStage(3 = 썸) 이상이고 privatePlaces 장소(0 = 바 1층 와인 바)에 있을 때만 private(흰 옷, 16단계: 배경과 세트). 특별 에피소드(data/episodes.json special)의 outfit 이 있으면 그 에피소드를 시작한 뒤로 그 의상(오프닝 다시 보기·다른 에피소드·초기화 때 풀림)",
-  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261124b", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb?v=2", "dracula": "seoa_dracula.glb?v=3", "bar": "seoa_bar.glb" }, "comfortStage": 3, "privatePlaces": [0] }
+  "outfits": { "files": { "ops": "seoa_vroid.glb?v=20261124b", "private": "seoa_private.glb?v=2", "xmas": "seoa_xmas.glb?v=2", "dracula": "seoa_dracula.glb?v=3", "bar": "seoa_bar.glb" }, "comfortStage": 3, "privatePlaces": [0] },
+  "_keyMoment": "결정적 순간(17-1B). 서아 답장이 올 때 신호 중 하나라도 걸리면 화면 확대 없이 카메라만 다가감(stage.pushIn). 화면에 글자·숫자로 알리지 않음. 신호: 내 메시지 괄호 ( ) 안에 touchWords 단어 · 처음으로 nameWords(이름)·heartWords(마음 표현)가 나옴(각 한 번, 저장값 S.fx.once, 전체 초기화로 비움) · 마지막 대화 뒤 reunionHours 시간 넘어 첫 답장 · 답장에 감정 값이 있을 때 직전 감정과 다르고 strongEmotions 에 듦 · 서버 v2 판정의 호감 변화가 judgeAffection 이상이거나 새 플래그(다음 답장). 내 메시지 cooldownTurns 턴에 한 번까지. 답장에 몸짓이 없으면 emotionMotions(감정 → 몸짓, 열린 것만) → 지금 단계의 열린 몸짓 중 최근 3번에 안 나온 것. 고른 몸짓이 레어·시크릿이고 처음 보는 것이면 확대 규칙(stage.zoomCooldownTurns)이 우선",
+  "keyMoment": {
+    "cooldownTurns": 8,
+    "touchWords": ["손", "잡", "안아", "안는", "껴안", "쓰다듬", "어깨", "머리", "기대", "우산", "닦아", "감싸", "다가", "붙잡"],
+    "nameWords": ["서아", "윤서아"],
+    "heartWords": ["좋아해", "좋아한다", "사랑해", "보고 싶었", "보고싶었"],
+    "reunionHours": 6,
+    "strongEmotions": ["당황", "진심", "질투", "설렘", "슬픔", "분노"],
+    "judgeAffection": 5,
+    "emotionMotions": { "당황": ["m06", "m05"], "진심": ["c01"], "설렘": ["m12", "c04"], "질투": ["m07"], "슬픔": ["m04"], "기쁨": ["m01"], "도발": ["c02", "m20"], "위로": ["m02", "m11"] }
+  }
 }

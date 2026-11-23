@@ -42,19 +42,33 @@
   },
   "_notify": "새 몸짓을 얻었을 때 알림(대화·선물 공통). common = 지금 작은 알림(data/seoa_story.json firstSeenText·firstSeenMs) 그대로. rare·special = 3D 무대 위 글자. fontPx 글자 크기, ms 보이는 시간, color 글자 색, dim 무대를 어둡게 하는 정도(0 = 안 어둡게), fadeMs 나타나고 사라지는 시간. 문구는 data/ui.json collection.notify",
   "notify": {
+    "_notify": "새 몸짓 알림 카드(17-B, 레어·시크릿만. 일반은 data/seoa_story.json firstSeenText 작은 알림). card = 모양·시간: 가로 widthPx, 둥근 모서리 radiusPx, 무대 아래에서 띄우는 높이 bottomPx, 올라오는 거리 risePx, 왼쪽 칸 boxPx, 바탕 bg, 올라옴 riseMs → 머무름 → 사라짐 fadeMs, 전체 ms. 등급마다 color = 테두리·등급 이름 색, soft = 왼쪽 칸 바탕(연한 등급 색), dim = 그동안 무대를 어둡게(0 = 안 어둡게). owned = 선물로 이미 모은 몸짓이 나왔을 때 흐린 카드(17-2, 등급 상관없이 회색 테두리, opacity 카드 불투명도, 무대 어둡게 안 함). 문구는 data/ui.json collection.grade·album.unlockSaved·album.count",
+    "card": {
+      "widthPx": 210,
+      "radiusPx": 14,
+      "bottomPx": 12,
+      "risePx": 18,
+      "boxPx": 36,
+      "bg": "rgba(13,11,22,0.85)",
+      "riseMs": 400,
+      "fadeMs": 400,
+      "ms": 2600
+    },
     "rare": {
-      "fontPx": 20,
-      "ms": 1500,
       "color": "#8ec9ff",
-      "dim": 0,
-      "fadeMs": 250
+      "soft": "rgba(142,201,255,0.18)",
+      "dim": 0
     },
     "special": {
-      "fontPx": 28,
-      "ms": 2200,
       "color": "#f5c66b",
-      "dim": 0.45,
-      "fadeMs": 300
+      "soft": "rgba(245,198,107,0.18)",
+      "dim": 0.45
+    },
+    "owned": {
+      "color": "#8b8798",
+      "soft": "rgba(139,135,152,0.12)",
+      "dim": 0,
+      "opacity": 0.75
     }
   },
   "items": [

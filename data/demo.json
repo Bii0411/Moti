@@ -23,7 +23,8 @@
     "flags": "플래그",
     "place": "장소",
     "motions": "몸짓",
-    "photo": "사진"
+    "photo": "사진",
+    "fx": "연출"
   },
   "wake": {
     "button": "서버 깨우기",
@@ -97,5 +98,21 @@
   "photoClear": "사진 비우기",
   "photoFilled": "사진 {n} / {cap}",
   "colOpenAll": "명장면 모두 열기",
-  "seoaPhotoNow": "서아 사진 지금 받기"
+  "seoaPhotoNow": "서아 사진 지금 받기",
+  "_fx": "연출(17-1, 항상 보임): 다음 답장 한 번을 쿨다운과 상관없이 결정적 순간으로 · 확대·결정적 순간 쿨다운 비우기 · 남은 쿨다운({z} 확대, {k} 결정적 순간, {t} 지금까지 내 메시지 수) · 마지막 결정적 순간의 이유(keyWhy, {w} 단어·감정 등, {turn} 몇 번째 메시지). 화면에는 보이지 않고 패널에만",
+  "keyForce": "다음 답장 결정적 순간으로",
+  "zoomClear": "확대 쿨다운 비우기",
+  "zoomCleared": "쿨다운을 비웠어요",
+  "fxLeft": "확대 {z}턴 · 결정적 순간 {k}턴 남음 · 내 메시지 {t}",
+  "keyLast": "마지막 결정적 순간: {why} ({turn}번째)",
+  "keyWhy": {
+    "touch": "괄호 행동 · {w}",
+    "name": "처음 · 이름",
+    "heart": "처음 · 마음 표현 · {w}",
+    "reunion": "다시 만남",
+    "emotion": "감정 · {w}",
+    "affection": "판정 · 호감 {w}",
+    "flag": "판정 · 플래그 {w}",
+    "force": "시연 지정"
+  }
 }

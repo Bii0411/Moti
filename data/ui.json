@@ -18,12 +18,12 @@
       "chat": "대화에서 만나요",
       "gift": "선물로 만나요"
     },
-    "unlockTag": "🔓 새 명장면",
-    "unlockSaved": "📔 명장면에 기록됐어요"
+    "unlockTag": "새 명장면",
+    "unlockSaved": "명장면 +1"
   },
   "chatList": {
     "_chatList": "대화 탭 메시지 목록이 비어 있을 때(앱을 처음 열었을 때 등). 홈에서 캐릭터 카드를 눌러 들어가야 목록에 생긴다",
-    "empty": "홈에서 캐릭터를 골라 대화를 시작해 보세요",
+    "empty": "아직 대화가 없어요",
     "goHome": "홈으로 가기"
   },
   "notify": {
@@ -37,16 +37,16 @@
   },
   "gift": {
     "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절). moodNote 의 {mood} = 지금 기분(이모지+이름), {bonus} = data/gifts.json moodBonus.rare. odds 의 {a}·{b}·{c} = 일반·희귀·특별 %(기분 맞춤 적용 뒤). pity 의 {n} = 천장 남은 횟수. logTag = 대화 기록에 남는 선물 결과 줄",
-    "moodNote": "지금 서아는 {mood} 상태예요 · 기분에 맞는 선물은 레어 확률 +{bonus}%p",
+    "moodNote": "지금 서아 {mood} · 맞는 선물은 레어 +{bonus}%p",
     "match": "기분 맞춤",
     "odds": "일반 {a}% · 레어 {b}% · 시크릿 {c}%",
-    "pity": "레어 이상 확정까지 {n}번",
+    "pity": "{n}번 안에 레어 확정",
     "noDia": "💎가 부족해요",
     "logTag": "🎁 {gift} · {grade}"
   },
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김)",
-    "seoaFirst": "＋ 로 선물하거나 서아를 찍어 보세요 · 처음 보는 몸짓은 앨범에 모여요"
+    "seoaFirst": "＋ 에서 선물하고 사진도 찍어요"
   },
   "home": {
     "_home": "홈 화면(8). 홈/랭킹 전환 문구(seg)는 8-2에서 랭킹 화면과 함께 지움. sorts = 정렬 칩(추천·인기 랭킹·신규·3D로 만나기). basic·special = 고른 카드 아래 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시",
@@ -65,14 +65,14 @@
     "btnPrice": "💎 {price}",
     "btnOwned": "구매함",
     "soon": "곧 공개돼요",
-    "specialNote": "에피소드를 사면 그 이야기 속 장면과 전용 모션을 볼 수 있어요.",
-    "motion": "✨ 에피소드 전용 모션: {name}",
+    "specialNote": "이 이야기에서만 보는 모습이 있어요",
+    "motion": "전용 모션 · {name}",
     "storyStart": "📖 특별 이야기 「{name}」 시작",
     "storyTag": "📖 이야기 전용 장면 · {name}",
     "noDia": "💎가 부족해요"
   },
   "collection": {
-    "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). already = 선물로 이미 있는 몸짓이 나왔을 때",
+    "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). giftGrade = 선물 결과 카드 첫 줄({grade} 등급 이름, {gift} 선물 이름, 17-2). owned = 선물로 이미 모은 몸짓이 나왔을 때 카드 셋째 줄(17-2, 예전 already 「이미 본 모습이에요」 알림을 대신함)",
     "grade": {
       "common": "일반",
       "rare": "레어",
@@ -82,7 +82,8 @@
       "rare": "레어 · {name}",
       "special": "시크릿 · {name}"
     },
-    "already": "이미 본 모습이에요"
+    "giftGrade": "{grade} · {gift}",
+    "owned": "이미 모은 모습"
   },
   "my": {
     "_my": "마이 페이지 카드 문구(12단계). lv·next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
@@ -93,7 +94,7 @@
     "max": "최고 단계",
     "bondNote1": "관계는 ",
     "bondNoteB": "대화로만",
-    "bondNote2": " 깊어져요. 선물로는 올라가지 않아요.",
+    "bondNote2": " 쌓여요",
     "collectionLabel": "명장면 수집",
     "plusPrice": "9,900원",
     "plusPer": "/ 월",
@@ -140,7 +141,7 @@
         "price": "84,000원"
       }
     ],
-    "chargeNote": "1다이아 = 70원 · 선물과 특별 에피소드에 써요"
+    "chargeNote": "1다이아 70원"
   },
   "fn": {
     "_fn": "＋ 기능판(10단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md). gift·camera·photo = 기능 이름. open·close = ＋ 버튼의 접근성 이름(화면에는 아이콘만)",
@@ -167,11 +168,11 @@
   },
   "photoFull": {
     "_photoFull": "사진 칸이 가득 찼을 때(카메라·포토부스 공통). notice·clear·grow = 들어갈 때 안내 한 줄과 옆 버튼, title·desc·opt* = 셔터를 눌렀을 때 시트. {price} = data/photos.json slots.stepPrice, {plusCap} = slots.plusCap",
-    "notice": "사진 칸이 가득 찼어요. 저장하려면 1칸이 필요해요.",
+    "notice": "사진 칸이 가득 찼어요",
     "clear": "칸 비우기",
     "grow": "칸 늘리기",
     "title": "사진 칸이 가득 찼어요",
-    "desc": "사진을 저장할 1칸을 먼저 마련해 주세요.",
+    "desc": "한 장 지우거나 칸을 늘려 주세요",
     "optDelete": "사진 하나 지우기",
     "optGrow": "칸 늘리기 +10 · 💎 {price}",
     "optPlus": "✨ PLUS · 사진 {plusCap}장",
@@ -188,7 +189,7 @@
       "received": "받은 사진"
     },
     "empty": {
-      "all": "아직 찍은 사진이 없어요. ＋ 의 카메라로 서아를 찍어 보세요.",
+      "all": "아직 사진이 없어요",
       "liked": "좋아요한 사진이 없어요.",
       "booth": "앨범의 포토부스에서 네 컷 사진을 만들어 보세요.",
       "received": "아직 서아가 보낸 사진이 없어요."
@@ -228,8 +229,8 @@
       "bg": "배경",
       "frame": "프레임"
     },
-    "poseNote": "모은 몸짓만 고를 수 있어요",
-    "locked": "아직 모으지 않은 몸짓이에요",
+    "poseNote": "모은 몸짓만",
+    "locked": "아직 못 모았어요",
     "momentValue": "{n}%",
     "angle": {
       "front": "정면",
@@ -256,7 +257,7 @@
     ],
     "click": "찰칵",
     "resultTitle": "완성",
-    "resultNote": "칸을 누르면 그 칸만 다시 찍을 수 있어요",
+    "resultNote": "칸을 누르면 다시 찍어요",
     "redo": "다시 꾸미기",
     "done": "완성",
     "saved": "사진에 저장했어요",
@@ -269,7 +270,7 @@
   "seoaPhoto": {
     "_seoaPhoto": "서아가 먼저 보내는 사진(12단계, 원고 docs/drafts/12-서아가-보내는-사진-원고.md 4절). sending = 만드는 동안 대화 기록 맨 아래. saved = 사진 말풍선 아래 저장 알림, savedStage = 단계 사진일 때 덧붙임({n} 받은 단계 사진 수, {total} 5). info·infoStage = 크게 보기 정보 첫째 줄(둘째 줄은 날짜, data/ui.json photo.date). stageLabel = infoStage 의 {stage}. 사진 화면 「받은 사진」: progress·progressCount = 단계 사진 진행도, slot = 못 받은 단계 사진 칸, others = 그 밖에 받은 사진 제목, note = 안내 한 줄({cap} 사진 칸), empty = 빈 상태. aria = 사진 말풍선 접근성 이름",
     "sending": "서아가 사진을 보내는 중…",
-    "saved": "🖼 받은 사진에 저장됐어요",
+    "saved": "받은 사진에 저장",
     "savedStage": " · 단계 사진 {n} / {total}",
     "info": "서아가 보낸 사진 · {place}",
     "infoStage": "{stage} · {name}",
@@ -278,7 +279,7 @@
     "progressCount": "{n} / {total}",
     "slot": "{k}단계 사진",
     "others": "그 밖에 받은 사진",
-    "note": "받은 사진은 사진 칸({cap}장)에 포함되지 않아요",
+    "note": "받은 사진은 칸을 차지하지 않아요",
     "empty": "아직 서아가 보낸 사진이 없어요.",
     "aria": "서아가 보낸 사진 크게 보기"
   },

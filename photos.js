@@ -172,7 +172,7 @@ const Cam=(()=>{
     Stage.shadow(false);Stage.camLoop(null);Stage.release();
     // 촬영 중에 온 답장: 나온 뒤 마지막 답장의 몸짓을 재생(그때 처음 본 몸짓이면 도감 기록)
     const h=held;held=null;
-    if(h){react(h.r,"");firstSeen(h.mid)}else faceReset();
+    if(h){react(h.r,"",false,Fx.first(h.mid));firstSeen(h.mid)}else faceReset();
     if(unlockQ.length&&!unlockBusy)setTimeout(unlockNext,h&&h.mid?Stage.dur(h.mid)*1000+700:600);
   }
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
