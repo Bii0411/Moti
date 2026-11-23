@@ -136,7 +136,7 @@ const Booth=(()=>{
       .concat(places().map(i=>chip(`data-bg="place:${i}"`,common.bg==="place:"+i?"on":"",`<span class="sw img" style="background-image:url(${SCENES[i].img})"></span>${esc(SCENES[i].name)}`))).join("");
     el.innerHTML=`<h3 class="bcellh">${esc(T("cell",{k:sel+1}))}</h3>
       <section><div class="bsh"><b>${esc(T("sec.pose"))}</b><small>${esc(T("poseNote"))}</small></div>
-        <div class="bchips" id="bPose">${L.map(x=>{const g=got.has(x.id);return chip(`data-pose="${x.id}" style="--gc:${gcol(x)}"`,`pose ${g?"":"lock"} ${c.pid===x.id?"on":""}`,`<span class="gd"></span>${g?"":"🔒 "}${esc(x.name)}`)}).join("")}</div></section>
+        <div class="bchips" id="bPose">${L.map(x=>{const g=got.has(x.id);return chip(`data-pose="${x.id}" style="--gc:${gcol(x)}"`,`pose ${g?"":"lock"} ${c.pid===x.id?"on":""}`,`<span class="gd"></span>${g?"":Icon.svg("lock",12)+" "}${esc(x.name)}`)}).join("")}</div></section>
       <section><div class="bsh"><b>${esc(T("sec.moment"))}</b><span id="bMomV">${esc(T("momentValue",{n:c.at}))}</span></div>
         <input type="range" class="brange" id="bMom" min="0" max="100" step="1" value="${c.at}"></section>
       <section><div class="bsh"><b>${esc(T("sec.face"))}</b></div>
