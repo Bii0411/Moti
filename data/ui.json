@@ -29,7 +29,26 @@
       "gift": "선물로 만나요"
     },
     "unlockTag": "새 무빙 카드",
-    "unlockSaved": "무빙 카드 +1"
+    "unlockSaved": "무빙 카드 +1",
+    "card": {
+      "_card": "26-1 무빙 카드 모양·확대. unseen = 열렸지만 아직 못 본 카드 위 글(chat 대화 카드, gift 선물 카드). back = 잠긴 카드 뒷면의 작은 글자. loading = 카드 확대 때 의상 모델을 불러오는 동안. info = 확대 카드 아래 줄({stage} 처음 봤을 때 관계 단계 이름, {date} 날짜. 단계 기록이 없으면 날짜만), date = 날짜 모양. prev·share·next = 아래 버튼, close = 닫기 접근성 이름, open = 카드 누르기 접근성 이름({name}). mark = 공유 그림 오른쪽 아래 표시. saved = 공유 창을 열 수 없는 브라우저에서 그림을 저장했을 때. chipsAria = 캐릭터 칩 줄 접근성 이름",
+      "unseen": {
+        "chat": "대화에서 만나요",
+        "gift": "선물로 만나요"
+      },
+      "back": "moti",
+      "loading": "불러오는 중",
+      "info": "{stage} · {date}",
+      "date": "{y}.{m}.{d}",
+      "prev": "이전",
+      "share": "공유",
+      "next": "다음",
+      "close": "카드 닫기",
+      "open": "{name} 카드 크게 보기",
+      "mark": "moti",
+      "saved": "카드 그림을 저장했어요",
+      "chipsAria": "캐릭터별 카드"
+    }
   },
   "chatList": {
     "_chatList": "대화 탭 메시지 목록이 비어 있을 때(앱을 처음 열었을 때 등). 홈에서 캐릭터 카드를 눌러 들어가야 목록에 생긴다",
