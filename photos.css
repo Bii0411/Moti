@@ -96,3 +96,10 @@
 .pcbox div{display:flex;gap:8px}
 .pcbox button{flex:1;height:42px;border-radius:11px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
 .pcbox .danger{background:#ef4444;border-color:#ef4444;color:#fff}
+
+/* ── 서아가 보낸 사진(12): 대화 기록의 사진 말풍선(사진 작게 + 아래 메시지 말풍선 + 저장 알림 줄) ── */
+.phmsg{align-self:flex-start;width:52%;max-width:200px;aspect-ratio:3/4;border-radius:16px;border-top-left-radius:6px;overflow:hidden;background:var(--card);border:1px solid var(--line);padding:0;display:block;-webkit-tap-highlight-color:transparent}
+.phmsg img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.phmsg.gone{aspect-ratio:auto;height:0;border:0;margin:0}
+.phmsg+.msg.c{margin-top:-2px}
+.phsave{align-self:flex-start;font-size:11px;color:var(--sub);padding:0 4px;margin-top:-2px}

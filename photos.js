@@ -36,7 +36,8 @@ const Photos=(()=>{
   const cfg=()=>PCFG().slots||{};
   // 칸 수 = 무료 + 산 칸(S.photoSlots × step). PLUS 이용 중이면 plusCap(산 칸이 더 많으면 그쪽)
   function cap(){const c=cfg(),base=(c.free!=null?c.free:20)+(S.photoSlots||0)*(c.step||10);return S.plus?Math.max(c.plusCap||200,base):base}
-  const count=()=>list.length,full=()=>list.length>=cap();
+  // 서아가 보낸 사진(12, 종류 received)은 칸 수에 넣지 않음
+  const count=()=>list.filter(m=>m.kind!=="received").length,full=()=>count()>=cap();
   async function add(meta,fullBlob,thumbBlob){
     const t0=performance.now(),d=await db();
     const m={...meta,type:fullBlob.type,size:fullBlob.size,thumbType:thumbBlob.type,thumb:await buf(thumbBlob)},f={id:meta.id,data:await buf(fullBlob)};
@@ -148,7 +149,7 @@ const Cam=(()=>{
     root.querySelector("#camCount").textContent=UI("cam.count",{n:Photos.count(),cap:Photos.cap()});
     root.querySelector("#camChip").textContent=info?UI(paused?"cam.paused":"cam.loop",{name:motionName(info)}):UI("cam.idle");
     const pb=root.querySelector("#camPause");pb.innerHTML=icon(paused?"play":"pause");pb.disabled=!info;pb.setAttribute("aria-label",UI(paused?"cam.ariaPlay":"cam.ariaPause"));
-    const L=Photos.list()[0],lb=root.querySelector("#camLast");lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L);
+    const L=Photos.list().find(m=>m.kind!=="received"),lb=root.querySelector("#camLast");  // 서아가 보낸 사진(12)은 빼고 내가 찍은 마지막 사진lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L);
     root.querySelector("#camFull").classList.toggle("on",Photos.full())}
   function open(){
     if(on)return;if(!root)build();
@@ -238,7 +239,8 @@ const PhotoUI=(()=>{
   }
   // ── 크게 보기 ──
   const V=()=>$("#pView");
-  function view(id){vIds=shown().map(m=>m.id);vi=Math.max(0,vIds.indexOf(id));build();V().classList.add("on");show()}
+  // ids: 넘겨 볼 사진 목록(대화의 사진 말풍선에서 열 때 = 받은 사진들). 없으면 지금 사진 화면 묶음
+  function view(id,ids){vIds=ids&&ids.length?ids.slice():shown().map(m=>m.id);if(!vIds.includes(id))vIds.unshift(id);vi=Math.max(0,vIds.indexOf(id));build();V().classList.add("on");show()}
   function build(){const v=V();if(v.dataset.built)return;v.dataset.built="1";
     v.innerHTML=`<div class="pvtop"><button class="pvx" data-v="close" aria-label="${esc(T("ariaClose"))}">${icon("close")}</button></div>
       <div class="pvimg" id="pvImg"><img alt=""></div>
@@ -258,7 +260,9 @@ const PhotoUI=(()=>{
   function go(k){const n=vi+k;if(n<0||n>=vIds.length)return;vi=n;show()}
   const curM=()=>Photos.list().find(m=>m.id===vIds[vi]);
   async function show(){const m=curM();if(!m){closeView();return}setMenu(false);
-    $("#pvL1").textContent=m.kind==="booth"?T("infoBooth",{date:fmt(m.at)}):T("info",{name:m.mname||UI("cam.idle"),place:m.place||""});
+    // 서아가 보낸 사진(12): 「서아가 보낸 사진 · 장소」, 단계 사진은 「k단계 · 사진 이름」. 둘째 줄 날짜
+    const rv=m.kind==="received",R=(k,v)=>UI("seoaPhoto."+k,v);
+    $("#pvL1").textContent=m.kind==="booth"?T("infoBooth",{date:fmt(m.at)}):rv?(m.stage?R("infoStage",{stage:R("stageLabel",{k:m.stage}),name:m.title||""}):R("info",{place:m.place||""})):T("info",{name:m.mname||UI("cam.idle"),place:m.place||""});
     $("#pvL2").textContent=m.kind==="booth"?"":fmt(m.at);
     like(true);
     const id=m.id,b=await Photos.blob(id);if(vIds[vi]!==id||!b)return;
