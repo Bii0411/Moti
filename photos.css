@@ -11,7 +11,7 @@
 .camx:active{background:#ffffff14}
 .camcount{flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--text)}
 .cammid{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.camv{position:relative;overflow:hidden;isolation:isolate;background:#140a24 center 40%/cover no-repeat;touch-action:none;cursor:grab}
+.camv{position:relative;overflow:hidden;isolation:isolate;border-radius:4px;background:#140a24 center 40%/cover no-repeat;touch-action:none;cursor:grab}
 .camv:active{cursor:grabbing}
 .camgl{position:absolute;inset:0}
 .camgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
@@ -31,7 +31,9 @@
 .cambtn{background:#1d1a27;color:#d9d2ee}
 .cambtn:disabled{opacity:.35}
 .camlast{background:#1d1a27;border:1px solid #ffffff2a;overflow:hidden;padding:0}
-.camlast img{width:100%;height:100%;object-fit:cover;display:block}
+.camlast img,.camlast canvas{width:100%;height:100%;object-fit:cover;display:block}
+/* 24: 찍은 직후 날아가는 사진(틀과 같은 자리·크기에서 시작, transform·opacity 만) */
+.camfly{position:absolute;z-index:6;display:block;transform-origin:50% 50%;pointer-events:none;will-change:transform,opacity}
 .camlast.empty{border-style:dashed}
 .camshut{width:72px;height:72px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
 .camshut i{width:58px;height:58px;border-radius:50%;background:#fff;transition:transform .1s}
@@ -44,6 +46,11 @@
 .phd{display:flex;align-items:baseline;gap:8px}
 .phd h2{margin:0}
 .phd span{margin-left:auto;font-size:13px;font-weight:800;color:var(--pri2)}
+/* 24: 「0 / 20」 옆 작은 + 버튼 → 칸 늘리기 결제 방식 작은 창 */
+.phd{align-items:center}
+.padd{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--pri2);-webkit-tap-highlight-color:transparent}
+.padd:active{transform:scale(.94)}
+.pslot{aspect-ratio:3/4;border-radius:8px;border:1.5px dashed #ffffff22}
 .phd span.full{color:#f87171}
 .pprog{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin:8px 0 12px}
 .pprog i{display:block;height:100%;background:var(--pri);border-radius:9px;transition:width .3s}
@@ -58,11 +65,7 @@
 .plike{position:absolute;right:5px;top:5px;color:var(--pink);background:#0009;border-radius:999px;padding:3px}
 .plike .ic{width:14px;height:14px}
 .plike svg path{fill:currentColor}
-.pempty{color:var(--sub);font-size:13px;line-height:1.6;text-align:center;padding:36px 12px;word-break:keep-all}
-.pfoot{position:sticky;bottom:0;background:#15131d;margin:12px -14px 0;padding:10px 14px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
-.prow{display:flex;align-items:center;justify-content:space-between;width:100%;height:44px;padding:0 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
-.prow b{font-size:13px;color:var(--pri2)}
-.prow.plus{border-color:#7c5cff}
+.psheet{padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
 /* 가득 참 시트 */
 .fopts{display:flex;flex-direction:column;gap:8px}
 .fopts button{height:48px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
@@ -88,6 +91,25 @@
 .pvmenu.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 .pvmenu button{width:auto;height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;background:none;border-radius:9px;font-size:14px;font-weight:700;color:var(--text);white-space:nowrap}
 .pvmenu .ic{width:20px;height:20px}
+/* 24: 작은 창(사진 칸 늘리기 결제 방식, 선물 확률 보기). 지우기 확인과 같은 겹 */
+.mini{position:absolute;inset:0;z-index:24;background:#0009;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .18s}
+.mini.on{opacity:1;pointer-events:auto}
+.minibox{position:relative;width:100%;max-width:320px;background:#1b1826;border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;transform:scale(.96);transition:transform .18s}
+.mini.on .minibox{transform:none}
+.minibox h3{font-size:15px;font-weight:800;margin:0 36px 12px 2px}
+.minix{position:absolute;right:8px;top:8px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--sub)}
+.mopts{display:flex;flex-direction:column;gap:8px}
+.mopts button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:48px;padding:0 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700;text-align:left}
+.mopts button b{flex:none;font-size:13px;color:var(--pri2);white-space:nowrap}
+.mopts button.plus{border-color:#7c5cff}
+/* 선물 확률 표 */
+.otab{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.otab th{font-size:11px;font-weight:700;color:var(--sub);text-align:right;padding:0 4px 6px}
+.otab th:first-child,.otab td:first-child{text-align:left}
+.otab td{text-align:right;padding:7px 4px;border-top:1px solid var(--line);white-space:nowrap}
+.otab tr.m td{border-top:0;padding-top:0;font-size:11.5px;color:#e9dcc0}
+.otab tr.m td:first-child{color:var(--sub);padding-left:10px}
+.onote{font-size:11.5px;color:var(--sub);line-height:1.5;margin-top:10px;word-break:keep-all}
 /* 지우기 확인 */
 .pconfirm{position:absolute;inset:0;z-index:24;background:#0009;display:none;align-items:center;justify-content:center;padding:24px}
 .pconfirm.on{display:flex}

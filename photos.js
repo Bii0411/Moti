@@ -82,11 +82,12 @@ const Shot=(()=>{
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
     g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img)cover(g,img,W,H,.5,.4);dimLayer(g,W,H);
     const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone();
-    if(o.shadow)Stage.shadow(true,(PCFG().camera||{}).shadow);
+    if(o.shadow)Stage.shadow(true,(((DATA.config||{}).camera||{}).photo||PCFG().camera||{}).shadow);
     R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H);
     R.render(scene,cam);g.drawImage(R.domElement,0,0,W,H);  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
     R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq);
     if(o.shadow)Stage.shadow(false);
+    if(o.onCanvas)try{o.onCanvas(c)}catch(e){console.error(e)}  // 24: 다 그린 사진(줄이기 전)을 촬영 화면의 「날아가는 사진」으로
     const t1=performance.now(),type=P.type||"image/jpeg";
     const full=await encode(c,type,P.quality||.86,P.minQuality||.5,P.maxKB||300);
     const thumb=await encode(scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
@@ -97,9 +98,11 @@ const Shot=(()=>{
 
 // ───────────────────────── 촬영 화면 ─────────────────────────
 const Cam=(()=>{
-  let on=false,root=null,fr=null,gl=null,yaw=0,zoom=0,info=null,paused=false,held=null,helpT=null,busy=false;
+  let on=false,root=null,fr=null,gl=null,yaw=0,pitch=0,zoom=0,info=null,paused=false,held=null,helpT=null,busy=false,flying=false;
   const ptrs=new Map();let pinch=null,drag=null;
-  const C=()=>PCFG().camera||{};
+  // 24: 촬영 화면 값은 data/config.json camera.photo (예전 data/photos.json camera)
+  const C=()=>((typeof DATA!=="undefined"&&DATA.config&&DATA.config.camera)||{}).photo||PCFG().camera||{};
+  const pLim=()=>[C().pitchMinDeg!=null?C().pitchMinDeg:-5,C().pitchMaxDeg!=null?C().pitchMaxDeg:30];
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const stopG=e=>e.preventDefault();
   function build(){
@@ -122,7 +125,9 @@ const Cam=(()=>{
     fr.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;try{fr.setPointerCapture(e.pointerId)}catch(err){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});base()});
     fr.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
       if(ptrs.size>=2&&pinch){zoom=clamp(pinch.z+Math.log(dist()/pinch.d)*(C().pinchK||.75),0,1)}
-      else if(ptrs.size===1&&drag){const p=[...ptrs.values()][0],mx=C().yawMaxDeg||60;yaw=clamp(drag.yaw-(p.x-drag.x)*(C().degPerPx||.35),-mx,mx)}});
+      else if(ptrs.size===1&&drag){const p=[...ptrs.values()][0],mx=C().yawMaxDeg||60,[pa,pb]=pLim();
+        yaw=clamp(drag.yaw-(p.x-drag.x)*(C().degPerPx||.35),-mx,mx);
+        pitch=clamp(drag.pitch+(p.y-drag.y)*(C().pitchDegPerPx||.25),pa,pb)}});  // 24: 아래로 끌면 위에서 내려다보는 쪽
     const up=e=>{if(!ptrs.delete(e.pointerId))return;base()};
     fr.addEventListener("pointerup",up);fr.addEventListener("pointercancel",up);
     fr.addEventListener("wheel",e=>{e.preventDefault();zoom=clamp(zoom-e.deltaY*(C().wheelK||.0012)*(e.deltaMode===1?16:1),0,1)},{passive:false});
@@ -133,30 +138,40 @@ const Cam=(()=>{
   }
   const dist=()=>{const [a,b]=[...ptrs.values()];return Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};
   // 손가락 수가 바뀔 때마다 기준을 다시 잡음(두 손가락 → 한 손가락으로 바뀌어도 튀지 않게)
-  function base(){pinch=ptrs.size>=2?{d:dist(),z:zoom}:null;const p=[...ptrs.values()][0];drag=ptrs.size===1?{x:p.x,yaw}:null}
+  function base(){pinch=ptrs.size>=2?{d:dist(),z:zoom}:null;const p=[...ptrs.values()][0];drag=ptrs.size===1?{x:p.x,y:p.y,yaw,pitch}:null}
   // 3:4 칸을 가운데 칸 안에 가장 크게
-  function layout(){const m=root.querySelector("#camMid"),A=(PCFG().image||{}).aspect||[3,4],aw=m.clientWidth,ah=m.clientHeight;
+  // 24: 양옆 framePad 여백을 두고(틀 밖은 어두운 단색) 그 안에 가장 크게
+  function layout(){const m=root.querySelector("#camMid"),A=(PCFG().image||{}).aspect||[3,4],pad=C().framePad!=null?C().framePad:12,aw=m.clientWidth-pad*2,ah=m.clientHeight;
     let w=Math.min(aw,ah*A[0]/A[1]),h=w*A[1]/A[0];fr.style.width=Math.floor(w)+"px";fr.style.height=Math.floor(h)+"px"}
-  // 구도: zoom 0 = 전신(far) ~ 1 = 얼굴(near) 사이. yaw = 정면 기준 좌우 각도(서아 주위를 돎)
-  function setCam(cam,aspect,y,z){const c=C(),F=c.far||{top:1.07,bottom:-.05,width:.8},N=c.near||{top:1.03,bottom:.8,width:.26};z=z!=null?z:zoom;y=y!=null?y:yaw;
-    const L=k=>F[k]+(N[k]-F[k])*z,H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360);
-    const top=L("top"),bot=L("bottom"),cy=(top+bot)/2*H,d=Math.max((top-bot)*H/2/tn,L("width")*H/2/(tn*aspect)),r=y*Math.PI/180;
+  // 구도: zoom 0 = 가장 멀리(far, 머리 위 여백 ~ 무릎 위) ~ 1 = 얼굴(near) 사이. yaw = 정면 기준 좌우 각도(서아 주위를 돎)
+  // 24: pitch = 위아래 각도(+ 위에서 내려다봄). 서아 몸 가운데 줄의 top 높이가 틀 위 끝, bottom 높이가 틀 아래 끝에 오도록
+  //     카메라의 수평 거리 dx·높이 cy 를 원근대로 풂(두 식 두 미지수). 그래서 각도·확대를 바꿔도 무릎 아래는 틀 밖
+  function setCam(cam,aspect,y,z,p){const c=C(),F=c.far||{top:1.07,bottom:.31},N=c.near||{top:1.03,bottom:.8};
+    z=z!=null?z:zoom;y=y!=null?y:yaw;p=p!=null?p:pitch;
+    const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),top=(F.top+(N.top-F.top)*z)*H,bot=(F.bottom+(N.bottom-F.bottom)*z)*H;
+    const a=p*Math.PI/180,s=Math.sin(a),co=Math.cos(a);
+    // 위 끝: dx(s−tn·co) − cy(co+tn·s) = −top(co+tn·s) / 아래 끝: dx(s+tn·co) − cy(co−tn·s) = −bot(co−tn·s)
+    const a1=s-tn*co,b1=-(co+tn*s),c1=-top*(co+tn*s),a2=s+tn*co,b2=-(co-tn*s),c2=-bot*(co-tn*s),D=a1*b2-a2*b1;
+    const dx=(c1*b2-c2*b1)/D,cy=(a1*c2-a2*c1)/D,r=y*Math.PI/180;
     const o=Stage.center(z);  // 몸짓이 서아를 앞뒤·옆으로 옮겨도(다가가기 등) 서아를 가운데 두고 돎
-    cam.position.set(o.x+Math.sin(r)*d,cy+(c.lift||0)*H,o.z+Math.cos(r)*d);cam.lookAt(o.x,cy,o.z)}
+    cam.position.set(o.x+Math.sin(r)*dx,cy,o.z+Math.cos(r)*dx);
+    cam.lookAt(cam.position.x-Math.sin(r)*co,cy-s,cam.position.z-Math.cos(r)*co)}
   function tick(now,w,h){if(on&&w&&h){const cam=Stage.three().cam;if(cam.view)cam.clearViewOffset();setCam(cam,w/h)}}
   const motionName=x=>x?(x.name||MNAME[x.id]||x.id):"";
   function render(){if(!root)return;
     root.querySelector("#camCount").textContent=UI("cam.count",{n:Photos.count(),cap:Photos.cap()});
     root.querySelector("#camChip").textContent=info?UI(paused?"cam.paused":"cam.loop",{name:motionName(info)}):UI("cam.idle");
     const pb=root.querySelector("#camPause");pb.innerHTML=icon(paused?"play":"pause");pb.disabled=!info;pb.setAttribute("aria-label",UI(paused?"cam.ariaPlay":"cam.ariaPause"));
-    const L=Photos.list().find(m=>m.kind!=="received"),lb=root.querySelector("#camLast");  // 서아가 보낸 사진(12)은 빼고 내가 찍은 마지막 사진lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L);
+    // 서아가 보낸 사진(12)은 빼고 내가 찍은 마지막 사진. 24: 주석 안에 묻혀 있던 줄을 되살림. 사진이 날아가는 중엔 도착할 때 바꿈
+    const L=Photos.list().find(m=>m.kind!=="received"),lb=root.querySelector("#camLast");
+    if(!flying){lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L)}
     root.querySelector("#camFull").classList.toggle("on",Photos.full())}
   function open(){
     if(on)return;if(!root)build();
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
     info=Stage.recentMotion(C().recentMs!=null?C().recentMs:1000);paused=false;held=null;Stage.camLoop(info);
-    yaw=0;zoom=0;ptrs.clear();pinch=drag=null;
+    const [pa,pb]=pLim();yaw=C().startYawDeg||0;zoom=clamp(C().startZoom||0,0,1);pitch=clamp(C().startPitchDeg!=null?C().startPitchDeg:0,pa,pb);ptrs.clear();pinch=drag=null;
     const sc=SCENES[S.scene]||SCENES[0];fr.style.backgroundImage=`url(${sc.img})`;Shot.loadImg(sc.img);
     const d=$("#bgdim"),cd=root.querySelector("#camDim");if(d){cd.className=d.className;cd.style.cssText=d.style.cssText}
     on=true;root.classList.add("on");root.setAttribute("aria-hidden","false");layout();
@@ -186,12 +201,28 @@ const Cam=(()=>{
         for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
         const src=ac.createBufferSource();src.buffer=b;const f=ac.createBiquadFilter();f.type="bandpass";f.frequency.value=k.freq||3000;f.Q.value=k.q||1;
         const g=ac.createGain();g.gain.value=(k.gain||.5)*(s.volume!=null?s.volume:1);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t+(k.at||0))})}catch(e){}}
+  // 24: 찍은 직후 — 틀 안 장면(다 그린 사진 canvas)이 작아지며 오른쪽 최근 사진 칸으로 날아 들어가고, 칸이 살짝 튀었다 돌아오며 새 사진으로.
+  //     transform·opacity 만 씀. 시간 값 data/config.json camera.photo.fly
+  function fly(c){const F=C().fly||{},ms=F.ms!=null?F.ms:400,lb=root.querySelector("#camLast");
+    const a=fr.getBoundingClientRect(),b=lb.getBoundingClientRect(),o=root.getBoundingClientRect();if(!a.width||!b.width)return;
+    const small=Shot.scaled(c,Math.max(160,Math.round(b.width*3)));  // 칸에 넣을 작은 그림(사진과 같은 장면)
+    c.className="camfly";c.style.cssText=`left:${a.left-o.left}px;top:${a.top-o.top}px;width:${a.width}px;height:${a.height}px`;
+    root.appendChild(c);flying=true;void c.offsetWidth;
+    // 칸(정사각)을 덮는 크기로 줄여 칸 가운데로
+    const k=Math.max(b.width/a.width,b.height/a.height),dx=(b.left+b.width/2)-(a.left+a.width/2),dy=(b.top+b.height/2)-(a.top+a.height/2);
+    c.style.transition=`transform ${ms}ms ${F.ease||"ease-in"},opacity ${ms}ms linear`;
+    c.style.transform=`translate(${dx}px,${dy}px) scale(${k})`;c.style.opacity=String(F.endOpacity!=null?F.endOpacity:.7);
+    let done=false;const land=()=>{if(done)return;done=true;c.remove();flying=false;
+      small.className="";lb.innerHTML="";lb.appendChild(small);lb.classList.remove("empty");
+      lb.style.transition="none";lb.style.transform=`scale(${F.bounceScale||1.14})`;void lb.offsetWidth;
+      lb.style.transition=`transform ${F.bounceMs||260}ms cubic-bezier(.3,1.6,.5,1)`;lb.style.transform="scale(1)"};
+    c.addEventListener("transitionend",e=>{if(e.propertyName==="transform")land()});setTimeout(land,ms+120)}
   function flash(){const f=root.querySelector("#camFlash");f.style.transition="none";f.style.opacity=".9";void f.offsetWidth;f.style.transition=`opacity ${C().flashMs||260}ms ease-out`;f.style.opacity="0"}
   async function shutter(){
     if(busy)return;
     if(Photos.full()){PhotoUI.fullSheet();return}
     sound();flash();busy=true;
-    try{const r=await Shot.take(S.scene,(cam,a)=>setCam(cam,a));
+    try{const r=await Shot.take(S.scene,(cam,a)=>setCam(cam,a),{onCanvas:fly});
       const meta={id:Photos.newId(),kind:"camera",at:Date.now(),mid:info?(info.ref||info.id):null,mname:info?motionName(info):null,scene:S.scene,place:r.place,liked:false,w:r.w,h:r.h};
       const sv=await Photos.add(meta,r.full,r.thumb);
       (window.__photoPerf||(window.__photoPerf=[])).push({...r.ms,save:sv.ms,kb:Math.round(r.full.size/1024),thumbKb:Math.round(r.thumb.size/1024)});
@@ -200,7 +231,19 @@ const Cam=(()=>{
     busy=false;render();
   }
   Photos.onChange(()=>{if(on)render()});
-  return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,sound,audio,state:()=>({yaw,zoom,info,paused}),view:(y,z)=>{yaw=y;zoom=z}};
+  return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,sound,audio,state:()=>({yaw,pitch,zoom,info,paused}),view:(y,z,p)=>{yaw=y;zoom=z;if(p!=null)pitch=p}};
+})();
+
+// ───────────────────────── 작은 창(24) ─────────────────────────
+// 사진 칸 늘리기 결제 방식·선물 확률 보기에 같이 씀. #mini(index.html). 바깥·✕ 누르면 닫힘. 열고 닫힘은 opacity·transform 만
+const Mini=(()=>{
+  const el=()=>document.getElementById("mini");
+  function open(title,body,bind){const m=el();if(!m)return;
+    m.innerHTML=`<div class="minibox" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><button class="minix" data-mini="x" aria-label="${esc(UI("photo.ariaClose"))}">${Icon.svg("close",20)}</button>${body}</div>`;
+    m.onclick=e=>{if(e.target===m||e.target.closest('[data-mini="x"]'))close()};
+    if(bind)bind(m);void m.offsetWidth;m.classList.add("on")}
+  function close(){const m=el();if(m)m.classList.remove("on")}
+  return{open,close,isOpen:()=>!!(el()&&el().classList.contains("on"))};
 })();
 
 // ───────────────────────── 사진 화면 ─────────────────────────
@@ -214,18 +257,25 @@ const PhotoUI=(()=>{
   const sheetOn=()=>$("#photoSheet").classList.contains("on");
   function sheet(){render();if(!sheetOn()){closeSheets();openSheet("#photoSheet")}}
   function render(){
-    const el=$("#photoSheet"),n=Photos.count(),cap=Photos.cap(),L=shown(),c=PCFG().slots||{};
-    el.innerHTML=`<div class="phd"><h2>${esc(T("title"))}</h2><span class="${n>=cap?"full":""}">${esc(T("count",{n,cap}))}</span></div>
+    const el=$("#photoSheet"),n=Photos.count(),cap=Photos.cap(),L=shown();
+    // 24: 아래 「칸 늘리기」「PLUS」 줄 대신 「n / cap」 옆 작은 + 버튼 → 결제 방식 작은 창. 빈 상태 문구 없이 빈 칸만
+    el.innerHTML=`<div class="phd"><h2>${esc(T("title"))}</h2><span class="${n>=cap?"full":""}">${esc(T("count",{n,cap}))}</span><button class="padd" data-p="add" aria-label="${esc(T("add"))}">${Icon.svg("plus",18)}</button></div>
       <div class="pprog ${n>=cap?"full":""}"><i style="width:${cap?Math.min(100,n/cap*100):0}%"></i></div>
       <div class="aseg pseg">${SEG.map(k=>`<button data-seg="${k}" class="${seg===k?"on":""}">${esc(T("seg."+k))}</button>`).join("")}</div>
-      ${seg==="received"?received(L,cap):L.length?grid(L):`<p class="pempty">${esc(T("empty."+seg))}</p>`}
-      <div class="pfoot"><button class="prow" data-p="grow"><span>${esc(T("growRow"))}</span><b>${Icon.fill(esc(T("growPrice",{price:c.stepPrice||50})))}</b></button>
-        ${S.plus?"":`<button class="prow plus" data-p="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`;
+      ${seg==="received"?received(L,cap):L.length?grid(L):emptyGrid()}`;
     el.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{seg=b.dataset.seg;render()});
     el.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>view(b.dataset.id));
-    el.querySelector('[data-p="grow"]').onclick=()=>Photos.buySlots();
-    const pl=el.querySelector('[data-p="plus"]');if(pl)pl.onclick=()=>Photos.startPlus();
+    el.querySelector('[data-p="add"]').onclick=buy;
   }
+  // 빈 상태(24): 문구 없이 빈 칸 두 줄
+  const EMPTY_CELLS=6;
+  const emptyGrid=()=>`<div class="pgrid">${'<div class="pslot"></div>'.repeat(EMPTY_CELLS)}</div>`;
+  // 결제 방식 작은 창(24): 칸 늘리기 +10 · 💎 / PLUS(이용 중이면 뺌). 값·문구는 예전 아래 줄 그대로
+  function buy(){const c=PCFG().slots||{};
+    Mini.open(T("buyTitle"),`<div class="mopts"><button data-b="grow"><span>${esc(T("growRow"))}</span><b>${Icon.fill(esc(T("growPrice",{price:c.stepPrice||50})))}</b></button>
+      ${S.plus?"":`<button class="plus" data-b="plus"><span>${esc(T("plusRow",{plusCap:c.plusCap||200}))}</span><b>${esc(T("plusPrice"))}</b></button>`}</div>`,
+      m=>{m.querySelector('[data-b="grow"]').onclick=()=>{if(Photos.buySlots())Mini.close()};
+        const pl=m.querySelector('[data-b="plus"]');if(pl)pl.onclick=()=>{Photos.startPlus();Mini.close()}})}
   const cell=m=>`<button class="pth ${m.kind==="booth"?"tall":""}" data-id="${m.id}"${m.kind==="booth"&&m.frameColor?` style="background:${esc(m.frameColor)}"`:""}><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}</button>`;
   const grid=L=>`<div class="pgrid">${L.map(cell).join("")}</div>`;
   // 받은 사진(12): 「단계 사진 n / 5」 진행도·막대 → 2~6단계 다섯 칸(못 받은 칸은 점선 「k단계 사진」) → 「그 밖에 받은 사진」 → 안내 한 줄
@@ -235,7 +285,7 @@ const PhotoUI=(()=>{
       <div class="pprog rprog"><i style="width:${tot?n/tot*100:0}%"></i></div>
       <div class="rstage">${st.map(o=>{const m=by[o.stage];return m?`<button class="pth rgot" data-id="${m.id}"><img src="${Photos.thumbUrl(m)}" alt="" loading="lazy">${m.liked?`<span class="plike">${icon("heart","ic")}</span>`:""}<span class="rlab">${esc(R("stageLabel",{k:o.stage}))}</span></button>`
         :`<div class="rslot"><span>${esc(R("slot",{k:o.stage}))}</span></div>`}).join("")}</div>
-      ${others.length?`<h3 class="rh3">${esc(R("others"))}</h3>${grid(others)}`:L.length?"":`<p class="pempty">${esc(R("empty"))}</p>`}
+      ${others.length?`<h3 class="rh3">${esc(R("others"))}</h3>${grid(others)}`:""}
       <p class="rnote">${esc(R("note",{cap}))}</p>`}
   // ── 가득 참 시트(셔터를 눌렀을 때, 카메라 안내 「칸 늘리기」) ──
   function fullSheet(){
@@ -328,5 +378,5 @@ const PhotoUI=(()=>{
     await Photos.addMany(items);return need}
   Photos.onChange(()=>{if(sheetOn())render()});
   // sharedBlob: 공유용 표시가 들어간 이미지(확인·보고서 캡처용)
-  return{sheet,render,fullSheet,view,fill,closeView,canShare,saveFile,fname,isViewOn:()=>V().classList.contains("on"),sharedBlob:async id=>marked(await Photos.blob(id))};
+  return{sheet,render,fullSheet,buy,view,fill,closeView,canShare,saveFile,fname,isViewOn:()=>V().classList.contains("on"),sharedBlob:async id=>marked(await Photos.blob(id))};
 })();

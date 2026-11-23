@@ -102,7 +102,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .fni{display:flex;flex-direction:column;align-items:center;gap:7px;padding:6px 0;-webkit-tap-highlight-color:transparent}
 .fni .tile{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:#1d1a27;color:#d9d2ee;transition:transform .1s}
 .fni .tile svg{width:26px;height:26px;display:block}
-.fni.gift .tile{background:var(--pri);color:#fff}
 .fni b{font-size:12px;font-weight:600;color:#cfc8e4}
 .fni:active .tile{transform:scale(.95)}
 /* 여러 줄 입력창: 엔터는 줄바꿈, 4줄까지 커지고 그 이상은 안에서 스크롤 (autoGrow). 16px = 아이폰 자동 확대 방지 */
@@ -310,11 +309,11 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .item .p{font-size:12px;color:var(--pri2);font-weight:700}
 .item .rec{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;background:var(--gold);color:#000;border-radius:999px;padding:2px 7px}
 .item.focus{border-color:var(--gold)}
-/* 선물 창(9-A): 기분 맞춤 선물은 금색 테두리, 확률 줄, 천장 남은 횟수 */
+/* 선물 창(9-A): 기분 맞춤 선물은 금색 테두리, 천장 남은 횟수(24: 확률 줄은 「확률 보기」 창으로) */
 .item.match{border-color:#f5c66b99;background:linear-gradient(160deg,#2a2236,#1a1426)}
-.item .odds{font-size:10.5px;letter-spacing:-.02em;color:var(--sub);margin-top:4px;line-height:1.4;white-space:nowrap}
-.item.match .odds{color:#e9dcc0}
 .sheet .pity{font-size:12px;font-weight:700;color:var(--pri2);margin:-2px 0 10px}
+/* 24: 선물 시트 아래 「확률 보기」 한 줄(누르면 확률 표 작은 창) */
+.oddsbtn{display:block;margin:12px auto 0;padding:8px 12px;font-size:12px;font-weight:600;color:var(--sub);text-decoration:underline;text-underline-offset:3px;-webkit-tap-highlight-color:transparent}
 .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
 .row button{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 11px;background:var(--card)}
 .row button.on{background:var(--pri);border-color:var(--pri)}
@@ -397,7 +396,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
         <button class="send" id="sendBtn" aria-label="보내기">↑</button>
       </div>
       <div class="fnp" id="fnPanel" aria-hidden="true"><div class="fngrid">
-        <button class="fni gift" data-fn="gift"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4.5" rx="1.2"/><path d="M5.5 12.5V20h13v-7.5M12 8v12M12 8C10.6 4.6 6.8 4.4 6.8 6.6 6.8 8 9.2 8 12 8zM12 8c1.4-3.4 5.2-3.6 5.2-1.4C17.2 8 14.8 8 12 8z"/></svg></span><b></b></button>
+        <button class="fni" data-fn="gift"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4.5" rx="1.2"/><path d="M5.5 12.5V20h13v-7.5M12 8v12M12 8C10.6 4.6 6.8 4.4 6.8 6.6 6.8 8 9.2 8 12 8zM12 8c1.4-3.4 5.2-3.6 5.2-1.4C17.2 8 14.8 8 12 8z"/></svg></span><b></b></button>
         <button class="fni" data-fn="camera"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9.5A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13.3" r="3.4"/></svg></span><b></b></button>
         <button class="fni" data-fn="photo"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.2"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 15.5l-4.6-4.6-9.4 8.6"/></svg></span><b></b></button>
       </div></div>
@@ -426,6 +425,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
   <div class="sheet" id="fullSheet" role="dialog" aria-modal="true"></div>
   <div class="pview" id="pView" role="dialog" aria-modal="true"></div>
   <div class="pconfirm" id="pConfirm"></div>
+  <div class="mini" id="mini"></div>
   <div class="toast" id="toast"></div>
   <div class="firstchip" id="firstChip"></div>
   <div class="chapter" id="chapter"></div>
@@ -1324,21 +1324,30 @@ function afterReply(v){
 
 // ───────────────────────── 선물 ─────────────────────────
 function openSheet(id){$("#scrim").classList.add("on");$(id).classList.add("on")}
-function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"))}
-// 선물 창(9-A, 원고 3절): 기분 안내 · 천장 남은 횟수 · 선물마다 기분 맞춤 표시와 확률 줄
+function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));Mini.close()}
+// 선물 창(9-A, 원고 3절, 24에서 다듬음): 「서아 기분 · {기분}」 · 천장 남은 횟수 · 선물 카드(기분에 맞으면 표시) · 아래 「확률 보기」
 const gradeKo=g=>UI("collection.grade."+g);
 function giftSheet(focus){
-  const st=curState(),B=GIFT.moodBonus||{};
-  const oddsLine=o=>UI("gift.odds",{a:o.common,b:o.rare,c:o.special});
+  const st=curState();
   $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
-  <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].ko,bonus:B.rare||0}))}</p>
+  <p class="sub">${esc(UI("gift.moodNote",{mood:STATES[st].ko}))}</p>
   <div class="pity">${esc(UI("gift.pity",{n:pityLeft()}))}</div>
-  <div class="items">${GIFTS.map(g=>{const m=g.rec===st,o=Gacha.odds(g,m,B);return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
+  <div class="items">${GIFTS.map(g=>{const m=g.rec===st;return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}
-    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div>
-    <div class="odds">${esc(oddsLine(o))}</div></button>`}).join("")}</div>`;
+    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`}).join("")}</div>
+  <button class="oddsbtn" data-odds="1">${esc(UI("gift.oddsOpen"))}</button>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
+  $("#giftSheet").querySelector("[data-odds]").onclick=giftOdds;
   openSheet("#giftSheet");
+}
+// 확률 보기(24): 선물별 등급 확률 표. 선물마다 기본 줄 + 그 선물에 맞는 기분일 때 오른 줄(Gacha.odds 와 같은 계산). 확률 공개용이라 숫자는 data/gifts.json 그대로
+function giftOdds(){
+  const B=GIFT.moodBonus||{},G=Gacha.ORDER,P=GIFT.pity||{},pct=v=>esc(UI("gift.pct",{v:+(+v||0).toFixed(2)}));
+  const row=(cls,name,o)=>`<tr class="${cls}"><td>${name}</td>${G.map(k=>`<td>${pct(o[k])}</td>`).join("")}</tr>`;
+  const body=`<table class="otab"><thead><tr><th>${esc(UI("gift.oddsGift"))}</th>${G.map(k=>`<th>${esc(gradeKo(k))}</th>`).join("")}</tr></thead><tbody>
+    ${GIFTS.map(g=>row("",esc(g.name),Gacha.odds(g,false,B))+(STATES[g.rec]?row("m",esc(UI("gift.oddsMatch",{mood:STATES[g.rec].ko})),Gacha.odds(g,true,B)):"")).join("")}</tbody></table>
+    <p class="onote">${esc(UI("gift.oddsNote",{bonus:B.rare||0,from:gradeKo(B.from||"common"),n:P.count||10,min:gradeKo(P.min||"rare")}))}</p>`;
+  Mini.open(UI("gift.oddsTitle"),body);
 }
 // 3D 무대 위 자막(대화방에서 선물 대사). 앨범 다시 보기는 3D 아래 칸(#rcap)
 let subT;
