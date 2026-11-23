@@ -45,7 +45,7 @@ const SeoaPhoto=(()=>{
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
         R.render(scene,cam);g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
       finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
-    },{shadow:((DATA.photos||{}).camera||{}).shadow||{},place:sc.name});
+    },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name});
     if(!ok)throw new Error("서아 모델이 아직 없음");
     const t1=performance.now(),type=P.type||"image/jpeg";
     const full=await Shot.encode(c,type,P.quality||.86,P.minQuality||.5,P.maxKB||300);
