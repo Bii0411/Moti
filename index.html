@@ -151,15 +151,10 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hc .tx p{font-size:12px;color:#cfc8e4;line-height:1.45}
 .hc .tx .tg{font-size:11px;color:var(--pri2)}
 .hseg{display:flex;gap:14px;margin:6px 0 12px}.hseg button{font-size:22px;font-weight:900;color:#5f5873}.hseg button.on{color:var(--text)}
-.hsearch input{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);padding:0 14px;font:inherit;font-size:14px;outline:none;margin-bottom:12px}
 .srow{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}.srow::-webkit-scrollbar{display:none}
 .srow>button{flex:0 0 auto}
 .pillchip{height:38px;padding:0 16px;border-radius:19px;border:1px solid var(--line);font-size:14px}
 .pillchip.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
-.srow.tagrow{flex-wrap:wrap;overflow:visible;margin-bottom:14px}
-.fchip{height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line);font-size:13px;color:var(--sub)}
-.fchip.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .ccard{border-radius:18px;overflow:hidden;background:var(--card);text-align:left;display:flex;flex-direction:column}
 .ccard .pic{aspect-ratio:262/300;background-size:cover;background-position:center 15%;position:relative}
 .ccard .pic::after{content:"";position:absolute;inset:auto 0 0;height:40%;background:linear-gradient(transparent,var(--card))}
@@ -169,6 +164,28 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .ccard h3{margin:0 0 4px;font-size:15px;font-weight:900;line-height:1.35}
 .ccard p{margin:0 0 6px;color:var(--sub);font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ccard .tags{color:#6b6480;font-size:12px}
+/* 홈 카드 가로 넘기기(8-B). --ph = 카드 그림 높이(화면 높이에 맞춰 줄어듦: 844 → 300px, 667 → 200px). 옆 카드는 크기·투명도만(blur 없음) */
+.hcar{--ph:clamp(170px,calc(100dvh - 468px),300px);--cw:calc(var(--ph)*.84);position:relative;display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:2px -14px 0;padding:4px calc(50% - var(--cw)/2) 6px;touch-action:pan-x pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.hcar::-webkit-scrollbar{display:none}
+.hcar.drag{scroll-snap-type:none;cursor:grabbing}
+.hcar.drag .hcard{transition:none}
+.hcard{flex:0 0 var(--cw);width:var(--cw);scroll-snap-align:center;scroll-snap-stop:always;border:2px solid transparent;transform:scale(.9);opacity:.5;transition:transform .22s,opacity .22s,border-color .22s;-webkit-tap-highlight-color:transparent}
+.hcard.on{transform:none;opacity:1;border-color:var(--pri2)}
+.hcard .pic{aspect-ratio:auto;height:var(--ph);-webkit-user-drag:none}
+.hcard .bd{padding:2px 12px 12px}
+.hcard .nm{display:block;font-size:13px;color:var(--pri2);font-weight:800;margin-bottom:2px}
+.hcard h3{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
+.hcard .tags{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdots{display:flex;justify-content:center;gap:6px;margin:6px 0 2px}
+.hdots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s,background .2s}
+.hdots i.on{width:16px;background:var(--pri2)}
+#hEps h2{margin:10px 0 7px;font-size:15px}
+.ep{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ep .tx{flex:1;min-width:0}.ep b{font-size:14px}.ep p{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.4}
+.ep .eb,.story .eb{flex:none;height:32px;line-height:32px;padding:0 14px;border-radius:16px;background:var(--pri);color:#fff;font-size:13px;font-weight:800}
+.eb.adult{background:#e11d48}
+.story .eb{margin-left:auto}
+.epsoon{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--sub);font-size:13px}
 .rank{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:10px 4px;border-bottom:1px solid var(--line)}
 .rank .n{width:22px;font-size:18px;font-weight:900;color:var(--pri2);text-align:center}
 .rank .av{width:54px;height:54px;border-radius:14px;background:center 18%/cover;flex:none}
@@ -1265,40 +1282,81 @@ function renderBond(){
 // ───────────────────────── 홈 ─────────────────────────
 // 에피소드 목록은 data/episodes.json(8-A): basic = 캐릭터별 기본 에피소드, special = 특별 에피소드(예전 STORIES)
 let EPS={basic:{},special:[]},STORIES=[];
-const H={seg:"home",q:"",sort:"rec",tag:""};
+const H={seg:"home",sort:"rec",pick:null};
+// 홈 정렬(8-B): 추천 = data/characters.json recommend 순서, 인기 랭킹 = 대화 수, 신규 = NEW 먼저, 3D로 만나기 = 3D 표시만
+function homeList(){
+  let list=[...CH];
+  if(H.sort==="rec")list.sort((a,b)=>REC.indexOf(a.id)-REC.indexOf(b.id));
+  if(H.sort==="hot")list.sort((a,b)=>b.chats-a.chats);
+  if(H.sort==="new")list.sort((a,b)=>(b.badge==="NEW")-(a.badge==="NEW"));
+  if(H.sort==="3d")list=list.filter(c=>c.badge==="3D");
+  return list;
+}
+// 에피소드 버튼 표시: 19+ 인증 전 → 「19+ 인증」, 기본은 대화방에 들어간 적 있으면 「이어하기」, 특별은 무료/💎/구매함
+const epAdult=()=>`<span class="eb adult">${esc(UI("home.btnAdult"))}</span>`;
+function renderEps(cid){
+  const box=$("#hEps");if(!box)return;
+  const c=chBy(cid);if(!c){box.innerHTML="";return}
+  const b=(EPS.basic||{})[cid],sp=STORIES.filter(s=>(s.char||"seoa")===cid),ad=needAdult(cid);
+  box.innerHTML=`<h2>${esc(UI("home.basic"))}</h2>
+  ${b?`<button class="ep" data-b="${cid}"><span class="tx"><b>${esc(b.title)}</b><p>${esc(b.situation)}</p></span>${ad?epAdult():`<span class="eb">${esc(S.rooms.includes(cid)?UI("home.btnContinue"):UI("home.btnStart"))}</span>`}</button>`:""}
+  <h2>${esc(UI("home.special"))}</h2>
+  ${sp.length?sp.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${esc(st.name)}</b><p>${esc(st.desc)}</p><span class="mo">${esc(UI("home.motion",{name:MNAME[st.m]||st.m}))}</span></span>
+    ${ad?epAdult():`<span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${esc(S.stories[st.id]?UI("home.btnOwned"):st.price?UI("home.btnPrice",{price:st.price}):UI("home.btnFree"))}</span>`}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
+  :`<div class="epsoon">${esc(UI("home.soon"))}</div>`}`;
+  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>enterRoom(x.dataset.b));  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
+  box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
+}
 function renderHome(){
-  const seg=`<div class="hseg"><button class="${H.seg==="home"?"on":""}" data-seg="home">홈</button><button class="${H.seg==="rank"?"on":""}" data-seg="rank">랭킹</button></div>`;
-  const eps=`<h2>📖 특별 에피소드</h2>
-  ${STORIES.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${st.name}</b><p>${esc((chBy(st.char)||{}).name||"")} · ${st.desc}</p><span class="mo">✨ 에피소드 전용 모션: ${MNAME[st.m]}</span></span>
-    <span class="pr ${st.price&&!S.stories[st.id]?"":"free"}">${esc(S.stories[st.id]?UI("home.btnOwned"):st.price?UI("home.btnPrice",{price:st.price}):UI("home.btnFree"))}</span></button>`).join("")}
-  <p class="alnote" style="margin-top:6px">에피소드를 사면 그 이야기 속 장면과 전용 모션을 볼 수 있어요.</p>`;
+  const seg=`<div class="hseg"><button class="${H.seg==="home"?"on":""}" data-seg="home">${esc(UI("home.seg.home"))}</button><button class="${H.seg==="rank"?"on":""}" data-seg="rank">${esc(UI("home.seg.rank"))}</button></div>`;
+  const h=$("#home");
   if(H.seg==="rank"){
     const r=[...CH].sort((a,b)=>b.chats-a.chats);
-    $("#home").innerHTML=seg+`<h2 style="margin-top:0">이번 주 대화 랭킹 <small style="font-size:12px;color:var(--sub);font-weight:500">대화 수 기준</small></h2>`+r.map((c,i)=>`<button class="rank" data-c="${c.id}"><span class="n">${i+1}</span><span class="av" style="background-image:url(${c.img})"></span><span style="flex:1;min-width:0"><b>${c.name}</b><div class="s">${esc(c.hook)}</div><div class="tg">💬 ${c.chats}만 · ${c.tags.slice(0,2).map(t=>"#"+t).join(" ")}</div></span></button>`).join("");
+    h.innerHTML=seg+`<h2 style="margin-top:0">이번 주 대화 랭킹 <small style="font-size:12px;color:var(--sub);font-weight:500">대화 수 기준</small></h2>`+r.map((c,i)=>`<button class="rank" data-c="${c.id}"><span class="n">${i+1}</span><span class="av" style="background-image:url(${c.img})"></span><span style="flex:1;min-width:0"><b>${c.name}</b><div class="s">${esc(c.hook)}</div><div class="tg">💬 ${c.chats}만 · ${c.tags.slice(0,2).map(t=>"#"+t).join(" ")}</div></span></button>`).join("");
+    h.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
   }else{
-    const tags=[...new Set(CH.flatMap(c=>c.tags))];
-    let list=CH.filter(c=>(!H.tag||c.tags.includes(H.tag))&&(!H.q||(c.name+c.hook+c.desc+c.tags.join("")).includes(H.q)));
-    if(H.sort==="rec")list=[...list].sort((a,b)=>REC.indexOf(a.id)-REC.indexOf(b.id));
-    if(H.sort==="hot")list=[...list].sort((a,b)=>b.chats-a.chats);
-    if(H.sort==="new")list=[...list].sort((a,b)=>(b.badge==="NEW")-(a.badge==="NEW"));
-    if(H.sort==="3d")list=list.filter(c=>c.badge==="3D");
-    const sorts=[["rec","추천"],["hot","인기 랭킹"],["new","신규"],["3d","3D로 만나기"]];
-    $("#home").innerHTML=seg+`<div class="hsearch"><input id="hq" placeholder="🔍 캐릭터, 태그로 찾기" value="${esc(H.q)}"></div>
-    <div class="srow">${sorts.map(([k,l])=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${l}</button>`).join("")}</div>
-    <div class="srow tagrow"><button class="fchip ${!H.tag?"on":""}" data-tag="">전체</button>${tags.map(t=>`<button class="fchip ${H.tag===t?"on":""}" data-tag="${t}">#${t}</button>`).join("")}</div>
-    ${list.length?`<div class="grid2">${list.map(c=>`<button class="ccard" data-c="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><h3>${esc(c.hook)}</h3><p>${esc(c.desc)}</p><div class="tags">${c.tags.map(t=>"#"+t).join(" ")}</div></div></button>`).join("")}</div>`:`<div class="empty">맞는 캐릭터가 없어요.</div>`}
-    ${eps}`;
-    const q=$("#hq");q.oninput=()=>{H.q=q.value;const p=q.selectionStart;renderHome();const n=$("#hq");n.focus();n.setSelectionRange(p,p)};
+    const list=homeList(),sorts=["rec","hot","new","3d"];
+    if(!list.some(c=>c.id===H.pick))H.pick=list.length?list[0].id:null;
+    h.innerHTML=seg+`<div class="srow">${sorts.map(k=>`<button class="pillchip ${H.sort===k?"on":""}" data-sort="${k}">${esc(UI("home.sorts."+k))}</button>`).join("")}</div>
+    <div class="hcar" id="hCar">${list.map(c=>`<button class="ccard hcard${c.id===H.pick?" on":""}" data-pick="${c.id}"><div class="pic" style="background-image:url(${c.img})"><span class="pl">💬 ${c.chats}만</span>${badgeOf(c)?`<span class="pl r${c.ageRating?" age":""}">${esc(badgeOf(c))}</span>`:""}</div><div class="bd"><b class="nm">${esc(c.name)}</b><h3>${esc(c.hook)}</h3><div class="tags">${c.tags.slice(0,3).map(t=>"#"+esc(t)).join(" ")}</div></div></button>`).join("")}</div>
+    <div class="hdots" id="hDots">${list.map(c=>`<i${c.id===H.pick?' class="on"':""}></i>`).join("")}</div>
+    <div id="hEps"></div>`;
+    Car.mount($("#hCar"),list.map(c=>c.id));
   }
-  const h=$("#home");
   h.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{H.seg=b.dataset.seg;renderHome()});
-  h.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{H.sort=b.dataset.sort;renderHome()});
-  h.querySelectorAll("[data-tag]").forEach(b=>b.onclick=()=>{H.tag=b.dataset.tag;renderHome()});
-  h.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
-  h.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>startStory(b.dataset.s));
+  h.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{if(H.sort===b.dataset.sort)return;H.sort=b.dataset.sort;H.pick=null;h.scrollTop=0;renderHome()});  // 정렬을 바꾸면 그 순서의 첫 카드
 }
+// 카드 가로 넘기기(8-B): 브라우저 스크롤 + 가운데 맞춤 스냅(scroll-snap). 가운데에 가장 가까운 카드가 고른 카드.
+// 옆 카드를 누르면 가운데로. 노트북: 마우스 휠(세로 휠은 한 장씩)·끌기. ←/→ 키는 시연 패널 단축키라 홈에서는 쓰지 않음
+const Car=(()=>{
+  let el=null,ids=[],cur=-1,raf=0,wheelAt=0,drag=null,moved=false;
+  const cards=()=>el?[...el.children]:[];
+  function nearest(){const mid=el.scrollLeft+el.clientWidth/2;let best=0,bd=1e9;cards().forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<bd){bd=d;best=i}});return best}
+  function mark(i){
+    cards().forEach((c,k)=>c.classList.toggle("on",k===i));
+    document.querySelectorAll("#hDots i").forEach((d,k)=>d.classList.toggle("on",k===i));
+    if(i!==cur){cur=i;H.pick=ids[i];renderEps(ids[i])}
+  }
+  function go(i,smooth=true){const c=cards()[i];if(!c)return;el.scrollTo({left:c.offsetLeft+c.offsetWidth/2-el.clientWidth/2,behavior:smooth?"smooth":"auto"});mark(i)}
+  function onMove(e){if(!drag||!el)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>5&&!moved){moved=true;el.classList.add("drag")}if(moved)el.scrollLeft=drag.l-dx}
+  function onUp(){if(!drag||!el){drag=null;return}const was=moved;drag=null;el.classList.remove("drag");if(was){go(nearest());setTimeout(()=>moved=false,0)}}
+  window.addEventListener("pointermove",onMove);window.addEventListener("pointerup",onUp);
+  function mount(node,list){
+    el=node;ids=list;cur=-1;drag=null;moved=false;
+    const i0=Math.max(0,ids.indexOf(H.pick));
+    go(i0,false);requestAnimationFrame(()=>{if(el===node)go(i0,false)});  // 탭이 막 보였을 때 한 번 더(크기 반영 뒤)
+    el.addEventListener("scroll",()=>{if(drag)return;cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>mark(nearest()))},{passive:true});
+    cards().forEach((c,k)=>c.onclick=e=>{if(moved){e.preventDefault();return}if(k!==cur)go(k)});  // 가운데 카드를 누르면 아무 일 없음(들어가기는 에피소드 버튼)
+    el.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight")e.preventDefault()});  // 카드에 포커스가 있어도 ←/→ 로 넘어가지 않게(시연 패널 단축키는 그대로 받음)
+    el.addEventListener("wheel",e=>{if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;e.preventDefault();const t=performance.now();if(t-wheelAt<450)return;wheelAt=t;go(Math.max(0,Math.min(ids.length-1,cur+(e.deltaY>0?1:-1))))},{passive:false});
+    el.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"||e.button!==0)return;drag={x:e.clientX,l:el.scrollLeft};moved=false});  // 끌기는 마우스만(터치는 브라우저 스크롤)
+    el.addEventListener("dragstart",e=>e.preventDefault());
+  }
+  return{mount};
+})();
 function startStory(id){
-  const st=STORIES.find(x=>x.id===id);
+  const st=STORIES.find(x=>x.id===id);if(!st)return;
+  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
   if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
   S.stories[id]=1;save();renderTop();setTab("chat");openRoom(st.char||"seoa");setScene(st.scene);
   addMsg("sys",UI("home.storyStart",{name:st.name}));
@@ -1352,13 +1410,13 @@ function renderList(){
 function showList(){S.room=null;save();$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread()}
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
-function adultSheet(cid){
+function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
   const sh=$("#adultSheet"),T=k=>Onboard.T("adult."+k);
   sh.innerHTML=`<h2>${esc(T("title"))}</h2><p class="sub">${esc(T("desc"))}</p><button class="adbtn" id="adVerify" type="button"><span class="spin"></span><span>${esc(T("verify"))}</span></button><button class="adlater" id="adLater" type="button">${esc(T("later"))}</button>`;
   let busyV=false;
   $("#adLater").onclick=closeSheets;
   $("#adVerify").onclick=()=>{if(busyV)return;busyV=true;$("#adVerify").classList.add("loading");
-    setTimeout(()=>{S.adult={at:Date.now()};save();closeSheets();toast(esc(T("done")),2200);setTab("chat");openRoom(cid)},((DATA.onboarding||{}).timing||{}).adultVerifyMs||1000)};
+    setTimeout(()=>{S.adult={at:Date.now()};save();closeSheets();toast(esc(T("done")),2200);if(then)then();else{setTab("chat");openRoom(cid)}},((DATA.onboarding||{}).timing||{}).adultVerifyMs||1000)};
   openSheet("#adultSheet");
 }
 function openRoom(cid){
