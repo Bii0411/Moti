@@ -1067,7 +1067,8 @@ function renderAlbum(fresh){
   <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
   <div class="slots c3">${L.map(x=>{const a=S.col[x.id];
     if(a)return `<button class="slot got ${fresh===x.id?"fresh":""}" style="--gc:${gc(x)}" data-f="${x.id}">${badge(x)}<span class="e">${x.source==="gift"?"🎁":"💬"}</span><span class="s">${esc(x.name)}</span><span class="d">${fmtD(a.at)}</span><span class="d pl">${esc(place(a))}</span></button>`;
-    const soon=x.source==="chat"&&isSoon(x.id),h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
+    const soon=x.source==="chat"&&x.stage!==1&&isSoon(x.id),  // 9-1: 1단계(처음부터 열린) 몸짓은 「수집 대기 중」 대신 잠긴 칸
+      h=soon?(DATA.story||{}).soonText||"":hints[x.id]||UI("album.hint."+x.source);
     return `<button class="slot lock ${soon?"soon":""}" style="--gc:${gc(x)}" data-h="${x.id}">${badge(x)}<span class="e">${soon?"✨":"👤"}</span><span class="hint">${esc(h)}</span></button>`}).join("")}</div>`;
   $("#album").querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{albumSeg=b.dataset.seg;renderAlbum()});
   $("#album").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>replayCol(b.dataset.f));
