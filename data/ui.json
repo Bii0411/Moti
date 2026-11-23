@@ -1,7 +1,7 @@
 {
   "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
   "album": {
-    "_album": "추억 앨범 탭. tabFirst = 해금 기록 칸(예전 「처음 본 모습」), tabGift = 선물 반응 칸. firstProgress 의 {got}·{total} 은 모은 수·전체 수. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "_album": "앨범 탭. tabFirst = 해금 기록 칸(예전 「처음 본 모습」), tabGift = 선물 반응 칸. firstProgress 의 {got}·{total} 은 모은 수·전체 수. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
     "tabFirst": "명장면",
     "tabGift": "선물 리액션",
     "firstProgress": "명장면 수집 {got} / {total}",
@@ -17,5 +17,19 @@
     "_notify": "다른 캐릭터가 먼저 말 거는 알림. 헤더의 로고와 💎 사이에 한 줄로 보인다. 간격·보이는 시간은 data/config.json notify",
     "format": "💬 {name}: {line}",
     "aria": "{name} 대화방으로 가기"
+  },
+  "nav": {
+    "_nav": "하단 탭 이름(7-1에서 예전 이름을 「앨범」으로 바꿈). 홈·대화·마이 탭 이름은 아직 index.html 에 있다",
+    "album": "앨범"
+  },
+  "gift": {
+    "_gift": "선물 시트 안내 둘째 줄(note, {special} 자리에 special 이 금색 굵은 글씨로)과 처음 본 선물 반응 토스트 첫 줄(albumSaved, 뒤에 (모은 수 / 16) 이 붙음)",
+    "note": "선물마다 {special}이 있고, 처음 본 반응은 앨범에 남아요.",
+    "special": "서아의 특별한 반응(모션)",
+    "albumSaved": "📔 앨범에 새 모습 저장!"
+  },
+  "chat": {
+    "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김)",
+    "seoaFirst": "🎁 버튼으로 서아에게 선물할 수 있어요 · 📔 앨범에 반응이 모여요"
   }
 }

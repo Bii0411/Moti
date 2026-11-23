@@ -25,6 +25,7 @@
 | `bg_jihu_class.jpg`, `bg_jihu_hall.jpg`, `bg_jihu_night.jpg` | 지후 배경 (`v1.html`) | **확인 필요** |
 | `card_doyun.jpg`, `card_haram.jpg`, `card_ijun.jpg`, `card_jihu.jpg`, `card_seoa.jpg` | 캐릭터 카드 | **확인 필요** |
 | `icons/gift_button.png`, `icons/gift_coffee.png`, `icons/gift_flower.png`, `icons/gift_ramen.png`, `icons/gift_ring.png` | 선물 버튼·아이콘 | 커밋 `040b5ed`「받은 디자인 이미지」. 만든 사람 **확인 필요** |
+| `assets/onboarding/film_seoa.webp` | 입장권 3D 배경 필름 띠 (`film.js`) | 앱에서 직접 찍은 그림(7-2, `tools/filmshot.mjs`). 서아 모델 `seoa_vroid.glb` + 코드 몸짓(`motion.js`)을 렌더링한 것이라 서아 모델의 출처·라이선스를 따름 |
 
 ## 라이브러리·폰트 (저장소에 파일 없음, CDN으로 불러옴)
 

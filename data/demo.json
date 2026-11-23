@@ -34,7 +34,6 @@
   },
   "opening": "오프닝 다시 보기",
   "resetAll": "전체 초기화",
-  "resetAllConfirm": "정말 전부 지울까요? 한 번 더 누르기",
   "dia": "💎 500 충전",
   "diaToast": "💎 500 충전 (시연)",
   "moods": {
@@ -78,5 +77,5 @@
   "motionPreview": "연출",
   "motionPreviewTitle": "해금 연출 미리보기 (상태는 그대로)",
   "chapter": "{n}장 · {name}",
-  "keysNote": "단축키: 1~6 장면 · ← → 이전/다음 · R 다시 · D 패널 · W 서버 깨우기"
+  "keysNote": "단축키: 0 앱 처음 열기 · 1~6 장면 · ← → 이전/다음 · R 다시 · D 패널 · W 서버 깨우기"
 }
