@@ -206,7 +206,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .bondbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
 .bondbox .prog{flex:1;margin:0}
 .app.nostage .stage{display:none}
-/* 홈(23): 헤더 검색 칸 → 이어서 대화 → 특별 에피소드 줄 → 캐릭터 찾기(태그 칩 + 2열 카드). 캐릭터 화면은 .chd·.chero. 그림자·블러·애니메이션 없음 */
+/* 홈(23, 24-2에서 이어서 대화 뺌): 헤더 검색 칸 → 특별 에피소드 줄 → 캐릭터 찾기(태그 칩 + 2열 카드). 캐릭터 화면은 .chd·.chero. 그림자·블러·애니메이션 없음 */
 .hsearch{display:none;flex:0 1 auto;min-width:34px;max-width:170px;height:32px;align-items:center;gap:6px;padding:0 11px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:12px;-webkit-tap-highlight-color:transparent}
 .hsearch span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hsearch.on{color:var(--text);border-color:var(--pri2)}
@@ -221,9 +221,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.hh h2{margin:0}
 .hrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px;-webkit-overflow-scrolling:touch}.hrow::-webkit-scrollbar{display:none}
 .hrow>button{flex:none;-webkit-tap-highlight-color:transparent}
-.hcont>button{width:64px;display:flex;flex-direction:column;align-items:center;gap:5px}
-.hcont .av{width:58px;height:58px;border-radius:50%;background:center 15%/cover;border:2px solid var(--pri2)}
-.hcont .nm{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .spc{width:148px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .spc .im{position:relative;height:92px;background:center/cover}
 .spc .nw{position:absolute;top:7px;left:7px;font-size:10px;font-weight:900;letter-spacing:.04em;background:var(--pri);color:#fff;border-radius:999px;padding:2px 7px}
@@ -529,6 +526,7 @@ if(!S.v){const mv=i=>i===1?4:2;S.scene=mv(S.scene||0);
 if(S.v<3){S.col={};(S.firsts||[]).forEach(f=>{if(f&&f.mid&&!S.col[f.mid])S.col[f.mid]={at:f.at,line:f.line||"",text:f.text||"",scene:f.scene}});
   delete S.album;delete S.learned;delete S.firsts;S.pity=null;S.giftNext=null;S.v=3}
 S.col=S.col||{};
+delete S.camHelp;delete S.roomAt;  // 24-2: 카메라 도움말·홈 「이어서 대화」를 빼면서 쓰지 않게 된 저장값
 // 예전 저장값(6-C 전): 대화 목록은 사용자가 한마디라도 보낸 대화방만 남기고, 말 건 적 없는 대화방은 뺀다
 if(!Array.isArray(S.rooms)){S.rooms=Object.keys(S.chats||{}).filter(cid=>(S.chats[cid]||[]).some(m=>m.r==="u"));if(S.room&&!S.rooms.includes(S.room))S.room=null}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -1684,7 +1682,7 @@ const BondTop=(()=>{
 
 // ───────────────────────── 홈 ─────────────────────────
 // 에피소드 목록은 data/episodes.json(8-A): basic = 캐릭터별 기본 에피소드, special = 특별 에피소드(예전 STORIES)
-// 23: 홈을 위에서 아래로 검색 → 이어서 대화 → 특별 에피소드 줄 → 캐릭터 찾기(태그 칩 + 2열 카드). 카드를 누르면 캐릭터 화면(H.view)
+// 23: 홈을 위에서 아래로 검색 → 특별 에피소드 줄(24-2: 이어서 대화 뺌) → 캐릭터 찾기(태그 칩 + 2열 카드). 카드를 누르면 캐릭터 화면(H.view)
 let EPS={basic:{},special:[]},STORIES=[];
 const H={sort:"rec",tag:"",q:"",search:false,view:null,top:0};  // view = 캐릭터 화면에 보이는 캐릭터 id(null 이면 홈), top = 홈 스크롤 위치(뒤로 가기 때 되돌림)
 const SORTS=["rec","hot","new"];  // 23: 정렬 버튼이 도는 순서(추천 → 인기 → 신규)
@@ -1701,9 +1699,6 @@ function homeList(){
   if(q)list=list.filter(c=>[c.name,c.desc,...(c.tags||[])].some(x=>norm(x).includes(q)));
   return list;
 }
-// 이어서 대화: 대화방에 들어간 적 있는 캐릭터(S.rooms)를 최근 순으로. 기준 = 마지막으로 들어간 때(S.roomAt)와 마지막 메시지 때 중 늦은 쪽
-const roomTime=cid=>{const L=chatOf(cid),last=L[L.length-1];return Math.max((S.roomAt||{})[cid]||0,last&&last.at||0)};
-const recentRooms=()=>CH.filter(c=>S.rooms.includes(c.id)).sort((a,b)=>roomTime(b.id)-roomTime(a.id));
 // 특별 에피소드 줄: 모든 캐릭터의 특별 에피소드. new: true 가 맨 앞(그 안에서는 데이터 순서)
 const specialRow=()=>STORIES.map((s,i)=>({s,i})).sort((a,b)=>(!!b.s.new-!!a.s.new)||a.i-b.i).map(x=>x.s);
 // 에피소드 버튼 표시: 19+ 인증 전 → 「19+ 인증」, 기본은 대화방에 들어간 적 있으면 「이어하기」, 특별은 무료/💎/구매함
@@ -1738,22 +1733,20 @@ function renderHome(){
   const h=$("#home");renderSearchBtn();
   if(H.view&&chBy(H.view))return renderChar(h,chBy(H.view));
   H.view=null;
-  const q=!!norm(H.q),rec=recentRooms(),sp=specialRow(),chips=((DATA.ui||{}).home||{}).tagChips;  // 칩 목록은 배열이라 UI() 대신 바로 읽음
+  const q=!!norm(H.q),sp=specialRow(),chips=((DATA.ui||{}).home||{}).tagChips;  // 칩 목록은 배열이라 UI() 대신 바로 읽음
   const searching=H.search||q;
   h.innerHTML=`${searching?`<div class="hq"><span class="ic">${Icon.svg("search",16)}</span><input id="hQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(UI("home.search"))}" value="${esc(H.q)}"><button class="x" id="hQx" aria-label="${esc(UI("home.close"))}">${Icon.svg("close",16)}</button></div>`:""}
-  ${!q&&rec.length?`<section class="hsec"><h2>${esc(UI("home.continue"))}</h2><div class="hrow hcont">${rec.map(c=>`<button data-r="${c.id}"><span class="av" style="background-image:url(${c.img})"></span><span class="nm">${esc(c.name)}</span></button>`).join("")}</div></section>`:""}
   ${!q&&sp.length?`<section class="hsec"><h2>${esc(UI("home.specialRow"))}</h2><div class="hrow hsp">${sp.map(st=>{const c=chBy(st.char||"seoa");return `<button class="spc" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})">${st.new?`<span class="nw">${esc(UI("home.newTag"))}</span>`:""}</span><span class="tx"><b>${esc(st.name)}</b><small>${esc(c?c.name:"")}</small>${spPrice(st)}</span></button>`}).join("")}</div></section>`:""}
   <section class="hsec"><div class="hh"><h2>${esc(UI("home.find"))}</h2><button class="hsort" id="hSort" aria-label="${esc(UI("home.sortLabel"))}">${Icon.svg("sort",14)}<span>${esc(UI("home.sorts."+H.sort))}</span></button></div>
   <div class="hchips">${[""].concat(Array.isArray(chips)?chips:[]).map(t=>`<button class="hchip${H.tag===t?" on":""}" data-t="${esc(t)}">${esc(t?"#"+t:UI("home.all"))}</button>`).join("")}</div>
   <div id="hGrid"></div></section>`;
   renderGrid();
-  h.querySelectorAll("[data-r]").forEach(x=>x.onclick=()=>enterRoom(x.dataset.r));  // 이어서 대화: 그 대화방으로 바로(서아는 보던 이야기 그대로)
   h.querySelectorAll(".hsp [data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
   h.querySelectorAll("[data-t]").forEach(x=>x.onclick=()=>{H.tag=x.dataset.t;h.querySelectorAll("[data-t]").forEach(y=>y.classList.toggle("on",y===x));renderGrid()});
   $("#hSort").onclick=()=>{H.sort=SORTS[(SORTS.indexOf(H.sort)+1)%SORTS.length];$("#hSort span").textContent=UI("home.sorts."+H.sort);renderGrid()};
   const qi=$("#hQ");
   if(qi){
-    // 글자를 칠 때마다 아래 목록만 다시 그림(입력창은 그대로). 검색어가 생기거나 없어질 때만 홈 전체(이어서 대화·특별 에피소드 줄 숨김/보임)
+    // 글자를 칠 때마다 아래 목록만 다시 그림(입력창은 그대로). 검색어가 생기거나 없어질 때만 홈 전체(특별 에피소드 줄 숨김/보임)
     qi.oninput=()=>{const was=!!norm(H.q);H.q=qi.value;renderSearchBtn();if(was!==!!norm(H.q)){renderHome();const n=$("#hQ");n.focus();n.setSelectionRange(n.value.length,n.value.length)}else renderGrid()};
     qi.onkeydown=e=>{if(e.key==="Enter")qi.blur()};
     $("#hQx").onclick=()=>{H.q="";H.search=false;renderHome()};
@@ -1853,7 +1846,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
 function openRoom(cid){
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
-  S.room=cid;S.read[cid]=chatOf(cid).length;(S.roomAt=S.roomAt||{})[cid]=Date.now();save();  // 23: 마지막으로 들어간 때(홈 「이어서 대화」 순서)
+  S.room=cid;S.read[cid]=chatOf(cid).length;save();
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   $("#roomSub").textContent=cid==="seoa"?"3D · 표정 · 선물":"2D · 3D는 준비 중이에요";Thread.chip(cid);
