@@ -18,7 +18,7 @@
       "chat": "대화에서 만나요",
       "gift": "선물로 만나요"
     },
-    "unlockTag": "🔓 새 명장면",
+    "unlockTag": "새 명장면",
     "unlockSaved": "명장면 +1"
   },
   "chatList": {
@@ -72,7 +72,7 @@
     "noDia": "💎가 부족해요"
   },
   "collection": {
-    "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). already = 선물로 이미 있는 몸짓이 나왔을 때",
+    "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). giftGrade = 선물 결과 카드 첫 줄({grade} 등급 이름, {gift} 선물 이름, 17-2). owned = 선물로 이미 모은 몸짓이 나왔을 때 카드 셋째 줄(17-2, 예전 already 「이미 본 모습이에요」 알림을 대신함)",
     "grade": {
       "common": "일반",
       "rare": "레어",
@@ -82,7 +82,8 @@
       "rare": "레어 · {name}",
       "special": "시크릿 · {name}"
     },
-    "already": "이미 본 모습이에요"
+    "giftGrade": "{grade} · {gift}",
+    "owned": "이미 모은 모습"
   },
   "my": {
     "_my": "마이 페이지 카드 문구(12단계). lv·next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",

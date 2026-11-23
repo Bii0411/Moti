@@ -58,7 +58,10 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .gcard .g{font-size:10px;font-weight:700;color:var(--gfColor,#fff)}
 .gcard b{font-size:14px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gcard .c{font-size:10px;color:var(--sub)}
-.stage.gfon .cap{opacity:0}
+/* 17-2 이미 모은 몸짓(선물): 같은 카드를 흐리게(회색 테두리·글자). 무대는 어둡게 하지 않음 */
+.gradefx.muted .gcard{opacity:var(--gfMuted,.75)}
+.gradefx.muted .gcard b{color:var(--sub)}
+.stage.gfon .cap,.stage.gfon .bubble{opacity:0}  /* 17-2: 선물 대사 자막(#bubble)도 카드 동안 숨김 */
 @keyframes burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}25%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-95%) scale(1)}}
 
 main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
@@ -1102,23 +1105,28 @@ function firstSeen(mid){
 }
 // 새 몸짓 알림(대화·선물 공통, 9-B): 일반 = 지금 작은 알림, 레어·시크릿 = 무대 아래 수집 카드(17-B, 크기·시간·색 data/collection.json notify)
 let firstChipT,gradeT;
-function notifyNew(it){
+// o.gift: 선물 이름(17-2, 카드 첫 줄이 「등급 · 선물」)
+function notifyNew(it,o={}){
   const D=DATA.story||{},N=(COL.notify||{})[it.grade];
   if(!N){const c=$("#firstChip");c.textContent=(D.firstSeenText||"{name}").replace("{name}",it.name);
     c.classList.add("on");clearTimeout(firstChipT);firstChipT=setTimeout(()=>c.classList.remove("on"),D.firstSeenMs||2000);return}
-  gradeFx(it,N);
+  gradeFx(it,N,o);
 }
-// 카드: 왼쪽 등급 색 칸 + 등급 이름 / 몸짓 이름 / 「명장면 +1 · n / 전체」. 떠 있는 동안 무대 아래 「▶ 몸짓 이름」 칩(#cap)을 숨김
-function gradeFx(it,N){
+// 17-2 선물로 이미 모은 몸짓이 나왔을 때(등급 상관없이): 같은 카드를 흐리게, 셋째 줄 「이미 모은 모습」
+function notifyOwned(it,o={}){gradeFx(it,(COL.notify||{}).owned||{color:"#8b8798"},{...o,owned:true})}
+// 카드: 왼쪽 등급 색 칸 + 등급 이름(선물이면 「등급 · 선물」) / 몸짓 이름 / 「명장면 +1 · n / 전체」(이미 모은 것이면 「이미 모은 모습」). 떠 있는 동안 무대 아래 「▶ 몸짓 이름」 칩(#cap)을 숨김
+function gradeFx(it,N,o={}){
   const C=(COL.notify||{}).card||{},g=$("#gradeFx"),st=$("#stage"),all=colList("all");
-  g.querySelector(".g").textContent=gradeKo(it.grade);g.querySelector("b").textContent=it.name;
-  g.querySelector(".c").textContent=UI("album.unlockSaved")+" · "+UI("album.count",{n:all.filter(x=>S.col[x.id]).length,total:all.length});
+  g.querySelector(".g").textContent=o.gift?UI("collection.giftGrade",{grade:gradeKo(it.grade),gift:o.gift}):gradeKo(it.grade);g.querySelector("b").textContent=it.name;
+  g.querySelector(".c").textContent=o.owned?UI("collection.owned"):UI("album.unlockSaved")+" · "+UI("album.count",{n:all.filter(x=>S.col[x.id]).length,total:all.length});
+  g.classList.toggle("muted",!!o.owned);if(N.opacity!=null)g.style.setProperty("--gfMuted",N.opacity);
   const px=(k,v)=>g.style.setProperty(k,v+"px"),ms=C.ms||2600,fade=C.fadeMs||400;
   px("--gfW",C.widthPx||210);px("--gfRadius",C.radiusPx||14);px("--gfBottom",C.bottomPx||12);px("--gfRisePx",C.risePx||18);px("--gfBox",C.boxPx||36);
   g.style.setProperty("--gfBg",C.bg||"rgba(13,11,22,.85)");g.style.setProperty("--gfRise",(C.riseMs||400)+"ms");g.style.setProperty("--gfFade",fade+"ms");
   g.style.setProperty("--gfColor",N.color||"#fff");g.style.setProperty("--gfSoft",N.soft||"transparent");g.style.setProperty("--gfDim",N.dim||0);
   g.classList.remove("on");void g.offsetWidth;g.classList.add("on");st.classList.add("gfon");
-  clearTimeout(gradeT);gradeT=setTimeout(()=>{g.classList.remove("on");gradeT=setTimeout(()=>st.classList.remove("gfon"),fade)},Math.max(0,ms-fade));
+  const sub=$("#bubble"),subTxt=sub&&sub.classList.contains("on")?sub.textContent:null;  // 17-2: 선물 대사 자막은 카드 동안 숨김 → 카드 뒤 처음부터 다시 보여 줌
+  clearTimeout(gradeT);gradeT=setTimeout(()=>{g.classList.remove("on");gradeT=setTimeout(()=>{st.classList.remove("gfon");if(subTxt&&sub.textContent===subTxt)stageSub(subTxt)},fade)},Math.max(0,ms-fade));
 }
 function unlockNext(){
   const x=unlockQ.shift();if(!x){unlockBusy=false;return}
@@ -1132,7 +1140,7 @@ function unlockNext(){
 // 해금 연출(재생·표정·토스트). 시연 패널 「연출 미리보기」도 이것만 부름(기록 없음)
 function unlockFx(mid,text,kind){
   Stage.play(mid,{tag:esc(UI("album.unlockTag")),fx:Fx.pick(kind||"stage",mid)});Stage.setFace("shy");faceReset();  // 3D 확대 + 허벅지 중간(춤은 전신)은 View.motion 이
-  toast(`🔓 ${esc(text)}<br><b>「${esc(MNAME[mid]||mid)}」</b><br><small>${esc(UI("album.unlockSaved"))}</small>`,3600);
+  toast(`${esc(text)}<br><b>「${esc(MNAME[mid]||mid)}」</b><br><small>${esc(UI("album.unlockSaved"))}</small>`,3600);
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
@@ -1316,7 +1324,7 @@ function give(id){
     addMsg("c",line,{gift:it.id});
     if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계 단계·호감도는 그대로
     renderTop();save();
-    if(isNew)notifyNew(it);else toast(esc(UI("collection.already")),2200);
+    if(isNew)notifyNew(it,{gift:g.name});else notifyOwned(it,{gift:g.name});  // 17-2: 선물 결과도 대화와 같은 카드(일반 처음 = 위쪽 작은 알림)
     if(curTab==="album")renderAlbum(it.id);
   },700);
 }
