@@ -40,3 +40,5 @@
 | --- | --- | --- |
 | three.js r128, GLTFLoader | `index.html`, `v1.html`, `xstage.html` | cdnjs / jsDelivr · MIT |
 | Noto Sans KR | `v1.html` | Google Fonts · SIL Open Font License |
+| 아래 탭바 아이콘(홈·대화·앨범·마이), 마이 페이지 PLUS 혜택 아이콘(무한·기억·말풍선·다이아·사진) | `index.html` (12단계) | [Tabler Icons](https://tabler.io/icons) (MIT 라이선스) 모양을 옮겨 코드 안 SVG 로 넣음. 선 굵기 1.8 |
+| 다이아 재화 아이콘 | `index.html` 헤더·마이 페이지 (12단계) | 코드 안 SVG 로 직접 그림(임시) |

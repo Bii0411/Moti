@@ -161,9 +161,32 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .card h3{font-size:15px;margin-bottom:6px}
 .card ul{list-style:none;font-size:13px;line-height:1.9;color:#ddd6f3}
 .card .cta{margin-top:10px;width:100%;padding:11px;border-radius:12px;background:var(--pri);font-weight:800;font-size:14px}
-.card.plus{background:linear-gradient(150deg,#3b2470,#1b1530);border-color:#7c5cff}
+.card.plus{background:#17132a;border-color:#3b2f6b}
+.mbh{display:flex;align-items:center;gap:8px;margin-bottom:12px}.mbh b{font-size:16px}
+.mbh .lv{font-size:11.5px;font-weight:800;color:#f0a6c8;background:rgba(244,114,182,.12);border-radius:6px;padding:2px 7px}
+.mbh .nx{margin-left:auto;font-size:12px;color:var(--sub)}
+.mybond .prog i{background:#f472b6}
+.mrow{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}.mrow b{color:var(--text);font-weight:700}
+.mph{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.mph .wm{font-size:18px;font-weight:900;letter-spacing:-.3px}.mph .wm span{color:#a78bfa}
+.mph .pp{margin-left:auto;font-size:12px;color:var(--sub)}.mph .pp b{color:var(--text);font-size:14px}
+.mph .on{margin-left:auto;font-size:12px;color:#6ee7b7;font-weight:700}
+.card ul.perks{line-height:1.4;font-size:13.5px;color:#e6e1f5}
+.perks li{display:flex;align-items:center;gap:11px;padding:5px 0}
+.perks em{font-style:normal;font-size:11.5px;color:var(--sub);margin-left:6px}
+.perks .mi{width:30px;height:30px;border-radius:9px;background:rgba(167,139,250,.12);color:#a78bfa;display:flex;align-items:center;justify-content:center;flex:none}
+.perks .mi svg{width:17px;height:17px}
+.card .fine{text-align:center;font-size:11px;color:var(--dim,#6b6878);margin:8px 0 0}
+.mch{display:flex;align-items:center;margin-bottom:12px}.mch b{font-size:16px}
+.mch .bal{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:13px;font-weight:800;background:#1f1d27;border-radius:999px;padding:4px 10px 4px 7px}
+.packs .amt{display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px}
+.packs button{position:relative}
+.packs button.hot{border-color:#8b5cf6}
+.packs .tg{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;background:#8b5cf6;border-radius:999px;padding:1px 7px;white-space:nowrap}
+.gem{display:block;flex:none}
+.dpill{display:inline-flex;align-items:center;gap:5px}
 .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.packs button{background:#0f0d16;border:1px solid var(--line);border-radius:12px;padding:10px 4px;font-size:13px;font-weight:800}
+.packs button{background:#0f0d16;border:1px solid var(--line);border-radius:12px;padding:13px 4px 11px;font-size:13px;font-weight:800}
 .packs button small{display:block;font-size:11px;color:var(--sub);font-weight:500;margin-top:2px}
 .bondbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
 .bondbox .prog{flex:1;margin:0}
@@ -239,11 +262,12 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .roomhd b{font-size:15px}.roomhd small{font-size:11px;color:var(--sub);display:block}
 #room{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 nav button{position:relative}
-nav .nb{position:absolute;top:4px;left:calc(50% + 6px);background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:1px 5px}
-nav{display:flex;border-top:1px solid var(--line);background:#0e0c16}
-nav button{flex:1;padding:10px 0 12px;font-size:12px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
-nav button b{font-size:18px}
-nav button.on{color:var(--text)}
+nav .nb{position:absolute;top:-5px;left:15px;min-width:17px;height:17px;line-height:17px;text-align:center;background:#8b5cf6;color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:0 5px}
+nav{display:flex;border-top:.5px solid rgba(255,255,255,.08);background:#0e0c16}
+nav button{flex:1;padding:9px 0 11px;font-size:11px;color:#6b6878;display:flex;flex-direction:column;align-items:center;gap:3px;-webkit-tap-highlight-color:transparent}
+nav button b{position:relative;display:block;width:24px;height:24px}nav button b svg{width:24px;height:24px;display:block}
+nav button:active b{transform:scale(.9)}
+nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
 /* 시트 */
 .scrim{position:absolute;inset:0;background:#0009;display:none;z-index:20}
@@ -319,7 +343,7 @@ nav button.on{color:var(--text)}
   <header>
     <h1>moti<small id="aiTag"></small></h1>
     <div class="hnote"><button id="hNote" type="button" tabindex="-1"></button></div>
-    <span class="pill">💎 <span id="dia">0</span></span>
+    <span class="pill dpill"><svg class="gem" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z" fill="#7c5cff"/><path d="M2 9h20L12 21z" fill="#5b3fd6"/><path d="M6 3l3 6h6l3-6" fill="#a993ff"/><path d="M9 9l3 12 3-12z" fill="#6d4cf0"/></svg><span id="dia">0</span></span>
     <button class="gear" id="gearBtn" aria-label="시연 설정" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </header>
 
@@ -366,10 +390,10 @@ nav button.on{color:var(--text)}
   </main>
 
   <nav>
-    <button data-tab="home"><b>🏠</b>홈</button>
-    <button class="on" data-tab="chat"><b>💬</b>대화<span class="nb" id="navUnread" style="display:none"></span></button>
-    <button data-tab="album"><b>📔</b><span id="navAlbum">앨범</span></button>
-    <button data-tab="my"><b>👤</b>마이</button>
+    <button data-tab="home"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M10 12h4v4h-4z"/></svg></b>홈</button>
+    <button class="on" data-tab="chat"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20l1.3-3.9c-2.324-3.437-1.426-7.872 2.1-10.374 3.526-2.501 8.59-2.296 11.845.48 3.255 2.777 3.695 7.266 1.029 10.501-2.666 3.235-7.615 4.215-11.574 2.293L3 20"/></svg><span class="nb" id="navUnread" style="display:none"></span></b>대화</button>
+    <button data-tab="album"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 16l5-5c.928-.893 2.072-.893 3 0l5 5"/><path d="M14 14l1-1c.928-.893 2.072-.893 3 0l3 3"/></svg></b><span id="navAlbum">앨범</span></button>
+    <button data-tab="my"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></b>마이</button>
   </nav>
 
   <div class="scrim" id="scrim"></div>
@@ -1464,18 +1488,26 @@ function startStory(id){
 }
 
 // ───────────────────────── 마이 ─────────────────────────
+// 마이 페이지 라인 아이콘(12단계). 선 굵기 1.8, 둥근 끝. 모양은 Tabler Icons(MIT)를 옮김
+const MYI={"infinity": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9.828 9.172a4 4 0 1 0 0 5.656 10 10 0 0 0 2.172-2.828 10 10 0 0 1 2.172-2.828 4 4 0 1 1 0 5.656 10 10 0 0 1-2.172-2.828 10 10 0 0 0-2.172-2.828\"/></svg>", "history": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8v4l2 2\"/><path d=\"M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5\"/></svg>", "message": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 20l1.3-3.9c-2.324-3.437-1.426-7.872 2.1-10.374 3.526-2.501 8.59-2.296 11.845.48 3.255 2.777 3.695 7.266 1.029 10.501-2.666 3.235-7.615 4.215-11.574 2.293L3 20\"/></svg>", "diamond": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 5h12l3 5-8.5 9.5a.7.7 0 0 1-1 0L3 10l3-5\"/><path d=\"M10 12l-2-2.2.6-1\"/></svg>", "photo": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 8h.01\"/><path d=\"M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z\"/><path d=\"M3 16l5-5c.928-.893 2.072-.893 3 0l5 5\"/><path d=\"M14 14l1-1c.928-.893 2.072-.893 3 0l3 3\"/></svg>"};
+// 다이아 재화 아이콘(12단계, 직접 그림). 💎 이모지 대신 마이 페이지 재화 표시에 씀
+const GEM=(sz=16)=>`<svg class="gem" width="${sz}" height="${sz}" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z" fill="#7c5cff"/><path d="M2 9h20L12 21z" fill="#5b3fd6"/><path d="M6 3l3 6h6l3-6" fill="#a993ff"/><path d="M9 9l3 12 3-12z" fill="#6d4cf0"/></svg>`;
 function renderMy(){
-  const {i,nx,pct}=renderBond();const n=COL.items.filter(x=>S.col[x.id]).length;
+  const {i,nx,pct}=renderBond();const n=COL.items.filter(x=>S.col[x.id]).length;const M=(DATA.ui||{}).my||{};
+  const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
+  const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
+  const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
   $("#my").innerHTML=`<h2>나와 서아</h2>
-  <div class="card"><h3>💗 관계 ${i+1}단계 · ${stageName(i+1)}</h3>
-    <div class="bondbox"><div class="prog"><i style="width:${pct}%"></i></div><span>${nx?"다음: "+nx.n:"최고 단계"}</span></div>
-    <p class="alnote" style="margin:8px 0 0">관계는 <b>대화로만</b> 깊어져요. 선물로는 올라가지 않아요.<br>${esc(UI("my.collection",{n,total:COL.items.length}))}</p></div>
-  <div class="card plus"><h3>✨ moti PLUS ${S.plus?"<small style='color:#6ee7b7'>· 이용 중</small>":""}</h3>
-    <ul><li>💬 하루 대화 무제한 (무료는 하루 30번)</li><li>🧠 서아가 예전 대화까지 기억해요</li><li>📩 서아가 먼저 말을 걸어요</li><li>💎 매달 300 지급</li><li>${esc(UI("my.plusPhotos",{plusCap:((DATA.photos||{}).slots||{}).plusCap||200}))}</li></ul>
-    <button class="cta" id="plusBtn">${S.plus?"구독 해지 (시연)":"월 9,900원으로 시작 (시연)"}</button></div>
-  <div class="card"><h3>💎 충전 <small style="color:var(--sub);font-weight:500">· 현재 ${S.dia}</small></h3>
-    <div class="packs"><button data-p="100">💎 100<small>7,000원</small></button><button data-p="500">💎 500<small>35,000원</small></button><button data-p="1200">💎 1,200<small>84,000원</small></button></div>
-    <p class="alnote" style="margin:8px 0 0">💎 1개 = 70원 · 선물과 특별 에피소드에 써요. (시연이라 실제 결제는 안 돼요)</p></div>
+  <div class="card mybond"><div class="mbh"><span class="lv">${esc(UI("my.lv",{n:i+1}))}</span><b>${esc(stageName(i+1))}</b><span class="nx">${esc(nx?UI("my.next",{name:nx.n}):UI("my.max"))}</span></div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    <p class="alnote" style="margin:10px 0 0">${esc(UI("my.bondNote1"))}<b>${esc(UI("my.bondNoteB"))}</b>${esc(UI("my.bondNote2"))}</p>
+    <div class="mrow"><span>${esc(UI("my.collectionLabel"))}</span><b>${n} / ${COL.items.length}</b></div></div>
+  <div class="card plus"><div class="mph"><span class="wm">moti <span>PLUS</span></span>${S.plus?`<small class="on">${esc(UI("my.plusOn"))}</small>`:`<span class="pp"><b>${esc(UI("my.plusPrice"))}</b> ${esc(UI("my.plusPer"))}</span>`}</div>
+    <ul class="perks">${perks}</ul>
+    <button class="cta" id="plusBtn">${esc(S.plus?UI("my.plusStop"):UI("my.plusStart"))}</button><p class="fine">${esc(UI("my.demoNote"))}</p></div>
+  <div class="card"><div class="mch"><b>${esc(UI("my.chargeTitle"))}</b><span class="bal">${GEM(15)}${Number(S.dia).toLocaleString()}</span></div>
+    <div class="packs">${packs}</div>
+    <p class="alnote" style="margin:10px 0 0">${esc(UI("my.chargeNote"))}</p></div>
   <p class="alnote" style="text-align:center"><a href="v1.html" style="color:var(--sub)">이전 버전(v1) 보기</a></p>`;
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast("✨ PLUS 시작 · 💎 300 지급")}save();renderTop();renderMy()};
   $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(`💎 ${b.dataset.p} 충전 (시연)`)});
