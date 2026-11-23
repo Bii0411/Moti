@@ -95,5 +95,6 @@
   "keysNote": "단축키: 0 앱 처음 열기 · 1~6 장면 · ← → 이전/다음 · R 다시 · D 패널 · W 서버 깨우기",
   "photoFill": "사진 가득 채우기",
   "photoClear": "사진 비우기",
-  "photoFilled": "사진 {n} / {cap}"
+  "photoFilled": "사진 {n} / {cap}",
+  "colOpenAll": "명장면 모두 열기"
 }

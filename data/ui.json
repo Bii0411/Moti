@@ -157,5 +157,58 @@
     "mark": "moti · 윤서아",
     "plusStart": "✨ PLUS 시작 · 💎 300 지급",
     "ariaClose": "닫기"
+  },
+  "booth": {
+    "_booth": "포토부스(11단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md [11]). count = 위쪽 저장 칸({n}·{cap}), cell = 칸 꾸미기 제목({k} 칸 번호), sec = 항목 이름, angle = 각도 표시({deg}), bg = 단색 배경 이름(장소 배경은 장소 이름 그대로), frame = 프레임 이름, shotOf = 촬영 중 위쪽({k} / 4), count3·2·1·click = 카운트다운, foot = 사진 아래 줄(사진 안에 찍힘, {date} 모양은 data/booth.json strip.date). aria* = 화면에 글자가 없는 버튼의 접근성 이름. momentValue = 동작 순간 값 표시({n} 0~100)",
+    "albumBtn": "포토부스",
+    "title": "포토부스",
+    "back": "‹ 앨범",
+    "count": "사진 {n} / {cap}",
+    "cell": "{k}번 칸",
+    "sec": {
+      "pose": "포즈",
+      "moment": "동작 순간",
+      "face": "표정",
+      "angle": "각도",
+      "bg": "배경",
+      "frame": "프레임"
+    },
+    "poseNote": "모은 몸짓만 고를 수 있어요",
+    "locked": "아직 모으지 않은 몸짓이에요",
+    "momentValue": "{n}%",
+    "angle": {
+      "front": "정면",
+      "left": "왼쪽 {deg}°",
+      "right": "오른쪽 {deg}°"
+    },
+    "bg": {
+      "white": "흰색",
+      "pink": "분홍",
+      "black": "검정",
+      "purple": "보라"
+    },
+    "frame": {
+      "white": "흰색",
+      "black": "검정",
+      "pink": "분홍"
+    },
+    "shoot": "촬영",
+    "shotOf": "{k} / 4",
+    "countdown": [
+      "3",
+      "2",
+      "1"
+    ],
+    "click": "찰칵",
+    "resultTitle": "완성",
+    "resultNote": "칸을 누르면 그 칸만 다시 찍을 수 있어요",
+    "redo": "다시 꾸미기",
+    "done": "완성",
+    "saved": "사진에 저장했어요",
+    "share": "공유하기",
+    "close": "닫기",
+    "foot": "{date} · moti · 윤서아",
+    "ariaZoomOut": "멀리",
+    "ariaZoomIn": "가까이"
   }
 }
