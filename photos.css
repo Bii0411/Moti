@@ -2,3 +2,38 @@
    blur·filter·그림자·그라데이션 없음(아이폰 사파리). 움직임은 투명도·transform 전환만 */
 .ic{width:24px;height:24px;display:block}
 
+/* ── 촬영 화면: 대화 위로 앱 전체를 덮음. 시트(20~21)·토스트(30)는 그 위에 ── */
+.cam{position:absolute;inset:0;z-index:19;background:#07060c;display:none;flex-direction:column;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:contain}
+.cam.on{display:flex}
+.camtop{flex:none;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px}
+.camx,.camsp{flex:none;width:40px;height:40px}
+.camx{display:grid;place-items:center;border-radius:50%;color:var(--text);-webkit-tap-highlight-color:transparent}
+.camx:active{background:#ffffff14}
+.camcount{flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--text)}
+.cammid{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.camv{position:relative;overflow:hidden;isolation:isolate;background:#140a24 center 40%/cover no-repeat;touch-action:none;cursor:grab}
+.camv:active{cursor:grabbing}
+.camgl{position:absolute;inset:0}
+.camgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.camchip{position:absolute;left:10px;bottom:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px;pointer-events:none;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camhelp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:700;background:#0d0b16d9;border:1px solid #ffffff22;border-radius:12px;padding:9px 14px;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
+.camhelp.on{opacity:1}
+.camflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+/* 가득 찼을 때 안내 한 줄(들어갈 때) */
+.camfull{position:absolute;left:8px;right:8px;top:8px;z-index:3;display:none;align-items:center;gap:8px;background:#15131df2;border:1px solid #ef444466;border-radius:12px;padding:8px 8px 8px 11px}
+.camfull.on{display:flex}
+.camfull p{flex:1;min-width:0;font-size:12px;line-height:1.4;word-break:keep-all}
+.camfull div{flex:none;display:flex;gap:5px}
+.camfull button{height:30px;padding:0 9px;border-radius:9px;font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--line)}
+.camfull button[data-c="grow"]{background:var(--pri);border-color:var(--pri)}
+.cambot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 28px calc(18px + env(safe-area-inset-bottom,0px))}
+.cambtn,.camlast{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
+.cambtn{background:#1d1a27;color:#d9d2ee}
+.cambtn:disabled{opacity:.35}
+.camlast{background:#1d1a27;border:1px solid #ffffff2a;overflow:hidden;padding:0}
+.camlast img{width:100%;height:100%;object-fit:cover;display:block}
+.camlast.empty{border-style:dashed}
+.camshut{width:72px;height:72px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
+.camshut i{width:58px;height:58px;border-radius:50%;background:#fff;transition:transform .1s}
+.camshut:active i{transform:scale(.9)}
+
