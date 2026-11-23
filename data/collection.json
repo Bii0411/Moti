@@ -421,5 +421,68 @@
         "speed": 1
       }
     }
-  ]
+  ],
+  "_card": "무빙 카드(26-1). image = 카드 그림(가로2:세로3, 긴 변 longPx, jpeg 품질 quality~minQuality, 최대 maxKB). frame = 카드 그림·확대 재생 구도(키 비율 top·bottom·width, lift 위에서, center 0 몸~1 머리 가운데), frameById = 몸짓별 구도(춤은 전신). face = 대화 몸짓 기본 표정(faceById 몸짓별, 선물 몸짓은 play.f). momentById = 멈춘 순간(재생 길이의 %, 없으면 data/seoa_photo.json moment). defaultOutfit·defaultScene = 예전 저장값(의상 기록 없음)을 채울 때의 의상·장소(0 바 1층). afterMs = 기록 뒤 그림을 만들기 전 최소 대기, waitMs = 무대가 바쁘면 다시 볼 간격, gapMs = 그림 사이 간격. view = 카드 확대: zoomMs 커지는 시간, closeMs 닫히는 시간, swipePx 아래로 밀어 닫는 거리, dim 확대 재생 배경 어둡게. look = 카드 모양: rare 레어 표시 색, secret 시크릿 테두리 무지개 색, common 일반 표시 색, edge 얇은 밝은 테두리 색. share = 공유 그림 글자 크기 비율",
+  "card": {
+    "image": {
+      "aspect": [
+        2,
+        3
+      ],
+      "longPx": 720,
+      "type": "image/jpeg",
+      "quality": 0.8,
+      "minQuality": 0.5,
+      "maxKB": 80
+    },
+    "frame": {
+      "top": 1.08,
+      "bottom": 0.36,
+      "width": 0.56,
+      "lift": 0.03,
+      "center": 0.3
+    },
+    "frameById": {
+      "m23": {
+        "top": 1.08,
+        "bottom": -0.03,
+        "width": 0.72,
+        "lift": 0.03,
+        "center": 0
+      }
+    },
+    "face": "soft",
+    "faceById": {},
+    "momentById": {},
+    "defaultOutfit": "ops",
+    "defaultScene": 0,
+    "afterMs": 1500,
+    "waitMs": 600,
+    "gapMs": 400,
+    "view": {
+      "zoomMs": 300,
+      "closeMs": 240,
+      "swipePx": 70,
+      "dim": 0.25
+    },
+    "look": {
+      "rare": "#ff7eb6",
+      "secret": [
+        "#ff7eb6",
+        "#ffd36e",
+        "#7ef0c2",
+        "#7ecbff",
+        "#b18cff",
+        "#ff7eb6"
+      ],
+      "common": "#e6e1f5",
+      "edge": "rgba(255,255,255,0.78)"
+    },
+    "share": {
+      "nameK": 0.06,
+      "gradeK": 0.032,
+      "markK": 0.03,
+      "marginK": 0.045
+    }
+  }
 }
