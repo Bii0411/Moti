@@ -11,6 +11,12 @@
 .obcity svg{position:absolute;left:0;bottom:0;width:100%;height:46%;display:block}
 .obrain{position:absolute;inset:0}
 .obrain i{position:absolute;top:-20%;width:1px;height:var(--h,60px);left:var(--x);background:linear-gradient(transparent,#b9a8ff55);opacity:var(--o,.5);animation:obRain var(--d,2.4s) linear var(--dl,0s) infinite;will-change:transform}
+/* 20단계 덜어내기(data trim.scenery): .norain 빗줄기 끔, .noneon 네온 사각형 끔, .solid 하늘빛·건물까지 어두운 단색으로 덮음. 화면이 바뀔 때 부드럽게 */
+.obneons,.obrain{transition:opacity .35s}
+.ob.norain .obrain,.ob.noneon .obneons{opacity:0}
+.obcity::after{content:"";position:absolute;inset:0;background:var(--obsolid,#0b0a12);opacity:0;transition:opacity .35s}
+.ob.solid .obcity::after{opacity:1}
+.ob [hidden]{display:none!important}
 @keyframes obRain{from{transform:translateY(0)}to{transform:translateY(140vh)}}
 
 .obscr{position:absolute;inset:0;display:none;flex-direction:column;opacity:0;transition:opacity .35s}
@@ -60,7 +66,9 @@
 .obchead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
 .obchead b{font-size:22px;font-weight:900;letter-spacing:-.3px}
 .obchead small{font-size:11px;font-weight:800;letter-spacing:1.5px;color:#8a7f9c;white-space:nowrap}
-.obai{font-size:12.5px;line-height:1.5;color:#3b2f52;background:#ece4f7;border-left:3px solid var(--pri);border-radius:10px;padding:9px 11px;margin-bottom:10px;word-break:keep-all}
+/* AI 안내: 「모두 동의」 위 작은 회색 한 줄(20단계). .box 면 예전 보라 상자 */
+.obai{font-size:11.5px;line-height:1.45;color:#8a7f9c;margin:0 0 4px;word-break:keep-all}
+.obai.box{font-size:12.5px;line-height:1.5;color:#3b2f52;background:#ece4f7;border-left:3px solid var(--pri);border-radius:10px;padding:9px 11px;margin-bottom:10px}
 .obchk{display:flex;align-items:center;gap:9px;min-height:34px;font-size:13.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex:1;min-width:0}
 .obchk input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .obchk .box{flex:none;width:20px;height:20px;border-radius:6px;border:1.5px solid #b9aecb;background:#fff;display:grid;place-items:center;transition:background .15s,border-color .15s}
