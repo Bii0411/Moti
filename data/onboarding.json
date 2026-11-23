@@ -56,8 +56,8 @@
   "_trim": "20단계 덜어내기 켜고 끄기. scenery 화면별 배경(first 첫 화면, ticket 입장권, login 로그인): rain 빗줄기, neon 떠다니는 네온 사각형, solid 가 true 면 하늘빛·건물까지 덮고 solidColor 어두운 단색. aiBox 가 true 면 AI 안내를 예전 보라 상자로, false 면 「모두 동의」 위 작은 회색 한 줄. welcome 이 true 면 펀치 순간 ticket.welcome 글자·상자를 띄움(문구가 비어 있으면 안 띄움)",
   "trim": {
     "scenery": {
-      "first": { "rain": true, "neon": true, "solid": false },
-      "ticket": { "rain": false, "neon": true, "solid": false },
+      "first": { "rain": false, "neon": true, "solid": false },
+      "ticket": { "rain": false, "neon": false, "solid": false },
       "login": { "rain": false, "neon": false, "solid": true }
     },
     "solidColor": "#0b0a12",
