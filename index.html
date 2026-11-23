@@ -940,7 +940,7 @@ async function askServer(cid,text){
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
   const pn=photoNote(cid,hist);
   const motions=cid==="seoa"?Object.values(allowedMotions()):[];
-  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.map(x=>x.name):[],motions},replyWait());
+  const j=await post("/chat",{char:cid,message:text,session_id:(S.sid||{})[cid]||null,history:hist,scene:cid==="seoa"?SCENES[S.scene].name:null,scenes:cid==="seoa"?SCENES.filter(x=>!x.episode).map(x=>x.name):[],motions},replyWait());
   if(j&&j.session_id){(S.sid||(S.sid={}))[cid]=j.session_id;save()}
   if(j&&pn)SeoaPhoto.noteDone();
   return readReply(j);
