@@ -98,7 +98,7 @@ const Shot=(()=>{
 
 // ───────────────────────── 촬영 화면 ─────────────────────────
 const Cam=(()=>{
-  let on=false,root=null,fr=null,gl=null,yaw=0,pitch=0,zoom=0,info=null,paused=false,held=null,helpT=null,busy=false,flying=false;
+  let on=false,root=null,fr=null,gl=null,yaw=0,pitch=0,zoom=0,info=null,paused=false,held=null,busy=false,flying=false;
   const ptrs=new Map();let pinch=null,drag=null;
   // 24: 촬영 화면 값은 data/config.json camera.photo (예전 data/photos.json camera)
   const C=()=>((typeof DATA!=="undefined"&&DATA.config&&DATA.config.camera)||{}).photo||PCFG().camera||{};
@@ -110,7 +110,7 @@ const Cam=(()=>{
     root.innerHTML=`<div class="camtop"><button class="camx" data-c="close">${icon("close")}</button><span class="camcount" id="camCount"></span><span class="camsp"></span></div>
       <div class="cammid" id="camMid"><div class="camv" id="camV"><div class="bgdim" id="camDim"></div><div class="camgl" id="camGl"></div>
         <div class="camfull" id="camFull"><p></p><div><button data-c="clear"></button><button data-c="grow"></button></div></div>
-        <span class="camchip" id="camChip"></span><div class="camhelp" id="camHelp"></div><div class="camflash" id="camFlash"></div></div></div>
+        <span class="camchip" id="camChip"></span><div class="camflash" id="camFlash"></div></div></div>
       <div class="cambot"><button class="cambtn" data-c="pause" id="camPause"></button><button class="camshut" data-c="shoot"><i></i></button><button class="camlast" data-c="last" id="camLast"></button></div>`;
     $(".app").appendChild(root);fr=root.querySelector("#camV");gl=root.querySelector("#camGl");
     root.querySelector('[data-c="close"]').setAttribute("aria-label",UI("cam.ariaClose"));
@@ -178,8 +178,6 @@ const Cam=(()=>{
     Stage.borrow(gl,null,tick);Stage.shadow(true,C().shadow);
     document.addEventListener("gesturestart",stopG,{passive:false});document.addEventListener("gesturechange",stopG,{passive:false});
     render();
-    const hp=root.querySelector("#camHelp");hp.classList.remove("on");clearTimeout(helpT);
-    if(!S.camHelp){S.camHelp=true;save();hp.textContent=UI("cam.help");hp.classList.add("on");helpT=setTimeout(()=>hp.classList.remove("on"),C().helpMs||3000)}
   }
   function close(){
     if(!on)return;on=false;root.classList.remove("on");root.setAttribute("aria-hidden","true");

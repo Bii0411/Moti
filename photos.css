@@ -16,8 +16,6 @@
 .camgl{position:absolute;inset:0}
 .camgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .camchip{position:absolute;left:10px;bottom:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px;pointer-events:none;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.camhelp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:700;background:#0d0b16d9;border:1px solid #ffffff22;border-radius:12px;padding:9px 14px;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
-.camhelp.on{opacity:1}
 .camflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
 /* 가득 찼을 때 안내 한 줄(들어갈 때) */
 .camfull{position:absolute;left:8px;right:8px;top:8px;z-index:3;display:none;align-items:center;gap:8px;background:#15131df2;border:1px solid #ef444466;border-radius:12px;padding:8px 8px 8px 11px}
