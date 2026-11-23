@@ -5,6 +5,7 @@ const Onboard=(()=>{
   const D=()=>(typeof DATA!=="undefined"&&DATA.onboarding)||{};
   const T=k=>{const v=k.split(".").reduce((o,x)=>o!=null?o[x]:undefined,D());return typeof v==="string"?v:""};
   const tm=(k,d)=>{const t=D().timing||{};return t[k]!=null?t[k]:d};
+  const trim=()=>D().trim||{};
   const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   // 원고의 <br> 만 줄바꿈으로 살리고 나머지는 글자 그대로
   const EB=s=>E(s).replace(/&lt;br\s*\/?&gt;/gi,"<br>");
@@ -25,7 +26,7 @@ const Onboard=(()=>{
       x+=w+(r()<.3?4:0)}return p};
     const svg=`<svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${row(0,200,70,150,"#1a1429")}${row(1,200,30,95,"#0d0a15")}</svg>`;
     let rain="";for(let i=0;i<34;i++)rain+=`<i style="--x:${(r()*100).toFixed(1)}%;--h:${(40+r()*60).toFixed(0)}px;--d:${(1.9+r()*1.6).toFixed(2)}s;--dl:${(-r()*3.5).toFixed(2)}s;--o:${(.25+r()*.45).toFixed(2)}"></i>`;
-    return `<div class="obcity">${neon}${svg}<div class="obrain">${rain}</div></div>`;
+    return `<div class="obcity"><div class="obneons">${neon}</div>${svg}<div class="obrain">${rain}</div></div>`;
   }
 
   function build(){
@@ -74,9 +75,20 @@ const Onboard=(()=>{
     punchText();
     q("obLTitle").innerHTML=EB(T("login.title"));q("obLDesc").textContent=T("login.desc");
     q("obG").textContent=T("login.google");q("obK").textContent=T("login.kakao");q("obGuest").textContent=T("login.guest");q("obLNote").textContent=T("login.note");
+    // 빈 문구(20단계 「없앰」)는 자리를 차지하지 않게 숨김
+    ["obTag","obGuide","obCSmall","obAi","obPunchS","obLTitle","obLDesc","obLNote"].forEach(id=>{const e=q(id);e.hidden=!e.textContent.trim()});
+    q("obAi").classList.toggle("box",!!trim().aiBox);  // AI 안내: 보라 상자(예전) 또는 회색 한 줄
     if(step==="first")showScr("obFirst");  // 데이터가 늦게 오면 그때 로고·소개가 나타남
   }
+  // 화면별 배경 덜어내기(20단계, data trim.scenery): 빗줄기·네온 사각형을 끄거나 어두운 단색으로 덮음
+  const SCN={obFirst:"first",obTicket:"ticket",obLogin:"login"};
+  function scenery(id){
+    const t=trim(),c=(t.scenery||{})[SCN[id]]||{};
+    root.classList.toggle("norain",c.rain===false);root.classList.toggle("noneon",c.neon===false);root.classList.toggle("solid",!!c.solid);
+    if(t.solidColor)root.style.setProperty("--obsolid",t.solidColor);
+  }
   function showScr(id){
+    scenery(id);
     root.querySelectorAll(".obscr").forEach(s=>{if(s.id!==id)s.classList.remove("on","show")});
     const s=root.querySelector("#"+id);if(!filled)return;
     s.classList.remove("show");s.classList.add("on");void s.offsetWidth;s.classList.add("show");
@@ -142,13 +154,13 @@ const Onboard=(()=>{
     leaveT.push(setTimeout(()=>{if(step!=="ticket")return;const st=root.querySelector("#obStage");st.style.setProperty("--stfade",fade+"ms");st.classList.add("fade")},t2));
     leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},t2+fade));
   }
-  // 인사: 서아 손 흔들기(m13) + 필름 띠가 잠깐 밝고 빨라짐 + 「어서 와요」
+  // 인사: 서아 손 흔들기(m13) + 필름 띠가 잠깐 밝고 빨라짐. 글자(ticket.welcome)는 trim.welcome 이 켜져 있고 문구가 있을 때만(20단계부터 끔)
   function greet(){
     const G=D().greet||{};
     if(typeof Stage!=="undefined"){Stage.play(G.motion||"m13",{quiet:true});Stage.setFace(G.face||"joy")}
     Film.punch();
     root.querySelector("#obGuide").classList.add("off");
-    const w=root.querySelector("#obWelcome");w.classList.remove("on");void w.offsetWidth;w.classList.add("on");
+    if(trim().welcome&&T("ticket.welcome")){const w=root.querySelector("#obWelcome");w.classList.remove("on");void w.offsetWidth;w.classList.add("on")}
   }
 
   // ── 3D: 대화방의 3D 그림판을 잠깐 빌려 옴(모델을 다시 불러오지 않음) ──
