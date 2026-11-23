@@ -110,6 +110,18 @@ const Film=(()=>{
     const mesh=new THREE.Mesh(geo,m);mesh.renderOrder=-2;mesh.frustumCulled=false;mesh.name="obFilm";
     return{mesh,t,m,col,b,tileLen,L};
   }
+  // 빈 필름(7-3): 사진 없이 어두운 칸 하나 + 위아래 구멍(투명). 크기·구멍은 사진 필름과 같은 cell 값이라 같은 모양
+  function blankTex(f){
+    const cell=f.cell||{},cw=cell.w||244,ch=cell.h||300,gap=cell.gap||12,mg=cell.margin||34,pitch=cw+gap,H=ch+2*mg;
+    const hp=cell.holesPerCell||6,hw=cell.holeW||14,hh=cell.holeH||10,hr=cell.holeR||2.5,hpitch=pitch/hp;
+    const c=document.createElement("canvas");c.width=pitch;c.height=H;const g=c.getContext("2d");
+    g.fillStyle=cell.base||"#0b0911";g.fillRect(0,0,pitch,H);
+    g.fillStyle=(f.thin&&f.thin.blankColor)||cell.bg||"#15101f";g.fillRect(gap/2,mg,cw,ch);
+    g.globalCompositeOperation="destination-out";g.fillStyle="#000";
+    for(let k=0;k<hp;k++){const hx=k*hpitch+(hpitch-hw)/2;
+      for(const hy of [(mg-hh)/2,H-mg+(mg-hh)/2]){g.beginPath();g.roundRect?g.roundRect(hx,hy,hw,hh,hr):g.rect(hx,hy,hw,hh);g.fill()}}
+    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;
+  }
   function build(){
     if(loading||typeof THREE==="undefined")return loading;
     const f=F();if(!f.image)return null;
@@ -120,7 +132,9 @@ const Film=(()=>{
       const big=f.big||{},thin=f.thin||{};
       const bigC=new THREE.CatmullRomCurve3((big.points||[[-1.6,.9,-1],[0,1.3,-2],[1.6,2,-3.5]]).map(V),false,"centripetal");
       const thinC=new THREE.LineCurve3(V(thin.from||[-2,.8,-2.4]),V(thin.to||[2,1,-2.8]));
-      bands=[make(tex,big,bigC,f.tint||"#9b80d6"),make(tex,thin,thinC,f.tint||"#9b80d6")];
+      // 사진은 큰 띠에만. 얇은 띠는 빈 필름(thin.blank 가 false 면 사진)
+      const thinTex=thin.blank===false?tex:blankTex(f);thinTex.anisotropy=tex.anisotropy;
+      bands=[make(tex,big,bigC,f.tint||"#9b80d6"),make(thinTex,thin,thinC,f.tint||"#9b80d6")];
       bands.forEach((x,i)=>{x.off=i*.37;group.add(x.mesh)});
       res(group)},undefined,()=>res(null)));
     return loading;

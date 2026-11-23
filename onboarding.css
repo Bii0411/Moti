@@ -42,7 +42,8 @@
 /* 입장권(7-B): 위쪽은 3D(대화방의 3D 그림판을 빌려 옴), 아래쪽은 밝은 입장권 카드가 3D 앞에 겹침 */
 .obticket{display:none}
 .obticket.on{display:block}
-.obstage{position:absolute;left:0;right:0;top:0;height:60%;pointer-events:none}
+.obstage{position:absolute;inset:0;pointer-events:none;transition:opacity var(--stfade,.5s) ease}
+.obstage.fade{opacity:0}
 .obstage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .obguide{position:absolute;left:0;right:0;top:calc(18px + env(safe-area-inset-top,0px));text-align:center;font-size:15px;font-weight:800;color:#e9e3f7;letter-spacing:-.2px;text-shadow:0 1px 8px #000a;transition:opacity .3s}
 .obguide.off{opacity:0}

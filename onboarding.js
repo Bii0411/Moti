@@ -136,8 +136,11 @@ const Onboard=(()=>{
     p.classList.add("punched");
     greet();
     const G=D().greet||{};
-    leaveT.push(setTimeout(()=>{if(step==="ticket")root.querySelector("#obCard").classList.add("leave")},G.leaveMs!=null?G.leaveMs:1700));
-    leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},(G.leaveMs!=null?G.leaveMs:1700)+(G.leaveFadeMs!=null?G.leaveFadeMs:450)));
+    // 카드가 올라가며 사라짐(서아 전신이 보이게 카메라가 살짝 물러남) → 잠깐 머묾 → 3D가 어두워지며 사라짐 → 로그인(7-3)
+    const L=(D().scene3d||{}).leave||{},t1=G.leaveMs!=null?G.leaveMs:1700,t2=t1+(G.leaveFadeMs!=null?G.leaveFadeMs:450)+(L.holdMs!=null?L.holdMs:300),fade=L.fadeMs!=null?L.fadeMs:500;
+    leaveT.push(setTimeout(()=>{if(step!=="ticket")return;root.querySelector("#obCard").classList.add("leave");leaving={t0:performance.now(),ms:G.leaveFadeMs!=null?G.leaveFadeMs:450}},t1));
+    leaveT.push(setTimeout(()=>{if(step!=="ticket")return;const st=root.querySelector("#obStage");st.style.setProperty("--stfade",fade+"ms");st.classList.add("fade")},t2));
+    leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},t2+fade));
   }
   // 인사: 서아 손 흔들기(m13) + 필름 띠가 잠깐 밝고 빨라짐 + 「어서 와요」
   function greet(){
@@ -154,19 +157,42 @@ const Onboard=(()=>{
     if(typeof Stage==="undefined")return;
     const C=D().scene3d||{};
     const st=root.querySelector("#obStage"),card=root.querySelector("#obCard");
-    const fit=()=>{st.style.height=Math.round(card.offsetTop+(C.overlapPx!=null?C.overlapPx:48))+"px"};fit();
-    Stage.borrow(st,C.frame||{top:1.1,bottom:.5,width:.9,lift:.02},Film.tick);borrowed=true;
-    window.addEventListener("resize",fitNow);fitNow.f=fit;
+    st.classList.remove("fade");leaving=null;
+    fov0=Stage.three().cam.fov;Stage.borrow(st,null,camTick);borrowed=true;
     const f=C.fog||{};Stage.fog(f.color||"#120e1f",f.near!=null?f.near:2.4,f.far!=null?f.far:6);
     if(typeof Look!=="undefined")Look.setPlace(null);
     Stage.setFace(C.face||"soft");
     Film.show();
   }
-  function fitNow(){if(fitNow.f)fitNow.f()}
+  // 3D 칸은 화면 아래 끝까지(서아 몸 전체가 그려짐, 아래쪽은 평소 카드가 가림). scene3d.frame 은
+  // 「3D 칸이 카드 윗변 + overlapPx 까지만 있을 때」의 구도. 카메라는 그때 자리 그대로 두고 시야만 아래로 늘린다
+  // (위쪽은 그때와 같은 그림, 아래로 이어서 더 그림 → 머리·상반신 크기·위치·안개가 예전과 같음).
+  // 방법: 그때 화면을 위쪽에 둔 더 큰 가상 화면을 잡고(setViewOffset) 그 아래 부분까지 그린다. 매 프레임(그림판의 카메라 계산 뒤) 맞춤.
+  // 카드가 사라질 때(leaving): 발끝(scene3d.leave.bottom)이 안 들어오면 머리 위치는 두고 카메라가 뒤로 물러남
+  let fov0=30,leaving=null;
+  function camTick(now,w,h){
+    Film.tick(now);
+    if(!borrowed||!w||!h)return;
+    const cam=Stage.three().cam,a=document.querySelector(".app");
+    if(a&&a.clientWidth>a.clientHeight){if(cam.view)cam.clearViewOffset();return}  // 가로 화면은 그림판 기본 카메라 그대로
+    const C=D().scene3d||{},F=C.frame||{top:1.1,bottom:.5,width:.9,lift:.02},card=root.querySelector("#obCard");
+    const h0=Math.max(1,Math.min(h,card.offsetTop+(C.overlapPx!=null?C.overlapPx:48)));
+    const H=Stage.height(),tn=Math.tan(fov0*Math.PI/360);
+    const d0=Math.max((F.top-F.bottom)*H/2/tn,(F.width||0)*H/2/(tn*w/h0)),T=(F.top+F.bottom)/2*H+d0*tn;  // T: 화면 위끝 높이(서아 자리)
+    let d=d0;
+    if(leaving){const lb=(C.leave||{}).bottom,dl=lb!=null?Math.max(d0,(T-lb*H)*h0/(2*tn*h)):d0,k=Math.min(1,(now-leaving.t0)/leaving.ms),e=k*k*(3-2*k);d=d0+(dl-d0)*e}
+    const cy=T-d*tn,fullH=2*h-h0;
+    cam.fov=2*Math.atan(tn*fullH/h0)*180/Math.PI;cam.aspect=w/fullH;
+    cam.setViewOffset(w,fullH,0,h-h0,w,h);  // 안에서 updateProjectionMatrix
+    cam.position.set(0,cy+(F.lift||0)*H,d);cam.lookAt(0,cy,0);
+  }
   function stageOut(){
     leaveT.forEach(clearTimeout);leaveT=[];
-    if(!borrowed)return;borrowed=false;window.removeEventListener("resize",fitNow);
+    if(!borrowed)return;borrowed=false;leaving=null;
+    // 카메라 시야를 그림판 기본으로 되돌림(대화방 3D 무대는 원래 계산 그대로)
+    const T3=Stage.three(),cam=T3.cam;cam.clearViewOffset();cam.fov=fov0;
     Film.hide();Stage.release();Stage.setFace("neutral");
+    const cv=T3.R.domElement;if(cv.clientWidth&&cv.clientHeight)cam.aspect=cv.clientWidth/cv.clientHeight;cam.updateProjectionMatrix();
     if(typeof showScene==="function"&&typeof SCENES!=="undefined")showScene(S.scene||0);  // 테두리 빛을 대화 장소로 되돌림
   }
   // Google·카카오: 시연 버전이라 안내 토스트 뒤 게스트로
