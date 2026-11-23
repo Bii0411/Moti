@@ -19,12 +19,12 @@ const SeoaPhoto=(()=>{
 
   // ── 사진 만들기 ──
   const filmShot=m=>((((DATA.onboarding||{}).film||{}).shots)||[]).find(s=>s.id===m);
-  function moment(mid){const fs=filmShot(mid);if(fs&&fs.at!=null)return fs.at;const bm=((DATA.booth||{}).moments||{}).byId||{};if(bm[mid]!=null)return bm[mid];const M=D().moment||{};return M.default!=null?M.default:50}
+  function moment(mid){const fs=filmShot(mid);if(fs&&fs.at!=null)return fs.at;const M=D().moment||{},bm=M.byId||{};if(bm[mid]!=null)return bm[mid];return M.default!=null?M.default:50}
   // 지금 열린 몸짓 중 하나(이 종류에서 피할 몸짓 빼고, 바로 앞 사진의 몸짓은 되도록 빼고)
   function pickMotion(K){const av=new Set(K.avoid||[]),s=st();
     let ids=unlockedIds().filter(id=>canPlay(id)&&!av.has(id));if(ids.length>1)ids=ids.filter(id=>id!==s.lastMid);
     return pick(ids)||IDLE}
-  // 구도: booth.js setCam 과 같은 계산 + lift(위에서 내려다보기) + shift(서아를 옆으로 비킴)
+  // 구도: 키 비율 top·bottom·width 가 들어오게 거리를 잡음(11단계 포토부스 구도와 같은 계산) + lift(위에서 내려다보기) + shift(서아를 옆으로 비킴)
   function setCam(cam,aspect,K,yaw,shift){
     const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),top=K.top,bot=K.bottom,cy=(top+bot)/2*H;
     const d=Math.max((top-bot)*H/2/tn,K.width*H/2/(tn*aspect)),r=yaw*Math.PI/180,o=Stage.center(K.center||0);
