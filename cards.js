@@ -40,18 +40,30 @@ const Cards=(()=>{
   const frameOf=m=>({...(C().frame||{top:1.08,bottom:.34,width:.56,lift:.03,center:.3}),...((C().frameById||{})[m]||{})});
   // 기록할 때 같이 남길 값(index.html seenNow 가 부름): 의상·장소·이야기 줄기·캐릭터·관계 단계
   // 기록이 생긴 칸의 그림 만들기를 예약. 대화 무대가 하던 일이 끝난 뒤(몸짓·해금 연출·사진 보내기·촬영) 하나씩
-  let queue=[],running=false,timer=null;
+  // 26-2: 한 번에 몰아서 만들지 않고 화면이 쉬는 틈에 한 장씩(requestIdleCallback, 없으면 setTimeout). 컬렉션을 보는 중이면 보이는 카드부터
+  let queue=[],running=false,timer=null,waitT=0;
   function capture(id,o={}){const a=S.col[id];if(!a||has(a.char,id)||queue.some(q=>q.id===id))return;
     queue.push({id,at:performance.now()+(o.delay!=null?o.delay:(C().afterMs!=null?C().afterMs:1500))});kick()}
-  function kick(ms){clearTimeout(timer);timer=setTimeout(step,ms!=null?ms:(C().waitMs||600))}
+  const idleCb=f=>typeof requestIdleCallback==="function"?requestIdleCallback(f,{timeout:C().idleTimeoutMs||3000}):setTimeout(()=>f(null),60);
+  function kick(ms){clearTimeout(timer);timer=setTimeout(()=>idleCb(step),ms!=null?ms:(C().waitMs||600))}
   let viewOn=()=>false;  // 카드 확대 중(아래 확대 부분이 채움)
-  // 대화 무대가 바쁜지: 몸짓 재생 중·해금 연출 대기·촬영·서아 사진 만드는 중·카드 확대 재생 중
-  const busyNow=()=>!!(Stage.recentMotion(0)||(typeof unlockBusy!=="undefined"&&(unlockBusy||unlockQ.length))||(typeof Cam!=="undefined"&&Cam.isOpen())||(typeof SeoaPhoto!=="undefined"&&SeoaPhoto.isSending())||viewOn());
-  async function step(){
+  // 대화 무대가 바쁜지: 몸짓 재생 중이거나 끝난 지 quietMs 안·해금 연출 대기·촬영·서아 사진 만드는 중·카드 확대 재생 중·사진 화면
+  const inRoom=()=>typeof curTab!=="undefined"&&curTab==="chat"&&S.room==="seoa";
+  const busyNow=()=>!!(Stage.recentMotion(inRoom()?(C().quietMs!=null?C().quietMs:1200):0)||(typeof unlockBusy!=="undefined"&&(unlockBusy||unlockQ.length))||(typeof Cam!=="undefined"&&Cam.isOpen())||(typeof SeoaPhoto!=="undefined"&&SeoaPhoto.isSending())||viewOn()||(typeof busy!=="undefined"&&busy&&inRoom()));
+  // 다음에 만들 카드: 컬렉션 화면에 보이는 카드 → 그다음 기다린 차례대로
+  function next(now){const ready=queue.filter(q=>now>=q.at);if(!ready.length)return null;
+    const A=typeof curTab!=="undefined"&&curTab==="album"&&document.getElementById("album");
+    if(A){const vh=window.innerHeight;const vis=ready.find(q=>{const e=A.querySelector(`.mc[data-f="${q.id}"]`);if(!e)return false;const r=e.getBoundingClientRect();return r.bottom>0&&r.top<vh});if(vis)return vis}
+    return ready[0]}
+  async function step(dl){
     if(running||!queue.length)return;
-    const q=queue[0];if(performance.now()<q.at)return kick(q.at-performance.now()+20);
+    const now=performance.now(),q=next(now);
+    if(!q){const soon=Math.min(...queue.map(x=>x.at));return kick(Math.max(20,soon-now+20))}
     if(busyNow())return kick();
-    queue.shift();running=true;
+    // 이번 틈이 너무 짧으면 다음 틈. 단 idleTimeoutMs 넘게 기다렸으면 그냥 만듦(3D 무대가 매 프레임 그려져 틈이 늘 짧은 기기)
+    if(!waitT)waitT=now;
+    if(dl&&dl.timeRemaining&&!dl.didTimeout&&dl.timeRemaining()<(C().idleMinMs!=null?C().idleMinMs:8)&&now-waitT<(C().idleTimeoutMs||3000))return kick(50);
+    waitT=0;queue.splice(queue.indexOf(q),1);running=true;
     try{await make(q.id)}catch(e){console.error("카드 그림을 만들지 못함",q.id,e)}
     running=false;if(queue.length)kick(C().gapMs||400)}
   const perf=[];
@@ -62,7 +74,7 @@ const Cards=(()=>{
     const r=await SeoaPhoto.make({card:true,mid:mo.m,face:mo.f,K:frameOf(mo.m),scene:a.scene!=null&&SCENES[a.scene]?a.scene:(C().defaultScene||0),outfit:a.outfit||C().defaultOutfit||"ops",image:C().image||{aspect:[2,3],longPx:720,quality:.8,maxKB:80},at:(C().momentById||{})[id]});
     if(!S.col[id])return;  // 그사이 초기화
     await put(a.char,id,r.full,{outfit:a.outfit,scene:a.scene,mid:mo.m,w:r.w,h:r.h});
-    perf.push({id,outfit:a.outfit,scene:a.scene,...r.ms,kb:Math.round(r.full.size/1024),total:Math.round(performance.now()-t0)});
+    perf.push({id,t:Math.round(t0),outfit:a.outfit,scene:a.scene,...r.ms,kb:Math.round(r.full.size/1024),total:Math.round(performance.now()-t0)});
   }
   // 그림 없는 카드 채우기(컬렉션을 열 때): 예전 저장값은 기본 의상·기록된 장소(없으면 바 1층)를 기록에도 적어 둠
   async function fill(){await init();let n=0;
@@ -153,7 +165,7 @@ const Cards=(()=>{
     K=null;Stage.camLoop(null);if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace(sc.name);
     const ld=$v(".cvload");ld.classList.toggle("on",!Stage.outfitLoaded(key));
     shareF=null;prep(id,my);
-    Stage.outfit(key);
+    Stage.keep(key);Stage.outfit(key);  // 26-2: 마지막으로 연 카드 의상은 남겨 둠(그 앞 카드 의상은 내려놓음)
     try{await Stage.ready;await Stage.model(key);await Stage.xs(mo.m)}catch(e){ld.classList.remove("on");return}
     for(let i=0;i<60&&Stage.outfitNow()!==key&&my===vTok;i++)await new Promise(r=>requestAnimationFrame(r));
     if(my!==vTok||!vOn)return;
@@ -198,6 +210,6 @@ const Cards=(()=>{
     if(PhotoUI.canShare(f)){try{await navigator.share({files:[f]})}catch(e){}return}
     PhotoUI.saveFile(f);toast(esc(T("saved")),1800)}
 
-  return{init,has,url,urlNow,blob,put,remove,clear,capture,fill,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),
+  return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),
     grid,hydrate,open,close,isOpen:()=>vOn,shareImage,state:()=>({vOn,id:vIds[vi],K:!!K,outfit:Stage.outfitNow(),playing:Stage.recentMotion(0)})};
 })();
