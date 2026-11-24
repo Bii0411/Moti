@@ -2248,6 +2248,7 @@ const IdleWatch=(()=>{
   function why(){
     if(!inRoom())return "room";if(!stageVis())return "stage";
     if($("#inp").value.length)return "typing";
+    if(document.activeElement===$("#inp"))return "focus";  // 33-1: 입력창 포커스(키보드) 중엔 처음부터
     if(waiting||busy)return "waiting";
     if(Stage.recentMotion(1200))return "motion";
     if(View.isBig()||View.isPushed()||View.moving())return "zoom";
