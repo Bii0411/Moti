@@ -1,7 +1,7 @@
 {
   "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. {gem} 은 다이아 아이콘 자리(21, 코드가 icons.js 의 그림으로 바꿈). 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
   "album": {
-    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, progress = 진행도 왼쪽 글(묶음별), count = 진행도 오른쪽({n} 모은 칸, {total} 그 묶음 전체), hint = 개별 힌트(data/seoa_story.json hints)가 없는 잠긴 칸. 등급 이름은 collection.grade. firstSeen = 일반 등급 새 몸짓 작은 알림({name} 몸짓 이름, 26에서 data/seoa_story.json firstSeenText 를 옮겨 옴). infoAria = 제목 옆 (!) 버튼 접근성 이름. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, collected = 위쪽 진행 줄(38, {n} 모은 칸, {total} 그 묶음 전체), count = 선물·해금 카드 셋째 줄의 개수. 38부터 잠긴 칸을 눌러도 힌트를 띄우지 않음. 등급 이름은 collection.grade. firstSeen = 일반 등급 새 몸짓 작은 알림({name} 몸짓 이름, 26에서 data/seoa_story.json firstSeenText 를 옮겨 옴). infoAria = 제목 옆 (!) 버튼 접근성 이름. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
     "title": "무빙 카드",
     "infoAria": "무빙 카드 설명 보기",
     "intro": {
@@ -9,7 +9,7 @@
       "title": "무빙 카드",
       "body": "대화하고 선물하며 처음 본 모습이 카드로 모여요.",
       "list": ["대화에서 처음 나온 몸짓", "선물에 대한 반응", "관계가 깊어질수록 열리는 카드"],
-      "foot": "잠긴 카드를 누르면 힌트가 보여요. 시크릿 카드도 숨어 있어요.",
+      "foot": "시크릿 카드도 숨어 있어요.",
       "ok": "확인"
     },
     "firstSeen": "새 무빙 카드 · {name}",
@@ -18,28 +18,21 @@
       "chat": "대화",
       "gift": "선물"
     },
-    "progress": {
-      "all": "전체 몸짓",
-      "chat": "대화 몸짓",
-      "gift": "선물 몸짓"
-    },
+    "collected": "모은 카드 {n} / {total}",
     "count": "{n} / {total}",
-    "hint": {
-      "chat": "대화에서 만나요",
-      "gift": "선물로 만나요"
-    },
     "unlockTag": "새 무빙 카드",
     "unlockSaved": "무빙 카드 +1",
     "card": {
-      "_card": "26-1 무빙 카드 모양·확대. unseen = 열렸지만 아직 못 본 카드 위 글(chat 대화 카드, gift 선물 카드). back = 잠긴 카드 뒷면의 작은 글자. loading = 카드 확대 때 의상 모델을 불러오는 동안. info = 확대 카드 아래 줄({stage} 처음 봤을 때 관계 단계 이름, {date} 날짜. 단계 기록이 없으면 날짜만), date = 날짜 모양. prev·share·next = 아래 버튼, close = 닫기 접근성 이름, open = 카드 누르기 접근성 이름({name}). mark = 공유 그림 오른쪽 아래 표시. saved = 공유 창을 열 수 없는 브라우저에서 그림을 저장했을 때. chipsAria = 캐릭터 칩 줄 접근성 이름",
-      "unseen": {
-        "chat": "대화에서 만나요",
-        "gift": "선물로 만나요"
+      "_card": "26-1 무빙 카드 모양·확대(38 포토카드). tag = 왼쪽 위 등급 표(영문, 화면에서 작은 대문자). band = 아래 띠 작은 줄에 넣는 것 사이 글자(관계 단계 이름 · 처음 본 장소 · 처음 본 날짜), mmdd = 그 날짜 모양({m} 월, {d} 일). backAria = 잠긴 칸(뒷면) 접근성 이름({no} 카드 번호). loading = 카드 확대 때 의상 모델을 불러오는 동안. prev·share·next = 아래 버튼, close = 닫기 접근성 이름, open = 카드 누르기 접근성 이름({name}). mark = 공유 그림 오른쪽 아래 moti 표시(로고 그림을 못 읽을 때 글자). saved = 공유 창을 열 수 없는 브라우저에서 그림을 저장했을 때. chipsAria = 캐릭터 칩 줄 접근성 이름",
+      "tag": {
+        "common": "DAILY",
+        "rare": "RARE",
+        "special": "SECRET"
       },
-      "back": "moti",
+      "band": " · ",
+      "mmdd": "{m}.{d}",
+      "backAria": "아직 모으지 않은 카드 {no}",
       "loading": "불러오는 중",
-      "info": "{stage} · {date}",
-      "date": "{y}.{m}.{d}",
       "prev": "이전",
       "share": "공유",
       "next": "다음",

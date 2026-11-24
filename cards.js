@@ -85,20 +85,45 @@ const Cards=(()=>{
       if(!has(a.char,id))capture(id,{delay:0})}
     if(n)save();return n}
 
-  // ── 카드 모양(26-1B): 3열, 가로2:세로3, 얇은 밝은 테두리와 둥근 모서리 ──
-  // 모은 카드 = 카드 그림 + 아래 이름 + 왼쪽 위 등급(레어 분홍, 시크릿은 무지개빛 테두리) · 열렸지만 못 본 카드 = 흐린 실루엣 + 「대화에서 만나요」·「선물로 만나요」 ·
-  // 잠긴 카드 = 뒷면(어두운 바탕, 자물쇠 선 아이콘, 작은 moti). 그림 효과 없이 색만
+  // ── 카드 모양(38 포토카드): 3열, 가로2:세로3. 사진 둘레 테두리(등급마다: 일반 크림 무광·레어 홀로그램·시크릿 금박) + 둥근 사진 + 아래 띠 ──
+  // 모은 카드 = 사진 + 왼쪽 위 영문 등급 표(DAILY·RARE·SECRET) + 아래 띠(이름 / 관계 단계 · 처음 본 장소 · MM.DD / 오른쪽 카드 번호)
+  //   레어 = 사진 위 옅은 빛 한 줄, 시크릿 = 사진 전체 옅은 오로라 + 작은 반짝이. 테두리 위로 반짝임이 천천히 지나감(CSS 만, 「동작 줄이기」면 멈춤)
+  // 아직 모으지 않은 칸(열렸지만 못 본 칸·잠긴 칸 모두) = 포토카드 뒷면: 가운데 캐릭터 영문 이름 그림 + 오른쪽 아래 작은 번호. 눌러도 아무것도 안 뜸
+  // 크기는 모두 카드 너비에 대한 비율(collection.json card.photocard, CSS 컨테이너 너비 단위 cqw) → 목록·크게 보기·공유 그림이 같은 모양
   const T=(k,v)=>UI("album.card."+k,v);
   const SIL='<svg class="mcsil" viewBox="0 0 60 90" aria-hidden="true"><circle cx="30" cy="31" r="11.5"/><path d="M6 92c0-22 9.5-38 24-38s24 16 24 38z"/></svg>';
-  function vars(){const L=C().look||{},sc=L.secret||["#ff7eb6","#ffd36e","#7ef0c2","#7ecbff","#b18cff"];
-    return `--mcEdge:${L.edge||"rgba(255,255,255,.78)"};--mcRare:${L.rare||"#ff7eb6"};--mcCommon:${L.common||"#e6e1f5"};--mcSecret:linear-gradient(135deg,${sc.join(",")})`}
-  const badge=x=>`<span class="mcgr">${esc(gradeKo(x.grade))}</span>`;
+  const GR=["common","rare","special"];
+  const G=g=>((((typeof COL!=="undefined"&&COL.grades)||{})[g])||{}).card||{};
+  const PC=()=>C().photocard||{};
+  const gradCss=(cs,ang)=>!cs||!cs.length?"transparent":cs.length===1?cs[0]:`linear-gradient(${ang!=null?ang:125}deg,${cs.join(",")})`;
+  function vars(){const P=PC(),B=C().back||{},v=[],n=(k,x)=>v.push(`--${k}:${x}`),d=(x,y)=>x!=null?x:y;
+    n("pcB",d(P.border,.0625));n("pcR",d(P.radius,.07));n("pcr",d(P.photoRadius,.045));n("pcBand",d(P.band,.25));
+    n("pcNm",d(P.name,.085));n("pcNmMin",d(P.nameMinPx,10)+"px");n("pcSm",d(P.small,.055));n("pcSmMin",d(P.smallMinPx,7)+"px");
+    n("pcNo",d(P.no,.1));n("pcNoMin",d(P.noMinPx,11)+"px");n("pcTag",d(P.tag,.05));n("pcTagMin",d(P.tagMinPx,6.5)+"px");n("pcTrack",d(P.tagTrack,.18)+"em");n("pcY",d(P.photoY,.3)*100+"%");
+    n("bkBg",d(B.bg,"#16131f"));n("bkLine",d(B.line,"rgba(255,255,255,.07)"));n("bkName",d(B.name,"#a99fcc"));n("bkW",d(B.nameWidth,.6)*100+"%");n("bkNo",d(B.no,"#6c6585"));
+    GR.forEach(g=>{const c=G(g),au=c.aurora||[];
+      n("fr-"+g,gradCss(c.frame||["#f4f1ea"],c.frameAngle));n("ink-"+g,c.ink||"#4b4560");n("sub-"+g,c.sub||c.ink||"#8a8398");n("tbg-"+g,c.tagBg||"#fff");n("tink-"+g,c.tagInk||c.ink||"#4b4560");
+      n("lt-"+g,c.light||"transparent");n("sh-"+g,c.sheen||"transparent");n("sp-"+g,c.sparkle||"#fff");n("mv-"+g,(c.moveS||8)+"s");
+      n("au-"+g,au.length?`linear-gradient(115deg,${[...au,au[0]].join(",")})`:"none")});
+    return v.join(";")}
+  // 등급마다 사진 위 효과: 레어 빛 한 줄, 시크릿 오로라 + 반짝이(개수 grades.special.card.sparkles)
+  function fx(g){const c=G(g);let h="";if(c.light)h+='<i class="pclt"></i>';if(c.aurora&&c.aurora.length)h+='<i class="pcau"></i>';
+    for(let i=0;i<Math.min(3,c.sparkles||0);i++)h+=`<i class="pcsp s${i+1}"></i>`;return h?`<span class="pcfx" aria-hidden="true">${h}</span>`:""}
+  const no2=x=>String((x&&x.no)||0).padStart(2,"0");
+  const tagOf=g=>T("tag."+g);
+  const P2=n=>String(n).padStart(2,"0");
+  // 아래 띠 작은 줄: 관계 단계 이름 · 처음 본 장소(짧은 이름) · 처음 본 날짜 MM.DD (기록이 없는 것은 뺌)
+  function bandLine(a){const d=new Date(a.at),sc=SCENES[a.scene];
+    return [a.stage?stageName(a.stage):"",sc?(sc.short||sc.name):"",a.at?T("mmdd",{m:P2(d.getMonth()+1),d:P2(d.getDate())}):""].filter(Boolean).join(T("band"))}
+  const band=(x,a)=>`<span class="pcbd"><span class="pctx"><b class="pcnm">${esc(x.name)}</b><small class="pcsub">${esc(bandLine(a))}</small></span><i class="pcno">${no2(x)}</i></span>`;
+  const curChar=()=>typeof colChar!=="undefined"?colChar:"seoa";
+  function backName(ch){const c=typeof chBy==="function"&&chBy(ch);if(!c||!c.nameEn)return "";
+    return `<span class="pcname" style="--nm:url(assets/name_${esc(ch)}.svg)"><span class="sr">${esc(c.nameEn)}</span></span>`}
   function cell(x){const a=S.col[x.id];
     if(a){const u=urlNow(a.char,x.id);
-      return `<button class="mc got g-${x.grade}" data-f="${x.id}" aria-label="${esc(T("open",{name:x.name}))}"><span class="mcin">${u?`<img class="mcimg" src="${u}" alt="">`:`${SIL}<img class="mcimg" alt="" hidden>`}${badge(x)}<span class="mcnm">${esc(x.name)}</span></span></button>`}
-    // 선물 카드는 처음부터 선물로 만날 수 있으니 「열렸지만 못 본」 칸. 대화 카드는 지금 단계까지 열린 몸짓
-    if(x.source==="gift"||isSoon(x.id))return `<button class="mc unseen g-${x.grade}" data-h="${x.id}"><span class="mcin">${SIL}${badge(x)}<span class="mctx">${esc(T("unseen."+x.source))}</span></span></button>`;
-    return `<button class="mc lock" data-h="${x.id}"><span class="mcin">${Icon.svg("lock",26)}<small class="mcmo"><span class="logo" role="img" aria-label="${esc(T("back"))}"><span class="sr">${esc(T("back"))}</span></span></small></span></button>`}
+      return `<button class="mc got" data-f="${x.id}" aria-label="${esc(T("open",{name:x.name}))}"><span class="pc g-${x.grade}"><span class="pcph">${u?`<img class="mcimg" src="${u}" alt="">`:`${SIL}<img class="mcimg" alt="" hidden>`}${fx(x.grade)}</span><span class="pctag">${esc(tagOf(x.grade))}</span>${band(x,a)}</span></button>`}
+    // 38: 열렸지만 못 본 칸·잠긴 칸 모두 같은 뒷면. 누를 수 없는 칸(힌트 없음)
+    return `<div class="mc back" role="img" aria-label="${esc(T("backAria",{no:no2(x)}))}"><span class="pc">${backName(curChar())}<i class="pcno">${no2(x)}</i></span></div>`}
   const grid=L=>`<div class="mcards" style="${vars()}">${L.map(cell).join("")}</div>`;
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
   function hydrate(root){root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
@@ -113,8 +138,8 @@ const Cards=(()=>{
   const $v=s=>vEl.querySelector(s);
   function build(){if(vEl)return;vEl=document.createElement("div");vEl.className="cv";vEl.id="cardView";vEl.setAttribute("role","dialog");vEl.setAttribute("aria-modal","true");vEl.setAttribute("aria-hidden","true");
     vEl.innerHTML=`<div class="cvbg"></div><button class="cvx" data-cv="close" aria-label="${esc(T("close"))}">${Icon.svg("close",22)}</button>
-      <div class="cvcard"><div class="cvframe"><div class="cvin"><div class="cvplace"></div><div class="cvdim"></div><div class="cvgl"></div>${SIL}<img class="cvimg" alt=""><span class="mcgr"></span><span class="cvload"></span></div></div></div>
-      <div class="cvinfo"><b class="cvnm"></b><p class="cvln"></p><small class="cvdt"></small></div>
+      <div class="cvcard"><div class="cvframe"><div class="pc"><div class="pcph cvin"><div class="cvplace"></div><div class="cvdim"></div><div class="cvgl"></div>${SIL}<img class="cvimg" alt=""><span class="cvfx"></span><span class="cvload"></span></div><span class="pctag"></span><span class="pcbd"><span class="pctx"><b class="pcnm"></b><small class="pcsub"></small></span><i class="pcno"></i></span></div></div></div>
+      <div class="cvinfo"><p class="cvln"></p></div>
       <div class="cvbar"><button data-cv="prev">${Icon.svg("back",18)}<span></span></button><button data-cv="share" class="cvsh"><span></span></button><button data-cv="next"><span></span>${Icon.svg("back",18)}</button></div>`;
     document.querySelector(".app").appendChild(vEl);
     $v('[data-cv="prev"] span').textContent=T("prev");$v('[data-cv="next"] span').textContent=T("next");$v('[data-cv="share"] span').textContent=T("share");$v(".cvload").textContent=T("loading");
@@ -143,7 +168,7 @@ const Cards=(()=>{
   const cellOf=id=>document.querySelector(`#album .mc[data-f="${id}"]`);
   function open(id,ids){build();vIds=ids&&ids.length?ids.slice():[id];vi=vIds.indexOf(id);if(vi<0){vIds.unshift(id);vi=0}
     layout();const c=$v(".cvcard"),ms=V().zoomMs||300,tf=fromTf(cellOf(id));
-    vOn=true;vEl.setAttribute("aria-hidden","false");
+    vOn=true;vEl.setAttribute("aria-hidden","false");document.querySelector(".app").classList.add("cvon");  // 38: 뒤 목록 카드 빛은 멈춤
     c.style.transition="none";c.style.transformOrigin="0 0";c.style.transform=tf||"translateY(24px) scale(.92)";vEl.classList.add("on");void c.offsetWidth;
     c.style.transition=`transform ${ms}ms cubic-bezier(.2,.8,.2,1),opacity 0s`;c.style.transform="";
     // 3D 뒤 장소 그림 어둡게: 대화 무대(#bgdim)와 같은 층
@@ -153,12 +178,12 @@ const Cards=(()=>{
   function tick(now,w,h){if(!vOn||!K||!w||!h)return;const cam=Stage.three().cam;if(cam.view)cam.clearViewOffset();
     const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),cy=(K.top+K.bottom)/2*H,d=Math.max((K.top-K.bottom)*H/2/tn,K.width*H/2/(tn*(w/h))),o=Stage.center(K.center||0);
     cam.position.set(o.x,cy+(K.lift||0)*H,o.z+d);cam.lookAt(o.x,cy,o.z)}
-  const P2=n=>String(n).padStart(2,"0");
-  function infoLine(a){const d=new Date(a.at),date=T("date",{y:d.getFullYear(),m:P2(d.getMonth()+1),d:P2(d.getDate())});return a.stage?T("info",{stage:stageName(a.stage),date}):date}
   async function show(){const id=vIds[vi],x=colBy(id),a=S.col[id];if(!x||!a)return close();
     const my=++vTok,mo=motionOf(id),key=a.outfit||C().defaultOutfit||"ops",sc=SCENES[a.scene]||SCENES[0];
-    const fr=$v(".cvframe");fr.className="cvframe g-"+x.grade;fr.setAttribute("style",vars());$v(".cvin>.mcgr").textContent=gradeKo(x.grade);
-    $v(".cvnm").textContent=x.name;const ln=speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;$v(".cvdt").textContent=infoLine(a);
+    // 38: 목록 칸과 같은 포토카드(테두리·등급 표·아래 띠·번호). 아래 글은 처음 봤을 때 대사만(이름·단계·날짜는 띠 안)
+    $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade;$v(".pctag").textContent=tagOf(x.grade);$v(".cvfx").innerHTML=fx(x.grade);
+    $v(".pcnm").textContent=x.name;$v(".pcsub").textContent=bandLine(a);$v(".pcno").textContent=no2(x);
+    const ln=speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;
     $v('[data-cv="prev"]').disabled=vi<=0;$v('[data-cv="next"]').disabled=vi>=vIds.length-1;
     $v(".cvplace").style.backgroundImage=`url(${sc.img})`;
     // 그림이 아직 없을 때만(만드는 중) 흐린 실루엣
@@ -181,7 +206,7 @@ const Cards=(()=>{
     if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace((SCENES[S.scene]||SCENES[0]).name);
     $v(".cvimg").classList.remove("off");  // 닫히는 동안은 카드 그림(그림판은 대화 무대로 돌아감)
     c.style.transition=`transform ${ms}ms cubic-bezier(.4,0,.2,1),opacity ${Math.round(ms/2)}ms linear ${Math.round(ms/2)}ms`;c.style.transform=tf||"translateY(40px) scale(.9)";
-    vEl.classList.remove("on");vEl.setAttribute("aria-hidden","true");shareF=null}
+    vEl.classList.remove("on");vEl.setAttribute("aria-hidden","true");document.querySelector(".app").classList.remove("cvon");shareF=null}
   viewOn=()=>vOn;
 
   // ── 공유: 카드 그림(이름·등급·moti 표시 포함)을 그림으로. 영상 공유는 아직 ──
@@ -190,26 +215,49 @@ const Cards=(()=>{
   // 35: 공유 그림 오른쪽 아래 moti 표시 = 로고 그림(assets/logo_moti.svg 의 경로). 못 읽으면 예전처럼 글자
   let logoP=null;
   const logoPath=()=>logoP||(logoP=fetch("assets/logo_moti.svg").then(r=>r.text()).then(t=>{const d=(t.match(/\sd="([^"]+)"/)||[])[1],vb=((t.match(/viewBox="([^"]+)"/)||[])[1]||"").split(/\s+/).map(Number);return d&&vb.length===4?{p:new Path2D(d),vb}:null}).catch(()=>null));
+  // 38: 목록·크게 보기와 같은 포토카드(테두리·사진·등급 표·아래 띠·번호)를 캔버스에 그림. 움직이는 빛은 한 순간으로 멈춰 그림. moti 로고는 카드 바깥 오른쪽 아래
+  // CSS linear-gradient(각도) 와 같은 그라데이션
+  function cssGrad(g,x,y,w,h,cs,ang){if(cs.length===1)return cs[0];const a=(ang!=null?ang:125)*Math.PI/180,dx=Math.sin(a),dy=-Math.cos(a),L=Math.abs(w*dx)+Math.abs(h*dy),cx=x+w/2,cy=y+h/2;
+    const gr=g.createLinearGradient(cx-dx*L/2,cy-dy*L/2,cx+dx*L/2,cy+dy*L/2);cs.forEach((s,i)=>gr.addColorStop(i/(cs.length-1),s));return gr}
+  // 비스듬한 빛 띠(가운데 x 비율 at, 너비 비율 wk)
+  function lightBand(g,x,y,w,h,col,at,wk){const cx=x+w*at,bw=w*wk,gr=g.createLinearGradient(cx-bw/2,0,cx+bw/2,0);gr.addColorStop(0,"rgba(255,255,255,0)");gr.addColorStop(.5,col);gr.addColorStop(1,"rgba(255,255,255,0)");
+    g.save();g.translate(cx,y+h/2);g.transform(1,0,Math.tan(-15*Math.PI/180),1,0,0);g.translate(-cx,-(y+h/2));g.fillStyle=gr;g.fillRect(cx-bw/2,y-h*.3,bw,h*1.6);g.restore()}
+  function star(g,cx,cy,s){const r=s/2,q=r*.22;g.beginPath();g.moveTo(cx,cy-r);g.lineTo(cx+q,cy-q);g.lineTo(cx+r,cy);g.lineTo(cx+q,cy+q);g.lineTo(cx,cy+r);g.lineTo(cx-q,cy+q);g.lineTo(cx-r,cy);g.lineTo(cx-q,cy-q);g.closePath();g.fill()}
+  const fit=(g,t,w)=>{if(g.measureText(t).width<=w)return t;while(t.length>1&&g.measureText(t+"…").width>w)t=t.slice(0,-1);return t+"…"};
   async function shareImage(id){const a=S.col[id],x=colBy(id);if(!a||!x)return null;const b=await blob(a.char,id);if(!b)return null;const img=await loadImg(b);if(!img)return null;
-    const L=C().look||{},Sh=C().share||{},W=img.naturalWidth,H=img.naturalHeight,pad=Math.round(W*.05),bw=Math.max(3,Math.round(W*.01)),R=Math.round(W*.05);
-    const c=document.createElement("canvas");c.width=W+pad*2;c.height=H+pad*2;const g=c.getContext("2d"),font=(wt,px)=>`${wt} ${px}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;
+    const P=PC(),Sh=C().share||{},gc=G(x.grade),d=(v,y)=>v!=null?v:y;
+    const Bk=d(P.border,.0625),CW=Math.round(img.naturalWidth/(1-2*Bk)),CH=Math.round(CW*1.5),B=CW*Bk,R=CW*d(P.radius,.07),r=CW*d(P.photoRadius,.045),BH=CW*d(P.band,.25);
+    const pad=Math.round(CW*.05),foot=Math.round(CW*.06);
+    const c=document.createElement("canvas");c.width=CW+pad*2;c.height=CH+pad*2+foot;const g=c.getContext("2d"),font=(wt,px)=>`${wt} ${px}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;
     g.fillStyle="#0b0a12";g.fillRect(0,0,c.width,c.height);
-    // 테두리: 얇은 밝은 테두리(시크릿은 무지개빛)
-    if(x.grade==="special"){const gr=g.createLinearGradient(pad,pad,pad+W,pad+H),cs=L.secret||["#ff7eb6","#ffd36e","#7ef0c2","#7ecbff","#b18cff"];cs.forEach((s,i)=>gr.addColorStop(i/(cs.length-1),s));g.fillStyle=gr}else g.fillStyle=L.edge||"rgba(255,255,255,.78)";
-    rr(g,pad-bw,pad-bw,W+bw*2,H+bw*2,R+bw);g.fill();
-    g.save();rr(g,pad,pad,W,H,R);g.clip();g.drawImage(img,pad,pad,W,H);
-    const sh=g.createLinearGradient(0,pad+H*.68,0,pad+H);sh.addColorStop(0,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=sh;g.fillRect(pad,pad+H*.68,W,H*.32);g.restore();
-    const mg=Math.round(W*(Sh.marginK||.045)),nf=Math.round(W*(Sh.nameK||.06)),gf=Math.round(W*(Sh.gradeK||.032)),mf=Math.round(W*(Sh.markK||.03));
-    // 왼쪽 위 등급
-    g.font=font(800,gf);g.textBaseline="middle";const gt=gradeKo(x.grade),gw=g.measureText(gt).width+gf*1.2,gh=gf*1.8,gx=pad+mg,gy=pad+mg;
-    g.fillStyle="rgba(10,8,18,.55)";rr(g,gx,gy,gw,gh,gh/2);g.fill();g.lineWidth=Math.max(1.5,gf*.08);
-    g.strokeStyle=x.grade==="rare"?(L.rare||"#ff7eb6"):x.grade==="special"?"#ffffff":(L.common||"#e6e1f5");g.stroke();g.fillStyle=g.strokeStyle;g.fillText(gt,gx+gf*.6,gy+gh/2+1);
-    // 아래 이름 · 오른쪽 아래 moti
-    g.fillStyle="#fff";g.font=font(800,nf);g.textBaseline="alphabetic";g.fillText(x.name,pad+mg,pad+H-mg,W-mg*2-mf*4);
-    g.fillStyle="rgba(255,255,255,.85)";const lg=await logoPath();
-    if(lg){const [vx,,vw]=lg.vb,lh=mf*(Sh.logoK||.8),k=lh/lg.vb[3];g.save();g.translate(pad+W-mg-vw*k,pad+H-mg);g.scale(k,k);g.translate(-vx,0);g.fill(lg.p);g.restore()}  // 기준선(y 0)을 예전 글자 기준선에
-    else{g.font=font(700,mf);const mt=T("mark");g.fillText(mt,pad+W-mg-g.measureText(mt).width,pad+H-mg)}
-    return await new Promise(r=>c.toBlob(r,"image/jpeg",.9))}
+    const X=pad,Y=pad;
+    // 테두리(등급 색: 일반 크림, 레어 홀로그램, 시크릿 금박) + 테두리 위 반짝임 한 줄
+    g.save();rr(g,X,Y,CW,CH,R);g.clip();g.fillStyle=cssGrad(g,X,Y,CW,CH,gc.frame||["#f4f1ea"],gc.frameAngle);g.fillRect(X,Y,CW,CH);
+    if(gc.sheen)lightBand(g,X,Y,CW,CH,gc.sheen,.82,.34);
+    // 사진(가운데 위쪽 자리 photoY 로 잘라 채움) + 레어 빛 한 줄 / 시크릿 오로라·반짝이
+    const px=X+B,py=Y+B,pw=CW-2*B,ph=CH-B-BH,iw=img.naturalWidth,ih=img.naturalHeight,s=Math.max(pw/iw,ph/ih),dw=iw*s,dh=ih*s;
+    g.save();rr(g,px,py,pw,ph,r);g.clip();g.fillStyle="#1a1626";g.fillRect(px,py,pw,ph);g.drawImage(img,px+(pw-dw)/2,py+(ph-dh)*d(P.photoY,.3),dw,dh);
+    if(gc.light)lightBand(g,px,py,pw,ph,gc.light,.62,.3);
+    if(gc.aurora&&gc.aurora.length){g.fillStyle=cssGrad(g,px,py,pw,ph,[...gc.aurora,gc.aurora[0]],115);g.fillRect(px,py,pw,ph)}
+    if(gc.sparkles){g.fillStyle=gc.sparkle||"#fff";[[.84,.14,1],[.14,.47,.7],[.74,.8,.85]].slice(0,Math.min(3,gc.sparkles)).forEach(([sx,sy,k])=>star(g,px+pw*sx,py+ph*sy,CW*.07*k))}
+    g.restore();
+    // 왼쪽 위 등급 표(영문, 자간 넓게)
+    const tf=CW*d(P.tag,.05),tr=tf*d(P.tagTrack,.18),tt=tagOf(x.grade);g.font=font(800,tf);g.textBaseline="middle";
+    const cw=[...tt].map(ch=>g.measureText(ch).width),tw=cw.reduce((p,q)=>p+q,0)+tr*(cw.length-1),th=tf*1.8,tx=px+CW*.035,ty=py+CW*.035;
+    g.fillStyle=gc.tagBg||"#fff";rr(g,tx,ty,tw+tf*1.2,th,th/2);g.fill();g.fillStyle=gc.tagInk||"#4b4560";
+    let cx=tx+tf*.6;[...tt].forEach((ch,i)=>{g.fillText(ch,cx,ty+th/2+tf*.04);cx+=cw[i]+tr});
+    // 아래 띠: 이름 / 작은 줄 · 오른쪽 번호
+    const nf=CW*d(P.name,.085),sf=CW*d(P.small,.055),nof=CW*d(P.no,.1),bt=Y+CH-BH,lx=X+B,blockH=nf*1.2+sf*1.35,top=bt+(BH-blockH)/2;
+    g.font=font(800,nof);g.textBaseline="middle";const nt=no2(x),nw=g.measureText(nt).width;g.fillStyle=gc.ink||"#4b4560";g.fillText(nt,X+CW-B-nw,bt+BH/2);
+    const tw2=CW-2*B-nw-CW*.04;g.textBaseline="alphabetic";
+    g.font=font(800,nf);g.fillStyle=gc.ink||"#4b4560";g.fillText(fit(g,x.name,tw2),lx,top+nf*.98);
+    g.font=font(600,sf);g.fillStyle=gc.sub||gc.ink||"#8a8398";g.fillText(fit(g,bandLine(a),tw2),lx,top+nf*1.2+sf*1.08);
+    g.restore();
+    // 카드 바깥 오른쪽 아래 moti 로고
+    const mf=CW*(Sh.markK||.03);g.fillStyle="rgba(255,255,255,.6)";const lg=await logoPath(),base=Y+CH+(pad+foot)/2+mf*.4;
+    if(lg){const [vx,,vw]=lg.vb,lh=mf*(Sh.logoK||.8),k=lh/lg.vb[3];g.save();g.translate(X+CW-vw*k,base);g.scale(k,k);g.translate(-vx,0);g.fill(lg.p);g.restore()}
+    else{g.font=font(700,mf);g.textBaseline="alphabetic";const mt=T("mark");g.fillText(mt,X+CW-g.measureText(mt).width,base)}
+    return await new Promise(res=>c.toBlob(res,"image/jpeg",.9))}
   const fname=id=>`moti-card-${id}.jpg`;
   // 공유 파일을 미리 만들어 둠(아이폰: 누른 순간 바로 공유 창을 열어야 함)
   async function prep(id,my){try{const b=await shareImage(id);if(!b||(my!=null&&my!==vTok))return null;shareF={id,file:new File([b],fname(id),{type:"image/jpeg"})};return shareF}catch(e){return null}}

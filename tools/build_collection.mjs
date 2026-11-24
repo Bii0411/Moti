@@ -1,6 +1,7 @@
 // 몸짓 도감(data/collection.json)의 items 를 다시 만든다 (9-A).
 // 대화 몸짓 = data/seoa_story.json unlock 의 stage·flag·event 몸짓 전부(ban 제외), 등급은 gradeRule 로 계산해 grade 에 적는다.
 // 선물 몸짓 g01~g12 = data/collection.json 에 이미 적힌 값(원고 docs/drafts/9-선물-앨범-원고.md 1절)을 그대로 둔다.
+// 38: 카드 번호(no)는 칸마다 고정. 새 칸은 다음 번호, 없어진 칸의 번호는 retiredNo 에 남겨 다시 쓰지 않음.
 // 실행: node tools/build_collection.mjs
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -28,6 +29,12 @@ for (const sec of ["flag", "event"]) for (const k in story.unlock[sec]) for (con
 const gift = col.items.filter(x => x.source === "gift");
 // 31: only 가 있는 칸 = 단계 해금이 아니라 정해진 연출에서만 얻는 칸(x17 「첫 만남」 = only "firstMeet"). 다시 만들어도 그대로 둠(대화 칸 뒤)
 const only = col.items.filter(x => x.only && !seen.has(x.id));
-col.items = [...chat.map(({ from, ...x }) => ({ ...x, ...(from.stage ? { stage: from.stage } : { [from.sec]: from.key }) })), ...only, ...gift];
+const items = [...chat.map(({ from, ...x }) => ({ ...x, ...(from.stage ? { stage: from.stage } : { [from.sec]: from.key }) })), ...only, ...gift];
+// 38: 카드 번호 no 는 한 번 정하면 그대로(예전 칸의 번호를 id 로 찾아 씀). 새 칸은 지금 가장 큰 번호 다음부터 차례로. 빠진 칸의 번호는 다시 쓰지 않음
+const oldNo = Object.fromEntries(col.items.filter(x => x.no).map(x => [x.id, x.no]));
+let nextNo = Math.max(0, ...Object.values(oldNo), ...(col.retiredNo || []));
+col.items = items.map(({ no, id, ...x }) => ({ id, no: oldNo[id] || ++nextNo, ...x }));
+const gone = Object.keys(oldNo).filter(id => !col.items.some(x => x.id === id));
+if (gone.length) col.retiredNo = [...new Set([...(col.retiredNo || []), ...gone.map(id => oldNo[id])])].sort((a, b) => a - b);
 writeFileSync("data/collection.json", JSON.stringify(col, null, 2) + "\n");
 console.log(`대화 ${chat.length}${only.length ? ` + 연출 ${only.length}` : ""} + 선물 ${gift.length} = ${col.items.length}칸`);
