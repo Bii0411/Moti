@@ -13,8 +13,8 @@ const SeoaPhoto=(()=>{
   // 저장값 S.sp: got = 받은 단계 사진 {단계: 사진 id}, pend = 보낼 차례(대화방에서 조건이 맞으면 보냄), since = 마지막 사진 뒤 서아 답장 수,
   // shot = 대화 중 사진의 마지막 종류(번갈아), last = 묶음별 마지막 메시지 번호, away = 마지막 오랜만 메시지 번호, note = 다음 서버 요청에 덧붙일 한 줄
   const st=()=>{const s=S.sp||(S.sp={});s.got=s.got||{};s.pend=s.pend||[];s.last=s.last||{};if(s.since==null)s.since=0;return s};
-  const sceneOf=name=>{const i=SCENES.findIndex(x=>x.name===name);return i>=0?i:(S.scene||0)};
-  let sending=false,loopT=null;
+  const sceneOf=name=>{if(!name||name===(D().here||"지금 장소"))return S.scene||0;const i=SCENES.findIndex(x=>x.name===name);return i>=0?i:(S.scene||0)};  // 32: 「지금 장소」 = 지금 대화 장소
+  let sending=false,silent=false,loopT=null;  // silent = 오랜만 사진(이미 받은 메시지로 끼워 넣음, 「보내는 중」 없음)
   const perf=[];
 
   // ── 사진 만들기 ──
@@ -71,7 +71,7 @@ const SeoaPhoto=(()=>{
         if(sf){setSelfieCam(cam,W/H,sf);Stage.reach(sf.side,armTarget(cam,sf),K.arm||{})}else setCam(cam,W/H,K,yaw,shift);
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
         if(sf&&sf.tilt)Stage.tiltHead(sf.tilt,cam.position);
-        const back=pano?Stage.pano.use(pi):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
+        const back=Stage.pano.use(pano?pi:-1);/* 32-C: 360도 그림이 없는 장소면 지금 장소의 구를 모두 숨김(평평한 그림이 가려지지 않게) */try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
       finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.fov=fov;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
     },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name,model});
     if(!ok)throw new Error("서아 모델이 아직 없음");
@@ -104,30 +104,46 @@ const SeoaPhoto=(()=>{
   const stageGot=()=>Photos.list().filter(m=>m.kind==="received"&&m.stage).length;
   async function deliver(it){
     const x=resolve(it);if(!x)return;
-    sending=true;renderLog();const my=GEN,t0=performance.now();
+    const away=x.type==="away"&&x.at;sending=true;silent=!!away;renderLog();const my=GEN,t0=performance.now();
     let fps=null;
     try{
       await wait(80);  // 「보내는 중…」이 먼저 그려지게
       fps=frameWatch();
       const r=await make(x);
-      const left=(D().sendingMs||1500)-(performance.now()-t0);if(left>0)await wait(left);
+      const left=away?0:(D().sendingMs||1500)-(performance.now()-t0);if(left>0)await wait(left);
       const fw=fps.stop();
       if(my!==GEN)return;  // 그사이 시연 패널에서 초기화·장면 이동
       // 단계 사진은 단계마다 한 장: 시연 장면으로 다시 받으면 예전 것을 지우고 새것으로
       if(x.type==="stage"){const old=Photos.list().filter(m=>m.kind==="received"&&m.stage===x.stage);for(const m of old)await Photos.remove(m.id)}
       const sc=SCENES[x.scene]||SCENES[0];
-      const meta={id:Photos.newId(),kind:"received",from:x.type,at:Date.now(),stage:x.type==="stage"?x.stage:null,title:x.name||null,msg:x.msg,
+      const meta={id:Photos.newId(),kind:"received",from:x.type,at:away?x.at:Date.now(),stage:x.type==="stage"?x.stage:null,title:x.name||null,msg:x.msg,
         scene:x.scene,place:sc.name,shot:x.shot,mid:r.mid,mname:MNAME[r.mid]||r.mid,liked:false,w:r.w,h:r.h};
       const sv=await Photos.add(meta,r.full,r.thumb);
       if(my!==GEN){await Photos.remove(meta.id);return}
       const s=st();if(x.type==="stage")s.got[x.stage]=meta.id;s.since=0;
-      s.note=(D().serverLine||"").replace("{place}",sc.name).replace("{msg}",x.msg);
+      s.note=((away&&D().serverLineAway)||D().serverLine||"").replace("{place}",sc.name).replace("{msg}",x.msg);
       perf.push({type:x.type,shot:x.shot,selfie:r.selfie,place:sc.name,mid:r.mid,face:r.face,...r.ms,save:sv.ms,kb:Math.round(r.full.size/1024),thumbKb:Math.round(r.thumb.size/1024),total:Math.round(performance.now()-t0),...fw});
-      sending=false;
-      addMsg("ph",x.msg,{pid:meta.id,...(x.type==="stage"?{stage:x.stage,sn:stageGot()}:{})},"seoa");
+      sending=false;silent=false;
+      if(away)insertMsg({r:"ph",t:x.msg,at:x.at,pid:meta.id,away:1},"seoa");
+      else addMsg("ph",x.msg,{pid:meta.id,...(x.type==="stage"?{stage:x.stage,sn:stageGot()}:{})},"seoa");
     }catch(e){console.error("서아 사진을 만들지 못함",e)}
-    finally{if(fps&&fps.on)fps.stop();sending=false;renderLog()}
+    finally{if(fps&&fps.on)fps.stop();sending=false;silent=false;renderLog()}
   }
+  // 32: 대화 기록의 그 시각 자리에 끼워 넣음(addMsg 는 맨 끝에 붙임). 대화방에 있으면 읽은 것으로
+  function insertMsg(m,cid){const L=chatOf(cid);let i=L.length;while(i>0&&(L[i-1].at||0)>m.at)i--;L.splice(i,0,m);
+    if(L.length>60)S.chats[cid]=L.slice(-60);if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
+  // 32: 오랜만 사진의 받은 시각. 마지막 대화(lt)와 지금 사이(앞뒤 edgeMin 분 비움)에서 밤 night[0]시~새벽 night[1]시 구간을 모아 길이 비례로 한 때를 뽑음. 없으면 가운데
+  function awayAt(lt){const A=D().away||{},N=A.night||[21,2],e=(A.edgeMin!=null?A.edgeMin:10)*60e3,now=Date.now();let lo=lt+e,hi=now-e;
+    if(hi<=lo){lo=lt;hi=now}
+    const segs=[],d0=new Date(lo);d0.setHours(0,0,0,0);d0.setDate(d0.getDate()-1);
+    for(let d=new Date(d0);d.getTime()<hi;d.setDate(d.getDate()+1)){const a=new Date(d);a.setHours(N[0],0,0,0);const b=new Date(d);if(N[1]<=N[0])b.setDate(b.getDate()+1);b.setHours(N[1],0,0,0);
+      const x=Math.max(lo,a.getTime()),y=Math.min(hi,b.getTime());if(y>x)segs.push([x,y])}
+    if(!segs.length)return Math.round((lo+hi)/2);
+    let r=Math.random()*segs.reduce((t,g)=>t+g[1]-g[0],0);for(const g of segs){const l=g[1]-g[0];if(r<l)return Math.round(g[0]+r);r-=l}return segs[0][0]}
+  // 말풍선 옆 시각: 오늘이면 「오후 11:42」, 어제면 「어제 오후 11:42」, 그 전이면 「11월 22일 오후 11:42」(문구 data/ui.json seoaPhoto)
+  function timeLabel(t){const d=new Date(t),h=d.getHours(),hm=T("time",{ap:T(h<12?"am":"pm"),h:h%12||12,mm:String(d.getMinutes()).padStart(2,"0")});
+    const day=x=>{const y=new Date(x);y.setHours(0,0,0,0);return y.getTime()},k=Math.round((day(Date.now())-day(t))/864e5);
+    return k<=0?hm:k===1?T("yesterday",{time:hm}):T("date",{m:d.getMonth()+1,d:d.getDate(),time:hm})}
   // 사진을 만드는 동안 대화 무대 프레임 간격(가장 긴 간격 = 멈칫한 정도)
   function frameWatch(){const o={on:true,max:0,n:0};let last=performance.now();
     (function f(now){if(!o.on)return;o.max=Math.max(o.max,now-last);o.n++;last=now;requestAnimationFrame(f)})(last);
@@ -153,7 +169,7 @@ const SeoaPhoto=(()=>{
   function lastTalk(){let t=0;for(const m of chatOf("seoa"))if((m.r==="u"||m.r==="c"||m.r==="ph"||m.r==="g")&&m.at)t=Math.max(t,m.at);return t}
   function enter(){const s=st(),A=D().away||{};
     const lt=lastTalk();
-    if(curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.length){s.pend.push({type:"away"});save();return kick(A.delayMs||1500)}
+    if(curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.length){s.pend.push({type:"away",at:awayAt(lt)});save();return kick(A.delayMs!=null?A.delayMs:300)}
     if(s.pend.length)kick(A.delayMs||1500)}
   // 3절: 서아 답장마다(send). 시연 장면 중에는 세지 않음
   function afterReply(){const s=st(),C=D().casual||{};
@@ -174,13 +190,14 @@ const SeoaPhoto=(()=>{
   const stageTotal=()=>(D().stage||[]).length||5;
   function bubble(m){const p=Photos.list().find(x=>x.id===m.pid);
     const line=T("saved")+(m.stage?T("savedStage",{n:m.sn||1,total:stageTotal()}):"");
+    const msg=m.away?`<div class="phrow"><div class="msg c">${esc(m.t)}</div><span class="phtime">${esc(timeLabel(m.at))}</span></div>`:`<div class="msg c">${esc(m.t)}</div>`;  // 32: 오랜만 사진은 받은 시각을 말풍선 옆에
     return `<button class="phmsg${p?"":" gone"}" data-ph="${esc(m.pid||"")}" aria-label="${esc(T("aria"))}">${p?`<img src="${Photos.thumbUrl(p)}" alt="">`:""}</button>`+
-      `<div class="msg c">${esc(m.t)}</div><div class="phsave">${esc(line)}</div>`}
-  const sendingHtml=()=>sending?`<div class="msg c typing">${esc(T("sending"))}</div>`:"";
+      msg+`<div class="phsave">${esc(line)}</div>`}
+  const sendingHtml=()=>sending&&!silent?`<div class="msg c typing">${esc(T("sending"))}</div>`:"";
   function onLogClick(e){const b=e.target.closest("[data-ph]");if(!b)return;const id=b.dataset.ph;if(!Photos.list().some(x=>x.id===id))return;
     PhotoUI.view(id,Photos.list().filter(x=>x.kind==="received").map(x=>x.id))}
   function init(){const L=document.getElementById("log");if(L)L.addEventListener("click",onLogClick);
     Photos.onChange(()=>{if(inRoom())renderLog()})}
 
-  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,isSending:()=>sending,kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
+  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,awayAt,timeLabel,isSending:()=>sending,kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
 })();
