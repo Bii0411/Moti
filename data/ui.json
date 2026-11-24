@@ -84,8 +84,10 @@
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",
     "seoaFirst": "＋ 에서 선물하고 사진도 찍어요",
     "placeChanged": "장소가 바뀌었어요 · {place}",
-    "_typing": "29-1: 내 메시지를 보낸 순간부터 답장이 올 때까지(직전 판정을 기다리는 시간 포함) 보이는 줄",
-    "typing": "서아가 입력 중…"
+    "_typing": "29-1: 내 메시지를 보낸 순간부터 답장이 올 때까지(직전 판정을 기다리는 시간 포함) 보이는 줄. 43: 「입력 중」 → 「생각 중」, 기다린 지 typingLongMs 가 지나면 typingLong(답장 기다리는 몸짓이 팔짱으로 넘어가는 때쯤, data/config.json wait). 답이 오면 다음 기다림은 다시 typing 부터",
+    "typing": "서아가 생각 중…",
+    "typingLong": "서아가 고민 중…",
+    "typingLongMs": 8000
   },
   "home": {
     "_home": "홈 화면(8, 23). 23에서 위에서 아래로: 검색 → 특별 에피소드 줄(specialRow, 24-2에서 「이어서 대화」 줄 뺌) → 캐릭터 찾기(find, 태그 칩 tagChips + 정렬 버튼 sorts). search = 검색 칸 안내, searchEmpty = 검색 결과 없음, all = 칩 「전체」, newTag = 새 특별 에피소드 표시, sortLabel = 정렬 버튼 읽기용 이름, back = 캐릭터 화면 뒤로 가기 읽기용 이름. sorts = 정렬 버튼이 도는 순서(추천 → 인기 → 신규). basic·special = 캐릭터 화면 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시, storySceneTag 는 첫 장면 무대 위 표시(18)",
