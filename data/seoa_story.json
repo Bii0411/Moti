@@ -16,7 +16,7 @@
     { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg", "pano": "pano_seoa_rooftop.webp", "panoYaw": 0, "panoBright": 0.9 },
     { "name": "드라큘라의 성", "img": "bg_seoa_castle.jpg", "pano": "pano_seoa_castle.webp", "panoYaw": 0, "panoBright": 1.1, "episode": true },
     { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "pano": "pano_seoa_xmas.webp", "panoYaw": 0, "panoBright": 1, "episode": true },
-    { "name": "서아의 자취방", "img": "bg_seoa_xmas_room.jpg", "pano": "pano_seoa_xmas_room.webp", "panoYaw": 0, "panoBright": 1.15, "episode": true }
+    { "name": "서아의 자취방", "img": "bg_seoa_xmas_room.jpg", "pano": "pano_seoa_xmas_room.webp", "panoYaw": -45, "panoBright": 1.25, "episode": true }
   ],
   "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
   "ban": ["m14", "m16", "m22"],
