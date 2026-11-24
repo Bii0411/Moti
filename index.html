@@ -1491,6 +1491,15 @@ function runJudge(){
   const recent=talkOf("seoa").slice(-24).map(m=>({r:m.r,t:turnText(m)}));
   const need=((S.judgeN||0)+1)%Math.max(1,Math.round(+DATA.config.summaryEveryJudges||1))===0;  // 요약은 판정 summaryEveryJudges(2) 번에 한 번
   const t0=performance.now(),aff0=st.affection||0;
+  // 42: 에피소드 단계가 있는 에피소드: 에피소드 단계·호감으로 판정을 받고, 호감 변화와 플래그만 에피소드에 더함(본 이야기 상태는 그대로. 요약만 이 줄기 것으로)
+  if(EpStage.on()){const es=EpStage.judgeState(),ea0=es.affection,ep=Thread.cur();
+    judgeP=post("/judge",{char:"seoa",state:es,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
+      .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok||Thread.cur()!==ep)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;
+        const d=(+j.state.affection||0)-ea0,fl=(j.flags||[]).filter(f=>typeof f==="string");if(need&&j.state.summary)st.summary=j.state.summary;
+        Fx.judged(d,fl);const r=EpStage.judged(d,fl);
+        JLOG.push({turn:S.bond||0,n:B.length,aff0:ea0,aff1:r?r.aff:ea0,stage:EpStage.n(),flags:fl,ms:Math.round(performance.now()-t0),summary:need,episode:ep});save()})
+      .catch(()=>{}).finally(()=>{if(tok===judgeTok)judgeP=null});
+    return judgeP}
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
@@ -1678,7 +1687,8 @@ async function send(text){
   if(g0!==GEN)return;
   const gen=g0;
   moveToV2();  // 시연 패널에서 서버 v2 로 바꾼 뒤 첫 메시지
-  S.bond=(S.bond||0)+1;Fx.tick();  // 17-1A: 확대 쿨다운은 내 메시지 수로 셈
+  const epOn=EpStage.on();  // 42: 에피소드 단계가 있는 에피소드(본 이야기 대화 횟수·단계에 안 셈)
+  if(!epOn)S.bond=(S.bond||0)+1;Fx.tick();  // 17-1A: 확대 쿨다운은 내 메시지 수로 셈
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
   lastRaw=null;const a0=performance.now();
@@ -1688,9 +1698,10 @@ async function send(text){
   Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
+  const src0=v.src;  // 42: 에피소드에서 아래가 src 를 바꾸기 전 출처(판정을 받을지)
   if(Thread.ep()){v.scene=null;  // 16-3: 특별 에피소드 중에는 서버·예비 대사가 고른 장소는 무시
     // 40-1: 에피소드 placeWords — 내 말(없으면 서아 말)에 장소 단어가 있으면 그 에피소드 안 장소(places)로 이동
-    const e=Thread.ep(),W=e.placeWords||{},hit=src=>{for(const k in W){if(+k!==S.scene&&(e.places||[]).includes(+k)&&new RegExp(W[k]).test(src||""))return +k}return null};
+    const e=Thread.ep(),W=e.placeWords||{},hit=src=>{for(const k in W){if(+k!==S.scene&&(e.places||[]).includes(+k)&&EpStage.placeOk(+k)&&new RegExp(W[k]).test(src||""))return +k}return null};
     const h=hit(text);v.scene=h!=null?h:hit(v.dialogue||v.line||"");v.src="server"}
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
     await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
@@ -1711,7 +1722,8 @@ async function send(text){
   const R=S.demoNext;let keep=null;
   if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
   // 관계: 서버 v2 답장이면 판정으로(29: judgeEvery 턴에 한 번), 아니면(서버 v1·서버 없음) 대화 횟수로
-  if(serverVer()===2&&v.src==="server"){
+  if(epOn){if(serverVer()===2&&src0==="server")queueJudge(text,turnText(talkOf("seoa").slice(-1)[0]),null);else EpStage.turn()}  // 42: 에피소드 판정은 에피소드 단계에만(시연 예약·사건 없음)
+  else if(serverVer()===2&&v.src==="server"){
     const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
     queueJudge(text,turnText(talkOf("seoa").slice(-1)[0]),keep);
   }else if(!R)countStage();
@@ -1896,6 +1908,14 @@ const Demo=(()=>{
     const st=story(),cs=curStage();
     let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
     h+=Scenes.html(T,B);
+    // 42: 에피소드 단계(그 에피소드 안에서만). 판정 버튼 = 서버 판정 한 번처럼(켠 플래그와 같이), 단계 = 그 단계 시작 호감으로 바로
+    if(EpStage.on()){const es=EpStage.st(),en=EpStage.n(),ef=DS.epFlags||[];
+      h+=`<h4>${esc(T("episode.title",{name:Thread.ep().name}))}</h4>
+        <div class="kv">${esc(T("episode.info",{n:en,stage:stageName(en),aff:es.aff||0,cap:EpStage.cap(en),miss:es.miss||0,flags:(es.flags||[]).join(", ")||"-"}))}</div>
+        <div class="kv">${esc(T("episode.mainNote",{n:cs,name:stageName(cs),aff:st.affection||0}))}</div>
+        <div class="row">${[1,2,3,4,5,6].map(n=>B("epStage",`${n} ${esc(stageName(n))}`,{v:n,on:en===n})).join("")}</div>
+        <div class="row">${[5,10,0,-3].map(d=>B("epJudge",esc(T("episode.judge",{d:(d>0?"+":"")+d})),{v:d})).join("")}${B("epScene",esc(T("episode.scene")))}${B("epReset",esc(T("episode.reset")))}</div>
+        <div class="kv">${esc(T("episode.flags"))}</div><div class="row">${["care","sincere","pursue","comfort"].map(f=>B("epFlag",esc(f),{v:f,on:ef.includes(f)})).join("")}</div>`}
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
     h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
@@ -1960,6 +1980,11 @@ const Demo=(()=>{
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
     if(a==="reset")return reset(v);
     if(a==="stage"){setStage(+v);return refresh()}
+    if(a==="epStage"){EpStage.setStage(+v);if(typeof EpScene!=="undefined")EpScene.fit();return refresh()}
+    if(a==="epJudge"){const fl=DS.epFlags||[];DS.epFlags=[];saveDS();toChat();EpStage.judged(+v,fl);return refresh()}
+    if(a==="epFlag"){const fl=DS.epFlags||(DS.epFlags=[]),i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);saveDS();return render()}
+    if(a==="epScene"){toChat();if(typeof EpScene!=="undefined")EpScene.run(EpStage.n());return refresh()}
+    if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];save();startStory(e.id);return refresh()}
     if(a==="flag"){const st=story(),fl=st.stage_flags||(st.stage_flags=[]);const i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);return refresh()}
     if(a==="place"){setScene(+v,{fade:true});return refresh()}
     if(a==="unlockAll"){allMotions().forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});return refresh()}
@@ -2050,7 +2075,7 @@ const Scenes=(()=>{
 // 단계는 story().stage (서버 v2 판정 또는 대화 횟수). 게이지: v2는 호감도, 아니면 대화 횟수 기준
 function renderBond(){
   Outfit.sync();  // 관계 단계가 바뀌면 의상도(14)
-  const {n,pct}=bondNow();  // 28: 계산은 bondNow 로 옮김(마이 「관계」 줄과 같은 값)
+  const {n,pct}=typeof EpStage!=="undefined"&&EpStage.on()?EpStage.bond():bondNow();  // 28: 계산은 bondNow 로 옮김(마이 「관계」 줄과 같은 값) · 42: 에피소드 단계가 있는 에피소드 안에서는 에피소드 단계
   BondTop.draw(n,pct);return{i:n-1,pct}}
 // 19: 대화 화면 오른쪽 위 「{n}단계 · {이름}」 + 얇은 게이지. 단계가 오르면 색이 바뀌며 0에서 새 값까지 다시 참.
 // 평소 답장으로 늘 때는 조용히 늘기만. 결정적 순간(17-1B)엔 shine() 으로 밝은 띠가 한 번 지나감. 값 data/config.json bondTop
@@ -2308,18 +2333,60 @@ function runOpening(I,done){
 const Thread={
   cur:()=>S.thread||"main",
   ep(){const k=this.cur();return k==="main"?null:STORIES.find(x=>x.id===k)||null},
-  save(){const k=this.cur(),st=story();(S.threads||(S.threads={}))[k]={chat:S.chats.seoa||[],read:S.read.seoa||0,sid:(S.sid||{}).seoa||null,scene:S.scene||0,lines:st.recent_lines||[],summary:st.summary||""}},
+  // 42: 줄기에 따로 붙은 값(에피소드 단계 ep)은 그대로 두고 덮어씀. 판정 묶음(judgeBuf·judgeN)도 줄기마다 따로(본 이야기 턴이 에피소드 판정에 섞이지 않게)
+  save(){const k=this.cur(),st=story(),T=S.threads||(S.threads={});T[k]={...(T[k]||{}),chat:S.chats.seoa||[],read:S.read.seoa||0,sid:(S.sid||{}).seoa||null,scene:S.scene||0,lines:st.recent_lines||[],summary:st.summary||"",jb:S.judgeBuf||[],jn:S.judgeN||0}},
   // 다른 줄기로. 처음 들어가는 줄기면 true
-  go(to){if(to===this.cur())return false;introT.forEach(clearTimeout);introT=[];busy=false;
-    this.save();const t=(S.threads||{})[to],st=story();S.thread=to;
+  go(to){if(to===this.cur())return false;introT.forEach(clearTimeout);introT=[];busy=false;if(typeof EpScene!=="undefined")EpScene.stop();
+    this.save();const t0=(S.threads||{})[to],t=t0&&t0.chat?t0:null,st=story();S.thread=to;
+    S.judgeBuf=t&&t.jb||[];S.judgeN=t&&t.jn||0;S.judgeKeep=null;judgeTok++;judgeP=null;  // 42: 판정 묶음은 줄기마다. 다른 줄기에서 하던 판정은 버림
     if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?((e0.places||[]).includes(t.scene)?t.scene:e0.scene):t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
-    const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");return !t},
+    const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");renderBond();return !t},  // 42: 하트·게이지도 그 줄기 단계로
   // 대화방 머리의 「본 이야기로」 단추(에피소드 중일 때만)
   // 대화방 이름 밑 설명 줄(25-1): 특별 에피소드 안에서만 thread.sub, 그 밖에는 비우고 숨김(이름만)
   chip(cid){const b=$("#thrBtn");if(!b)return;const e=cid==="seoa"?this.ep():null;b.style.display=e?"":"none";
     const sub=$("#roomSub");sub.textContent=e?UI("thread.sub",{name:e.name}):"";sub.hidden=!e;if(!e)return;
     b.textContent=UI("thread.back",{name:e.name});b.onclick=()=>{this.go("main");if(!chatOf("seoa").length)start();renderLog();Stage.setFace("soft");toast(esc(UI("thread.backToast")),1800)}}
+};
+// 42: 에피소드만의 관계 단계. data/episodes.json 특별 에피소드의 stage 묶음이 있으면(지금은 s2 크리스마스 이브만) 그 에피소드 안에서는
+// 판정 결과(호감 변화·플래그)를 본 이야기 대신 에피소드 호감에만 쌓고, 단계도 앱이 정한다(서버 단계 규칙은 본 이야기 것이라 쓰지 않음).
+// 저장: S.threads[에피소드 id].ep = {aff 호감, stage 단계, flags 이 단계에서 받은 판정 플래그, miss 단계를 못 올린 판정 수, signaled 신호를 넣은 단계, dressed 자취방 옷으로 갈아입었는지, play 진행 중인 단계 장면}
+// 단계 이름은 본 이야기와 같음(data/seoa_story.json stageNames). 화면 위 하트·게이지는 에피소드 안에서 에피소드 단계
+const EpStage={
+  cfgOf:e=>e&&e.stage&&Array.isArray(e.stage.affectionAt)?e.stage:null,
+  cfg(){return this.cfgOf(Thread.ep())},
+  on(){return !!this.cfg()},
+  st(){const e=Thread.ep();if(!this.cfgOf(e))return null;const T=S.threads||(S.threads={}),t=T[e.id]||(T[e.id]={});
+    const s=t.ep||(t.ep={aff:0,stage:1,flags:[],miss:0,signaled:[],dressed:false,play:null,turns:0});return s},
+  n(){const s=this.st();return s?Math.max(1,Math.min(6,s.stage||1)):curStage()},
+  name(){return stageName(this.n())},
+  // 하트·게이지 값(bondNow 와 같은 계산, 에피소드 기준)
+  bond(){const A=this.cfg().affectionAt,s=this.st(),i=this.n()-1;
+    const pct=i>=5?100:A[i+1]!=null?Math.max(0,Math.min(100,((s.aff||0)-(A[i]||0))/((A[i+1]-(A[i]||0))||1)*100)):0;return{n:i+1,pct}},
+  cap(n){const C=this.cfg(),c=C.cap||[];return c[n-1]!=null?c[n-1]:C.affectionAt[n]!=null?C.affectionAt[n]-1:100},
+  // 다음 단계로 가는 데 필요한 판정 플래그(하나라도). 없으면 호감만
+  flagsOk(to,flags){const need=(this.cfg().needFlags||{})[to];return !need||!need.length||need.some(f=>flags.includes(f))},
+  // 이 장소에 갈 수 있는지(placeFrom: 장소 → 열리는 단계)
+  placeOk(i){const C=this.cfg();if(!C)return true;const from=(C.placeFrom||{})[i];return from==null||this.n()>=from},
+  // 판정 한 번: 호감 delta·플래그 flags 를 에피소드에만 더함. 한 번에 한 단계까지(건너뛰지 않게). 단계 상한 = cap(다음 기준 − 1)
+  apply(delta,flags){const s=this.st(),A=this.cfg().affectionAt;if(!s)return null;
+    (flags||[]).forEach(f=>{if(!s.flags.includes(f))s.flags.push(f)});
+    const from=this.n(),raw=Math.max(0,(s.aff||0)+(+delta||0));let to=from;
+    if(from<6&&A[from]!=null&&raw>=A[from]&&this.flagsOk(from+1,s.flags))to=from+1;
+    s.aff=Math.min(raw,this.cap(to));
+    if(to>from){s.stage=to;s.flags=[];s.miss=0}else s.miss=(s.miss||0)+1;
+    save();return{from,to,aff:s.aff}},
+  // 판정 결과를 받은 뒤: 단계 상승이면 대화 줄 + 그 단계 장면, 아니면 오래 머물 때 신호
+  judged(delta,flags){const r=this.apply(delta,flags);if(!r)return null;
+    if(r.to>r.from){addMsg("sys",((DATA.story||{}).stageUpMessage||"{name}").replace("{name}",stageName(r.to)),null,"seoa");if(typeof EpScene!=="undefined")EpScene.stageUp(r.to)}
+    else if(typeof EpScene!=="undefined")EpScene.maybeSignal();
+    renderBond();if(S.room==="seoa")renderLog();return r},
+  // 서버 v1·서버 없음: 판정 대신 judgeEvery 턴마다 noServerGain 만큼(플래그 없음)
+  turn(){const s=this.st();if(!s)return;s.turns=(s.turns||0)+1;save();if(s.turns%judgeEvery()===0)this.judged(this.cfg().noServerGain||0,[])},
+  // /judge 에 보낼 상태: 본 이야기 상태를 바탕으로 단계·호감·플래그만 에피소드 값(본 이야기 사건·출발 일수는 빼고)
+  judgeState(){const s=this.st();return{...story(),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},
+  // 시연 패널: 단계 n 으로(호감 = 그 단계 기준, 플래그·신호 비움). 4단계 이상이면 자취방이 열리고, dressFrom 이상이면 자취방 옷
+  setStage(n){const s=this.st(),C=this.cfg();if(!s)return;n=Math.max(1,Math.min(6,n));s.stage=n;s.aff=C.affectionAt[n-1]||0;s.flags=[];s.miss=0;s.signaled=[];s.dressed=n>=(C.dressFrom||5);s.play=null;save()}
 };
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)
