@@ -1687,7 +1687,10 @@ async function send(text){
   Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
-  if(Thread.ep())v.scene=null;  // 16-3: 특별 에피소드 중에는 장소 고정(서버가 바 장소를 보내도 무시)
+  if(Thread.ep()){v.scene=null;  // 16-3: 특별 에피소드 중에는 서버·예비 대사가 고른 장소는 무시
+    // 40-1: 에피소드 placeWords — 내 말(없으면 서아 말)에 장소 단어가 있으면 그 에피소드 안 장소(places)로 이동
+    const e=Thread.ep(),W=e.placeWords||{},hit=src=>{for(const k in W){if(+k!==S.scene&&(e.places||[]).includes(+k)&&new RegExp(W[k]).test(src||""))return +k}return null};
+    const h=hit(text);v.scene=h!=null?h:hit(v.dialogue||v.line||"");v.src="server"}
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
     await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
