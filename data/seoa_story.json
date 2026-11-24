@@ -18,8 +18,8 @@
     { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "pano": "pano_seoa_xmas.webp", "panoYaw": 0, "panoBright": 1, "episode": true },
     { "name": "서아의 자취방", "img": "bg_seoa_xmas_room.jpg", "pano": "pano_seoa_xmas_room.webp", "panoYaw": -45, "panoBright": 1.25, "episode": true }
   ],
-  "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
-  "ban": ["m14", "m16", "m22"],
+  "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓(44: m23 바디웨이브 댄스는 옥상 춤 보류로 넣음 — 모션 데이터·컬렉션 칸(hold)은 그대로)",
+  "ban": ["m14", "m16", "m22", "m23"],
   "_lead": "단계가 오르면 그 단계 몸짓을 모두 열되, 해금 연출(3D 확대·토스트·앨범 기록)은 lead(대표 몸짓) 하나만. 나머지는 조용히 열어 두고 대화에서 처음 재생될 때 firstSeenText 를 잠깐 띄우며 앨범에 기록한다. 판정 플래그·사건 몸짓은 열릴 때 바로 연출하되 한 번에 여럿이면 하나만, 나머지는 같은 방식으로 둔다.",
   "_firstSeenText": "26: 새 몸짓 작은 알림 문구는 data/ui.json album.firstSeen 으로 옮김",
   "firstSeenMs": 2000,
@@ -41,7 +41,7 @@
       "pursue": { "motions": ["m18"], "text": "서아가 처음으로 안겼어요" }
     },
     "event": {
-      "ROOFTOP": { "motions": ["m23"], "text": "서아가 처음으로 춤을 보여 줬어요" }
+      "ROOFTOP": { "motions": [], "text": "", "_보류": { "motions": ["m23"], "text": "서아가 처음으로 춤을 보여 줬어요", "_설명": "44: 옥상 춤 보류. 사건(ROOFTOP)과 알림 구조는 그대로 두고 몸짓만 비움(motions 가 비면 해금 연출·알림이 안 나옴). 나중에 다른 몸짓을 붙이려면 motions·text 를 채움" } }
     }
   },
   "_hints": "컬렉션 탭 「무빙 카드」에서 아직 안 열린 칸에 보여 줄 힌트. 원고: docs/drafts/2-1-앨범힌트.md",

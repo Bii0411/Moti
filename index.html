@@ -502,7 +502,7 @@ async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
   const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json")]);
   DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
-  if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
+  if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items){COL=col;COL.held=COL.items.filter(x=>x.hold);COL.items=COL.items.filter(x=>!x.hold)}  // 44: 보류 칸(hold)은 앱 어디에도 안 나오고 세지 않음(저장값 S.col 은 그대로)
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
@@ -990,7 +990,14 @@ const Stage=(()=>{
     if(ms===0)for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)m.material.opacity=+k===panoWant?1:0;if(m)m.visible=+k===panoWant}}
   // 매 프레임: 원하는 구는 진하게, 나머지는 옅게. 다 사라진 구는 그리지 않음
   // 41: 이미 목표 투명도면 그대로(전에는 1일 때도 줄였다가 다음 프레임에 다시 올려, 구가 매 프레임 살짝 비쳐 깜빡임)
-  function panoTick(now){const dt=panoLast?Math.min(.25,(now-panoLast)/1000):0;panoLast=now;const st=dt*1000/(panoC().fadeMs||600);
+  // 44: 카메라 먼 면(far)과 구 크기를 카메라 거리에 맞춤. 넓은 구도(첫 만남 firstMeet.frame)·좁고 긴 3D 칸(컴퓨터 크롬의 앱 칸 440×1080)에서
+  //   카메라가 구 중심에서 8.7m 까지 물러나, 구 뒤쪽(8.7+12=20.7m)이 먼 면 20m 밖으로 잘려 그 자리에 평평한 배경 그림(CSS)이 반원으로 보였음.
+  //   far = 카메라~구 중심 가로 거리 + 구 반지름 + farPad(최소 처음 값 20). 카메라가 구 가장자리에 가까우면(camMargin 안) 구를 가로로만 넓힘(높이·바닥 평면 y=0·바닥 이음매는 그대로)
+  let farBase=0;
+  function panoFit(){if(!farBase)farBase=cam.far;const C=panoC(),r=C.radius||12,hz=Math.hypot(cam.position.x,cam.position.z),k=Math.max(1,(hz+(C.camMargin!=null?C.camMargin:2))/r);
+    for(const i in panoMesh){const m=panoMesh[i].mesh;if(m&&m.scale.x!==k)m.scale.set(k,1,k)}
+    const far=Math.max(farBase,hz+r*k+(C.farPad!=null?C.farPad:1));if(Math.abs(cam.far-far)>.01){cam.far=far;cam.updateProjectionMatrix()}}
+  function panoTick(now){const dt=panoLast?Math.min(.25,(now-panoLast)/1000):0;panoLast=now;const st=dt*1000/(panoC().fadeMs||600);panoFit();
     for(const k in panoMesh){const m=panoMesh[k].mesh;if(!m)continue;const o=m.material.opacity,goal=+k===panoWant?1:0;
       m.material.opacity=goal>o?Math.min(1,o+st):goal<o?Math.max(0,o-st):o;m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}
     panoPrune()}
