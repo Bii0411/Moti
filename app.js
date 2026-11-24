@@ -5,8 +5,12 @@ const MODEL={jihu:"jihu.glb",seoa:"seoa_vroid.glb?v=20261122c"};
 // 3D 칸 뒤 장소 그림: 캐릭터마다 3곳. 대화에 장소 말이 나오면(kw) 배경이 바뀌어요
 const SCENES={
  seoa:[
-  {name:"네온 거리",img:"bg_seoa_street.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니|비가|비 와|비와|비 오|빗|우산|젖|간판|가게|상점|라멘/,say:"비 온다. …이리 와, 내 코트 안으로. 작전 중엔 감기 걸리면 안 되니까."},
-  {name:"도시 옥상",img:"bg_seoa_rooftop.jpg",kw:/옥상|하늘|달|야경|전망|높은 곳|올라가|기차|열차|도시 전체/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
+  // name = 서버가 보내는 location 값과 똑같이. 바 1층·2층은 전용 배경이 나올 때까지 기존 이미지로 임시 대체
+  {name:"바 '라스트 오더' 1층",img:"bg_seoa_alley.jpg",kw:/바 안|카운터|가게|술|잔|창가/,say:"문 닫을 시간이지? …한 잔만 더."},
+  {name:"바 '라스트 오더' 2층",img:"bg_seoa_roof.jpg",kw:/2층|위층|방|자고 가|침대/,say:"여기가 사장님 집이구나. …생각보다 깔끔하네."},
+  {name:"네온 골목",img:"bg_seoa_street.jpg",kw:/골목|거리|밤거리|걷자|걸어|시장|돌아다니/,say:"이 골목은 카메라 사각지대야. 여기선 마음 놓고 걸어도 돼."},
+  {name:"비 내리는 골목",img:"bg_seoa_rain.jpg",kw:/비가|비 와|비와|비 오|빗|우산|젖/,say:"비 온다. …이리 와, 우산 같이 쓰자."},
+  {name:"바 옥상",img:"bg_seoa_rooftop.jpg",kw:/옥상|하늘|달|야경|전망|별/,say:"여기가 이 도시에서 제일 높은 곳이야. …너한테만 보여 주는 거야."}
  ],
  jihu:[
   {name:"노을 진 교실",img:"bg_jihu_class.jpg",kw:/교실|수업|책상|칠판|방과\s?후|노을|해 질|오후/,say:"여기, 네 자리였잖아. 노을 질 때면 네가 늘 창밖을 봤어."},
@@ -14,7 +18,7 @@ const SCENES={
   {name:"학교 복도",img:"bg_jihu_hall.jpg",kw:/복도|사물함|나가자|나가서|걸어가|교문|하교|계단|산책/,say:"복도 끝까지 같이 걸을래? 예전에 매일 이렇게 걸었는데."}
  ]
 };
-const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const m=S.scene||(S.scene={});return L[m[cid]||0]||L[0]};
+const sceneOf=cid=>{const L=SCENES[cid];if(!L)return null;const st=S.story&&S.story[cid];if(st&&st.location){const k=L.findIndex(x=>x.name===st.location);if(k>=0)return L[k]}const m=S.scene||(S.scene={});return L[m[cid]||0]||L[0]};
 const BG3D={};
 function sil(c1,c2){const s=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/></linearGradient></defs><rect width='260' height='300' fill='url(#g)'/><circle cx='130' cy='112' r='50' fill='rgba(0,0,0,.35)'/><path d='M40 300c6-70 46-108 90-108s84 38 90 108z' fill='rgba(0,0,0,.35)'/></svg>`;return "data:image/svg+xml,"+encodeURIComponent(s.replace(/'/g,'"'))}
 const CH=[
@@ -27,7 +31,7 @@ const CH=[
  {id:"haram",name:"류하람",img:IMG.haram,hook:"데뷔하면, 제일 먼저 너한테 보여줄게.",desc:"데뷔 D-30 연습생. 웃게 해 주면 춤으로 답한다.",tags:["연습생","성장","응원","하트챌린지"],chats:25.6,badge:"NEW",bg:"#2b1236",route:"데뷔 조 루트",
   intro:"*연습실 거울 앞에서 땀에 젖은 앞머리를 급히 쓸어 넘기며 하람이 돌아섰다.*\n잠깐, 머리 좀 정리하고! …됐다. 오늘도 보러 와 준 거야?",lines:["방금 안무 봤어? 엔딩요정 각 나왔지?","누나, 아니 선배… 아니 그냥 너! 오늘 와 줘서 고마워.","연습 끝나고 편의점 갈래? 내가 쏠게.","나 데뷔하면 첫 직캠은 너한테 보낼 거야.","지금 웃었다! 내가 웃게 했다!","긴장돼서 손 떨려. 잠깐만 잡아 줄래?"]},
  {id:"seoa",name:"윤서아",img:IMG.seoa,hook:"이 도시에서 날 아는 사람은 없어. …너 빼고.",desc:"요원, 해커, 특수부대 팀장. 이야기마다 정체도 옷도 바뀌는 직진 선배.",tags:["걸크러시","요원","해커","정체반전"],chats:33.1,badge:"3D",bg:"#0c1630",route:"네온 시티 잠입 루트",glow:"#1e3a66",
-  intro:"*비에 젖은 후드를 벗으며 서아가 가게 문턱에 기대섰다. 손등의 긁힌 상처를 아무렇지 않게 내민다.*\n…내가 처리할 수 있었는데. 근데, 꽤 멋있었어. 사장님. 이것도 처리해 줄래? 아니면… 문 닫는다고 쫓아낼 거야?",lines:["쉿. 이 층 카메라는 내가 다 꺼 놨어.","걱정 마. 이 도시에서 내가 못 뚫는 건 없어. …너 빼고.","손 줘. 길 잃으면 곤란하니까.","방금 그 표정, 기록해 둘게. 내 전용 파일에.","작전 끝나면 라멘 먹자. 내가 살게, 선배니까.","정체가 들켜도 괜찮아. 너한텐 처음부터 들키고 싶었어."]}
+  intro:"*새벽 2시, 산성비. 문 닫을 시간인데 창가 자리에 그녀가 앉아 있다. 2주째, 매일 밤 같은 자리, 같은 술.*\n\n*젖은 보라색 머리칼이 드러난 어깨 위로 흘러내리고, 네온 불빛이 하얀 피부와 검은 칼라 안쪽의 분홍빛 링 위에 번진다. 오늘은 장갑 낀 손등에 피가 묻어 있다.*\n\n*그때, 술 취한 용병 셋이 그녀의 테이블을 둘러싼다. 그중 하나가 히죽거리며 그녀의 맨어깨에 손을 올린다.*\n\n*그녀의 손이 허리 옆 파우치로 내려가는 순간, 당신이 먼저 움직인다. 손목을 비틀고, 테이블에 처박고, 나머지 둘이 덤비기도 전에 끝난다. 세 사람이 빗속으로 도망친다.*\n\n*그녀는 한 번도 일어나지 않았다. 일자 앞머리 사이로 보랏빛 눈이 당신을 천천히 훑는다.*\n\n\"…내가 처리할 수 있었는데.\"\n\n*잔을 장밋빛 입술에 댄 채, 처음으로 웃는다.*\n\n\"근데, 꽤 멋있었어. 사장님.\"\n\n*그녀가 카운터 쪽으로 몸을 기울이며, 피 묻은 손등을 내민다.*\n\n\"이것도 처리해 줄래? 아니면… 문 닫는다고 쫓아낼 거야?\"",lines:["쉿. 이 층 카메라는 내가 다 꺼 놨어.","걱정 마. 이 도시에서 내가 못 뚫는 건 없어. …너 빼고.","손 줘. 길 잃으면 곤란하니까.","방금 그 표정, 기록해 둘게. 내 전용 파일에.","작전 끝나면 라멘 먹자. 내가 살게, 선배니까.","정체가 들켜도 괜찮아. 너한텐 처음부터 들키고 싶었어."]}
 ];
 const chById=id=>CH.find(c=>c.id===id);
 // motions: tier, jump price, grade, emotion, anim, released (NEW rule)
@@ -38,7 +42,12 @@ const M=[
  ["m18","감싸 안기","T2",40,"A","설렘","zoom"],["m19","자신감 있게 설득하기","T2",40,"A","자신감","lean"],["m20","도발하기","T2",45,"B","장난","shake","2026-11-08"],["m21","원투 펀치","T2",45,"A","분노","punch"],["m22","하트 챌린지","T2",50,"S","기쁨","heart"],["m23","바디웨이브 댄스","T2",50,"S","장난","dance"],
  ["m24","부끄러워하기","T1",20,"B","수줍음","lean",null,1]
 ].map(a=>({id:a[0],name:a[1],tier:a[2],price:a[3],grade:a[4],emo:a[5],anim:a[6],released:a[7]||null,xs:!!a[8]}));
-const mBy=id=>M.find(m=>m.id===id);
+// 서아 전용 신규 몸짓(c01~c05, 해금으로만 얻음)과 답장 기다릴 때 쓰는 대기 몸짓(m25). 상점·뽑기 목록(M)에는 넣지 않음
+const MX=[
+ ["c01","칼라 만지작거리기","U",0,"B","진심","tilt"],["c02","머리 쓸어 넘기기","U",0,"C","도발","sway"],["c03","팔꿈치 괴고 몸 숙이기","U",0,"B","도발","lean"],
+ ["c04","옷깃 잡아당기기","U",0,"B","설렘","lean"],["c05","이마 맞대기","U",0,"A","설렘","zoom"],["m25","고개 갸웃하며 듣기","W",0,"F","평온","tilt"]
+].map(a=>({id:a[0],name:a[1],tier:a[2],price:a[3],grade:a[4],emo:a[5],anim:a[6],released:null,xs:false,only:a[0][0]==="c"?"seoa":null}));
+const mBy=id=>M.find(m=>m.id===id)||MX.find(m=>m.id===id);
 const mByName=n=>M.find(m=>m.name===n);
 const FX={heart:"💗",flash:"📸",punch:"💥",dance:"✨",zoom:"💞",bounce:"✨"};
 const GRADES=["S","A","B","C","D","E","F"];
@@ -178,7 +187,7 @@ function stage3dHtml(c,lv,b,intro){const sc=sceneOf(c.id),from=!intro&&U.sceneFr
 function msgParts(t){
   t=String(t||"");const out=[];
   const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
-  if(/\*[^*]+\*/.test(t)){t.split(/(\*[^*]+\*)/).forEach(seg=>{if(/^\*[^*]+\*$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg.replace(/\*/g,""))})}
+  if(/\*[^*]+\*/.test(t)){t.split(/(\*[^*]+\*)/).forEach(seg=>{if(/^\*[^*]+\*$/.test(seg))push("n",seg.slice(1,-1));else seg.split(/\n+/).forEach(x=>push("d",x.replace(/\*/g,"").trim().replace(/^[“"](.*)[”"]$/,"$1")))})}
   else if(/[“"][^”"]+[”"]/.test(t)){t.split(/([“"][^”"]+[”"])/).forEach(seg=>{if(/^[“"][^”"]+[”"]$/.test(seg))push("d",seg.slice(1,-1));else push("n",seg)})}
   else push("d",t);
   // 한 덩어리 안의 줄바꿈은 문단으로 나누기
@@ -253,6 +262,7 @@ const KEY="movelog-proto-v3";
 const blank=()=>({step:15,jump:115,plus:false,owned:Object.fromEntries(CH.map(c=>[c.id,[]])),packs:[],eps:[],views:{date:"",left:3},attend:"",stepAds:{date:"",n:0},chats:{},bond:{},reels:[],seen:[]});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){S=blank()}
 S.mypacks=S.mypacks||[];S.vmode=S.vmode||"split";if(!S.read){S.read={};for(const k in S.chats)S.read[k]=S.chats[k].length}S.last=S.last||{};S.gauge=S.gauge||{};S.mmode=S.mmode||{};S.scene=S.scene||{};
+S.story=S.story||{};S.lastMotion=S.lastMotion||{};S.firsts=S.firsts||{};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const U={hq:"",htag:"",hsort:"rec",mk:{scene:"첫 만남",ms:[]},ck:[],dsub:"feed",shareReel:null,tab:"home",homeSeg:"home",slide:0,chatChar:null,fitChar:"seoa",fitTab:"motion",filter:"all",dq:"",dtag:""};
 const todayKey=today.toISOString().slice(0,10);
@@ -409,12 +419,14 @@ function renderChat(){
   if(S.chats[c.id])S.chats[c.id]=S.chats[c.id].filter(m=>m.t!=="…이렇게?");
   const msgs=S.chats[c.id]||(S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}]);
   S.read[c.id]=msgs.length;if(!S.last[c.id])S.last[c.id]=Date.now()-FIRST_MIN[c.id]*60000;save();renderNav();
-  const co=chatOnly(c.id),csc=sceneOf(c.id);
+  const ci0=$("#ci"),keep=ci0?ci0.value:"",foc=ci0&&document.activeElement===ci0;  // 뒤에서 다시 그려도 쓰던 글 유지
+  story(c.id);const co=chatOnly(c.id),csc=sceneOf(c.id);
   $("#view").innerHTML=`<div class="chatwrap ${co?"conly":""}" ${co&&csc?`style="--scn:url(${csc.img})"`:""}><div class="modebar">${has3D(c.id)?`<div class="mgrp"><small>화면</small><div class="mseg" role="group" aria-label="화면 보기 방식"><button class="${co?"":"on"}" data-act="vset" data-v="split">나눠 보기</button><button class="${co?"on":""}" data-act="vset" data-v="chat">채팅만</button></div></div>`:""}<div class="mgrp"><span class="kbar" aria-label="게이지 ${S.gauge[c.id]||0}%"><i style="width:${S.gauge[c.id]||0}%"></i></span></div></div>${co?`<div class="cohd"><b>${c.name}</b><span></span><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`:has3D(c.id)?stage3dHtml(c,lv,b):`<div class="stage"><div class="figure" id="fig" style="${bgi(c)}"><span class="soon3">3D 준비 중</span></div><div class="info"><b>${c.name}</b><div class="gauge" aria-label="두근 게이지 ${lv}/5">${"♥".repeat(lv)}${"♡".repeat(5-lv)}</div><small>인연 ${lv} · ${BONDL[lv]}</small><span class="mood">분위기: ${MOODS[b.mood]}</span></div><button class="chip" data-act="chatback" aria-label="캐릭터 바꾸기">⇄</button></div>`}
-  <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):msgHtml(m)).join("")}</div>
+  <div class="msgs" id="msgs">${msgs.map((m,i)=>m.r==="sys"&&/결정적 순간/.test(m.t)?"":m.r==="choice"?choiceHtml(c,m,i):`${m.act?`<div class="actn">${esc(m.act)}</div>`:""}${m.typing?`<div class="msg ${m.r}">…</div>`:msgHtml(m)}`).join("")}</div>
   <div class="toolrow"><button data-act="motionsheet">👀 모션 보기</button>${b.turns>=3?`<button data-act="reel">🎬 릴스</button>`:`<button disabled style="opacity:.5">🎬 릴스 (${3-b.turns}번 더 대화)</button>`}<button data-act="restart">새 회차 시작</button></div>
   <div class="composer"><textarea id="ci" rows="1" name="moti-msg-${Date.now()}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-form-type="other" data-lpignore="true" enterkeyhint="send" placeholder="${c.name}에게 말 걸기" aria-label="메시지"></textarea><button class="ic send" data-act="send" aria-label="보내기">↑</button></div></div>`;
   const m=$("#msgs");m.scrollTop=m.scrollHeight;if(has3D(c.id))J3D.mount($("#s3d"),c.id);
+  if(keep){$("#ci").value=keep}if(foc)$("#ci").focus();
   $("#ci").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}};
 }
 function playOn(el,m){if(!el||!m)return;el.className=el.className.replace(/\sa-\w+/g,"");void el.offsetWidth;el.classList.add("a-"+m.anim);el.querySelectorAll(".mtag,.fx").forEach(x=>x.remove());el.insertAdjacentHTML("beforeend",`<span class="mtag">▶ ${m.name}</span>`+(FX[m.anim]?`<span class="fx">${FX[m.anim]}</span>`:""))}
@@ -433,49 +445,123 @@ function choiceHtml(c,m,i){
     return `<button data-act="pickm" data-v="${id}" data-i="${i}"><span class="gb" style="background:var(--${x.grade})">${x.grade}</span>${x.name}<small class="${own?"own":""}">${own?"✓ ":""}${lab}</small></button>`}).join("")}</div></div>`;
 }
 // ── LLM 서버 주소 ─────────────────────────────────────────────
-// 내 컴퓨터에서 서버를 켰으면 http://localhost:8000 그대로 두면 돼요.
-// 서버를 인터넷에 올리면 그 주소로 바꿔요. 서버가 꺼져 있으면 미리 써 둔 대사로 대답해요.
-const API_URL="https://seoa-backand.onrender.com";
+// 기본은 배포 서버. 주소 뒤에 ?api=http://localhost:8000 처럼 붙이면 그 서버로 바꿔서 시험할 수 있어요.
+// 서버가 꺼져 있거나 연결이 안 되면 미리 써 둔 대사로 대답해요. (배포 서버는 https + CORS 허용이어야 해요)
+const API_DEFAULT="https://seoa-backand.onrender.com";
+const API_URL=(()=>{try{const q=new URLSearchParams(location.search).get("api");if(q)return q.replace(/\/+$/,"")}catch(e){}return API_DEFAULT})();
+// ── 이야기 상태 (서버는 저장하지 않음. 여기 localStorage에 두고 매 요청에 보냄) ──
+const STORY0={seoa:{stage:1,affection:0,day:1,time_of_day:"새벽 2시",location:"바 '라스트 오더' 1층",revealed_secrets:[],departure_days_left:null,summary:"",recent_lines:[],pending_event:null}};
+const STAGE_NAMES={seoa:["신경전","단골","끌림","고백 직전","엇갈림","연인"]};
+const STAGE_AT=[0,20,40,60,75,100];  // 다음 단계로 가는 호감도 기준 (서버 engine._next_stage와 같게). 게이지에 씀
+function story(cid){if(!STORY0[cid])return null;const st=S.story[cid]||(S.story[cid]={});const d=STORY0[cid];
+  for(const k in d)if(st[k]===undefined)st[k]=JSON.parse(JSON.stringify(d[k]));
+  if(!st.base){st.base=1;unlockGrant(cid,(UNLOCK[cid].stage[1]||{}).ms||[])}  // 1단계 기본 몸짓
+  return st}
+const bondName=(cid,lv)=>{const st=STAGE_NAMES[cid]&&story(cid);return st?STAGE_NAMES[cid][st.stage-1]:BONDL[lv]};
+// ── 몸짓 해금 지도 (프롬프트 파일 「몸짓 해금 지도」) ──
+const UNLOCK={seoa:{
+  ban:["m14","m16","m22"],  // 서아에게 안 맞는 몸짓
+  stage:{1:{ms:["m02","m03","m04","m07","m17","m20","m12","m11","m01","c02"]},
+    2:{ms:["m09","c03"],say:"서아가 처음으로 잔을 건네줬어요"},
+    3:{ms:["m05","m06","c01","c04"],say:"서아가 처음으로 진심을 내비쳤어요"},
+    4:{ms:["c05"],say:"서아가 처음으로 이마를 맞댔어요"},
+    5:{ms:["m10","m13"],say:"서아가 처음으로 등을 돌렸어요"},
+    6:{ms:["m15"],say:"서아가 처음으로 당신을 맞아 줬어요"}},
+  flag:{protect:{ms:["m21"],say:"서아가 처음으로 당신 앞에서 싸웠어요"},
+    tease:{ms:["m19"],say:"서아가 처음으로 지지 않으려 했어요",min:2},
+    comfort:{ms:["m08"],say:"서아가 처음으로 당신을 쓰다듬었어요"},
+    pursue:{ms:["m18"],say:"서아가 처음으로 안겼어요"}},
+  event:{ROOFTOP:{ms:["m23"],say:"서아가 처음으로 춤을 보여 줬어요"}}
+}};
+function unlockGrant(cid,ms){ms.forEach(id=>{if(mBy(id))grant(cid,id)})}
+// 해금된 몸짓 = 지금 단계까지의 단계 해금 + 판정·사건 해금(소장 목록에 들어감) + 결제로 소장한 것. 안 맞는 몸짓·직전 몸짓은 뺌
+function unlockedIds(cid){const u=UNLOCK[cid],st=story(cid);if(!u||!st)return [];const set=new Set();
+  for(let k=1;k<=st.stage;k++)((u.stage[k]||{}).ms||[]).forEach(id=>set.add(id));
+  (S.owned[cid]||[]).forEach(id=>set.add(id));
+  return [...set].filter(id=>{const m=mBy(id);return m&&m.tier!=="W"&&!u.ban.includes(id)&&(!m.only||m.only===cid)})}
+function motionList(cid){return unlockedIds(cid).filter(id=>id!==S.lastMotion[cid]).map(id=>{const m=mBy(id);return{id:m.id,name:m.name,emo:m.emo}})}
+// 대화 기록 → 서버로 보낼 모양 ("*행동* 대사")
+const turnText=m=>(m.act?`*${m.act}* `:"")+m.t;
+const histOf=cid=>(S.chats[cid]||[]).filter(m=>(m.r==="u"||m.r==="c")&&!m.typing).map(m=>({r:m.r,t:turnText(m)}));
+async function post(path,body,ms){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),ms);
+  try{const r=await fetch(API_URL+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
+    if(!r.ok){console.warn("AI 서버 오류",path,r.status,await r.text());return null}return await r.json()}
+  catch(e){console.warn("AI 서버에 연결 못 함 → 미리 써 둔 대사 사용",path,e);return null}finally{clearTimeout(tm)}}
+// 서아 응답만 바로 받기 → {action, dialogue, motion_id, emotion, location}
 async function askAI(c,t,hist){
-  const sc=sceneOf(c.id);const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),20000);
-  try{
-    const r=await fetch(API_URL+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,
-      body:JSON.stringify({char:c.id,message:t,session_id:(S.sid||{})[c.id]||null,history:hist,scene:sc?sc.name:null,scenes:(SCENES[c.id]||[]).map(x=>x.name),motions:M.map(m=>m.name)})});
-    if(!r.ok){console.warn("AI 서버 오류",r.status,await r.text());return null}
-    const j=await r.json();
-    if(j.session_id){(S.sid||(S.sid={}))[c.id]=j.session_id;save()}  // 서버 대화 번호 기억
-    return j;
-  }catch(e){console.warn("AI 서버에 연결 못 함 → 미리 써 둔 대사 사용",e);return null}
-  finally{clearTimeout(tm)}
+  const st=story(c.id);if(!st)return null;  // 서버에 연결된 캐릭터만 (지금은 서아)
+  const j=await post("/chat",{char:c.id,message:t,history:hist.slice(-32),state:st,motion_list:motionList(c.id)},45000);
+  return j&&typeof j.dialogue==="string"?j:null;
+}
+// 판정은 화면을 막지 않고 뒤에서. 끝나기 전에 다음 메시지를 보내면 send()가 기다렸다가 보냄
+function runJudge(c,lastUser,lastReply,needSummary){
+  const st=story(c.id);if(!st)return;
+  U.judgeP=post("/judge",{char:c.id,state:st,last_user:lastUser,last_reply:lastReply,need_summary:needSummary,recent:needSummary?histOf(c.id).slice(-24):[]},45000)
+    .then(j=>{if(!j||!j.state)return;Object.assign(st,j.state);
+      // 게이지: 다음 단계까지 호감도 진행률
+      S.gauge[c.id]=st.stage>=5?100:Math.round(Math.max(0,Math.min(100,(st.affection-STAGE_AT[st.stage-1])/(STAGE_AT[st.stage]-STAGE_AT[st.stage-1])*100)));
+      const q=[];
+      if(j.stage_up){S.chats[c.id].push({r:"sys",t:`관계가 변했어요 · ${STAGE_NAMES[c.id][st.stage-1]}`});const g=UNLOCK[c.id].stage[st.stage];if(g)q.push(g)}
+      (j.flags||[]).forEach(f=>{const g=UNLOCK[c.id].flag[f];if(g&&(!g.min||st.stage>=g.min))q.push(g)});
+      save();if(U.tab==="chat"&&U.chatChar===c.id&&!U.busy)renderChat();
+      unlockShow(c,q)})
+    .finally(()=>{U.judgeP=null});
+}
+// 해금 연출: 관계 메시지 → 새 몸짓을 결정적 순간처럼 재생 → 문구 토스트 → S.firsts에 그때 대사와 기록
+function unlockShow(c,groups){
+  const seen=new Set((S.firsts[c.id]||[]).map(f=>f.mid));
+  const todo=groups.map(g=>({g,ms:g.ms.filter(id=>mBy(id)&&!seen.has(id))})).filter(x=>x.ms.length);
+  groups.forEach(g=>unlockGrant(c.id,g.ms));
+  if(!todo.length){save();return}
+  const last=(S.chats[c.id]||[]).filter(m=>m.r==="c"&&!m.typing).slice(-1)[0];const line=last?turnText(last):"";
+  const fl=S.firsts[c.id]||(S.firsts[c.id]=[]);
+  todo.forEach(x=>x.ms.forEach(id=>fl.push({mid:id,text:x.g.say,line,date:fmtMD(new Date())})));
+  save();if(U.tab==="chat"&&U.chatChar===c.id&&!U.busy)renderChat();
+  todo.forEach((x,k)=>setTimeout(()=>{if(U.tab!=="chat"||U.chatChar!==c.id)return;const m=mBy(x.ms[0]);
+    playMotion(m,{key:true,line});toast(`🔓 ${x.g.say} · 「${m.name}」`)},400+k*3200));
 }
 async function send(){
   const i=$("#ci");const t=i.value.trim();if(!t||U.busy)return;const c=chById(U.chatChar);const b=bond(c.id);
-  const hist=(S.chats[c.id]||[]).filter(m=>m.r==="u"||m.r==="c").map(m=>({r:m.r,t:m.t}));
-  S.chats[c.id].push({r:"u",t});S.last[c.id]=Date.now();
-  // 대답 기다리는 동안 "…" 표시
+  if(U.judgeP){U.busy=true;try{await U.judgeP}catch(e){}U.busy=false}  // 직전 판정이 끝난 뒤에 보내기
+  const hist=histOf(c.id);
+  S.chats[c.id].push({r:"u",t});S.last[c.id]=Date.now();i.value="";
+  // 대답 기다리는 동안 "…" 표시 + 고개 갸웃하며 듣기
   U.busy=true;S.chats[c.id].push({r:"c",t:"…",typing:true});renderChat();
+  if(has3D(c.id)&&!chatOnly(c.id)&&$("#s3d"))J3D.play(mBy("m25"));
   const ai=await askAI(c,t,hist);
   U.busy=false;S.chats[c.id]=S.chats[c.id].filter(m=>!m.typing);
-  b.turns++;b.pts+=1+((ai?ai.key_moment>=30:KEYMOMENT.test(t))?2:0);b.mood=Math.min(2,Math.floor(Math.random()*3));
-  const owned=M.filter(m=>owns(c.id,m.id));let pick=owned[Math.floor(Math.random()*owned.length)];
-  // 장소 바뀜: AI가 알려 준 장소 (서버 없으면 단어 찾기)
+  b.turns++;b.mood=Math.min(2,Math.floor(Math.random()*3));
+  const st=story(c.id);
+  if(ai){
+    // ── 서버 응답: 매 답장마다 몸짓 재생, 장소 바뀌면 배경 전환 ──
+    const usedEvent=st.pending_event;st.pending_event=null;
+    const m=ai.motion_id?mBy(ai.motion_id):null;
+    const L=SCENES[c.id];if(L&&ai.location&&ai.location!==st.location){const from=sceneOf(c.id);const k=L.findIndex(x=>x.name===ai.location);
+      if(k>=0){U.sceneFrom={cid:c.id,img:from.img};st.location=ai.location;S.chats[c.id].push({r:"sys",t:`📍 장소가 바뀌었어요 · ${ai.location}`})}}
+    const msg={r:"c",t:ai.dialogue,act:ai.action||null,a:m?m.name:null,mid:m?m.id:null,emo:ai.emotion||null};
+    S.chats[c.id].push(msg);
+    st.recent_lines=[...(st.recent_lines||[]),turnText(msg)].slice(-3);
+    if(m)S.lastMotion[c.id]=m.id;
+    b.pts+=1;save();
+    if(U.tab==="chat"&&U.chatChar===c.id){renderChat();if(m&&!chatOnly(c.id))playMotion(m,{line:turnText(msg)})}
+    if(usedEvent&&UNLOCK[c.id].event[usedEvent])unlockShow(c,[UNLOCK[c.id].event[usedEvent]]);  // 사건 해금은 그 사건 응답 뒤에
+    runJudge(c,t,turnText(msg),b.turns%6===0);
+    return;
+  }
+  // ── 서버 없음: 미리 써 둔 대사 (예전 방식) ──
+  b.pts+=1+(KEYMOMENT.test(t)?2:0);
+  const owned=st?unlockedIds(c.id).map(mBy):M.filter(m=>owns(c.id,m.id));let pick=owned[Math.floor(Math.random()*owned.length)];
   const L=SCENES[c.id];let moved=null;
-  if(L){const sm=S.scene||(S.scene={});const cur=sm[c.id]||0;
-    const k=ai?L.findIndex(x=>x.name===ai.scene):L.findIndex(x=>x.kw.test(t));
-    if(k>=0&&k!==cur){U.sceneFrom={cid:c.id,img:L[cur].img};sm[c.id]=k;moved=L[k];S.chats[c.id].push({r:"sys",t:`📍 장소가 바뀌었어요 · ${moved.name}`})}}
-  // 결정적 순간 게이지: 턴마다 +10 + AI가 매긴 중요도(0~60). 100이 넘으면 자동으로 (무료, 구매 유도 없음)
-  const g=(S.gauge[c.id]||0)+(ai?10+ai.key_moment:15+(t.length>=20?10:0)+(KEYMOMENT.test(t)?35:0)+(moved?25:0));
+  if(L){const cur=sceneOf(c.id);const k=L.findIndex(x=>x.kw.test(t));
+    if(k>=0&&L[k]!==cur){U.sceneFrom={cid:c.id,img:cur.img};moved=L[k];if(st)st.location=moved.name;else (S.scene||(S.scene={}))[c.id]=k;S.chats[c.id].push({r:"sys",t:`📍 장소가 바뀌었어요 · ${moved.name}`})}}
+  // 결정적 순간 게이지: 100이 넘으면 자동으로 (무료, 구매 유도 없음)
+  const g=(S.gauge[c.id]||0)+15+(t.length>=20?10:0)+(KEYMOMENT.test(t)?35:0)+(moved?25:0);
   const key=g>=100&&b.turns>=2;S.gauge[c.id]=key?0:Math.min(95,g);
-  const line=ai&&ai.reply?ai.reply:(moved?moved.say:c.lines[(b.turns-1)%c.lines.length]);
+  const line=moved?moved.say:c.lines[(b.turns-1)%c.lines.length];
   if(key){pick=owned.slice().sort((x,y)=>GRADES.indexOf(x.grade)-GRADES.indexOf(y.grade))[0];}
-  S.chats[c.id].push({r:"c",t:line,a:key?pick.name:null,emo:ai?ai.emotion:null});
-  // 3지선다: AI가 고른 어울리는 모션 3개 (없으면 무작위). 아직 없는 모션 1개는 꼭 섞기
-  const choose=!key&&b.turns%3===0;
-  if(choose){let ids=ai?ai.motions.map(n=>mByName(n)).filter(Boolean).map(m=>m.id):[];
-    ids=[...new Set(ids)].slice(0,3);
-    if(ids.length<3)ids=choicePick(c.id);
-    else if(ids.every(id=>owns(c.id,id))){const no=M.filter(m=>!owns(c.id,m.id)&&!ids.includes(m.id));if(no.length)ids[2]=no[Math.floor(Math.random()*no.length)].id}
-    S.chats[c.id].push({r:"choice",ms:ids,done:null})}
+  S.chats[c.id].push({r:"c",t:line,a:key?pick.name:null});
+  // 3지선다(choice)는 꺼 둠 — 01 지시문 4-2. 다시 켜려면 아래 주석을 풀면 돼요.
+  // if(!key&&b.turns%3===0)S.chats[c.id].push({r:"choice",ms:choicePick(c.id),done:null});
   save();if(U.tab==="chat"&&U.chatChar===c.id){renderChat();if(key)playMotion(pick,{key:true,line})}
 }
 function motionSheet(){
@@ -644,10 +730,20 @@ function openBox(kind){const b=BOX[kind];const c=chById(U.fitChar);
   },900);
 }
 // ---------- intro
+// 인트로 3D 연출: 문단이 하나씩 나오면서 정해진 몸짓 재생 (서아: m07 팔짱 → 웃는 문단 m01 → 손등 내미는 문단 m11)
+const INTRO_SEQ={seoa:[{at:0,m:"m07"},{find:/웃는다/,m:"m01"},{find:/내민다/,m:"m11"}]};
+let introTimers=[];
+function introParas(c){return msgParts(c.intro)}
+function introRun(cid){introTimers.forEach(clearTimeout);introTimers=[];const c=chById(cid);const ps=[...document.querySelectorAll(".intro .itx p")];
+  const seq=INTRO_SEQ[cid];ps.forEach(p=>p.classList.remove("on"));
+  ps.forEach((p,k)=>introTimers.push(setTimeout(()=>{if(!p.isConnected)return;p.classList.add("on");p.scrollIntoView({block:"nearest",behavior:"smooth"});
+    if(!seq)return;const hit=seq.find(x=>x.at===k||(x.find&&x.find.test(p.textContent)&&x.at===undefined));if(hit&&$("#i3d"))J3D.play(mBy(hit.m))},300+k*1700)));
+  if(!seq&&$("#i3d"))J3D.play(mBy("m13"))}
 function intro(cid){const c=chById(cid);
-  if(has3D(cid)){$("#layer").innerHTML=`<div class="intro">${stage3dHtml(c,0,{mood:0},true)}<q>${c.intro}</q><div class="r"><button class="btn" data-act="replay">다시 보기</button><button class="btn pri" data-act="skipintro">건너뛰고 대화로</button></div></div>`;J3D.mount($("#i3d"),cid);J3D.play(mBy("m13"));return}
-  $("#layer").innerHTML=`<div class="intro"><div class="figure" id="ifig" style="${bgi(c)}"></div><q>${c.intro}</q><div class="r"><button class="btn" data-act="replay">다시 보기</button><button class="btn pri" data-act="skipintro">건너뛰고 대화로</button></div></div>`;
-  const m=mBy("m15");setTimeout(()=>playOn($("#ifig"),m),200);
+  const txt=`<div class="itx">${introParas(c).map(p=>`<p class="${p.k==="n"?"narr":"say"}">${esc(p.x)}</p>`).join("")}</div>`;
+  if(has3D(cid)){$("#layer").innerHTML=`<div class="intro">${stage3dHtml(c,0,{mood:0},true)}${txt}<div class="r"><button class="btn" data-act="replay">다시 보기</button><button class="btn pri" data-act="skipintro">건너뛰고 대화로</button></div></div>`;J3D.mount($("#i3d"),cid);introRun(cid);return}
+  $("#layer").innerHTML=`<div class="intro"><div class="figure" id="ifig" style="${bgi(c)}"></div>${txt}<div class="r"><button class="btn" data-act="replay">다시 보기</button><button class="btn pri" data-act="skipintro">건너뛰고 대화로</button></div></div>`;
+  introRun(cid);const m=mBy("m15");setTimeout(()=>playOn($("#ifig"),m),200);
 }
 // ---------- router
 function render(){renderTop();renderNav();({home:renderHome,discover:renderDiscover,chat:renderChat,motion:renderMotion,my:renderMy})[U.tab]();mountFit()}
@@ -666,8 +762,8 @@ document.addEventListener("click",e=>{
     case"stepad":S.stepAds.n++;S.step+=5;save();render();chargeSheet();toast("광고 시청 완료 · 스텝 +5");break;
     case"buyjump":S.jump+=+v;save();render();chargeSheet();toast(`점프 +${v} 충전 (시연)`);break;
     case"openchat":U.chatChar=v;U.tab="chat";render();if(!S.seen.includes(v)){S.seen.push(v);save();intro(v)}break;
-    case"replay":if($("#i3d"))J3D.play(mBy("m13"));else playOn($("#ifig"),mBy("m15"));break;
-    case"skipintro":closeSheet();if(U.tab==="chat")renderChat();break;
+    case"replay":introRun(U.chatChar);if(!$("#i3d"))playOn($("#ifig"),mBy("m15"));break;
+    case"skipintro":introTimers.forEach(clearTimeout);closeSheet();if(U.tab==="chat")renderChat();break;
     case"chatback":U.chatChar=null;render();break;
     case"send":send();break;
     case"vmode":S.vmode=S.vmode==="chat"?"split":"chat";save();renderChat();toast(S.vmode==="chat"?"채팅만 보기 · 모션은 나올 때 전체 화면으로 보여요":"나눠 보기 · 위에 캐릭터, 아래 채팅");break;
@@ -679,8 +775,8 @@ document.addEventListener("click",e=>{
     case"viewm":viewMotion(v);break;
     case"buymotion":buyMotion(t.dataset.c,v);break;
     case"reel":reel();break;
-    case"savereel":{const c=chById(U.chatChar),b=bond(c.id),lv=Math.min(5,Math.floor(b.pts/4));S.reels.push({ch:c.id,name:c.name,lv:`인연 ${lv} — ${BONDL[lv]}`,mood:MOODS[b.mood],turns:b.turns,date:fmtMD(new Date())});save();closeSheet();toast("릴스 소장 완료");break}
-    case"restart":{const c=chById(U.chatChar);if(S.sid)delete S.sid[c.id];S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}];S.bond[c.id]={pts:0,turns:0,mood:0};if(S.scene)S.scene[c.id]=0;save();render();toast("새 회차 시작");break}
+    case"savereel":{const c=chById(U.chatChar),b=bond(c.id),lv=Math.min(5,Math.floor(b.pts/4));S.reels.push({ch:c.id,name:c.name,lv:`인연 ${lv} — ${bondName(c.id,lv)}`,mood:MOODS[b.mood],turns:b.turns,date:fmtMD(new Date())});save();closeSheet();toast("릴스 소장 완료");break}
+    case"restart":{const c=chById(U.chatChar);if(S.sid)delete S.sid[c.id];if(S.story)delete S.story[c.id];delete S.lastMotion[c.id];S.gauge[c.id]=0;S.chats[c.id]=[{r:"c",t:c.intro,a:"웃음"}];S.bond[c.id]={pts:0,turns:0,mood:0};if(S.scene)S.scene[c.id]=0;save();render();toast("새 회차 시작");break}
     case"fitchar":U.fitChar=v;U.mk.ms=[];U.ck=[];render();break;
     case"fittab":U.fitTab=v;render();break;
     case"filter":U.filter=v;render();break;
