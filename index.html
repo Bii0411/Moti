@@ -851,7 +851,7 @@ const Stage=(()=>{
   // 조명·안개 영향 없음. 배경 어둡게 층(data/look.json background)과 같은 밝기·채도를 구 안에서 곱함 + 장소별 panoBright. 장소별 panoYaw = 그림 가운데를 서아 뒤에서 몇 도 돌릴지.
   // 장소 전환: 구의 투명도를 바꾸는 시간 data/config.json pano.fadeMs(배경 그림 전환 .6s 와 같게). 평평한 배경 그림(CSS)은 늘 그 아래에 그대로 있어 그림을 불러오는 동안·실패해도 보인다
   const panoC=()=>(DATA.config&&DATA.config.pano)||{};
-  const panoTex={},panoMesh={};let panoWant=-1,panoMain=-1,borrowed=false,panoLast=0,panoGeo=null;
+  const panoTex={},panoMesh={},panoPin={};let panoWant=-1,panoMain=-1,borrowed=false,panoLast=0,panoGeo=null;
   const panoOf=i=>{const L=SCENES[i];return L&&L.pano&&qs.get("pano")!=="off"?L:null};
   function panoLoad(i){const L=panoOf(i);if(!L)return Promise.resolve(null);
     return panoTex[L.pano]||(panoTex[L.pano]=new Promise(ok=>new THREE.TextureLoader().load(L.pano,t=>{t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(4,R.capabilities.getMaxAnisotropy());ok(t)},undefined,()=>{delete panoTex[L.pano];ok(null)})))}
@@ -875,13 +875,21 @@ const Stage=(()=>{
   // 매 프레임: 원하는 구는 진하게, 나머지는 옅게. 다 사라진 구는 그리지 않음
   function panoTick(now){const dt=panoLast?Math.min(.25,(now-panoLast)/1000):0;panoLast=now;const st=dt*1000/(panoC().fadeMs||600);
     for(const k in panoMesh){const m=panoMesh[k].mesh;if(!m)continue;const o=m.material.opacity,goal=+k===panoWant?1:0;
-      m.material.opacity=goal>o?Math.min(1,o+st):Math.max(0,o-st);m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}}
+      m.material.opacity=goal>o?Math.min(1,o+st):Math.max(0,o-st);m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}
+    panoPrune()}
+  // 30-1: 360도 그림은 지금 보이는 장소(빌린 칸이면 그 장소 + 대화방 장소)와 사진·카드 그림을 만드는 중인 장소 것만 메모리에 둔다.
+  // 나머지는 다 사라진 뒤(투명도 0) 구·재질·텍스처를 내려놓음. 다시 오면 다시 불러옴(그동안은 평평한 배경 그림)
+  function panoDrop(k){const p=panoMesh[k],L=SCENES[k];delete panoMesh[k];
+    if(p&&p.mesh){scene.remove(p.mesh);p.mesh.material.dispose()}  // 구 모양(panoGeo)은 장소끼리 같이 써서 남김
+    const url=L&&L.pano;if(url&&panoTex[url]&&!Object.keys(panoMesh).some(j=>SCENES[j]&&SCENES[j].pano===url)){const t=panoTex[url];delete panoTex[url];t.then(x=>{if(x)x.dispose()})}}
+  function panoPrune(){for(const k in panoMesh){if(+k===panoWant||+k===panoMain||panoPin[k]>0)continue;const m=panoMesh[k].mesh;if(m&&m.material.opacity>0)continue;panoDrop(k)}}
   // 사진·카드 그림: 장소 i 의 360도를 잠깐 바로 보이게(그림을 다 불러온 뒤 같은 작업 안에서). 되돌리는 함수를 돌려줌
   function panoUse(i){const keep={};for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)keep[k]={o:m.material.opacity,v:m.visible,t:m.material.transparent}}
     const w=panoWant;panoShow(i,0);for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)m.material.transparent=m.material.opacity<1}
     return()=>{panoWant=w;for(const k in keep){const m=panoMesh[k].mesh;if(m){m.material.opacity=keep[k].o;m.visible=keep[k].v;m.material.transparent=keep[k].t}}}}
   // 장소 i 의 360도 그림을 받고 구까지 만들어 둠(구가 있으면 true)
-  async function panoReady(i){if(!panoOf(i))return false;panoMeshOf(i);const t=await panoLoad(i);if(!t)return false;
+  // 사진·카드 그림용: 부른 쪽이 다 쓰면 pano.done(i) 로 놓아야 함(그동안 내려놓지 않음)
+  async function panoReady(i){if(!panoOf(i))return false;panoPin[i]=(panoPin[i]||0)+1;panoMeshOf(i);const t=await panoLoad(i);if(!t)return false;
     for(let n=0;n<5&&!panoMesh[i].mesh;n++)await new Promise(r=>setTimeout(r,0));return !!panoMesh[i].mesh}
   // ── 서아가 보내는 사진(12) ──
   // 몸짓 mid 의 mt 초 순간 자세 + 표정 fk(눈 뜬 채, 입 다문 채)로 서아를 잠깐 세우고 draw() 를 부른 뒤, 같은 작업 안에서 원래대로 되돌린다.
@@ -928,7 +936,7 @@ const Stage=(()=>{
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},use:panoUse,ready:panoReady,has:i=>!!panoOf(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────

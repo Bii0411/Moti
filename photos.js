@@ -78,15 +78,17 @@ const Shot=(()=>{
   // 지금 3D 장면을 사진 크기로 한 번 더 그려서 배경 위에 얹음. setCam(cam,aspect) = 카메라 자리(촬영 화면의 지금 구도)
   async function take(sceneIdx,setCam,o={}){
     const P=PCFG().image||{},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const sc=SCENES[sceneIdx]||SCENES[0],img=await loadImg(sc.img),pano=await Stage.pano.ready(SCENES[sceneIdx]?sceneIdx:0);  // 30: 360도 배경이 있는 장소는 3D 장면 안의 구가 배경
+    const sc=SCENES[sceneIdx]||SCENES[0],img=await loadImg(sc.img),pi=SCENES[sceneIdx]?sceneIdx:0,pano=await Stage.pano.ready(pi);  // 30: 360도 배경이 있는 장소는 3D 장면 안의 구가 배경
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
     g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img&&!pano){cover(g,img,W,H,.5,.4);dimLayer(g,W,H)}
+    try{
     const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone();
     if(o.shadow)Stage.shadow(true,(((DATA.config||{}).camera||{}).photo||PCFG().camera||{}).shadow);
     R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H);
-    const back=pano?Stage.pano.use(SCENES[sceneIdx]?sceneIdx:0):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H);  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
+    const back=pano?Stage.pano.use(pi):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H);  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
     R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq);
     if(o.shadow)Stage.shadow(false);
+    }finally{Stage.pano.done(pi)}  // 30-1: 다 그렸으면 360도 그림을 놓음(지금 장소 것이 아니면 내려놓음)
     if(o.onCanvas)try{o.onCanvas(c)}catch(e){console.error(e)}  // 24: 다 그린 사진(줄이기 전)을 촬영 화면의 「날아가는 사진」으로
     const t1=performance.now(),type=P.type||"image/jpeg";
     const full=await encode(c,type,P.quality||.86,P.minQuality||.5,P.maxKB||300);

@@ -36,10 +36,10 @@ const SeoaPhoto=(()=>{
   async function make(spec){
     await Stage.ready;
     const P={...(((DATA.photos||{}).image)||{}),...(spec.image||{})},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img),pano=await Stage.pano.ready(SCENES[spec.scene]?spec.scene:0);  // 30: 360도 배경
+    const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img),pi=SCENES[spec.scene]?spec.scene:0,pano=await Stage.pano.ready(pi);  // 30: 360도 배경
     // 26-2: 다른 의상 모델은 그리는 동안 붙잡아 둠(내려놓기 prune 에서 빠짐). 다 그리면 놓고, 쓰지 않으면 바로 내려놓음
     const pin=spec.outfit&&spec.outfit!==Stage.outfitNow()?spec.outfit:null;if(pin)Stage.use(pin,1);
-    try{
+    try{  // 30-1: 360도 그림도 다 그릴 때까지 붙잡아 둠(끝나면 pano.done)
     const model=pin?await Stage.model(pin).catch(()=>null):null;
     const mid=spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
     const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
@@ -50,7 +50,7 @@ const SeoaPhoto=(()=>{
       const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone(),vw=cam.view?{...cam.view}:null;
       try{if(vw)cam.clearViewOffset();R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H,K,yaw,shift);
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
-        const back=pano?Stage.pano.use(SCENES[spec.scene]?spec.scene:0):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
+        const back=pano?Stage.pano.use(pi):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
       finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
     },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name,model});
     if(!ok)throw new Error("서아 모델이 아직 없음");
@@ -60,7 +60,7 @@ const SeoaPhoto=(()=>{
     const thumb=await Shot.encode(Shot.scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
     st().lastMid=mid;
     return{full,thumb,w:W,h:H,mid,face,yaw,shift,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
-    }finally{if(pin)Stage.use(pin,-1)}
+    }finally{if(pin)Stage.use(pin,-1);Stage.pano.done(pi)}
   }
 
   // ── 보낼 사진 고르기(원고에서만) ──
