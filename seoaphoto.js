@@ -162,6 +162,7 @@ const SeoaPhoto=(()=>{
   function check(){const s=st();if(!s.pend.length||sending)return;
     if(!inRoom())return;  // 대화방에 들어오면 enter() 가 다시 부름
     if(!idle())return kick();
+    if(s.pend[0].type!=="away"&&typeof Greet!=="undefined"&&Greet.holds())return kick();  // 34: 다시 들어올 때 인사 중이면 첫 대사 자리(lineDelayMs)까지 기다림(부재중 사진은 인사보다 먼저)
     const it=s.pend.shift();save();
     // 대화 중 사진은 보낼 때 다시 확인: 시연 장면이 시작됐으면 버림
     if(it.type==="casual"&&typeof Scenes!=="undefined"&&Scenes.cur())return kick(0);
@@ -208,5 +209,5 @@ const SeoaPhoto=(()=>{
   function init(){const L=document.getElementById("log");if(L)L.addEventListener("click",onLogClick);
     Photos.onChange(()=>{if(inRoom()&&!quiet)renderLog()})}
 
-  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,awayAt,timeLabel,isSending:()=>sending,kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
+  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,awayAt,timeLabel,isSending:()=>sending,awayPending:()=>st().pend.some(p=>p.type==="away"),kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
 })();
