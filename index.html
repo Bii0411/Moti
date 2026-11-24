@@ -121,9 +121,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .inp:placeholder-shown{padding-top:5px;padding-bottom:5px;word-break:keep-all;overflow-wrap:normal}
 .abtn{flex:none;height:46px;padding:0 9px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--pri2);line-height:1.15}
 .send{width:46px;height:46px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
-.quick{display:flex;gap:6px;padding:0 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0;max-width:100%;flex:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
-.quick::-webkit-scrollbar{display:none}
-.quick button{flex:none;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--sub)}
 
 /* 앨범 */
 .album{flex:1;overflow-y:auto;padding:12px 14px 16px}
@@ -432,7 +429,6 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
       <div class="roomhd"><button class="bk" id="backBtn" aria-label="메시지 목록">‹</button><span class="av" id="roomAv"></span><span><b id="roomName">윤서아</b><small id="roomSub"></small></span><button class="thr" id="thrBtn" style="display:none"></button></div>
       <div id="stageSlot"></div>
       <div class="log" id="log"></div>
-      <div class="quick" id="quick"></div>
       <div class="bar">
         <button class="fnbtn" id="fnBtn" aria-expanded="false" aria-controls="fnPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         <button class="abtn" id="actBtn" aria-label="행동 묘사 넣기">( )<br>행동</button>
@@ -606,6 +602,8 @@ const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortSta
 // XSTAGE 모션(진짜 모션 데이터): data/motions.json 의 xstage 에서 채움. 몸짓 번호 → {file, from, to(초), inPlace(골반 수평 이동 없앰)}
 const XS={};
 const XORD=["Hips","Spine","Spine01","Spine02","neck","Head","LeftShoulder","LeftArm","LeftForeArm","LeftHand","RightShoulder","RightArm","RightForeArm","RightHand","LeftUpLeg","LeftLeg","LeftFoot","RightUpLeg","RightLeg","RightFoot"];
+// 45-1 손가락 뼈(서아 VRoid 이름). 마디 1→2→3 순서(부모 먼저). 모션 JSON 의 fingers(tools/fbx2motion.mjs)가 있을 때만 움직임, 없으면 기본 손
+const XFING=["R","L"].flatMap(s=>["Thumb","Index","Middle","Ring","Little"].flatMap(f=>[1,2,3].map(i=>`J_Bip_${s}_${f}${i}`)));
 const XCH={Hips:"Spine",Spine:"Spine01",Spine01:"Spine02",Spine02:"neck",neck:"Head",LeftShoulder:"LeftArm",LeftArm:"LeftForeArm",LeftForeArm:"LeftHand",RightShoulder:"RightArm",RightArm:"RightForeArm",RightForeArm:"RightHand",LeftUpLeg:"LeftLeg",LeftLeg:"LeftFoot",RightUpLeg:"RightLeg",RightLeg:"RightFoot"};
 const Stage=(()=>{
   let setOutfit=()=>{},loadOutfit=()=>Promise.reject(),outfitNow=null;  // 의상 바꾸기(14단계)·의상 모델 불러오기(26-1 카드). init 안에서 채움
@@ -697,6 +695,22 @@ const Stage=(()=>{
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
   const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
+  // 45-1 손가락: x·y·z 정수(scale 배)만 담겨 있어 w 를 되살려 Float32Array 로 한 번 풀어 둠(d.fq). hold = 내내 같은 자세(한 프레임)
+  function xsFq(d){if(d.fq)return d.fq;const F=d.fingers,s=F.scale||100,fq={};
+    const un=(a,o,i)=>{const x=a[i*3]/s,y=a[i*3+1]/s,z=a[i*3+2]/s;o[i*4]=x;o[i*4+1]=y;o[i*4+2]=z;o[i*4+3]=Math.sqrt(Math.max(0,1-x*x-y*y-z*z))};
+    for(const n in F.tracks){const a=F.tracks[n],m=a.length/3,o=new Float32Array(m*4);for(let i=0;i<m;i++)un(a,o,i);fq[n]=o}
+    for(const n in F.hold){const o=new Float32Array(4);un(F.hold[n],o,0);fq[n]=o}
+    return d.fq=fq}
+  // 손가락 뼈를 몸 뼈와 같은 규칙으로(기준 자세 대비 세계 회전 · 방향 맞춤 · 돌기 turn · 섞기 w, 건너뛰기 이음매 kb). 손가락은 FPS 가 몸보다 낮아(fingers.fps) 시각을 따로 셈
+  function xsFingers(d,a,tt,t2,kb,tn,w){const F=d.fingers,fq=xsFq(d),fps=F.fps||15;
+    const at=t=>{const N=F.frames||1,f=Math.max(0,t*fps),i=Math.min(N-1,Math.floor(f));return[i,Math.min(N-1,i+1),Math.min(1,f-i)]};
+    const [i,j,u]=at(tt),[i2,j2,u2]=at(t2);
+    for(const n of XFING){const b=md.bones[n],o=fq[n];if(!b||!o||!a.W[n])continue;
+      if(o.length===4)q0.set(o[0],o[1],o[2],o[3]);
+      else{q0.set(o[i*4],o[i*4+1],o[i*4+2],o[i*4+3]).slerp(q1.set(o[j*4],o[j*4+1],o[j*4+2],o[j*4+3]),u);
+        if(kb)q0.slerp(q1.set(o[i2*4],o[i2*4+1],o[i2*4+2],o[i2*4+3]).slerp(q2.set(o[j2*4],o[j2*4+1],o[j2*4+2],o[j2*4+3]),u2),kb)}
+      if(tn)q0.premultiply(qT);q0.multiply(a.A[n]).multiply(a.W[n]);
+      b.parent.getWorldQuaternion(q2);q3.copy(q2.invert()).multiply(q0);b.quaternion.slerp(q3,w);b.updateMatrixWorld(true)}}
   // XSTAGE 모션을 서아 뼈에 맞추기
   // 26-1: 맞춤값은 모델(의상)마다 따로 보관(카드 그림을 다른 의상 모델로 그릴 때 섞이지 않게)
   function xsAlign(d){
@@ -707,6 +721,10 @@ const Stage=(()=>{
     const a={A:{},W:{},hipH:wp("Hips").y};
     for(const n of XORD){const b=md.bones[n],dir=d.dir[n];if(!b)continue;const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
       a.A[n]=md.bones[XCH[n]]&&dir?new THREE.Quaternion().setFromUnitVectors(wp(XCH[n]).sub(wp(n)).normalize(),new THREE.Vector3(...dir).normalize()):new THREE.Quaternion()}
+    // 45-1 손가락: 1·2마디는 다음 마디 쪽 방향을 맞춤, 3마디(끝 뼈 없음)는 2마디 맞춤값을 씀
+    const F=d.fingers;if(F)for(const n of XFING){const b=md.bones[n];if(!b||!(F.tracks[n]||F.hold[n]))continue;const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
+      const k=n.endsWith("3")?n.replace(/3$/,"2"):n,nx=k.replace(/\d$/,c=>+c+1),dir=F.dir[k];
+      a.A[n]=md.bones[k]&&md.bones[nx]&&dir?new THREE.Quaternion().setFromUnitVectors(wp(nx).sub(wp(k)).normalize(),new THREE.Vector3(...dir).normalize()):new THREE.Quaternion()}
     for(const n in keep)md.bones[n].quaternion.copy(keep[n]);md.root.position.copy(kp);md.root.updateMatrixWorld(true);
     d.al.set(md.root,a);return a;
   }
@@ -730,6 +748,7 @@ const Stage=(()=>{
       q3.copy(q2.invert()).multiply(q0);if(win.damp)(xsTW[n]||(xsTW[n]=new THREE.Quaternion())).copy(q0);
       b.quaternion.slerp(q3,win.damp&&win.damp[n]!=null?w*Math.max(0,Math.min(1,+win.damp[n])):w);b.updateMatrixWorld(true)}
     if(win.damp)for(const k in xsTW)delete xsTW[k];
+    if(d.fingers)xsFingers(d,a,tt,t2,kb,tn,w);
     const h=d.hip,h1=k=>h[i*3+k]+(h[j*3+k]-h[i*3+k])*u,ip=k=>(kb?h1(k)+(h[i2*3+k]+(h[j2*3+k]-h[i2*3+k])*u2-h1(k))*kb:h1(k))*a.hipH*w;
     if(!win.inPlace){const hx=ip(0),hz=ip(2),c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);
   }
@@ -1413,8 +1432,6 @@ function renderLog(){
 }
 // 43: 답장을 기다리는 줄 — 처음엔 chat.typing, 기다린 지 chat.typingLongMs 가 지나면 chat.typingLong(Wait). 서버가 깨기 전 첫 답장은 예전처럼 config.waitText
 function typingText(){return waiting&&!serverAwake&&DATA.config.waitText||UI(Wait.long()?"chat.typingLong":"chat.typing")}
-const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
-function renderQuick(){$("#quick").innerHTML=QUICK.map(q=>`<button>${q}</button>`).join("");$("#quick").querySelectorAll("button").forEach(b=>b.onclick=()=>send(b.textContent))}
 
 let busy=false,waiting=false,sampleFn=undefined;  // waiting: 서아 답장을 서버에서 기다리는 중
 async function getSample(){
@@ -2393,8 +2410,9 @@ function openRoom(cid){
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   Thread.chip(cid);  // 25-1: 이름 밑 설명 줄은 특별 에피소드 안에서만(data/ui.json thread.sub)
-  $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
-  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
+  $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);
+  // 45-1: 괄호 ( ) 안은 줄바꿈 없이 한 덩어리(넘치면 괄호 앞에서 다음 줄로)
+  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name).replace(/\([^)]*\)/g,m=>[...m.replace(/ /g,"\u00a0")].join("\u2060"));  // 띄어쓰기는 붙는 빈칸, 글자 사이는 단어 잇개(U+2060, 「·」 뒤에서도 안 끊기게)
   placeStage();renderLog();renderUnread();
   if(cid==="seoa")Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
@@ -2745,7 +2763,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(()=>Cards.refresh());renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
