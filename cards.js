@@ -67,13 +67,17 @@ const Cards=(()=>{
     try{await make(q.id)}catch(e){console.error("카드 그림을 만들지 못함",q.id,e)}
     running=false;if(queue.length)kick(C().gapMs||400)}
   const perf=[];
+  // 43: 몸짓의 진짜 모션 버전(data/motions.json xstage 의 motionVer, 없으면 1). 카드 그림을 만들 때 기록(S.col[id].mv)에 남기고,
+  //   버전이 바뀐 몸짓의 카드는 그림만 지우고 다시 만든다(의상·장소·날짜·대사는 기록 그대로)
+  const verOf=m=>(typeof XS!=="undefined"&&XS[m]&&XS[m].ver)||1;
   async function make(id){const a=S.col[id];if(!a||has(a.char,id))return;
     await init();if(has(a.char,id))return;
     const mo=motionOf(id);if(!mo.m||!canPlay(mo.m))return;
     const t0=performance.now();
     const r=await SeoaPhoto.make({card:true,mid:mo.m,face:mo.f,K:frameOf(mo.m),scene:a.scene!=null&&SCENES[a.scene]?a.scene:(C().defaultScene||0),outfit:a.outfit||C().defaultOutfit||"ops",image:C().image||{aspect:[2,3],longPx:720,quality:.8,maxKB:80},at:(C().momentById||{})[id]});
     if(!S.col[id])return;  // 그사이 초기화
-    await put(a.char,id,r.full,{outfit:a.outfit,scene:a.scene,mid:mo.m,w:r.w,h:r.h});
+    await put(a.char,id,r.full,{outfit:a.outfit,scene:a.scene,mid:mo.m,mv:verOf(mo.m),w:r.w,h:r.h});
+    if(S.col[id]){S.col[id].mv=verOf(mo.m);save()}
     perf.push({id,t:Math.round(t0),outfit:a.outfit,scene:a.scene,...r.ms,kb:Math.round(r.full.size/1024),total:Math.round(performance.now()-t0)});
   }
   // 그림 없는 카드 채우기(컬렉션을 열 때): 예전 저장값은 기본 의상·기록된 장소(없으면 바 1층)를 기록에도 적어 둠
@@ -82,8 +86,15 @@ const Cards=(()=>{
       if(!a.outfit){a.outfit=C().defaultOutfit||"ops";if(a.scene==null||!SCENES[a.scene])a.scene=C().defaultScene||0;if(!a.char)a.char="seoa";a.old=1;n++}
       // 27: 장소와 의상이 안 맞게 저장된 카드(크리스마스 거리에 작전복 등)는 맞는 의상으로 고치고 그림을 다시 만듦
       if(typeof outfitForScene==="function"){const fit=outfitForScene(a.scene,a.outfit);if(fit!==a.outfit){a.outfit=fit;n++;if(has(a.char,id))await remove(a.char,[id])}}
+      if(stale(id)){await remove(a.char,[id]);n++}
       if(!has(a.char,id))capture(id,{delay:0})}
     if(n)save();return n}
+  // 43: 그림이 있는데 그 몸짓의 모션 버전이 기록과 다른 카드(예전 그림은 mv 없음 = 1)
+  function stale(id){const a=S.col[id];if(!a||!has(a.char,id))return false;const mo=motionOf(id);return !!(mo.m&&canPlay(mo.m)&&(a.mv||1)!==verOf(mo.m))}
+  // 43: 앱을 열 때 한 번 — 모션 버전이 바뀐 카드만 그림을 지우고 다시 만들기 예약(다른 카드는 그대로). 만드는 때는 26-2 나눠 만들기 그대로
+  async function refresh(){await init();const ids=Object.keys(S.col||{}).filter(id=>colBy(id)&&stale(id));
+    for(const id of ids){const a=S.col[id];await remove(a.char,[id]);capture(id)}
+    return ids}
 
   // ── 카드 모양(38 포토카드): 3열, 가로2:세로3. 사진 둘레 테두리(등급마다: 일반 크림 무광·레어 홀로그램·시크릿 금박) + 둥근 사진 + 아래 띠 ──
   // 모은 카드 = 사진 + 왼쪽 위 영문 등급 표(DAILY·RARE·SECRET) + 아래 띠(이름 / 관계 단계 · 처음 본 장소 · MM.DD / 오른쪽 카드 번호)
@@ -128,7 +139,9 @@ const Cards=(()=>{
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
   function hydrate(root){root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
     url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=b.querySelector(".mcsil");if(sv)sv.remove()})})}
-  subs.push(k=>{const r=document.getElementById("album");if(!r||!k)return;const id=k.slice(k.indexOf(":")+1),b=r.querySelector(`.mc.got[data-f="${id}"]`);if(b)hydrate(b.parentNode)});
+  subs.push(k=>{const r=document.getElementById("album");if(!r||!k)return;const id=k.slice(k.indexOf(":")+1),b=r.querySelector(`.mc.got[data-f="${id}"]`);if(!b)return;
+    const im=b.querySelector(".mcimg"),a=S.col[id];if(im&&!im.hidden&&a){url(a.char,id).then(u=>{if(u&&im.isConnected)im.src=u});return}  // 43: 다시 만든 그림은 보이는 칸에 바로 바꿔 넣음
+    hydrate(b.parentNode)});
 
   // ── 카드 확대(26-1B) ──
   // 카드가 가운데로 커지고(transform 만) 카드 안에서 3D 서아가 그 몸짓을 그때 의상·장소로 반복. 대화방 3D 그림판을 빌려 씀(Stage.borrow, 모델을 두 번 불러오지 않음)
@@ -265,6 +278,6 @@ const Cards=(()=>{
     if(PhotoUI.canShare(f)){try{await navigator.share({files:[f]})}catch(e){}return}
     PhotoUI.saveFile(f);toast(esc(T("saved")),1800)}
 
-  return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),
+  return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,refresh,stale,verOf,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),
     grid,hydrate,open,close,isOpen:()=>vOn,shareImage,state:()=>({vOn,id:vIds[vi],K:!!K,outfit:Stage.outfitNow(),playing:Stage.recentMotion(0)})};
 })();
