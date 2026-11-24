@@ -1894,10 +1894,10 @@ function giftSheet(focus){
 }
 // 확률 보기(24): 선물별 등급 확률 표. 선물마다 기본 줄 + 그 선물에 맞는 기분일 때 오른 줄(Gacha.odds 와 같은 계산). 확률 공개용이라 숫자는 data/gifts.json 그대로
 function giftOdds(){
-  const B=GIFT.moodBonus||{},G=Gacha.ORDER,P=GIFT.pity||{},pct=v=>esc(UI("gift.pct",{v:+(+v||0).toFixed(2)}));
+  const B=GIFT.moodBonus||{},G=Gacha.grades(COL.items),P=GIFT.pity||{},pct=v=>esc(UI("gift.pct",{v:+(+v||0).toFixed(2)}));  // 47: 열 = 얻을 수 있는 등급만(특별 선물 몸짓이 모두 보류면 특별 열 없음, 그 확률은 레어에 더함)
   const row=(cls,name,o)=>`<tr class="${cls}"><td>${name}</td>${G.map(k=>`<td>${pct(o[k])}</td>`).join("")}</tr>`;
   const body=`<table class="otab"><thead><tr><th>${esc(UI("gift.oddsGift"))}</th>${G.map(k=>`<th>${esc(gradeKo(k))}</th>`).join("")}</tr></thead><tbody>
-    ${GIFTS.map(g=>row("",esc(g.name),Gacha.odds(g,false,B))+(STATES[g.rec]?row("m",esc(UI("gift.oddsMatch",{mood:STATES[g.rec].ko})),Gacha.odds(g,true,B)):"")).join("")}</tbody></table>
+    ${GIFTS.map(g=>row("",esc(g.name),Gacha.odds(g,false,B,COL.items))+(STATES[g.rec]?row("m",esc(UI("gift.oddsMatch",{mood:STATES[g.rec].ko})),Gacha.odds(g,true,B,COL.items)):"")).join("")}</tbody></table>
     <p class="onote">${esc(UI("gift.oddsNote",{bonus:B.rare||0,from:gradeKo(B.from||"common"),n:P.count||10,min:gradeKo(P.min||"rare")}))}</p>`;
   Mini.open(UI("gift.oddsTitle"),body);
 }
@@ -1913,7 +1913,7 @@ function give(id){
   closeSheets();setTab("chat");openRoom("seoa");
   S.dia-=g.price;
   const matched=g.rec===st,F=S.giftNext;S.giftNext=null;
-  let it=F&&F.item?colBy(F.item):null,grade=it?it.grade:F&&F.grade?F.grade:Gacha.rollGrade(Gacha.odds(g,matched,GIFT.moodBonus),pityLeft(),GIFT.pity);
+  let it=F&&F.item?colBy(F.item):null,grade=it?it.grade:F&&F.grade?Gacha.fit(F.grade,COL.items):Gacha.rollGrade(Gacha.odds(g,matched,GIFT.moodBonus,COL.items),pityLeft(),GIFT.pity);  // 47: 특별 선물 몸짓이 모두 보류 → 특별은 레어로(확률 표와 같은 계산, 시연 「특별」 지정도)
   if(!it)it=Gacha.pickItem(COL.items,grade);
   S.pity=Gacha.nextPity(grade,pityLeft(),GIFT.pity);
   const line=Gacha.line(g,grade,matched),isNew=!S.col[it.id];
@@ -2652,11 +2652,8 @@ const EpScene=(()=>{
       if(k<P.length-1){await sleep(gap);if(!alive())return}
     }
     running=false;busy=false;ep.play=null;(ep.seen||(ep.seen=[])).includes(n)||ep.seen.push(n);save();renderLog();
-    if(sc.card)award(sc.card);
     const nx=queue.shift();if(nx)run(nx)}
-  // 장면이 끝나면 주는 카드(42-C, data/collection.json). 장소·의상은 카드에 적힌 값(자취방·자취방 옷), 관계 단계는 에피소드 단계
-  function award(id){const it=colBy(id);if(!it||S.col[id])return;
-    S.col[id]=seenNow({scene:it.scene!=null?it.scene:S.scene,outfit:it.outfit||Outfit.want(),stage:EpStage.n(),line:""});save();Cards.capture(id);notifyNew(it);if(curTab==="album")renderAlbum(id)}
+  // 47: 장면 뒤 카드(42-C e01 크리스마스 이브)는 뺌. 장면이 끝나면 따로 보상 없이 자유 대화
   // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
   function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in");View.release()}
   // 다시 들어왔을 때 끊긴 장면 이어 가기
@@ -2668,7 +2665,7 @@ const EpScene=(()=>{
   // 시연 패널에서 단계를 바꾼 뒤: 갈 수 없는 장소면 그 단계 장면 장소로, 옷 맞춤
   function fit(){stop();const s=EpStage.st();if(s)s.play=null;const e=Thread.ep(),sc=cfgOf(EpStage.n());
     if(!EpStage.placeOk(S.scene))setScene(sc&&sc.place!=null?sc.place:e.scene,{fade:true});else Outfit.sync();save()}
-  return{run,stop,resume,maybeSignal,fit,stageUp:n=>run(n),isOn:()=>running,award:id=>award(id)};
+  return{run,stop,resume,maybeSignal,fit,stageUp:n=>run(n),isOn:()=>running};
 })();
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introEnd=0;  // 43: 오프닝 문단이 다 나오는 때(답장 기다리는 몸짓을 막음)

@@ -31,7 +31,7 @@ const gift = col.items.filter(x => x.source === "gift");
 const only = col.items.filter(x => x.only && !seen.has(x.id));
 // 44: hold(보류) 칸 = 지금은 얻을 수 없어 숨긴 칸(m23 바디웨이브 댄스, 옥상 춤 보류). ban·unlock 에서 빠져도 그대로 두고 번호를 지킴.
 //   나중에 hold 를 지우고 unlock 에 몸짓을 붙이면 같은 번호로 다시 나타남(그때는 unlock 쪽 칸이 되고 이 줄은 건너뜀)
-const held = col.items.filter(x => x.hold && !seen.has(x.id) && !only.includes(x));
+const held = col.items.filter(x => x.hold && x.source !== "gift" && !seen.has(x.id) && !only.includes(x));  // 47: 선물 칸의 hold(g11·g12)는 선물 줄에 그대로
 const items = [...chat.map(({ from, ...x }) => ({ ...x, ...(from.stage ? { stage: from.stage } : { [from.sec]: from.key }) })), ...held, ...only, ...gift];
 // 38: 카드 번호 no 는 한 번 정하면 그대로(예전 칸의 번호를 id 로 찾아 씀). 새 칸은 지금 가장 큰 번호 다음부터 차례로. 빠진 칸의 번호는 다시 쓰지 않음
 const oldNo = Object.fromEntries(col.items.filter(x => x.no).map(x => [x.id, x.no]));
