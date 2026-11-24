@@ -303,7 +303,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .roomhd .av{width:34px;height:34px;border-radius:50%;background:center 18%/cover}
 .roomhd b{font-size:15px}.roomhd small{font-size:11px;color:var(--sub);display:block}.roomhd small[hidden]{display:none}
 /* 16: 에피소드 중 「본 이야기로」 */
-.roomhd .thr{margin-left:auto;font-size:11px;font-weight:700;color:var(--pri2,#c4b5fd);border:1px solid #6d4bd1;border-radius:999px;padding:5px 10px;white-space:nowrap;max-width:52%;overflow:hidden;text-overflow:ellipsis}
 #room{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 nav button{position:relative}
 nav .nb{position:absolute;top:-5px;left:15px;min-width:17px;height:17px;line-height:17px;text-align:center;background:#8b5cf6;color:#fff;font-size:10.5px;font-weight:800;border-radius:999px;padding:0 5px}
@@ -426,7 +425,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
     <section class="view on" id="vChat">
       <div id="dmWrap" style="display:none;flex:1;min-height:0;flex-direction:column"><div class="dmhd"><h2>메시지</h2><span id="dmUnread"></span></div><div class="dmlist" id="dmList"></div></div>
       <div id="room">
-      <div class="roomhd"><button class="bk" id="backBtn" aria-label="메시지 목록">‹</button><span class="av" id="roomAv"></span><span><b id="roomName">윤서아</b><small id="roomSub"></small></span><button class="thr" id="thrBtn" style="display:none"></button></div>
+      <div class="roomhd"><button class="bk" id="backBtn" aria-label="메시지 목록">‹</button><span class="av" id="roomAv"></span><span><b id="roomName">윤서아</b><small id="roomSub"></small></span></div>
       <div id="stageSlot"></div>
       <div class="log" id="log"></div>
       <div class="bar">
@@ -452,7 +451,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
   <nav>
     <button data-tab="home"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M10 12h4v4h-4z"/></svg></b>홈</button>
     <button class="on" data-tab="chat"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20l1.3-3.9c-2.324-3.437-1.426-7.872 2.1-10.374 3.526-2.501 8.59-2.296 11.845.48 3.255 2.777 3.695 7.266 1.029 10.501-2.666 3.235-7.615 4.215-11.574 2.293L3 20"/></svg><span class="nb" id="navUnread" style="display:none"></span></b>대화</button>
-    <button data-tab="album"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path d="M3 16l5-5c.928-.893 2.072-.893 3 0l5 5"/><path d="M14 14l1-1c.928-.893 2.072-.893 3 0l3 3"/></svg></b><span id="navAlbum">컬렉션</span></button>
+    <button data-tab="album"><b id="navAlbumIc"></b><span id="navAlbum">컬렉션</span></button>
     <button data-tab="my"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></b>마이</button>
   </nav>
 
@@ -485,6 +484,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
+$("#navAlbumIc").innerHTML=Icon.svg("cards",24);  // 46: 아래 탭 컬렉션 = 포토카드가 겹친 선 아이콘(icons.js)
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 // 서아가 처음부터 쓰는 기본 모션 (관계로 얻는 것 · 무료)
@@ -2371,7 +2371,7 @@ function placeStage(){const st=$("#stage");$("#stageSlot").appendChild(st);
   Stage.pano.hold(!vis||FirstMeet.isOn()||FirstMeet.armed());if(vis)Stage.xsRest(()=>FirstMeet.isOn());}  // 39: 무대가 보일 때 360도 그림을 받고, 나머지 모션은 대화 화면이 뜬 뒤 쉬는 틈에(첫 만남 연출이 끝난 뒤)
 function setTab(t){if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
-  if(t==="chat"){if(S.room)openRoom(S.room);else showList()}
+  if(t==="chat")showList();  // 46: 「대화」 탭은 언제나 대화 목록부터(다른 탭에 다녀와도). 대화방으로 바로 가는 곳(홈 에피소드 카드·알림)은 이 뒤에 openRoom
   placeStage();
   if(t==="album"){renderAlbum();Cards.fill();if(!S.colIntro){S.colIntro=1;save();colIntro()}}if(t==="home")renderHome();if(t==="my")renderMy()}
 const unreadOf=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(m=>m.r==="c"||m.r==="ph").length};
@@ -2447,11 +2447,10 @@ const Thread={
     if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?((e0.places||[]).includes(t.scene)?t.scene:e0.scene):t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
     const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");renderBond();return !t},  // 42: 하트·게이지도 그 줄기 단계로
-  // 대화방 머리의 「본 이야기로」 단추(에피소드 중일 때만)
   // 대화방 이름 밑 설명 줄(25-1): 특별 에피소드 안에서만 thread.sub, 그 밖에는 비우고 숨김(이름만)
-  chip(cid){const b=$("#thrBtn");if(!b)return;const e=cid==="seoa"?this.ep():null;b.style.display=e?"":"none";
-    const sub=$("#roomSub");sub.textContent=e?UI("thread.sub",{name:e.name}):"";sub.hidden=!e;if(!e)return;
-    b.textContent=UI("thread.back",{name:e.name});b.onclick=()=>{this.go("main");if(!chatOf("seoa").length)start();renderLog();Stage.setFace("soft");toast(esc(UI("thread.backToast")),1800)}}
+  // 46: 「본 이야기로」 단추는 없앰. 이야기 바꾸기는 대화 목록의 서아 줄을 옆으로 넘겨서
+  chip(cid){const e=cid==="seoa"?this.ep():null;
+    const sub=$("#roomSub");sub.textContent=e?UI("thread.sub",{name:e.name}):"";sub.hidden=!e}
 };
 // 42: 에피소드만의 관계 단계. data/episodes.json 특별 에피소드의 stage 묶음이 있으면(지금은 s2 크리스마스 이브만) 그 에피소드 안에서는
 // 판정 결과(호감 변화·플래그)를 본 이야기 대신 에피소드 호감에만 쌓고, 단계도 앱이 정한다(서버 단계 규칙은 본 이야기 것이라 쓰지 않음).
