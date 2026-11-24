@@ -1,0 +1,180 @@
+{
+ "mode": "resume",
+ "steps": [
+  {
+   "name": "main-before",
+   "top": "썸",
+   "gauge": "0%",
+   "ep": null,
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 0,
+   "outfit": "private",
+   "busy": false
+  },
+  {
+   "name": "stage1",
+   "top": "경계",
+   "gauge": "0%",
+   "ep": {
+    "n": 1,
+    "aff": 0,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "left-offscreen",
+   "top": "고백 직전",
+   "gauge": "0%",
+   "ep": {
+    "n": 4,
+    "aff": 30,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": true,
+   "play": "{\"n\":4,\"k\":7,\"pend\":6}"
+  },
+  {
+   "name": "main",
+   "top": "썸",
+   "gauge": "0%",
+   "ep": null,
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 0,
+   "outfit": "private",
+   "busy": false,
+   "walk": "null"
+  },
+  {
+   "name": "reenter",
+   "top": "고백 직전",
+   "gauge": "0%",
+   "ep": {
+    "n": 4,
+    "aff": 30,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": true,
+   "play": "{\"n\":4,\"k\":7,\"pend\":6}"
+  },
+  {
+   "name": "resumed",
+   "top": "고백 직전",
+   "gauge": "0%",
+   "ep": {
+    "n": 4,
+    "aff": 30,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false,
+   "last": "[\"\\\"잠깐 기다려 봐.\\\"\",\"*서아가 방 안쪽으로 걸어 들어간다.*\",\"*잠시 뒤, 편한 옷으로 갈아입고 나온다. 묶은 머리가\"]"
+  },
+  {
+   "name": "again",
+   "top": "고백 직전",
+   "gauge": "0%",
+   "ep": {
+    "n": 4,
+    "aff": 30,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  }
+ ],
+ "logs": [
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material."
+ ]
+}

@@ -1,0 +1,44 @@
+{
+ "mode": "card",
+ "steps": [
+  {
+   "name": "card",
+   "before": "null",
+   "after": "{\"at\":1795550020076,\"scene\":7,\"char\":\"seoa\",\"outfit\":\"xmasRoom\",\"thread\":\"s2\",\"stage\":6,\"line\":\"\"}"
+  }
+ ],
+ "logs": [
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material."
+ ]
+}

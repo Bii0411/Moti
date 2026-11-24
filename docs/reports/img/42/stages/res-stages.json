@@ -1,0 +1,296 @@
+{
+ "mode": "stages",
+ "steps": [
+  {
+   "name": "main-before",
+   "top": "썸",
+   "gauge": "0%",
+   "ep": null,
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 0,
+   "outfit": "private",
+   "busy": false
+  },
+  {
+   "name": "stage1",
+   "top": "경계",
+   "gauge": "0%",
+   "ep": {
+    "n": 1,
+    "aff": 0,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "signal",
+   "top": "경계",
+   "gauge": "50%",
+   "ep": {
+    "n": 1,
+    "aff": 4,
+    "miss": 4
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false,
+   "signals": 1
+  },
+  {
+   "name": "stage2",
+   "top": "티키타카",
+   "gauge": "10%",
+   "ep": {
+    "n": 2,
+    "aff": 9,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "stage3",
+   "top": "썸",
+   "gauge": "8.33333%",
+   "ep": {
+    "n": 3,
+    "aff": 19,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "stage3-home",
+   "top": "썸",
+   "gauge": "8.33333%",
+   "ep": {
+    "n": 3,
+    "aff": 19,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "stage4",
+   "top": "고백 직전",
+   "gauge": "8.33333%",
+   "ep": {
+    "n": 4,
+    "aff": 31,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  },
+  {
+   "name": "stage4-street",
+   "top": "고백 직전",
+   "gauge": "8.33333%",
+   "ep": {
+    "n": 4,
+    "aff": 31,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  },
+  {
+   "name": "stage4-room",
+   "top": "고백 직전",
+   "gauge": "41.6667%",
+   "ep": {
+    "n": 4,
+    "aff": 35,
+    "miss": 1
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  },
+  {
+   "name": "stage5",
+   "top": "엇갈림",
+   "gauge": "38.4615%",
+   "ep": {
+    "n": 5,
+    "aff": 47,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  },
+  {
+   "name": "stage5-noflag",
+   "top": "엇갈림",
+   "gauge": "92.3077%",
+   "ep": {
+    "n": 5,
+    "aff": 54,
+    "miss": 1
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  },
+  {
+   "name": "stage6",
+   "top": "연인",
+   "gauge": "100%",
+   "ep": {
+    "n": 6,
+    "aff": 56,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false,
+   "card": "{\"at\":1795549820375,\"scene\":7,\"char\":\"seoa\",\"outfit\":\"xmasRoom\",\"thread\":\"s2\",\"stage\":6,\"line\":\"\"}"
+  },
+  {
+   "name": "main-after",
+   "top": "썸",
+   "gauge": "0%",
+   "ep": null,
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 0,
+   "outfit": "private",
+   "busy": false
+  },
+  {
+   "name": "resume",
+   "top": "연인",
+   "gauge": "100%",
+   "ep": {
+    "n": 6,
+    "aff": 56,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 7,
+   "outfit": "xmasRoom",
+   "busy": false
+  }
+ ],
+ "logs": [
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material."
+ ]
+}
