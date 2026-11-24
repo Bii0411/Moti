@@ -309,13 +309,13 @@
     },
     {
       "id": "g02",
-      "name": "피식 웃기",
+      "name": "입 가리고 웃기",
       "source": "gift",
       "grade": "common",
       "play": {
-        "m": "m01",
-        "f": "fun",
-        "speed": 0.8
+        "m": "x19",
+        "f": "shy",
+        "speed": 1
       }
     },
     {

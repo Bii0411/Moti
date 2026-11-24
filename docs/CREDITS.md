@@ -19,6 +19,7 @@
 | `motions/xstage_standard_kick.json` (x17 돌려차기) | `index.html`(첫 만남 연출, 시연 패널, 무빙 카드 「첫 만남」) | XSTAGE 「돌려차기 반복」(xstage.co 상품 5093). 라이선스 범위 **확인 필요** | 원본 `standard_Kick.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
 | `motions/xstage_checking_watch.json` (x18 시계 보기) | `index.html`(내가 말이 없을 때 대화방에서, 시연 패널) | XSTAGE 「[standard] Waiting - Checking watch」. 라이선스 범위 **확인 필요** | 원본 `standard_Waiting.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
 | `motions/xstage_wave_and_laugh.json` (m13 손 흔들기) | `index.html`(대화 몸짓, 다시 들어올 때 인사, 작별 인사 키워드, 시연 패널) | XSTAGE 「[standard] Wave and Laugh」. 라이선스 범위 **확인 필요** | 원본 `standard_Wave_and_Laugh.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
+| `motions/xstage_shy_short_laugh.json` (x19 입 가리고 웃기) | `index.html`(선물 반응 g02, 시연 패널) | XSTAGE 「[standard] Shy - Short laugh」. 라이선스 범위 **확인 필요** | 원본 `standard_Shy_Short laugh.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). 원본 배우가 옆을 보고 있어 재생 때 95° 돌림(`turn`). FBX는 저장소에 없음 |
 | `motion.js` m01~m25, c01~c05 | 전체 | 직접 만든 코드 몸짓 | 외부 자산 아님 |
 
 ## 그림
