@@ -1104,9 +1104,11 @@ async function post(path,body,ms){
     if(!r.ok){console.warn("서버 오류",path,r.status);rec({status:r.status,error:"http"});return null}const j=await r.json();if(P)P.res=performance.now();rec({status:r.status,json:j});return j}
   catch(e){const to=e&&e.name==="AbortError";console.warn(to?"서버 답장 시간 초과 → 예시 대사":"서버에 연결 못 함 → 예시 대사",path,e&&e.name);rec({error:to?"timeout":"error"});return null}finally{clearTimeout(tm)}
 }
+const isFiller=t=>(DATA.config.serverFiller||["…"]).includes(String(t).replace(/\*/g,"").trim());
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
 function readReply(j){
   if(!j)return null;
+  if(typeof j.dialogue==="string"&&isFiller(j.dialogue))return null;  // 29: 서버 대체 응답 「…」 = 실패로 봄 → 예비 대사
   if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null};
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
   return null;
@@ -1128,7 +1130,8 @@ async function askServer(cid,text){
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
     const pn=photoNote(cid,hist);
     const j=await postChat({char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
-    if(j&&pn)SeoaPhoto.noteDone();
+    if(j&&typeof j.dialogue==="string"&&isFiller(j.dialogue)&&lastRaw)lastRaw.error="filler";  // 시연 패널 「마지막 답장」 출처
+    else if(j&&pn)SeoaPhoto.noteDone();
     return readReply(j);
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
@@ -1164,6 +1167,12 @@ function stageUp(from,to,q){
     SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진
   }
   renderBond();
+}
+// 29: v2 로 처음 열 때 저장값 옮기기. 대화 횟수로 오른 단계 n 을 지키도록 호감도를 affectionAt[n-1] 까지 올림(한 번만, S.v2moved)
+function moveToV2(){
+  if(serverVer()!==2||S.v2moved)return;
+  const st=story(),n=curStage(),at=((DATA.story||{}).affectionAt||[])[n-1]||0;
+  st.affection=Math.max(st.affection||0,at);S.v2moved=true;save();
 }
 // 서버 v1·서버 없음: 대화 횟수로 한 단계씩 올림 (data/seoa_story.json countAt)
 function countStage(){
@@ -1369,6 +1378,7 @@ async function send(text){
   if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
   if(g0!==GEN)return;
   const gen=g0;
+  moveToV2();  // 시연 패널에서 서버 v2 로 바꾼 뒤 첫 메시지
   S.bond=(S.bond||0)+1;Fx.tick();  // 17-1A: 확대 쿨다운은 내 메시지 수로 셈
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
@@ -2054,7 +2064,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
