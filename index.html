@@ -321,6 +321,14 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .swhint{position:absolute;left:74px;top:calc(100% - 2px);z-index:6;max-width:calc(100% - 84px);background:#f4f0ff;color:#2a1f45;font-size:12.5px;font-weight:700;line-height:1.35;padding:8px 12px;border-radius:11px;box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;transform:translateY(-4px);transition:opacity .22s,transform .22s;pointer-events:none;word-break:keep-all}
 .swhint::before{content:"";position:absolute;left:16px;top:-5px;width:10px;height:10px;background:inherit;transform:rotate(45deg);border-radius:2px}
 .swhint.on{opacity:1;transform:none}
+/* 46-C: 이야기마다 셀카 프로필(칸을 넘기면 짧게 흐려졌다 나타남) + 특별 에피소드 칸이면 프로필 밑 SPECIAL 표(포토카드 SECRET 표처럼 진한 바탕·금색 글자) */
+.swrow>.av{background:none;overflow:visible}
+.swrow .pfi{position:absolute;inset:0;border-radius:50%;background:#1d1730 center 18%/cover;transition:filter var(--pfs,300ms) ease,opacity var(--pfs,300ms) ease}
+.swrow .pfi.swap{filter:blur(5px);opacity:.45}
+.swrow>.av i{z-index:1}
+.swrow.sp>.av i{display:none}
+.swsp{position:absolute;z-index:2;left:50%;top:calc(100% - 7px);transform:translateX(-50%) scale(.9);opacity:0;font-style:normal;font-size:8.5px;font-weight:800;letter-spacing:.06em;line-height:1;padding:3px 6px 3px 6.5px;border-radius:999px;background:#1d1730;color:#f5c66b;border:1px solid rgba(245,198,107,.45);white-space:nowrap;pointer-events:none;transition:opacity .2s,transform .2s}
+.swrow.sp .swsp{opacity:1;transform:translateX(-50%)}
 .roomhd{display:flex;align-items:center;gap:10px;padding:2px 12px 8px}
 .roomhd .bk{font-size:24px;padding:0 6px 2px 0;line-height:1}
 .roomhd .av{width:34px;height:34px;border-radius:50%;background:center 18%/cover}
@@ -502,6 +510,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script src="photos.js"></script>
 <script src="seoaphoto.js"></script>
 <script src="cards.js?v=42"></script>
+<script src="storypic.js"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -1991,11 +2000,11 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null});
+    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
-    all(){S=blank();Photos.clear();Cards.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
+    all(){S=blank();Photos.clear();Cards.clear();StoryPic.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};S.judgeBuf=[];S.judgeKeep=null;const st=story();st.recent_lines=[];st.summary="";start()},
     bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0},
@@ -2418,6 +2427,22 @@ const Swipe={
   stage(k){const e=this.ep(k);if(!e||!EpStage.cfgOf(e))return curStage();const s=((S.threads||{})[k]||{}).ep;return Math.max(1,Math.min(6,s&&s.stage||1))},
   order(){const at=k=>{const l=this.last(k);return l?l.at||0:0};return this.keys().sort((a,b)=>at(b)-at(a)||(a==="main"?-1:b==="main"?1:0))},
   cfg:()=>(DATA.config||{}).storySwipe||{},
+  // 46-C: 그 이야기의 마지막 장소. 지금 줄기는 지금 장소, 다른 줄기는 보관한 장소(에피소드는 그 에피소드 장소 안에서만, Thread.go 와 같은 규칙)
+  sceneOf(k){if(k===Thread.cur())return S.scene||0;const t=(S.threads||{})[k],e=this.ep(k);if(!e)return t&&t.scene||0;
+    const cf=EpStage.cfgOf(e),from=cf&&(cf.placeFrom||{})[t&&t.scene];if(from!=null&&this.stage(k)<from)return e.scene;  // 42: 에피소드 단계로 아직 안 열린 장소면 첫 장소(setScene 과 같음)
+    return t&&(e.places||[]).includes(t.scene)?t.scene:e.scene},
+  // 46-C: 그 이야기에서 지금 입는 옷. 지금 줄기는 Outfit.want() 그대로, 다른 줄기는 같은 규칙을 보관한 값으로(에피소드 의상·장소별 의상·갈아입었는지, 본 이야기 흰 옷)
+  outfitOf(k){if(k===Thread.cur())return Outfit.want();const O=Outfit.cfg(),F=O.files||{},sc=this.sceneOf(k),e=this.ep(k);
+    if(e&&e.outfit&&F[e.outfit]){const bs=e.outfitByScene&&e.outfitByScene[sc],cf=EpStage.cfgOf(e),s=((S.threads||{})[k]||{}).ep;
+      const dressed=!cf||!s||!!s.dressed||Math.max(1,Math.min(6,s.stage||1))>=(cf.dressFrom||5);return bs&&F[bs]&&dressed?bs:e.outfit}
+    const pl=O.privatePlaces||[0];return curStage()>=(O.comfortStage||3)&&pl.includes(sc)?"private":"ops"},
+  // 셀카가 새로 만들어짐(storypic.js) → 그 칸이 보이는 중이면 프로필을 바꿈
+  pic(k){const row=$("#dmList .swrow");if(row&&!S.room&&curTab==="chat"&&this.key===k)this.avatar(row,k,true)},
+  // 프로필 동그라미: 이 이야기의 셀카(없으면 원래 그림), 특별 에피소드면 SPECIAL 표. anim = 짧게 흐려졌다 나타남
+  avatar(row,k,anim){const p=row.querySelector(".pfi");if(!p)return;const c=chBy("seoa"),u=StoryPic.url(k)||c.img,want=`url("${u}")`;row.classList.toggle("sp",k!=="main");
+    if(p.dataset.u===u)return;p.dataset.u=u;clearTimeout(p._t);
+    if(!anim){p.classList.remove("swap");p.style.backgroundImage=want;return}
+    const ms=(DATA.config.storyPic||{}).swapMs||300;row.style.setProperty("--pfs",Math.round(ms/2)+"ms");p.classList.add("swap");p._t=setTimeout(()=>{p.style.backgroundImage=want;p.classList.remove("swap")},Math.round(ms/2))},
   // 칸을 누르면 그 이야기로 대화방(본 이야기 = Thread.go, 특별 에피소드 = 홈 에피소드 카드와 같은 startStory)
   enter(k){if(needAdult("seoa"))return adultSheet("seoa");
     if(k!=="main")return startStory(k);
@@ -2428,13 +2453,14 @@ const Swipe={
       return`<button class="swi" data-k="${k}" aria-label="${esc(UI("chatList.slotAria",{name:e?e.name:UI("chatList.main")}))}"><span class="mid"><span class="swt"><b>${esc(c.name)}</b><span class="swh" style="color:${bondColor(n)}">${Icon.heart(n,17)}<em>${esc(stageName(n))}</em></span></span>
         <span class="pv ${u?"new":""}">${pvOf(c,last,k)}</span></span><span class="rt"><small>${last&&last.at?fmtTime(last.at):""}</small>${u?`<em class="ub">${u}</em>`:""}</span></button>`};
     const dots=multi?`<span class="swdots">${L.map((k,j)=>`<button data-d="${j}" class="${j===i?"on":""}" aria-label="${esc(UI("chatList.dotAria",{n:j+1,total:L.length}))}"></button>`).join("")}</span>`:"";
-    return`<div class="dm swrow" data-c="${c.id}"><button class="av" data-sav aria-label="${esc(c.name)}" style="background-image:url(${c.img})">${c.badge==="3D"?"<i>3D</i>":""}</button>
+    const k0=L[i],u0=StoryPic.url(k0)||c.img;
+    return`<div class="dm swrow${k0!=="main"?" sp":""}" data-c="${c.id}"><button class="av" data-sav aria-label="${esc(c.name)}"><span class="pfi" data-u="${esc(u0)}" style="background-image:url(&quot;${esc(u0)}&quot;)"></span>${c.badge==="3D"?"<i>3D</i>":""}<span class="swsp">${esc(UI("chatList.special"))}</span></button>
       <div class="swbox"><div class="swx${multi?"":" one"}">${L.map(slot).join("")}</div>${dots}</div>${this.hintOn?`<div class="swhint on" role="status">${esc(this.hintOn)}</div>`:""}</div>`},
   // 목록을 그린 뒤: 보던 칸 되살리기, 넘기기·점·마우스 끌기
   bind(){const row=$("#dmList .swrow");if(!row)return;const x=row.querySelector(".swx"),L=this.order(),C=this.cfg();
     const i=L.indexOf(this.key);if(i>0)x.scrollLeft=i*x.clientWidth;else this.key=L[0];
     const at=()=>Math.max(0,Math.min(L.length-1,Math.round(x.scrollLeft/(x.clientWidth||1))));
-    x.addEventListener("scroll",()=>{const j=at();if(L[j]!==this.key){this.key=L[j];this.onSlot(row,L,j)}if(this.hintOn&&Math.abs(x.scrollLeft-L.indexOf(this.hintKey)*x.clientWidth)>8)this.hideHint()},{passive:true});
+    x.addEventListener("scroll",()=>{const j=at();if(L[j]!==this.key){this.key=L[j];this.onSlot(row,L,j,true)}if(this.hintOn&&Math.abs(x.scrollLeft-L.indexOf(this.hintKey)*x.clientWidth)>8)this.hideHint()},{passive:true});
     row.querySelectorAll("[data-d]").forEach(d=>d.onclick=e=>{e.stopPropagation();x.scrollTo({left:+d.dataset.d*x.clientWidth,behavior:"smooth"})});
     let drag=null,moved=false;  // 컴퓨터 마우스로 끌어 넘기기(터치는 브라우저 기본 넘기기)
     x.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"||L.length<2)return;drag={x0:e.clientX,s0:x.scrollLeft};moved=false});
@@ -2443,9 +2469,10 @@ const Swipe={
     x.addEventListener("pointerup",up);x.addEventListener("pointercancel",up);
     x.addEventListener("click",e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false;return}const b=e.target.closest("[data-k]");if(b)this.enter(b.dataset.k)},true);
     row.querySelector("[data-sav]").onclick=()=>this.enter(this.key||L[0]);
-    this.onSlot(row,L,Math.max(0,L.indexOf(this.key)))},
-  // 보이는 칸이 바뀔 때: 점
-  onSlot(row,L,j){row.querySelectorAll("[data-d]").forEach((d,k)=>{d.classList.toggle("on",k===j);if(k===j)d.setAttribute("aria-current","true");else d.removeAttribute("aria-current")})},
+    this.onSlot(row,L,Math.max(0,L.indexOf(this.key)));
+    StoryPic.need([this.key,...L.filter(k=>k!==this.key)])},  // 46-C: 셀카 프로필이 없거나 옷이 바뀐 이야기는 만들기 예약(보이는 칸 먼저)
+  // 보이는 칸이 바뀔 때: 점 · 46-C 프로필(셀카)·SPECIAL 표
+  onSlot(row,L,j,anim){this.avatar(row,L[j],anim);row.querySelectorAll("[data-d]").forEach((d,k)=>{d.classList.toggle("on",k===j);if(k===j)d.setAttribute("aria-current","true");else d.removeAttribute("aria-current")})},
   // 넘기기 안내(한 번만, 저장값 S.swipeHint): 이야기가 둘 이상인 목록이 처음 보일 때. 첫 칸이 특별 에피소드면 「본 이야기」 문구.
   //   목록이 실제로 보이는지 hintDelayMs 뒤에 다시 보고(홈 에피소드 카드·알림처럼 목록을 거쳐 바로 대화방으로 가는 때는 안 띄움), 내용 칸이 살짝 옆으로 움직였다 돌아옴
   hintOn:null,hintKey:null,hintT:null,
