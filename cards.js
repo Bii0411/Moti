@@ -34,7 +34,7 @@ const Cards=(()=>{
   // ── 처음 본 순간 ──
   // 칸 id → 그릴 몸짓·표정·속도. 선물 칸(g01…)은 임시 재생 설정 play, 대화 칸은 그 몸짓 그대로
   function motionOf(id){const it=colBy(id)||{},p=it.play||{},F=C().faceById||{};
-    if(it.source==="gift")return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1};
+    if(it.source==="gift"||p.m)return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1};  // 42: 몸짓 칸이 아닌 연출 카드(e01 크리스마스 이브)도 play
     const fs=((((DATA.onboarding||{}).film||{}).shots)||[]).find(s=>s.id===id);
     return{m:id,f:F[id]||(fs&&fs.face)||C().face||"soft",sp:1}}
   const frameOf=m=>({...(C().frame||{top:1.08,bottom:.34,width:.56,lift:.03,center:.3}),...((C().frameById||{})[m]||{})});

@@ -1,0 +1,125 @@
+{
+ "mode": "net",
+ "steps": [
+  {
+   "name": "main-before",
+   "top": "썸",
+   "gauge": "25%",
+   "ep": null,
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 0,
+   "outfit": "private",
+   "busy": false
+  },
+  {
+   "name": "stage1",
+   "top": "경계",
+   "gauge": "0%",
+   "ep": {
+    "n": 1,
+    "aff": 0,
+    "miss": 0
+   },
+   "main": {
+    "stage": 3,
+    "aff": 45
+   },
+   "scene": 6,
+   "outfit": "xmas",
+   "busy": false
+  }
+ ],
+ "before3": "{\"ep\":{\"aff\":30,\"stage\":4,\"flags\":[],\"miss\":0,\"signaled\":[],\"dressed\":false,\"play\":null,\"turns\":0,\"seen\":[1]},\"main\":{\"stage\":3,\"aff\":45},\"buf\":2}",
+ "after3": "{\"ep\":{\"aff\":33,\"stage\":4,\"flags\":[\"care\"],\"miss\":1,\"signaled\":[],\"dressed\":false,\"play\":null,\"turns\":0,\"seen\":[1]},\"main\":{\"stage\":3,\"aff\":45},\"jlog\":[{\"turn\":0,\"n\":3,\"aff0\":30,\"aff1\":33,\"stage\":4,\"flags\":[\"care\"],\"ms\":4997,\"summary\":false,\"episode\":\"s2\"}]}",
+ "reqs": [
+  {
+   "url": "https://seoa-backand.onrender.com/chat",
+   "state": {
+    "stage": 3,
+    "affection": 45,
+    "location": "크리스마스 거리",
+    "episode": "s2",
+    "episode_stage": 1,
+    "episode_stage_name": "경계"
+   },
+   "message": "안녕, 늦어서 미안"
+  },
+  {
+   "url": "https://seoa-backand.onrender.com/chat",
+   "state": null,
+   "message": null
+  },
+  {
+   "url": "https://seoa-backand.onrender.com/chat",
+   "state": {
+    "stage": 3,
+    "affection": 45,
+    "location": "크리스마스 거리",
+    "episode": "s2",
+    "episode_stage": 4,
+    "episode_stage_name": "고백 직전"
+   },
+   "message": "집 예쁘다"
+  },
+  {
+   "url": "https://seoa-backand.onrender.com/chat",
+   "state": {
+    "stage": 3,
+    "affection": 45,
+    "location": "크리스마스 거리",
+    "episode": "s2",
+    "episode_stage": 4,
+    "episode_stage_name": "고백 직전"
+   },
+   "message": "(서아 손을 잡는다) 오늘 와 줘서 고마워"
+  },
+  {
+   "url": "https://seoa-backand.onrender.com/judge",
+   "state": {
+    "stage": 4,
+    "affection": 30,
+    "stage_flags": [],
+    "location": "크리스마스 거리",
+    "episode": "s2",
+    "episode_stage": 4,
+    "episode_stage_name": "고백 직전"
+   }
+  },
+  {
+   "url": "https://seoa-backand.onrender.com/judge",
+   "state": null,
+   "message": null
+  }
+ ],
+ "logs": [
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material.",
+  "warning: THREE.MeshBasicMaterial: 'morphNormals' is not a property of this material."
+ ]
+}

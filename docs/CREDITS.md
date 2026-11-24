@@ -22,6 +22,7 @@
 | `motions/xstage_shy_short_laugh.json` (x19 입 가리고 웃기) | `index.html`(선물 반응 g02, 시연 패널) | XSTAGE 「[standard] Shy - Short laugh」. 라이선스 범위 **확인 필요** | 원본 `standard_Shy_Short laugh.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). 원본 배우가 옆을 보고 있어 재생 때 95° 돌림(`turn`). FBX는 저장소에 없음 |
 | `motions/xstage_wave_hand.json` (x20 손 인사) | `onboarding.js`(입장권 「눌러서 입장」 인사, 시연 패널) | XSTAGE 「[standard] Wave Hand」. 라이선스 범위 **확인 필요** | 원본 `standard_Wave_Hand.fbx`(2026-11-24 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps). FBX는 저장소에 없음 |
 | `motions/xstage_run_look_back.json` (x21 뒤돌아보며 달리기) | `index.html`(첫 만남 연출의 골목 프롤로그 첫 장면) | XSTAGE 「[standard] run_look back」. 라이선스 범위 **확인 필요** | 원본 `[standard] run_look back.fbx`(2026-11-24 기획자가 zip 으로 줌)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps, 2.95초). 앞으로 골반 높이의 약 9배를 달려서 inPlace. FBX는 저장소에 없음(`_src/`) |
+| `motions/xstage_walk.json` (x22 걷기) | `index.html`(크리스마스 에피소드 4단계 장면의 걸어서 화면 밖으로·안으로) | XSTAGE 「[standard] Walk」. 라이선스 범위 **확인 필요** | 원본 `standard_Walk.fbx`(2026-11-25 받음, `_src/` 에 이름 그대로)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps, 3.53초). 2.067~3.233초(한 걸음 주기)를 되풀이, 앞으로 가는 거리는 원본 골반 이동 그대로. FBX는 저장소에 없음 |
 | `motion.js` m01~m25, c01~c05 | 전체 | 직접 만든 코드 몸짓 | 외부 자산 아님 |
 
 ## 그림
