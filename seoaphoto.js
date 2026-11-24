@@ -1,6 +1,7 @@
 // moti 서아가 먼저 보내는 사진(12단계). 원고·값 data/seoa_photo.json, 화면 문구 data/ui.json seoaPhoto
 // SeoaPhoto : 사진 만들기(열린 몸짓의 한 순간 + 장소, 셀카·풍경) → 대화 기록의 사진 말풍선 + 사진 저장소(종류 received)
 //             보내는 때: 단계 사진(관계 2~6단계로 오를 때) · 오랜만 사진 · 대화 중 가끔 · 시연 패널 「서아 사진 지금 받기」
+// 45-B: 셀카는 셀카 모션(x25)의 한 순간 + 폰을 든 손에 붙인 카메라(data kinds.selfie.hand·types). 모션을 못 받으면 32-B 팔 뻗기 셀카(armTypes)
 // 사진과 함께 오는 말은 원고에서만 고른다(대화 AI 가 만들지 않음). 서아 혼자, blur·filter 효과 없음.
 // 사진은 화면 밖에서 만든다: 대화 무대 그림판을 같은 작업 안에서 잠깐 큰 크기로 한 번 더 그리고 바로 되돌림(Stage.still, photos.js Shot 과 같은 방식)
 // photos.js 다음, index.html 본 스크립트보다 먼저 불린다. S·DATA·Stage·UI 등은 함수 안에서만 쓴다.
@@ -33,10 +34,23 @@ const SeoaPhoto=(()=>{
     cam.position.set(o.x+Math.sin(r)*d+rx,cy+(K.lift||0)*H,o.z+Math.cos(r)*d+rz);cam.lookAt(o.x+rx,cy,o.z+rz)}
   // 32-B 진짜 셀카(data/seoa_photo.json kinds.selfie.types): 종류 하나를 뽑음(직전 셀카와 같은 종류는 피함). 종류 값이 kinds.selfie 기본값을 덮음
   const range=a=>Array.isArray(a)?(a.length>1?a[0]+Math.random()*(a[1]-a[0]):a[0]||0):(+a||0);
-  function pickSelfie(K,id){const L=K.types||[];if(!L.length)return null;const s=st();
+  // 45-B: hand = 손이 폰이 되는 셀카(셀카 모션을 받았을 때, types). 못 받았으면 32-B 팔 뻗기 셀카(armTypes)
+  function pickSelfie(K,id,hand){const L=(hand?K.types:K.armTypes)||[];if(!L.length)return null;const s=st();
     let t=id&&L.find(x=>x.id===id);if(!t){const c=L.length>1?L.filter(x=>x.id!==s.lastSelfie):L;t=pick(c)}
-    const T={...K,...t};
-    return{T,id:t.id,pitch:range(T.pitch),roll:range(T.roll)*(Math.random()<.5?-1:1),yaw:pick(T.yaw)||0,side:pick(T.arm&&T.arm.side)||"R",tilt:range(T.headTilt)*(Math.random()<.5?-1:1)}}
+    const T={...K,...(hand?K.hand:{}),...t},sg=()=>Math.random()<.5?-1:1;
+    if(hand)return{T,id:t.id,hand:true,at:range(T.at),roll:range(T.roll)*(T.rollSide?T.rollSide:sg()),side:T.side||"R",tilt:range(T.headTilt)*sg(),pitch:0,yaw:0};
+    return{T,id:t.id,pitch:range(T.pitch),roll:range(T.roll)*sg(),yaw:pick(T.yaw)||0,side:pick(T.arm&&T.arm.side)||"R",tilt:range(T.headTilt)*sg()}}
+  // 45-B 손이 폰이 되는 셀카 카메라: 손목에서 손끝 쪽으로 along, 얼굴 쪽으로 out(−면 얼굴에서 멀어짐), 위로 up(키 비율) 띄운 자리 = 폰 렌즈.
+  //   얼굴(두 눈 사이)에서 look(키 비율)만큼 아래를 봄(얼굴이 사진 위쪽 1/3 쯤). 얼굴까지 거리가 minDist 보다 가까우면 얼굴 반대쪽으로 물림. 사진 기울기 roll°
+  function setHandCam(cam,sf){const T=sf.T,H=Stage.height(),hp=Stage.handPose(sf.side);if(!hp)return false;
+    const fing=hp.finger.clone().sub(hp.hand).normalize(),tof=hp.face.clone().sub(hp.hand).normalize();
+    const c=hp.hand.clone().addScaledVector(fing,(T.along||0)*H).addScaledVector(tof,(T.out||0)*H);c.y+=(T.up||0)*H;
+    const md=(T.minDist||0)*H,away=c.clone().sub(hp.face),dd=away.length();if(md&&dd<md)c.copy(hp.face).addScaledVector(away.normalize(),md);
+    cam.position.copy(c);cam.up.set(0,1,0);const aim=new THREE.Vector3(hp.face.x,hp.face.y-(T.look||0)*H,hp.face.z);cam.lookAt(aim);
+    // shift = 렌즈를 카메라 기준 [팔 반대쪽, 위]로 옮김(키 비율): 폰 렌즈는 손목보다 폰 위쪽 끝에 있으니 뻗은 팔이 사진 아래 옆 모서리로 빠지게
+    const sh=T.shift||[0,0];if(sh[0]||sh[1]){const q=cam.quaternion,sx=sf.side==="L"?-1:1;cam.position.addScaledVector(new THREE.Vector3(1,0,0).applyQuaternion(q),sx*sh[0]*H).addScaledVector(new THREE.Vector3(0,1,0).applyQuaternion(q),(sh[1]||0)*H);cam.lookAt(aim)}
+    if(sf.roll)cam.rotateZ(sf.roll*Math.PI/180);cam.updateMatrixWorld(true);
+    sf.dist=+(cam.position.distanceTo(hp.face)/H).toFixed(3);const rel=cam.position.clone().sub(hp.face);sf.elev=+(Math.asin(rel.y/rel.length())*180/Math.PI).toFixed(1);return true}
   // 셀카 카메라: 넓은 렌즈(fov), 구도 top·bottom·width 가 들어오는 거리, 눈 높이에서 pitch° 위(살짝 내려다봄), 좌우 yaw°, 사진 기울기 roll°
   function setSelfieCam(cam,aspect,sf){const T=sf.T,H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),cy=(T.top+T.bottom)/2*H;
     const d=Math.max((T.top-T.bottom)*H/2/tn,(T.width||0)*H/2/(tn*aspect)),o=Stage.center(T.center!=null?T.center:1),ey=Stage.eyeY();
@@ -53,13 +67,17 @@ const SeoaPhoto=(()=>{
   async function make(spec){
     await Stage.ready;
     const P={...(((DATA.photos||{}).image)||{}),...(spec.image||{})},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const K0=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sf=!spec.K&&spec.shot==="selfie"?pickSelfie(K0,spec.selfie):null,K=sf?sf.T:K0,sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img),pi=SCENES[spec.scene]?spec.scene:0,pano=await Stage.pano.ready(pi);  // 30: 360도 배경
+    const K0=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},selfie=!spec.K&&spec.shot==="selfie";
+    // 45-B: 셀카면 셀카 모션(kinds.selfie.hand.motion)을 받아 둠. 못 받으면 32-B 셀카(팔 뻗기)로
+    const hm=selfie&&K0.hand&&K0.hand.motion,hand=!!(hm&&typeof XS!=="undefined"&&XS[hm]&&await Stage.xs(hm));
+    const sf=selfie?pickSelfie(K0,spec.selfie,hand):null,K=sf?sf.T:K0,sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img),pi=SCENES[spec.scene]?spec.scene:0,pano=await Stage.pano.ready(pi);  // 30: 360도 배경
     // 26-2: 다른 의상 모델은 그리는 동안 붙잡아 둠(내려놓기 prune 에서 빠짐). 다 그리면 놓고, 쓰지 않으면 바로 내려놓음
     const pin=spec.outfit&&spec.outfit!==Stage.outfitNow()?spec.outfit:null;if(pin)Stage.use(pin,1);
     try{  // 30-1: 360도 그림도 다 그릴 때까지 붙잡아 둠(끝나면 pano.done)
     const model=pin?await Stage.model(pin).catch(()=>null):null;
-    const mid=spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
-    const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
+    const mid=sf&&sf.hand?hm:spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
+    // 45-B: 손 셀카의 at = 셀카 모션 원본 파일 시각(초) → 재생 시각(from 을 뺌)
+    const mt=sf&&sf.hand?Math.max(0,sf.at-(XS[mid].from||0)):(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
     const yaw=pick(K.yaw)||0,shift=pick(K.shift)||0,bgX=pick(K.bgX);
     // 32-A: 확대(View)가 커지거나 줄어드는 중이면 끝날 때까지 미룸(그림판 크기가 매 프레임 바뀌는 중에 크기를 빌리지 않게)
     for(let i=0;i<20&&typeof View!=="undefined"&&View.moving&&View.moving()>0;i++)await wait(View.moving()+60);
@@ -67,12 +85,14 @@ const SeoaPhoto=(()=>{
     g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img&&!pano){Shot.cover(g,img,W,H,bgX!=null?bgX:.5,.4);Shot.dimLayer(g,W,H)}
     const ok=Stage.still(mid,mt,face,()=>{
       const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,fov=cam.fov,kp=cam.position.clone(),kq=cam.quaternion.clone(),vw=cam.view&&cam.view.enabled?{...cam.view}:null;  // 32-A: 꺼진 시야 자르기(온보딩이 남긴 값)를 되살리지 않음
-      try{if(vw)cam.clearViewOffset();R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;if(sf&&K.fov)cam.fov=K.fov;cam.updateProjectionMatrix();
-        if(sf){setSelfieCam(cam,W/H,sf);Stage.reach(sf.side,armTarget(cam,sf),K.arm||{})}else setCam(cam,W/H,K,yaw,shift);
+      const near=cam.near;let unhide=null;
+      try{if(vw)cam.clearViewOffset();R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;if(sf&&K.fov)cam.fov=K.fov;if(sf&&sf.hand&&K.near)cam.near=K.near;cam.updateProjectionMatrix();
+        if(sf&&sf.hand){if(!setHandCam(cam,sf))throw new Error("손 뼈가 없음");unhide=Stage.hideBones(K.hide)}  // 45-B: 카메라 = 폰을 든 손. 가리는 뼈는 숨김(data hide)
+        else if(sf){setSelfieCam(cam,W/H,sf);Stage.reach(sf.side,armTarget(cam,sf),K.arm||{})}else setCam(cam,W/H,K,yaw,shift);
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
         if(sf&&sf.tilt)Stage.tiltHead(sf.tilt,cam.position);
         const back=Stage.pano.use(pano?pi:-1);/* 32-C: 360도 그림이 없는 장소면 지금 장소의 구를 모두 숨김(평평한 그림이 가려지지 않게) */try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
-      finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.fov=fov;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
+      finally{if(unhide)unhide();R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.fov=fov;cam.near=near;cam.up.set(0,1,0);if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
     },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name,model});
     if(!ok)throw new Error("서아 모델이 아직 없음");
     const t1=performance.now(),type=P.type||"image/jpeg";
@@ -80,7 +100,7 @@ const SeoaPhoto=(()=>{
     if(spec.card)return{full,w:W,h:H,mid,face,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
     const thumb=await Shot.encode(Shot.scaled(c,P.thumbPx||400),type,P.thumbQuality||.72,.4,P.thumbMaxKB||60);
     st().lastMid=mid;if(sf)st().lastSelfie=sf.id;
-    return{full,thumb,w:W,h:H,mid,face,yaw:sf?sf.yaw:yaw,shift,selfie:sf?{type:sf.id,side:sf.side,pitch:+sf.pitch.toFixed(1),roll:+sf.roll.toFixed(1),tilt:+sf.tilt.toFixed(1)}:null,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
+    return{full,thumb,w:W,h:H,mid,face,yaw:sf?sf.yaw:yaw,shift,selfie:sf?{type:sf.id,hand:!!sf.hand,side:sf.side,...(sf.hand?{at:+sf.at.toFixed(2),dist:sf.dist,elev:sf.elev}:{pitch:+sf.pitch.toFixed(1)}),roll:+sf.roll.toFixed(1),tilt:+sf.tilt.toFixed(1)}:null,ms:{render:Math.round(t1-t0),encode:Math.round(performance.now()-t1)}};
     }finally{if(pin)Stage.use(pin,-1);Stage.pano.done(pi)}
   }
 
