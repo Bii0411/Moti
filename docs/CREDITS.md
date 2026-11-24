@@ -49,6 +49,7 @@
 | three.js r128, GLTFLoader | `index.html`, `v1.html`, `xstage.html` | cdnjs / jsDelivr · MIT |
 | Noto Sans KR | `v1.html` | Google Fonts · SIL Open Font License |
 | Fredoka SemiBold(600) | 로고 「moti」 그림 `assets/logo_moti.svg` (35단계: 시작 화면, 헤더, 카드 뒷면, 카드 공유 그림). 글꼴 파일은 앱에서 불러오지 않고 저장소에도 없음(`_src/Fredoka-SemiBold.ttf`), `tools/logo2svg.mjs` 로 글자 모양만 경로로 바꿈 | [Google Fonts · Fredoka](https://fonts.google.com/specimen/Fredoka) (정적 600 TTF, fonts.gstatic.com, 2026-11-24 받음) · SIL Open Font License 1.1 |
+| Great Vibes Regular | 무빙 카드 뒷면(잠긴 칸) 가운데 영문 이름 그림 `assets/name_seoa.svg` (38단계). 글꼴 파일은 앱에서 불러오지 않고 저장소에도 없음(`_src/GreatVibes-Regular.ttf`), `tools/logo2svg.mjs` 로 「Seoa」 글자 모양만 경로로 바꿈 | [Google Fonts · Great Vibes](https://fonts.google.com/specimen/Great+Vibes) (TTF, fonts.gstatic.com, 2026-11-25 받음, 글꼴 안 저작권 「Copyright 2010 The Great Vibes Pro Project Authors」, [github.com/googlefonts/great-vibes](https://github.com/googlefonts/great-vibes)) · SIL Open Font License 1.1 |
 | opentype.js | `tools/logo2svg.mjs`(개발 도구, 앱에 안 들어감) | npm `opentype.js` · MIT |
 | 아래 탭바 아이콘(홈·대화·앨범·마이), 마이 페이지 PLUS 혜택 아이콘(무한·기억·말풍선·다이아·사진) | `index.html` (12단계) | [Tabler Icons](https://tabler.io/icons) (MIT 라이선스) 모양을 옮겨 코드 안 SVG 로 넣음. 선 굵기 1.8 |
 | 다이아 재화 아이콘 | `index.html` 헤더·마이 페이지 (12단계) | 코드 안 SVG 로 직접 그림(임시) |

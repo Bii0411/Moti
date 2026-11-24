@@ -1,33 +1,54 @@
-/* moti 무빙 카드(26-1). 목록 칸 · 카드 확대. 값·색 data/collection.json card(look), 문구 data/ui.json album.card
-   블러·그림 효과 없음. 확대·닫기는 transform·opacity 만(아이폰 사파리) */
+/* moti 무빙 카드(26-1, 38 포토카드). 목록 칸 · 카드 확대. 값 data/collection.json card.photocard·card.back, 등급 색 grades.*.card, 문구 data/ui.json album.card
+   블러·그림자 효과 없음. 확대·닫기·빛은 transform·opacity 만(아이폰 사파리) */
 
-/* ── 목록: 3열, 가로2:세로3, 얇은 밝은 테두리(바깥 2px 바탕색)와 둥근 모서리 ── */
+/* ── 목록: 3열, 가로2:세로3 포토카드(38) ──
+   크기는 카드 너비 비율(cqw = 카드 칸 너비의 1%, 값은 collection.json card.photocard → cards.js vars()). 크게 보기(.cvframe)도 같은 규칙
+   등급 색은 grades.*.card. 블러·그림자·무거운 filter 없음. 움직이는 것은 transform·opacity 만(CSS), 「동작 줄이기」면 멈춤 */
 .mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.mc{position:relative;display:block;width:100%;aspect-ratio:2/3;padding:2px;border-radius:12px;background:var(--mcEdge);border:0;color:inherit;font:inherit;text-align:left}
-.mc .mcin{position:relative;display:block;width:100%;height:100%;border-radius:10px;overflow:hidden;background:#1a1626}
-.mc .mcimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.mc{position:relative;display:block;width:100%;aspect-ratio:2/3;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;container-type:inline-size}
+.pc{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--pcB)*100cqw) calc(var(--pcB)*100cqw) 0;border-radius:calc(var(--pcR)*100cqw);overflow:hidden;isolation:isolate;
+  --fr:var(--fr-common);--ink:var(--ink-common);--sub:var(--sub-common);--tbg:var(--tbg-common);--tink:var(--tink-common);--lt:var(--lt-common);--sh:var(--sh-common);--sp:var(--sp-common);--au:var(--au-common);--mv:var(--mv-common);
+  background:var(--fr);color:var(--ink)}
+.pc.g-rare{--fr:var(--fr-rare);--ink:var(--ink-rare);--sub:var(--sub-rare);--tbg:var(--tbg-rare);--tink:var(--tink-rare);--lt:var(--lt-rare);--sh:var(--sh-rare);--sp:var(--sp-rare);--au:var(--au-rare);--mv:var(--mv-rare)}
+.pc.g-special{--fr:var(--fr-special);--ink:var(--ink-special);--sub:var(--sub-special);--tbg:var(--tbg-special);--tink:var(--tink-special);--lt:var(--lt-special);--sh:var(--sh-special);--sp:var(--sp-special);--au:var(--au-special);--mv:var(--mv-special)}
+/* 레어·시크릿: 테두리 위로 반짝임 한 줄이 천천히 지나감(사진 뒤라 테두리·띠에만 보임) */
+.pc.g-rare::before,.pc.g-special::before{content:"";position:absolute;top:-20%;bottom:-20%;left:0;width:45%;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--sh),transparent);transform:translateX(-130%) skewX(-15deg);animation:pcsheen var(--mv) ease-in-out infinite}
+@keyframes pcsheen{0%{transform:translateX(-130%) skewX(-15deg)}55%,100%{transform:translateX(330%) skewX(-15deg)}}
+/* 사진: 둥근 모서리. 사파리에서 움직이는 안쪽 층이 둥근 모서리 밖으로 새지 않게 isolation */
+.pcph{position:relative;z-index:1;flex:1;min-height:0;display:block;border-radius:calc(var(--pcr)*100cqw);overflow:hidden;isolation:isolate;background:#1a1626}
+.mc .mcimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% var(--pcY);display:block}
 .mc .mcimg[hidden]{display:none}
 .mcsil{position:absolute;left:50%;bottom:0;width:72%;transform:translateX(-50%);fill:#ffffff;opacity:.1}
-/* 왼쪽 위 등급: 일반 밝은 회색, 레어 분홍, 시크릿 흰색(테두리가 무지개) */
-.mcgr{position:absolute;left:6px;top:6px;z-index:2;font-size:10px;font-weight:800;line-height:1.3;padding:1px 6px;border-radius:999px;border:1px solid var(--mcCommon);color:var(--mcCommon);background:rgba(10,8,18,.55)}
-.g-rare .mcgr{border-color:var(--mcRare);color:var(--mcRare)}
-.g-special .mcgr{border-color:#fff;color:#fff}
-/* 모은 카드: 아래 이름(그림 위 어두운 바닥 띠) */
-.mc .mcnm{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 7px 6px;font-size:11.5px;font-weight:800;line-height:1.25;color:#fff;word-break:keep-all;
-  background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.72));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mc.got.g-special{background:var(--mcSecret)}
-/* 열렸지만 못 본 카드: 흐린 실루엣 + 글 */
-.mc.unseen{background:rgba(255,255,255,.28)}
-.mc.unseen .mcin{background:#1c1729}
-.mc.unseen .mcgr{opacity:.7}
-.mc .mctx{position:absolute;left:0;right:0;bottom:10px;z-index:2;text-align:center;font-size:10.5px;font-weight:700;color:#cfc8e4;word-break:keep-all;padding:0 6px}
-/* 잠긴 카드: 뒷면(어두운 바탕, 자물쇠 선 아이콘, 작은 moti) */
-.mc.lock{background:rgba(255,255,255,.14)}
-.mc.lock .mcin{background:#110e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#5f5878}
-.mc.lock .mcin::before{content:"";position:absolute;inset:6px;border:1px solid rgba(255,255,255,.06);border-radius:7px}
-.mc .mcmo{font-size:10px;font-weight:800;letter-spacing:.08em;color:#4f4866}
-/* 35: 뒷면 작은 moti = 로고 그림(index.html .logo). 높이 7.5px(예전 10px 글자 잉크 높이쯤) */
-.mc .mcmo .logo{--lh:7.5px;height:7.5px}
+/* 사진 위 효과: 레어 빛 한 줄, 시크릿 오로라 + 반짝이 */
+.pcfx{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.pcfx i{position:absolute;display:block}
+.pclt{top:-30%;bottom:-30%;left:0;width:40%;background:linear-gradient(90deg,transparent 20%,var(--lt) 50%,transparent 80%);transform:translateX(120%) skewX(-15deg);animation:pclight var(--mv) ease-in-out infinite}
+@keyframes pclight{0%{transform:translateX(-120%) skewX(-15deg)}70%,100%{transform:translateX(280%) skewX(-15deg)}}
+.pcau{top:0;bottom:0;left:0;width:200%;background:var(--au);animation:pcaur calc(var(--mv) * 2) ease-in-out infinite alternate}
+@keyframes pcaur{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.pcsp{width:7cqw;height:7cqw;background:var(--sp);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);opacity:.85;animation:pctw 2.6s ease-in-out infinite}
+.pcsp.s1{right:12%;top:10%}
+.pcsp.s2{left:11%;top:44%;width:5cqw;height:5cqw;animation-delay:-.9s}
+.pcsp.s3{right:22%;top:76%;width:6cqw;height:6cqw;animation-delay:-1.7s}
+@keyframes pctw{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:.95;transform:scale(1)}70%{opacity:.3;transform:scale(.7)}}
+/* 왼쪽 위 등급 표: 영문 작은 대문자, 자간 넓게 */
+.pctag{position:absolute;z-index:4;left:calc((var(--pcB) + .035)*100cqw);top:calc((var(--pcB) + .035)*100cqw);font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));font-weight:800;line-height:1;
+  letter-spacing:var(--pcTrack);text-transform:uppercase;padding:.4em calc(.6em - var(--pcTrack)) .4em .6em;border-radius:999px;background:var(--tbg);color:var(--tink);white-space:nowrap}
+/* 아래 띠: 이름 / 작은 줄(단계 · 장소 · MM.DD) · 오른쪽 번호 */
+.pcbd{position:relative;z-index:1;flex:none;height:calc(var(--pcBand)*100cqw);display:flex;align-items:center;gap:4cqw}
+.pctx{flex:1;min-width:0;display:flex;flex-direction:column}
+.pcnm{display:block;font-size:max(var(--pcNmMin),calc(var(--pcNm)*100cqw));font-weight:800;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:keep-all}
+.pcsub{display:block;font-size:max(var(--pcSmMin),calc(var(--pcSm)*100cqw));font-weight:600;line-height:1.35;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcno{flex:none;font-style:normal;font-size:max(var(--pcNoMin),calc(var(--pcNo)*100cqw));font-weight:800;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+/* 아직 모으지 않은 칸 = 포토카드 뒷면: 가운데 영문 이름(그림 마스크, 색 bkName) + 오른쪽 아래 작은 번호 */
+.mc.back .pc{background:var(--bkBg);padding:0;align-items:center;justify-content:center;color:var(--bkName)}
+.mc.back .pc::after{content:"";position:absolute;inset:calc(var(--pcB)*100cqw);border:1px solid var(--bkLine);border-radius:calc(var(--pcr)*100cqw);pointer-events:none}
+.pcname{display:block;width:var(--bkW);aspect-ratio:2/1;background:currentColor;-webkit-mask:var(--nm) center/contain no-repeat;mask:var(--nm) center/contain no-repeat}
+.mc.back .pcno{position:absolute;right:calc((var(--pcB) + .04)*100cqw);bottom:calc((var(--pcB) + .035)*100cqw);font-size:max(8px,calc(.065*100cqw));font-weight:700;color:var(--bkNo)}
+/* 「동작 줄이기」 설정이면 빛을 멈춤. 카드를 크게 볼 때는 뒤 목록 빛도 멈춤 */
+@media (prefers-reduced-motion:reduce){.pc::before,.pcfx i{animation:none!important}}
+.app.cvon .mcards .pc::before,.app.cvon .mcards .pcfx i{animation-play-state:paused}
 .mc.fresh{animation:fresh 1.6s ease-out}
 .mcchips{display:flex;gap:6px;margin:0 0 10px;overflow-x:auto}
 .mcchips button{flex:none;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px;font-weight:700;color:var(--sub)}
@@ -43,28 +64,24 @@
 .cvcard{position:absolute;opacity:0;transition:transform .3s;will-change:transform}
 .cv.on .cvcard{opacity:1}
 .cv:not(.on) .cvcard{opacity:0;transition:transform .24s,opacity .12s .12s}
-.cvframe{width:100%;height:100%;padding:3px;border-radius:18px;background:var(--mcEdge)}
-.cvframe.g-special{background:var(--mcSecret)}
-.cvin{position:relative;width:100%;height:100%;border-radius:15px;overflow:hidden;isolation:isolate;background:#140a24}
+.cvframe{position:relative;width:100%;height:100%;container-type:inline-size}
+.cvin{background:#140a24}
 .cvplace{position:absolute;inset:0;background:#140a24 center 40%/cover no-repeat}
 .cvin .cvdim{position:absolute;inset:0}
 .cvgl{position:absolute;inset:0}
 .cvgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .cvin .mcsil{z-index:1;display:none}
 .cvin.noimg .mcsil{display:block}
-.cvimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;opacity:1;transition:opacity .25s}
+.cvimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% var(--pcY);z-index:2;opacity:1;transition:opacity .25s}
 .cvimg:not([src]){opacity:0}
 .cvimg.off{opacity:0}
-.cvin .mcgr{left:10px;top:10px;font-size:12px;padding:2px 9px;z-index:3}
-.cvload{position:absolute;left:50%;bottom:14px;z-index:3;transform:translateX(-50%);font-size:12px;font-weight:700;color:#fff;background:rgba(10,8,18,.6);border-radius:999px;padding:5px 12px;opacity:0;transition:opacity .2s}
+.cvload{position:absolute;left:50%;bottom:14px;z-index:5;transform:translateX(-50%);font-size:12px;font-weight:700;color:#fff;background:rgba(10,8,18,.6);border-radius:999px;padding:5px 12px;opacity:0;transition:opacity .2s}
 .cvload.on{opacity:1;animation:cvpulse 1s ease-in-out infinite alternate}
 @keyframes cvpulse{from{opacity:.55}to{opacity:1}}
 .cvinfo{position:absolute;left:24px;right:24px;text-align:center;opacity:0;transition:opacity .2s}
 .cv.on .cvinfo{opacity:var(--cvFade);transition-delay:.12s}
-.cvnm{display:block;font-size:17px;font-weight:800}
-.cvln{margin:6px 0 0;font-size:13px;line-height:1.45;color:#dcd6ee;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cvln{margin:0;font-size:13px;line-height:1.45;color:#dcd6ee;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cvln[hidden]{display:none}
-.cvdt{display:block;margin-top:6px;font-size:12px;color:var(--sub)}
 .cvbar{position:absolute;left:16px;right:16px;bottom:14px;display:flex;gap:8px;opacity:0;transition:opacity .2s}
 .cv.on .cvbar{opacity:var(--cvFade);transition-delay:.12s}
 .cvbar button{flex:1;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
