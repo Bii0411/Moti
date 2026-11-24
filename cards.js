@@ -164,7 +164,7 @@ const Cards=(()=>{
     // 그림이 아직 없을 때만(만드는 중) 흐린 실루엣
     const im=$v(".cvimg"),cin=$v(".cvin");im.classList.remove("off");const u=urlNow(a.char,id);cin.classList.toggle("noimg",!u);
     if(u)im.src=u;else{im.removeAttribute("src");url(a.char,id).then(v=>{if(v&&my===vTok){im.src=v;cin.classList.remove("noimg")}})}
-    K=null;Stage.camLoop(null);if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace(sc.name);
+    K=null;Stage.camLoop(null);Stage.pano.view(SCENES[a.scene]?a.scene:0);if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace(sc.name);
     const ld=$v(".cvload");ld.classList.toggle("on",!Stage.outfitLoaded(key));
     shareF=null;prep(id,my);
     Stage.keep(key);Stage.outfit(key);  // 26-2: 마지막으로 연 카드 의상은 남겨 둠(그 앞 카드 의상은 내려놓음)

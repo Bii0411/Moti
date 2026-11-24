@@ -23,6 +23,7 @@
 | 파일 | 쓰는 곳 | 출처 |
 | --- | --- | --- |
 | `bg_seoa_street.jpg`, `bg_seoa_rooftop.jpg`, `bg_seoa_alley.jpg`, `bg_seoa_rain.jpg`, `bg_seoa_roof.jpg` | 서아 배경 | **확인 필요** |
+| `pano_seoa_bar.webp`, `pano_seoa_street.webp` | 360도 배경 (30단계, 바 1층·네온 골목) | AI 이미지 생성 후 확대(Upscayl 4x)·수평선 보정. 그림체 참고 `bg_seoa_street.jpg`·`bg_seoa_rain.jpg`·`bg_seoa_bar.jpg`. 4096×2048 webp |
 | `bg_jihu_class.jpg`, `bg_jihu_hall.jpg`, `bg_jihu_night.jpg` | 지후 배경 (`v1.html`) | **확인 필요** |
 | `card_doyun.jpg`, `card_haram.jpg`, `card_ijun.jpg`, `card_jihu.jpg`, `card_seoa.jpg` | 캐릭터 카드 | **확인 필요** |
 | `icons/gift_button.png`, `icons/gift_coffee.png`, `icons/gift_flower.png`, `icons/gift_ramen.png`, `icons/gift_ring.png` | 선물 버튼·아이콘 | 커밋 `040b5ed`「받은 디자인 이미지」. 만든 사람 **확인 필요** |

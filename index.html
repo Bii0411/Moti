@@ -715,7 +715,7 @@ const Stage=(()=>{
     const cv=R.domElement,w=cv.clientWidth,h=cv.clientHeight;
     if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio()))){
       R.setSize(w,h,false);cam.aspect=w/h;tall=w/h<.8;cam.updateProjectionMatrix()}
-    camAt(now);Look.tick(now,w,h);
+    camAt(now);Look.tick(now,w,h);panoTick(now);
     if(extraTick)extraTick(now,w,h);
     if(!md){if(w&&h)R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
@@ -797,9 +797,10 @@ const Stage=(()=>{
   const dur=mid=>XS[mid]?xsDur(mid):RIG.M[mid]?RIG.M[mid].d:2;
   // 온보딩(7-B): 3D 그림판(canvas)을 다른 칸으로 잠깐 빌려줌 → 모델을 두 번 불러오지 않는다. release 로 대화 3D 칸에 돌려놓음
   let extraTick=null;
-  function borrow(el,frame,tick){el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0)}
+  // 30: o.pano = 빌린 칸에서 보여 줄 360도 장소 번호(없으면 360도 없이: 온보딩 입장권·필름 사진). release 하면 대화 장소의 360도로
+  function borrow(el,frame,tick,o){el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0);borrowed=true;panoShow(o&&o.pano!=null?o.pano:-1,0)}
   function release(){const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
-    scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null}
+    scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null;borrowed=false;panoShow(panoMain,0)}
   function fog(color,near,far){scene.fog.color.set(color);scene.fog.near=near;scene.fog.far=far}
   // ── 촬영 화면(10-B) ──
   // 지금 몸짓(대기 몸짓 제외) 또는 끝난 지 ms 안의 몸짓. {id, sp, name(선물 몸짓 이름), ref(선물 몸짓 도감 id)}
@@ -844,6 +845,44 @@ const Stage=(()=>{
   function faceNow(){Object.keys(faceW).forEach(n=>{faceW[n]=faceT[n]||0});for(const n in faceT)faceW[n]=faceT[n]}
   // 3D 장면 배경색(단색 배경). null 이면 투명(뒤의 장소 그림이 보임)
   function bg(c){scene.background=c?new THREE.Color(c):null}
+  // ── 360도 배경(30) ──
+  // 장소에 pano(data/seoa_story.json locations)가 있으면 평평한 배경 그림 대신, 서아를 둘러싼 큰 구 안쪽에 360도 그림을 입혀 3D 장면 안에 둔다.
+  // 구 = 바닥을 평평하게 누른 구(중심 높이 height = 그림 수평선 = 카메라 눈높이, 반지름 radius. 중심보다 height 넘게 아래인 점은 바닥 y=0 평면으로 눌러 서아 발이 그림 바닥에 서게).
+  // 조명·안개 영향 없음. 배경 어둡게 층(data/look.json background)과 같은 밝기·채도를 구 안에서 곱함 + 장소별 panoBright. 장소별 panoYaw = 그림 가운데를 서아 뒤에서 몇 도 돌릴지.
+  // 장소 전환: 구의 투명도를 바꾸는 시간 data/config.json pano.fadeMs(배경 그림 전환 .6s 와 같게). 평평한 배경 그림(CSS)은 늘 그 아래에 그대로 있어 그림을 불러오는 동안·실패해도 보인다
+  const panoC=()=>(DATA.config&&DATA.config.pano)||{};
+  const panoTex={},panoMesh={};let panoWant=-1,panoMain=-1,borrowed=false,panoLast=0,panoGeo=null;
+  const panoOf=i=>{const L=SCENES[i];return L&&L.pano&&qs.get("pano")!=="off"?L:null};
+  function panoLoad(i){const L=panoOf(i);if(!L)return Promise.resolve(null);
+    return panoTex[L.pano]||(panoTex[L.pano]=new Promise(ok=>new THREE.TextureLoader().load(L.pano,t=>{t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(4,R.capabilities.getMaxAnisotropy());ok(t)},undefined,()=>{delete panoTex[L.pano];ok(null)})))}
+  function panoGeometry(){if(panoGeo)return panoGeo;const C=panoC(),r=C.radius||12,h=C.height||1.43;
+    const g=new THREE.SphereGeometry(r,96,48);g.scale(-1,1,1);  // 안쪽에서 보이게(좌우 뒤집힘 없이)
+    const p=g.attributes.position;for(let k=0;k<p.count;k++){const y=p.getY(k);if(y<-h){const s=-h/y;p.setXYZ(k,p.getX(k)*s,-h,p.getZ(k)*s)}}
+    g.translate(0,h,0);g.computeBoundingSphere();return panoGeo=g}
+  function panoMat(L,tex){const b=(DATA.look&&DATA.look.background)||{},raw=qs.get("bg")==="raw"||b.on===false;
+    const k=Math.pow(raw?1:(b.brightness!=null?b.brightness:.8),2.2)*(L.panoBright||1),sat=raw?1:(b.saturation!=null?b.saturation:.9);
+    const m=new THREE.MeshBasicMaterial({map:tex,color:new THREE.Color(k,k,k),fog:false,transparent:true,depthWrite:false,side:THREE.FrontSide});
+    m.onBeforeCompile=sh=>{sh.uniforms.uSat={value:sat};sh.fragmentShader="uniform float uSat;\n"+sh.fragmentShader.replace("#include <map_fragment>","#include <map_fragment>\ndiffuseColor.rgb = mix( vec3( dot( diffuseColor.rgb, vec3( 0.2126, 0.7152, 0.0722 ) ) ), diffuseColor.rgb, uSat );")};
+    m.customProgramCacheKey=()=>"pano";return m}
+  function panoMeshOf(i){const L=panoOf(i);if(!L)return null;if(panoMesh[i])return panoMesh[i];
+    panoLoad(i);const t=panoTex[L.pano];let mesh=null;
+    t.then(tex=>{if(!tex||panoMesh[i]!==pend)return;mesh=new THREE.Mesh(panoGeometry(),panoMat(L,tex));mesh.rotation.y=-Math.PI/2+(L.panoYaw||0)*Math.PI/180;
+      mesh.renderOrder=-10;mesh.frustumCulled=false;mesh.material.opacity=0;mesh.name="pano";pend.mesh=mesh;scene.add(mesh)});
+    const pend={mesh:null};return panoMesh[i]=pend}
+  // i = 보여 줄 장소(없거나 -1 이면 360도 없음). ms 0 = 바로
+  function panoShow(i,ms){panoWant=panoOf(i)?i:-1;if(panoWant>=0)panoMeshOf(panoWant);
+    if(ms===0)for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)m.material.opacity=+k===panoWant?1:0;if(m)m.visible=+k===panoWant}}
+  // 매 프레임: 원하는 구는 진하게, 나머지는 옅게. 다 사라진 구는 그리지 않음
+  function panoTick(now){const dt=panoLast?Math.min(.25,(now-panoLast)/1000):0;panoLast=now;const st=dt*1000/(panoC().fadeMs||600);
+    for(const k in panoMesh){const m=panoMesh[k].mesh;if(!m)continue;const o=m.material.opacity,goal=+k===panoWant?1:0;
+      m.material.opacity=goal>o?Math.min(1,o+st):Math.max(0,o-st);m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}}
+  // 사진·카드 그림: 장소 i 의 360도를 잠깐 바로 보이게(그림을 다 불러온 뒤 같은 작업 안에서). 되돌리는 함수를 돌려줌
+  function panoUse(i){const keep={};for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)keep[k]={o:m.material.opacity,v:m.visible,t:m.material.transparent}}
+    const w=panoWant;panoShow(i,0);for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)m.material.transparent=m.material.opacity<1}
+    return()=>{panoWant=w;for(const k in keep){const m=panoMesh[k].mesh;if(m){m.material.opacity=keep[k].o;m.visible=keep[k].v;m.material.transparent=keep[k].t}}}}
+  // 장소 i 의 360도 그림을 받고 구까지 만들어 둠(구가 있으면 true)
+  async function panoReady(i){if(!panoOf(i))return false;panoMeshOf(i);const t=await panoLoad(i);if(!t)return false;
+    for(let n=0;n<5&&!panoMesh[i].mesh;n++)await new Promise(r=>setTimeout(r,0));return !!panoMesh[i].mesh}
   // ── 서아가 보내는 사진(12) ──
   // 몸짓 mid 의 mt 초 순간 자세 + 표정 fk(눈 뜬 채, 입 다문 채)로 서아를 잠깐 세우고 draw() 를 부른 뒤, 같은 작업 안에서 원래대로 되돌린다.
   // 화면(대화 무대)은 다음 프레임에 원래 자세로 다시 그려지므로 바뀐 자세가 보이지 않는다(그사이 브라우저가 화면을 그리지 않음).
@@ -889,7 +928,7 @@ const Stage=(()=>{
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},use:panoUse,ready:panoReady,has:i=>!!panoOf(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1006,7 +1045,7 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
 ["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
-function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
+function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;Stage.pano.show(i);$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
 function setScene(i){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene])i=e.scene}  // 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
   if(!SCENES[i])i=0;S.scene=i;if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);showScene(i);if(SCENES[i].name)story().location=SCENES[i].name}
@@ -1197,13 +1236,6 @@ function queueJudge(u,c,keep){
   if(B.length>=judgeEvery())return runJudge();
 }
 let judgeTok=0;  // 29-1: 기다림이 judgeWaitMs 를 넘겨 버린 판정은 결과가 와도 무시
-// 29-1: 서버 규칙보다 앱 기준을 낮춘 단계(data/seoa_story.json stageUpRule, 지금은 1 → 2 만): 호감도 affectionAt[from] 이상 + 플래그 하나면 앱이 올림
-function clientStageUp(st){
-  const D=DATA.story||{},n=curStage(),R=(D.stageUpRule||{})[n],at=(D.affectionAt||[])[n];
-  if(!R||at==null||(st.affection||0)<at)return;
-  const F=R.flags||[];if(F.length&&!(st.stage_flags||[]).some(f=>F.includes(f)))return;
-  st.stage=n+1;st.stage_flags=[];
-}
 function runJudge(){
   const st=story(),before=curStage(),gen=GEN,keep=S.judgeKeep||null,tok=++judgeTok;
   const B=(S.judgeBuf||[]).slice(-judgeEvery()),M=DATA.config.judgeMaxChars||{};
@@ -1213,7 +1245,7 @@ function runJudge(){
   const need=((S.judgeN||0)+1)%Math.max(1,Math.round(+DATA.config.summaryEveryJudges||1))===0;  // 요약은 판정 summaryEveryJudges(2) 번에 한 번
   const t0=performance.now(),aff0=st.affection||0;
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);if(!keep)clientStageUp(st);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
