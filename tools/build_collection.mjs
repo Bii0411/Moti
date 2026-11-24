@@ -26,6 +26,8 @@ for (const k of Object.keys(story.unlock.stage).sort()) for (const id of story.u
 for (const sec of ["flag", "event"]) for (const k in story.unlock[sec]) for (const id of story.unlock[sec][k].motions) push(id, { sec, key: k });
 
 const gift = col.items.filter(x => x.source === "gift");
-col.items = [...chat.map(({ from, ...x }) => ({ ...x, ...(from.stage ? { stage: from.stage } : { [from.sec]: from.key }) })), ...gift];
+// 31: only 가 있는 칸 = 단계 해금이 아니라 정해진 연출에서만 얻는 칸(x17 「첫 만남」 = only "firstMeet"). 다시 만들어도 그대로 둠(대화 칸 뒤)
+const only = col.items.filter(x => x.only && !seen.has(x.id));
+col.items = [...chat.map(({ from, ...x }) => ({ ...x, ...(from.stage ? { stage: from.stage } : { [from.sec]: from.key }) })), ...only, ...gift];
 writeFileSync("data/collection.json", JSON.stringify(col, null, 2) + "\n");
-console.log(`대화 ${chat.length} + 선물 ${gift.length} = ${col.items.length}칸`);
+console.log(`대화 ${chat.length}${only.length ? ` + 연출 ${only.length}` : ""} + 선물 ${gift.length} = ${col.items.length}칸`);

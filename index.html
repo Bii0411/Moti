@@ -369,6 +369,18 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 /* 장 제목: 장면에 들어갈 때 대화 화면 가운데 2초 (투명도·크기 전환만) */
 .chapter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:32;background:#0d0b16e6;border:1px solid #f5c66b66;color:var(--gold);padding:14px 24px;border-radius:16px;font-size:20px;font-weight:800;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;white-space:nowrap}
 .chapter.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+/* 31 첫 만남 연출: 무대가 앱 화면 전체(fixed, 자리는 FirstMeet 이 px 로) · 바깥 어둡게(fmshade) · 장소 바꿀 때 검은 막(fmveil) · 위아래 검은 띠(fmbar, transform 만) · 건너뛰기. 블러·그림자 없음 */
+.stage.fm{position:fixed;margin:0;z-index:58;min-height:0}
+.stage.fm>.where,.stage.fm>.btop,.stage.fm>.cap,.stage.fm>.bubble,.stage.fm>.burst,.stage.fm>.gradefx{opacity:0!important;pointer-events:none}
+.fmshade{position:absolute;inset:0;z-index:57;background:#000;opacity:0;pointer-events:none;transition:opacity .5s ease}
+.fmshade.on{opacity:1;pointer-events:auto}
+.fmveil{position:absolute;inset:0;z-index:5;background:#000;opacity:0;pointer-events:none;transition:opacity .25s linear}
+.fmveil.on{opacity:1}
+.fmbar{position:absolute;left:0;right:0;height:var(--fmBar,11%);z-index:6;background:#000;pointer-events:none;transition:transform var(--fmBarMs,.5s) ease-in-out}
+.fmbar.t{top:-1px;transform:translateY(-101%)}.fmbar.b{bottom:-1px;transform:translateY(101%)}
+.fmbar.on{transform:none}
+.fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
+.fmskip.on{opacity:1;pointer-events:auto}
 </style>
 <link rel="stylesheet" href="onboarding.css">
 <link rel="stylesheet" href="photos.css">
@@ -700,15 +712,16 @@ const Stage=(()=>{
   const landscape=()=>{const a=$(".app");return a.clientWidth>a.clientHeight};
   // name: data/config.json camera 의 구도 이름, 또는 {top,bottom,width,lift} 직접(입장권 구도 등)
   function frameTo(name,ms){const F=name&&typeof name==="object"?name:camCfg()[name];if(!F)return;
-    frFrom=frNow?{...frNow}:{...F};frTo={...F};frT0=performance.now();frMs=ms!=null?ms:(camCfg().moveMs||350)}
+    frFrom=frNow?{...frNow}:{...F};frTo={...F};frT0=performance.now();frMs=ms!=null?ms:(camCfg().moveMs||350);
+    if(!frMs)frNow={...F}}  // 31: 0ms 면 바로 그 구도(다음 frameTo 가 아직 안 그려진 예전 구도에서 출발하지 않게)
   function camAt(now){
     if(landscape()||!frTo){cam.position.set(0,tall?1.25:1.26,tall?2.9:2.3);cam.lookAt(0,tall?1.12:1.19,0);return}
     const k=frMs?Math.min(1,(now-frT0)/frMs):1,e=k*k*(3-2*k);
-    frNow={};for(const n of ["top","bottom","width","lift"])frNow[n]=(frFrom[n]||0)+((frTo[n]||0)-(frFrom[n]||0))*e;
+    frNow={};for(const n of ["top","bottom","width","lift","yaw"])frNow[n]=(frFrom[n]||0)+((frTo[n]||0)-(frFrom[n]||0))*e;
     const H=height(),tn=Math.tan(cam.fov*Math.PI/360),range=(frNow.top-frNow.bottom)*H,cy=(frNow.top+frNow.bottom)/2*H;
     const d=Math.max(range/2/tn,(frNow.width||0)*H/2/(tn*cam.aspect));
-    const dy=followDy(now);
-    cam.position.set(0,cy+dy+frNow.lift*H,d);cam.lookAt(0,cy+dy,0);
+    const dy=followDy(now),yw=(frNow.yaw||0)*Math.PI/180;  // 31: yaw = 서아 주위를 도는 각도(도, + = 위에서 볼 때 시계 반대 방향). 없으면 0(정면)
+    cam.position.set(Math.sin(yw)*d,cy+dy+frNow.lift*H,Math.cos(yw)*d);cam.lookAt(0,cy+dy,0);
   }
   function frame(now){
     requestAnimationFrame(frame);
@@ -728,7 +741,7 @@ const Stage=(()=>{
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
-    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,XS[id]);
+    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur.fo!=null?{...XS[id],fadeOut:cur.fo}:XS[id]);
     if(blend)blendStep(now);
     keepPre();
     if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
@@ -776,11 +789,13 @@ const Stage=(()=>{
     return !!(faceEmo&&new RegExp(g.avertEmotion||"당황|수줍|부끄").test(faceEmo))}
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사) · o.fx: "big" 3D 칸 확대 · "push" 카메라만 다가감 · 없으면 그대로(17-1A, Fx.pick 이 정함) · o.speed: 재생 속도(9-A 선물 몸짓 임시 재생) · o.name: 3D 아래 표시 이름(선물 몸짓 이름)
+  // 31(첫 만남 연출): o.at = 몸짓의 이 순간(초)부터 시작 · o.blendMs = 지금 자세에서 섞는 시간(없으면 stage.motionBlendMs) · o.fadeOut = XSTAGE 끝 섞기 시간(초) 이번만 바꿈
   function play(mid,o={}){
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
-    blendFromPre();  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게)
-    cur={id:mid,start:performance.now()/1000,sp:o.speed>0?o.speed:1,name:o.name||null,ref:o.ref||null};
+    blendFromPre(o.blendMs);  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게)
+    const sp0=o.speed>0?o.speed:1;
+    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null};
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
@@ -836,7 +851,7 @@ const Stage=(()=>{
   // (살아 있게는 매 프레임 다시 더해지므로, 더한 뒤 자세에서 섞으면 숨·시선이 잠깐 두 번 더해짐)
   const pre={q:{},p:null};
   function keepPre(){for(const n in md.bones){if(/^J_Sec_/.test(n))continue;const q=pre.q[n]||(pre.q[n]=new THREE.Quaternion());q.copy(md.bones[n].quaternion)}(pre.p||(pre.p=new THREE.Vector3())).copy(md.root.position)}
-  function blendFromPre(){const ms=((DATA.config&&DATA.config.stage)||{}).motionBlendMs;if(!md||!pre.p||!(ms>0))return;
+  function blendFromPre(over){const ms=over!=null?over:((DATA.config&&DATA.config.stage)||{}).motionBlendMs;if(!md||!pre.p||!(ms>0))return;
     const q={};for(const n in pre.q)q[n]=pre.q[n].clone();blend={q,p:pre.p.clone(),t0:performance.now(),ms}}
   function blendStep(now){const k=Math.min(1,(now-blend.t0)/blend.ms),w=k*k*(3-2*k);
     for(const n in blend.q){const b=md.bones[n];if(b)b.quaternion.copy(blend.q[n].clone().slerp(b.quaternion,w))}
@@ -976,13 +991,98 @@ const View=(()=>{
     let delay=0;
     if(fx==="big"){
       const grow=!big&&curTab==="chat"&&S.room==="seoa"&&!focused();
-      Stage.frameTo(mid==="m23"?"full":"motion",grow?(c.growMs||700):undefined);pushed=false;
+      const fm=(((DATA.config&&DATA.config.camera)||{}).byMotion||{})[mid];  // 31: 몸짓별 구도(x17 돌려차기 = kick). 없으면 예전대로
+      Stage.frameTo(fm||(mid==="m23"?"full":"motion"),grow?(c.growMs||700):undefined);pushed=false;
       if(grow){setBig(true);delay=c.motionDelayMs!=null?c.motionDelayMs:250}
     }else if(fx==="push"&&!big&&!pushed){Stage.frameTo(pushFrame(),c.pushInMs||600);pushed=true}
     backT=setTimeout(()=>{if(my===tok)rest()},delay+Stage.dur(mid)/(sp||1)*1000+(c.backDelayMs!=null?c.backDelayMs:1500));
     return delay;
   }
   return{motion,rest,isBig:()=>big,isPushed:()=>pushed};
+})();
+
+// ───────────────────────── 첫 만남 연출(31) ─────────────────────────
+// 서아 기본 에피소드 「라스트 오더」를 처음 시작할 때 한 번(저장값 S.firstMeet, 전체 초기화로 지워짐). 「이어하기」·특별 에피소드·두 번째부터는 없음.
+// ① 어두워지며 3D 무대가 앱 화면 전체로 + 위아래 검은 띠 → ② 네온 골목(360도)에서 x17 돌려차기. 넓은 구도(다리 끝까지)로 카메라가 서아 주위를 천천히 돎
+// → ③ x16 몸 낮춰 경계하기 잠깐(카메라 따라감 그대로) → 대기 자세로 부드럽게 일어섬 → ④ 바 1층, 띠가 걷히며 무대가 대화 화면 크기로(확대 뒤 돌아오기와 같은 움직임) → ⑤ 오프닝(runIntro)
+// 넘어가는 순간은 25단계 섞기(Stage.play blendMs). 3D 가 준비되지 않았거나 모션을 못 받으면 연출 없이 바로 대화로. 건너뛰기 = ④ 끝 상태로 바로.
+// 끝까지 보거나 건너뛰면 무빙 카드 시크릿 「첫 만남」(data/collection.json 의 firstMeet 칸). 값 data/config.json firstMeet, 문구 data/ui.json firstMeet
+const FirstMeet=(()=>{
+  let armed=false,on=false,pend=false,tok=0,T=[],el=null,then=null,replay=false,back=null,pinned=-1;
+  const C=()=>(DATA.config&&DATA.config.firstMeet)||{};
+  const later=(f,ms)=>T.push(setTimeout(f,ms));
+  const wait=ms=>new Promise(r=>later(r,ms));
+  const within=(p,ms)=>Promise.race([Promise.resolve(p).catch(()=>null),new Promise(r=>setTimeout(()=>r(null),ms))]);
+  // 기본 에피소드 「시작」을 눌렀을 때 표시 → 대화방이 열릴 때(openRoom) take() 로 한 번 꺼냄
+  function arm(){armed=!S.firstMeet&&!S.introDone}
+  function take(){const a=armed;armed=false;return a&&!S.firstMeet}
+  function build(){if(el)return el;const st=$("#stage"),mk=(t,c)=>{const e=document.createElement(t);e.className=c;return e};
+    el={shade:mk("div","fmshade"),veil:mk("div","fmveil"),top:mk("div","fmbar t"),bot:mk("div","fmbar b"),skip:mk("button","fmskip")};
+    el.skip.type="button";el.skip.onclick=skip;
+    $(".app").appendChild(el.shade);st.append(el.veil,el.top,el.bot,el.skip);return el}
+  const rect=e=>{const r=e.getBoundingClientRect();return{l:r.left,t:r.top,w:r.width,h:r.height}};
+  const put=(st,r)=>{st.style.left=r.l+"px";st.style.top=r.t+"px";st.style.width=r.w+"px";st.style.height=r.h+"px"};
+  const tr=(ms,ease)=>["left","top","width","height","border-radius"].map(k=>`${k} ${ms}ms ${ease}`).join(",")+",background-image .6s";
+  // ① 무대를 지금 자리에서 앱 화면 전체로. 무대가 빠진 자리는 같은 높이로 비워 둠(대화 목록이 튀지 않게)
+  function grow(ms){const st=$("#stage"),slot=$("#stageSlot"),from=rect(st),s=rect(slot);
+    back={dl:from.l-s.l,dw:s.w-from.w,h:from.h};slot.style.height=from.h+"px";
+    st.style.transition="none";st.classList.add("fm");put(st,from);st.style.borderRadius="20px";void st.offsetWidth;
+    st.style.transition=tr(ms,"ease-in-out");put(st,rect($(".app")));st.style.borderRadius="0px"}
+  // ④ 대화 화면 자리로 돌아옴. 끝나면 원래 스타일로
+  function shrink(ms){const st=$("#stage");if(!back)return;const s=rect($("#stageSlot")),c=(DATA.config&&DATA.config.stage)||{};
+    st.style.transition=tr(ms,c.ease||"ease-in-out");put(st,{l:s.l+back.dl,t:s.t,w:s.w-back.dw,h:back.h});st.style.borderRadius="20px"}
+  function plain(){const st=$("#stage");st.classList.remove("fm");["transition","left","top","width","height","borderRadius"].forEach(k=>st.style[k]="");$("#stageSlot").style.height="";back=null;
+    if(el){el.shade.classList.remove("on");el.veil.classList.remove("on");el.top.classList.remove("on");el.bot.classList.remove("on");el.skip.classList.remove("on")}}
+  function bars(onOff,ms){const c=C(),st=$("#stage");st.style.setProperty("--fmBar",(c.barK!=null?c.barK:.11)*100+"%");st.style.setProperty("--fmBarMs",ms+"ms");el.top.classList.toggle("on",onOff);el.bot.classList.toggle("on",onOff)}
+  const frame=yaw=>({...(c=>c.frame||{top:1.2,bottom:-.1,width:1.2,lift:.03})(C()),yaw});
+  async function run(o={}){
+    if(on||pend)return;const my=++tok,c=C();then=o.then||null;replay=!!o.replay;pend=true;
+    const ok=await within(Stage.ready,c.readyWaitMs||1500);pend=false;
+    if(my!==tok)return;
+    if(!ok)return finish(false);  // 3D 가 아직이거나 실패: 연출 없이 바로 대화
+    if(!replay){S.firstMeet=Date.now();save()}
+    on=true;busy=true;if(S.room==="seoa")renderLog();build();
+    const loads=Promise.all([Stage.xs(c.kick),Stage.xs(c.alert)]);
+    pinned=Stage.pano.has(c.scene)?c.scene:-1;const pano=pinned>=0?Stage.pano.ready(c.scene):null;
+    el.skip.textContent=UI("firstMeet.skip");el.skip.setAttribute("aria-label",UI("firstMeet.skipAria"));
+    // ① 어두워짐 + 전체 화면 + 띠
+    const fm=c.fullMs||500;el.shade.style.transitionDuration=fm+"ms";el.veil.style.transitionDuration=Math.round(fm/2)+"ms";
+    void el.shade.offsetWidth;el.shade.classList.add("on");el.veil.classList.add("on");grow(fm);bars(true,fm);el.skip.classList.add("on");
+    await wait(Math.round(fm/2));if(my!==tok)return;
+    const got=await within(loads,c.loadWaitMs||4000);if(my!==tok)return;
+    if(!got||!got[0]||!got[1])return end(false);  // 모션을 못 받음: 대화 화면으로 바로(카드 없음)
+    if(pano)await within(pano,c.panoWaitMs||2000);if(my!==tok)return;
+    // ② 네온 골목, 넓은 구도에서 돌려차기. 카메라가 yawFrom → yawTo 로 천천히 돎
+    showScene(c.scene);Stage.pano.show(c.scene,0);Stage.play(IDLE,{quiet:true,blendMs:0});Stage.frameTo(frame(c.yawFrom||0),0);
+    el.veil.style.transitionDuration=Math.round(fm/2)+"ms";el.veil.classList.remove("on");
+    Stage.play(c.kick,{quiet:true,fadeOut:c.kickFadeOut});Stage.frameTo(frame(c.yawTo!=null?c.yawTo:18),c.orbitMs||4000);
+    await wait((c.kickSec||2.8)*1000);if(my!==tok)return;
+    // ③ 몸 낮춰 경계하기(낮춘 자세가 다 된 순간부터) → 대기 자세로 일어섬
+    Stage.play(c.alert,{quiet:true,at:c.alertFrom||1,blendMs:c.alertBlendMs||450});
+    await wait((c.alertSec||1)*1000);if(my!==tok)return;
+    Stage.play(IDLE,{quiet:true,blendMs:c.standBlendMs||900});
+    await wait(c.standMs||700);if(my!==tok)return;
+    // ④ 바 1층(다시 보기는 지금 대화 장소), 띠가 걷히며 무대가 대화 화면 크기로
+    const sm=((DATA.config&&DATA.config.stage)||{}).shrinkMs||800;
+    if(replay)showScene(S.scene);else setScene(c.endScene||0);
+    bars(false,sm);shrink(sm);Stage.frameTo("normal",sm);el.shade.style.transitionDuration=sm+"ms";el.shade.classList.remove("on");el.skip.classList.remove("on");
+    await wait(sm+40);if(my!==tok)return;
+    plain();finish(true);
+  }
+  // ④ 끝 상태로 바로(건너뛰기·모션 실패)
+  function end(card){T.forEach(clearTimeout);T=[];tok++;const c=C();
+    Stage.play(IDLE,{quiet:true});Stage.frameTo("normal",0);
+    const sc=replay?S.scene:(c.endScene||0);if(replay)showScene(sc);else setScene(sc);Stage.pano.show(sc,0);
+    plain();finish(card)}
+  function skip(){if(on)end(true)}
+  function finish(card){const was=on;on=false;if(was)busy=false;if(pinned>=0){Stage.pano.done(pinned);pinned=-1}
+    if(card)award();const f=then;then=null;if(f)f();else if(was&&S.room==="seoa")renderLog()}
+  // 무빙 카드 「첫 만남」: 그때 장소(네온 골목)·의상으로 기록 → 카드 그림은 26-1 방식(Cards.capture)
+  function award(){const c=C(),id=c.card;if(!id||!colBy(id)||S.col[id])return;
+    S.col[id]=seenNow({scene:c.scene,outfit:outfitForScene(c.scene,Outfit.want())});save();Cards.capture(id);notifyNew(colBy(id));if(curTab==="album")renderAlbum(id)}
+  // 시연 패널 초기화·장면 이동: 연출을 멈추고 원래 화면으로(카드·이어지는 일 없음)
+  function stop(){tok++;then=null;pend=false;if(!on&&!T.length&&!back)return;T.forEach(clearTimeout);T=[];plain();if(pinned>=0){Stage.pano.done(pinned);pinned=-1}if(on){on=false;busy=false}}
+  return{arm,take,run,skip,stop,isOn:()=>on||pend};
 })();
 
 // ───────────────────────── 화면 확대·카메라 다가가기 규칙 (17-1A) ─────────────────────────
@@ -1591,7 +1691,7 @@ const Demo=(()=>{
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
     introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cards.close();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
-    View.rest(true);Stage.play(IDLE);
+    FirstMeet.stop();View.rest(true);Stage.play(IDLE);
   }
   function refresh(){save();renderTop();renderBond();
     if(curTab==="album")renderAlbum();else if(curTab==="my")renderMy();else if(curTab==="home")renderHome();else if(S.room)renderLog();else renderList();
@@ -1651,7 +1751,7 @@ const Demo=(()=>{
     h+=Scenes.html(T,B);
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 선물(9-B): 다음 선물 결과(등급 또는 선물 몸짓, 다음 선물 한 번에만) · 천장 초기화 · 선물 몸짓 모두 열기 · 비우기
     const GN=S.giftNext||{},gItems=COL.items.filter(x=>x.source==="gift");
@@ -1690,6 +1790,7 @@ const Demo=(()=>{
     if(a==="close")return setOpen(false);
     if(a==="wake")return wakeServer();
     if(a==="opening")return opening();
+    if(a==="firstMeet"){cancel();toChat();return FirstMeet.run({replay:true})}  // 31: 첫 만남 다시 보기(저장값·대화는 그대로, 끝나면 지금 대화 장소로)
     if(a==="replayOnboard")return replayOnboard();
     if(a==="adultReset"){delete S.adult;if(S.room&&needAdult(S.room)){S.room=null;if(curTab==="chat")showList()}toast(esc(T("resetToast",{name:OT("demo.adultReset")})),1800);return refresh()}
     if(a==="scene0")return firstOpen();
@@ -1871,7 +1972,7 @@ function renderEps(cid){
   ${sp.length?sp.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${esc(st.name)}</b><p>${esc(st.desc)}</p><span class="mo">${esc(UI("home.motion",{name:MNAME[st.m]||st.m}))}</span></span>
     ${spPrice(st)}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
   :`<div class="epsoon">${esc(UI("home.soon"))}</div>`}`;
-  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{if(x.dataset.b==="seoa")Thread.go("main");enterRoom(x.dataset.b)});  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
+  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{if(x.dataset.b==="seoa"){Thread.go("main");FirstMeet.arm()}enterRoom(x.dataset.b)});  // 31: 처음 「시작」이면 첫 만남 연출  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
   box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
 }
 // 헤더 검색 칸(홈 탭에서만 보임). 누르면 홈 맨 위에 입력창이 열림
@@ -2033,7 +2134,7 @@ function openRoom(cid){
   $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
-  if(cid==="seoa"&&!S.introDone&&DATA.intro)runIntro();
+  if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
   if(cid==="seoa")SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
 }
 // 특별 에피소드 첫 장면(16): 문단을 하나씩, 정해진 문단에서 몸짓·표정·장소. 원고 data/episodes.json special[].opening

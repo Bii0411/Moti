@@ -35,6 +35,7 @@
     "ms": "{ms}ms"
   },
   "opening": "오프닝 다시 보기",
+  "firstMeet": "첫 만남 다시 보기",
   "resetAll": "전체 초기화",
   "dia": "{gem} 500 충전",
   "diaToast": "{gem} 500 충전 (시연)",
