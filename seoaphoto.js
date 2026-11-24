@@ -14,7 +14,7 @@ const SeoaPhoto=(()=>{
   // shot = 대화 중 사진의 마지막 종류(번갈아), last = 묶음별 마지막 메시지 번호, away = 마지막 오랜만 메시지 번호, note = 다음 서버 요청에 덧붙일 한 줄
   const st=()=>{const s=S.sp||(S.sp={});s.got=s.got||{};s.pend=s.pend||[];s.last=s.last||{};if(s.since==null)s.since=0;return s};
   const sceneOf=name=>{if(!name||name===(D().here||"지금 장소"))return S.scene||0;const i=SCENES.findIndex(x=>x.name===name);return i>=0?i:(S.scene||0)};  // 32: 「지금 장소」 = 지금 대화 장소
-  let sending=false,silent=false,loopT=null;  // silent = 오랜만 사진(이미 받은 메시지로 끼워 넣음, 「보내는 중」 없음)
+  let sending=false,silent=false,quiet=false,loopT=null;  // quiet = 사진 저장 알림으로 기록을 다시 그리지 않음(32-1)  // silent = 오랜만 사진(이미 받은 메시지로 끼워 넣음, 「보내는 중」 없음)
   const perf=[];
 
   // ── 사진 만들기 ──
@@ -103,8 +103,8 @@ const SeoaPhoto=(()=>{
   // ── 보내기 ──
   const stageGot=()=>Photos.list().filter(m=>m.kind==="received"&&m.stage).length;
   async function deliver(it){
-    const x=resolve(it);if(!x)return;
-    const away=x.type==="away"&&x.at;sending=true;silent=!!away;renderLog();const my=GEN,t0=performance.now();
+    const x=it.pid?it:resolve(it);if(!x)return;  // 32-1: 오랜만 사진은 들어갈 때(enter) 이미 골라 자리까지 잡아 둠
+    const away=x.type==="away"&&x.at;sending=true;silent=!!away;if(!away)renderLog();const my=GEN,t0=performance.now();
     let fps=null;
     try{
       await wait(80);  // 「보내는 중…」이 먼저 그려지게
@@ -116,21 +116,26 @@ const SeoaPhoto=(()=>{
       // 단계 사진은 단계마다 한 장: 시연 장면으로 다시 받으면 예전 것을 지우고 새것으로
       if(x.type==="stage"){const old=Photos.list().filter(m=>m.kind==="received"&&m.stage===x.stage);for(const m of old)await Photos.remove(m.id)}
       const sc=SCENES[x.scene]||SCENES[0];
-      const meta={id:Photos.newId(),kind:"received",from:x.type,at:away?x.at:Date.now(),stage:x.type==="stage"?x.stage:null,title:x.name||null,msg:x.msg,
+      const meta={id:x.pid||Photos.newId(),kind:"received",from:x.type,at:away?x.at:Date.now(),stage:x.type==="stage"?x.stage:null,title:x.name||null,msg:x.msg,
         scene:x.scene,place:sc.name,shot:x.shot,mid:r.mid,mname:MNAME[r.mid]||r.mid,liked:false,w:r.w,h:r.h};
-      const sv=await Photos.add(meta,r.full,r.thumb);
+      quiet=!!away;let sv;try{sv=await Photos.add(meta,r.full,r.thumb)}finally{quiet=false}
       if(my!==GEN){await Photos.remove(meta.id);return}
       const s=st();if(x.type==="stage")s.got[x.stage]=meta.id;s.since=0;
       s.note=((away&&D().serverLineAway)||D().serverLine||"").replace("{place}",sc.name).replace("{msg}",x.msg);
       perf.push({type:x.type,shot:x.shot,selfie:r.selfie,place:sc.name,mid:r.mid,face:r.face,...r.ms,save:sv.ms,kb:Math.round(r.full.size/1024),thumbKb:Math.round(r.thumb.size/1024),total:Math.round(performance.now()-t0),...fw});
       sending=false;silent=false;
-      if(away)insertMsg({r:"ph",t:x.msg,at:x.at,pid:meta.id,away:1},"seoa");
+      if(away)fill(meta.id);
       else addMsg("ph",x.msg,{pid:meta.id,...(x.type==="stage"?{stage:x.stage,sn:stageGot()}:{})},"seoa");
-    }catch(e){console.error("서아 사진을 만들지 못함",e)}
-    finally{if(fps&&fps.on)fps.stop();sending=false;silent=false;renderLog()}
+    }catch(e){console.error("서아 사진을 만들지 못함",e);if(away){for(const m of chatOf("seoa"))if(m.pid===x.pid)delete m.wait;save();silent=false}}  // 32-1: 못 만들면 자리를 거둠(말풍선·시각만)
+    finally{if(fps&&fps.on)fps.stop();sending=false;if(!silent)renderLog();silent=false}
   }
+  // 32-1: 자리만 잡아 둔 오랜만 사진 말풍선에 그림을 조용히 채움(기록을 다시 그리지 않음 → 스크롤·자리 그대로)
+  function fill(pid){const p=Photos.list().find(x=>x.id===pid);let m=null;for(const k in S.chats)for(const x of S.chats[k])if(x.pid===pid)m=x;
+    if(m&&m.wait){delete m.wait;save()}
+    const b=p&&document.querySelector(`#log .phmsg[data-ph="${CSS.escape(pid)}"]`);if(!b)return;
+    b.classList.remove("wait");b.innerHTML=`<img src="${Photos.thumbUrl(p)}" alt="">`}
   // 32: 대화 기록의 그 시각 자리에 끼워 넣음(addMsg 는 맨 끝에 붙임). 대화방에 있으면 읽은 것으로
-  function insertMsg(m,cid){const L=chatOf(cid);let i=L.length;while(i>0&&(L[i-1].at||0)>m.at)i--;L.splice(i,0,m);
+  function insertMsg(m,cid){const L=chatOf(cid);if(L.some(x=>x.pid&&x.pid===m.pid))return;let i=L.length;while(i>0&&(L[i-1].at||0)>m.at)i--;L.splice(i,0,m);
     if(L.length>60)S.chats[cid]=L.slice(-60);if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
   // 32: 오랜만 사진의 받은 시각. 마지막 대화(lt)와 지금 사이(앞뒤 edgeMin 분 비움)에서 밤 night[0]시~새벽 night[1]시 구간을 모아 길이 비례로 한 때를 뽑음. 없으면 가운데
   function awayAt(lt){const A=D().away||{},N=A.night||[21,2],e=(A.edgeMin!=null?A.edgeMin:10)*60e3,now=Date.now();let lo=lt+e,hi=now-e;
@@ -169,7 +174,11 @@ const SeoaPhoto=(()=>{
   function lastTalk(){let t=0;for(const m of chatOf("seoa"))if((m.r==="u"||m.r==="c"||m.r==="ph"||m.r==="g")&&m.at)t=Math.max(t,m.at);return t}
   function enter(){const s=st(),A=D().away||{};
     const lt=lastTalk();
-    if(curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.length){s.pend.push({type:"away",at:awayAt(lt)});save();return kick(A.delayMs!=null?A.delayMs:300)}
+    // 32-1: 들어가는 순간(대화방이 처음 그려지는 같은 작업 안에서) 그 시각 자리에 말풍선·시각과 사진 크기 자리를 먼저 넣음. 사진 그림은 만들어지면 조용히 채움(fill).
+    //   새 메시지 알림·소리·자동 스크롤 없음. 기다리던 단계 사진이 있어도 오랜만 사진은 그보다 앞(지난 시각)에 들어감
+    if(curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.some(p=>p.type==="away")){
+      const x=resolve({type:"away",at:awayAt(lt)});
+      if(x){x.pid=Photos.newId();s.pend.unshift(x);insertMsg({r:"ph",t:x.msg,at:x.at,pid:x.pid,away:1,wait:1},"seoa");save();return kick(A.delayMs!=null?A.delayMs:300)}}
     if(s.pend.length)kick(A.delayMs||1500)}
   // 3절: 서아 답장마다(send). 시연 장면 중에는 세지 않음
   function afterReply(){const s=st(),C=D().casual||{};
@@ -188,16 +197,16 @@ const SeoaPhoto=(()=>{
 
   // ── 대화 기록의 사진 말풍선 ──
   const stageTotal=()=>(D().stage||[]).length||5;
-  function bubble(m){const p=Photos.list().find(x=>x.id===m.pid);
+  function bubble(m){const p=Photos.list().find(x=>x.id===m.pid),hold=!p&&m.wait;  // 32-1: wait = 그림을 만드는 중(자리만)
     const line=T("saved")+(m.stage?T("savedStage",{n:m.sn||1,total:stageTotal()}):"");
     const msg=m.away?`<div class="phrow"><div class="msg c">${esc(m.t)}</div><span class="phtime">${esc(timeLabel(m.at))}</span></div>`:`<div class="msg c">${esc(m.t)}</div>`;  // 32: 오랜만 사진은 받은 시각을 말풍선 옆에
-    return `<button class="phmsg${p?"":" gone"}" data-ph="${esc(m.pid||"")}" aria-label="${esc(T("aria"))}">${p?`<img src="${Photos.thumbUrl(p)}" alt="">`:""}</button>`+
+    return `<button class="phmsg${p?"":hold?" wait":" gone"}" data-ph="${esc(m.pid||"")}" aria-label="${esc(T("aria"))}">${p?`<img src="${Photos.thumbUrl(p)}" alt="">`:""}</button>`+
       msg+`<div class="phsave">${esc(line)}</div>`}
   const sendingHtml=()=>sending&&!silent?`<div class="msg c typing">${esc(T("sending"))}</div>`:"";
   function onLogClick(e){const b=e.target.closest("[data-ph]");if(!b)return;const id=b.dataset.ph;if(!Photos.list().some(x=>x.id===id))return;
     PhotoUI.view(id,Photos.list().filter(x=>x.kind==="received").map(x=>x.id))}
   function init(){const L=document.getElementById("log");if(L)L.addEventListener("click",onLogClick);
-    Photos.onChange(()=>{if(inRoom())renderLog()})}
+    Photos.onChange(()=>{if(inRoom()&&!quiet)renderLog()})}
 
   return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,awayAt,timeLabel,isSending:()=>sending,kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
 })();

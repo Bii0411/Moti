@@ -120,6 +120,7 @@
 /* ── 서아가 보낸 사진(12): 대화 기록의 사진 말풍선(사진 작게 + 아래 메시지 말풍선 + 저장 알림 줄) ── */
 .phmsg{flex:none;align-self:flex-start;width:52%;max-width:200px;aspect-ratio:3/4;border-radius:16px;border-top-left-radius:6px;overflow:hidden;background:var(--card);border:1px solid var(--line);padding:0;display:block;-webkit-tap-highlight-color:transparent}
 .phmsg img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.phmsg.wait{cursor:default}  /* 32-1: 오랜만 사진 그림을 만드는 동안 자리만(사진 크기 그대로, 카드 바탕) */
 .phmsg.gone{aspect-ratio:auto;height:0;border:0;margin:0}
 .phmsg+.msg.c{margin-top:-2px}
 /* 32: 오랜만 사진 말풍선 옆 받은 시각 */
