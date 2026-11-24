@@ -1,6 +1,6 @@
 # 진행 현황
 
-기준: 2026-11-24, 28 병합 후
+기준: 2026-11-24, 29 병합 후
 
 ## 지금 main에 있는 화면
 
@@ -313,10 +313,20 @@
 - 관계 기능이 없는 캐릭터는 「곧 열려요」. 관계 기능 여부는 `data/characters.json` 의 `bond: true`
 - 「관계는 대화로만 쌓여요」·「다음 단계」 문구 뺌
 
+## 29단계에서 main에 들어온 것 (`step/29-v2-on` 병합, 2026-11-24)
+
+보고서: [reports/29-v2-켜기.md](reports/29-v2-켜기.md)
+
+- **서버 v2 기본:** `data/config.json` `serverVersion` 2. `?server=1` 로 예전 방식(대화 횟수, 판정 없음)
+- **판정 3턴에 한 번:** 서버 v2 답장 `judgeEvery`(3) 턴마다 `/judge` 한 번, 쌓인 턴을 줄바꿈으로 이어 넘김. 요약은 판정 2번에 한 번. 판정 못 한 턴은 저장값에 남아 다음 판정 때 같이
+- **저장값 옮기기:** v2 로 처음 열 때 단계 n 이면 호감도를 `affectionAt[n-1]` 로(한 번, `v2moved`)
+- **서버 「…」 대체 응답** = 실패로 보고 예비 대사(「다시 말해 봐」)
+- 실서버 9턴: `/chat` 9 + `/judge` 3 = 12번(예전 18번), 응답 1.3~1.8초
+
 ## 서버 배포 상태 (확인 가능한 범위)
 
 - 주소: `https://seoa-backand.onrender.com` — 응답함.
-- 공개된 API 목록(`/openapi.json`): `/chat`, `/sessions`, `/sessions/{sid}`, `/sessions/{sid}/chat`. **`/judge` 가 없다** → v2 서버는 아직 배포되지 않은 것으로 보인다.
+- 2026-11-24(29단계): `/chat`(v2 `dialogue`·`motion_id` 응답)·`/judge` 모두 응답함 → 앱 기본을 v2 로 바꿈. ~~`/judge` 가 없다~~
 - 주의: v2 서버가 배포되면 `/chat` 응답이 `reply` 대신 `dialogue`로 바뀐다. 2단계 병합으로 main의 `index.html`은 두 형식을 모두 읽으므로 서버를 먼저 배포해도 대화는 이어진다. 배포 뒤 `data/config.json`의 `serverVersion`을 2로.
 - 2026-11-23 확인: 배포 서버 첫 요청이 25초 안에 답하지 않음(Render 깨어나는 시간). 두 번째부터 정상.
 - 앱: GitHub Pages `https://bii0411.github.io/Moti/` 응답 200.

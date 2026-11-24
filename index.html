@@ -1090,21 +1090,25 @@ function wakeServer(){const p=DATA.config.wakePath;if(!p||wakeState==="waking")r
     .finally(()=>{clearTimeout(tm);wakeMs=Math.round(performance.now()-t0);if(typeof Demo!=="undefined")Demo.render()})}
 // 답장 기다리는 시간: 깨어난 게 확인되기 전 첫 답장은 firstReplyWaitMs(45초), 그 뒤엔 replyTimeoutMs(8초)까지만 → 넘기면 예시 대사
 const replyWait=()=>serverAwake?(DATA.config.replyTimeoutMs||8000):(DATA.config.firstReplyWaitMs||45000);
+const CALLS={};  // 확인용: 경로별 서버 요청 수(/chat·/judge)
 let lastRaw=null;  // 이번 턴 /chat 원본 응답(시연 패널 「마지막 답장」용)
 // 서아 이야기 상태. 서버 v2는 저장하지 않으므로 여기 보관해서 매 요청에 보냄
 const story=()=>S.story||(S.story={});
 async function post(path,body,ms){
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
   const P=path==="/chat"?PERF_CUR:null;if(P)P.req=performance.now();
+  CALLS[path]=(CALLS[path]||0)+1;
   const t0=performance.now(),rec=o=>{if(path==="/chat")lastRaw={ms:Math.round(performance.now()-t0),wait:ms,...o}};
   try{const r=await fetch(apiUrl()+path,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify(body)});
     serverAwake=true;if(wakeState!=="awake"){wakeState="awake";if(typeof Demo!=="undefined")Demo.render()}
     if(!r.ok){console.warn("서버 오류",path,r.status);rec({status:r.status,error:"http"});return null}const j=await r.json();if(P)P.res=performance.now();rec({status:r.status,json:j});return j}
   catch(e){const to=e&&e.name==="AbortError";console.warn(to?"서버 답장 시간 초과 → 예시 대사":"서버에 연결 못 함 → 예시 대사",path,e&&e.name);rec({error:to?"timeout":"error"});return null}finally{clearTimeout(tm)}
 }
+const isFiller=t=>(DATA.config.serverFiller||["…"]).includes(String(t).replace(/\*/g,"").trim());
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
 function readReply(j){
   if(!j)return null;
+  if(typeof j.dialogue==="string"&&isFiller(j.dialogue))return null;  // 29: 서버 대체 응답 「…」 = 실패로 봄 → 예비 대사
   if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null};
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
   return null;
@@ -1126,7 +1130,8 @@ async function askServer(cid,text){
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
     const pn=photoNote(cid,hist);
     const j=await postChat({char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
-    if(j&&pn)SeoaPhoto.noteDone();
+    if(j&&typeof j.dialogue==="string"&&isFiller(j.dialogue)&&lastRaw)lastRaw.error="filler";  // 시연 패널 「마지막 답장」 출처
+    else if(j&&pn)SeoaPhoto.noteDone();
     return readReply(j);
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
@@ -1163,19 +1168,42 @@ function stageUp(from,to,q){
   }
   renderBond();
 }
+// 29: v2 로 처음 열 때 저장값 옮기기. 대화 횟수로 오른 단계 n 을 지키도록 호감도를 affectionAt[n-1] 까지 올림(한 번만, S.v2moved)
+function moveToV2(){
+  if(serverVer()!==2||S.v2moved)return;
+  const st=story(),n=curStage(),at=((DATA.story||{}).affectionAt||[])[n-1]||0;
+  st.affection=Math.max(st.affection||0,at);S.v2moved=true;save();
+}
 // 서버 v1·서버 없음: 대화 횟수로 한 단계씩 올림 (data/seoa_story.json countAt)
 function countStage(){
   const at=(DATA.story||{}).countAt||[];const st=story(),cur=curStage();
   if(cur<6&&at[cur]!=null&&(S.bond||0)>=at[cur]){st.stage=cur+1;const q=[];stageUp(cur,cur+1,q);save();unlockShow(q)}
 }
 // 서버 v2: 답장을 보여 준 뒤 화면을 막지 않고 판정. 끝나기 전에 보낸 메시지는 send()가 기다렸다가 보냄
-// keep: 시연 예약을 실행한 턴이면 그 단계로 고정(판정이 단계를 바꾸려 해도 예약 우선)하고, 판정 플래그 해금 연출은 건너뜀
-function runJudge(lastUser,lastReply,keep){
-  const st=story(),before=curStage(),gen=GEN;
+// 29: 판정은 서버 v2 답장 judgeEvery(data/config.json, 3) 턴에 한 번. 그 사이 턴(내 말·서아 답)은 저장값 S.judgeBuf 에 쌓아 두고
+//     판정 때 last_user·last_reply 에 순서대로 줄바꿈으로 이어 붙여 넘김(서버는 그대로). 앱을 닫아도 남아 다음 대화 첫 판정 때 같이 감
+// keep: 시연 예약을 실행한 턴이면 그 단계로 고정(판정이 단계를 바꾸려 해도 예약 우선)하고, 판정 플래그 해금 연출은 건너뜀.
+//       예약 턴이 묶음 중간이면 S.judgeKeep 에 두었다가 그 묶음 판정 때 적용
+const judgeEvery=()=>Math.max(1,Math.round(+DATA.config.judgeEvery||1));
+const JLOG=[];  // 확인용: 판정마다 {turn 내 메시지 수, n 넘긴 턴 수, aff0→aff1, stage, ms, summary}
+function queueJudge(u,c,keep){
+  const B=S.judgeBuf||(S.judgeBuf=[]);B.push({u,c});
+  if(B.length>judgeEvery())B.splice(0,B.length-judgeEvery());  // 최대 judgeEvery 개(판정이 실패해 남은 옛 턴은 앞에서부터 버림)
+  if(keep)S.judgeKeep=Math.max(S.judgeKeep||0,keep);
+  save();
+  if(B.length>=judgeEvery())return runJudge();
+}
+function runJudge(){
+  const st=story(),before=curStage(),gen=GEN,keep=S.judgeKeep||null;
+  const B=(S.judgeBuf||[]).slice(-judgeEvery()),M=DATA.config.judgeMaxChars||{};
+  const cut=(t,n)=>n&&t.length>n?t.slice(-n):t;  // 서버 입력 한도(last_user 1000·last_reply 2000자)를 넘으면 앞(오래된 쪽)을 자름
+  const lastUser=cut(B.map(x=>x.u).join("\n"),M.user),lastReply=cut(B.map(x=>x.c).join("\n"),M.reply);
   const recent=talkOf("seoa").slice(-24).map(m=>({r:m.r,t:turnText(m)}));
-  const need=(S.bond||0)%6===0;
+  const need=((S.judgeN||0)+1)%Math.max(1,Math.round(+DATA.config.summaryEveryJudges||1))===0;  // 요약은 판정 summaryEveryJudges(2) 번에 한 번
+  const t0=performance.now(),aff0=st.affection||0;
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state||gen!==GEN)return;const aff0=st.affection||0;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
+      JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
@@ -1350,6 +1378,7 @@ async function send(text){
   if(judgeP){const j0=performance.now();await judgeP;P.judgeWait=performance.now()-j0}  // 직전 판정이 끝난 뒤에 보냄 (판정이 바꾼 단계·사건이 이번 요청에 들어가게)
   if(g0!==GEN)return;
   const gen=g0;
+  moveToV2();  // 시연 패널에서 서버 v2 로 바꾼 뒤 첫 메시지
   S.bond=(S.bond||0)+1;Fx.tick();  // 17-1A: 확대 쿨다운은 내 메시지 수로 셈
   const usedEvent=story().pending_event;
   waiting=true;renderLog();
@@ -1378,10 +1407,10 @@ async function send(text){
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
   const R=S.demoNext;let keep=null;
   if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
-  // 관계: 서버 v2 답장이면 판정으로, 아니면(서버 v1·서버 없음) 대화 횟수로
+  // 관계: 서버 v2 답장이면 판정으로(29: judgeEvery 턴에 한 번), 아니면(서버 v1·서버 없음) 대화 횟수로
   if(serverVer()===2&&v.src==="server"){
     const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
-    runJudge(text,turnText(talkOf("seoa").slice(-1)[0]),keep);
+    queueJudge(text,turnText(talkOf("seoa").slice(-1)[0]),keep);
   }else if(!R)countStage();
   renderBond();renderTop();perfEnd(P);
   if(prevMood!==S.mood&&!S.force&&!S.birthday)moodToast(S.mood);
@@ -1524,14 +1553,14 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null});
+    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
     all(){S=blank();Photos.clear();Cards.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
-    chat(){S.chats={};S.read={};S.sid={};const st=story();st.recent_lines=[];st.summary="";start()},
-    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null},
+    chat(){S.chats={};S.read={};S.sid={};S.judgeBuf=[];S.judgeKeep=null;const st=story();st.recent_lines=[];st.summary="";start()},
+    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0},
     album(){S.col={};delete S.colIntro;Cards.clear()}  // 26: 소개 창도 다시 뜸 · 26-1: 카드 그림도 지움
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
@@ -1662,7 +1691,7 @@ const Scenes=(()=>{
     if(sc.reset==="seoa"){Demo.resetSeoa();setTab("chat");openRoom("seoa")}  // 서아 전체 초기화 → 오프닝
     else{
       S.chats.seoa=[{r:"sys",t:title(sc)}];S.read.seoa=1;S.introDone=true;if(S.sid)delete S.sid.seoa;
-      Object.assign(story(),{recent_lines:[],summary:"",pending_event:null,stage_flags:[]});
+      Object.assign(story(),{recent_lines:[],summary:"",pending_event:null,stage_flags:[]});S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;  // 29: 장면을 옮기면 판정 못 한 턴도 비움
       Demo.setStage(sc.stage||1);
       const pi=SCENES.findIndex(x=>x.name===sc.place);setScene(pi>=0?pi:0);
       const md=sc.mood||"normal";S.force=null;S.birthday=md==="birthday";S.mood=md==="birthday"?"normal":md;
@@ -2035,7 +2064,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
