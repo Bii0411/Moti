@@ -552,6 +552,7 @@ const colBy=id=>COL.items.find(x=>x.id===id);
 // 27: 장소와 의상은 세트. 에피소드 전용 장소(크리스마스 거리·드라큘라의 성 등)면 그 에피소드 의상, 아니면 지금 의상
 // (에피소드 장소인데 다른 옷, 에피소드 옷인데 다른 장소로 저장되던 것 막기)
 function outfitForScene(sc,cur){const inEp=x=>x.scene===sc||(x.places||[]).includes(sc);
+  if(typeof Thread!=="undefined"&&Thread.ep()&&sc===S.scene&&inEp(Thread.ep()))return Outfit.want();  // 42: 지금 에피소드의 지금 장소면 지금 옷(자취방이어도 갈아입기 전이면 니트)
   const ep=STORIES.find(x=>inEp(x)&&x.outfit&&SCENES[sc]&&SCENES[sc].episode);if(ep)return (ep.outfitByScene||{})[sc]||ep.outfit;  // 40: 장소별 의상
   const fits=k=>STORIES.some(x=>inEp(x)&&(x.outfit===k||Object.values(x.outfitByScene||{}).includes(k)));
   const epKeys=new Set(STORIES.flatMap(x=>[x.outfit,...Object.values(x.outfitByScene||{})]).filter(Boolean));if(cur&&epKeys.has(cur)&&!fits(cur))return "ops";return cur||"ops"}
@@ -593,7 +594,7 @@ const Outfit={
   cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261124b"},comfortStage:3},
   url(k){const f=this.cfg().files||{};return f[k]||f.ops||"seoa_vroid.glb"},
   // 16: 본 이야기의 흰 옷은 친해진 뒤(comfortStage) 와인 바(privatePlaces 장소)에서만. 배경과 세트
-  want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit]){const e=typeof Thread!=="undefined"&&Thread.ep(),bs=e&&e.outfitByScene&&e.outfitByScene[S.scene];return bs&&(this.cfg().files||{})[bs]?bs:S.epOutfit}  // 40: 에피소드 안 장소별 의상(outfitByScene)
+  want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit]){const e=typeof Thread!=="undefined"&&Thread.ep(),bs=e&&e.outfitByScene&&e.outfitByScene[S.scene];return bs&&(this.cfg().files||{})[bs]&&(typeof EpStage==="undefined"||!EpStage.on()||EpStage.dressed())?bs:S.epOutfit}  // 40: 에피소드 안 장소별 의상(outfitByScene) · 42: 단계가 있는 에피소드는 장면에서 갈아입은 뒤(또는 dressFrom 단계부터)
   // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
 const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
   // 지금 상황에 맞는 의상으로. 처음 흰 옷으로 바뀌는 순간에는 서아 한마디(data/ui.json outfit.firstPrivate)
@@ -767,14 +768,16 @@ const Stage=(()=>{
     const t=now/1000;let id=null,mt=0;
     // 10-B 촬영 화면: cur.loop = 끝나면 처음부터 다시, cur.hold = 그 순간에 멈춤(멈춘 시각을 붙잡아 둠). 끝난 몸짓은 lastEnd 에 남김(끝난 지 1초 안이면 촬영 화면이 이어받음)
     if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
-      mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?xsDur(cur.id):RIG.M[cur.id].d;
+      mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?(cur.win?xsCyc({...XS[cur.id],...cur.win},xsCache[cur.id]?xsCache[cur.id].duration:null)*(cur.win.repeat||XS[cur.id].repeat||1):xsDur(cur.id)):RIG.M[cur.id].d;  // 42: cur.win = 이번 재생만 바꾼 구간 값(걷기)
       if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
       else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now};cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
-    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur.fo!=null?{...XS[id],fadeOut:cur.fo}:XS[id]);
+    if(walk)walkTick(now,id,mt);  // 42: 걷기 = 돌기 각도(cur.win.turn)와 옮긴 거리
+    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur&&cur.win?{...XS[id],...cur.win}:cur&&cur.fo!=null?{...XS[id],fadeOut:cur.fo}:XS[id]);
+    if(walk){md.root.position.x+=walk.x;md.root.position.z+=walk.z}
     if(blend)blendStep(now);
     keepPre();
     if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
@@ -823,12 +826,53 @@ const Stage=(()=>{
   let lastMid=null;const recent=[];  // 최근에 재생한 몸짓(대기 몸짓 제외), 반복 방지용
   // o.quiet: 자막·3D 확대·반복 기록 없이 몸짓만(온보딩 인사) · o.fx: "big" 3D 칸 확대 · "push" 카메라만 다가감 · 없으면 그대로(17-1A, Fx.pick 이 정함) · o.speed: 재생 속도(9-A 선물 몸짓 임시 재생) · o.name: 3D 아래 표시 이름(선물 몸짓 이름)
   // 31(첫 만남 연출): o.at = 몸짓의 이 순간(초)부터 시작 · o.blendMs = 지금 자세에서 섞는 시간(없으면 stage.motionBlendMs) · o.fadeOut = XSTAGE 끝 섞기 시간(초) 이번만 바꿈
+  // ── 걸어 나가기·들어오기(42, data/config.json walk) ──
+  // 걷기 모션(x22)은 제자리 걸음(inPlace). 앞으로 가는 거리는 모션의 골반이 실제로 앞으로 간 만큼(되풀이마다 이어 붙임) × 섞는 무게 × 서아 골반 높이 × strideK
+  // → 걸음 폭과 옮기는 속도가 같아 발이 미끄러지지 않음. 방향은 모션 전체를 세로축으로 돌린 각도(turn: −90 = 화면 왼쪽, +90 = 화면 오른쪽)를 따름. 카메라는 그대로
+  // phase: out 걸어 나가는 중 → off 화면 밖에 서 있음 → in 걸어 들어오는 중 → end 앞으로 돌며 멈춤 → 끝나면 walk = null(제자리)
+  let walk=null;
+  const walkC=()=>(DATA.config&&DATA.config.walk)||{};
+  const smooth=k=>{k=Math.max(0,Math.min(1,k));return k*k*(3-2*k)};
+  // 서아 자리(z=0) 깊이에서 3D 칸의 화면 반폭(m)
+  function viewHalf(){const tn=Math.tan(cam.fov*Math.PI/360);return Math.hypot(cam.position.x,cam.position.z)*tn*cam.aspect}
+  const outX=()=>-(viewHalf()+(walkC().outMargin!=null?walkC().outMargin:.45));
+  // 모션 시간 mt 까지 골반이 앞으로 간 거리(골반 높이 단위, 되풀이마다 이어 붙임)
+  function fwd(d,win,mt){const cyc=xsCyc(win,d.duration),N=d.frames,h=d.hip;
+    const z=tt=>{const f=Math.max(0,Math.min(N-1,tt*d.fps)),i=Math.floor(f),j=Math.min(N-1,i+1),u=f-i;return h[i*3+2]+(h[j*3+2]-h[i*3+2])*u};
+    const k=Math.floor(mt/cyc);return k*(z(win.from+cyc)-z(win.from))+z(win.from+(mt-k*cyc))-z(win.from)}
+  // 모션 무게(xsApply 와 같은 섞기)
+  function wOf(win,d,mt,dur){const C=((DATA.config&&DATA.config.stage)||{}),fi=win.fadeIn||C.xsFadeIn||.5,fo=win.fadeOut||C.xsFadeOut||.7;const x=Math.max(0,Math.min(1,mt/fi,(dur-mt)/fo));return x*x*(3-2*x)}
+  function walkTick(now,id,mt){const W=walkC(),wid=W.motion||"x22",d=xsCache[wid];
+    if(walk.phase==="off"||!d||!md)return;
+    if(!cur||cur.id!==wid){if(walk.phase==="end")walkDone();return}
+    const win={...XS[wid],...cur.win},cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1),hipH=xsAlign(d).hipH*(W.strideK||1);
+    const el=now-walk.t0;
+    if(walk.phase==="out"){const th=-90*smooth(el/(W.turnMs||300));cur.win.turn=th;
+      const U=fwd(d,win,mt),dU=(U-walk.u)*wOf(win,d,mt,dur)*hipH;walk.u=U;const r=th*Math.PI/180;walk.x+=dU*Math.sin(r);walk.z+=dU*Math.cos(r);
+      if(walk.x<=outX()){cur=null;walk.phase="off";walk.z=0;const f=walk.res;walk.res=null;if(f)f()}return}
+    if(walk.phase==="in"){cur.win.turn=90;const U=fwd(d,win,mt),dU=(U-walk.u)*wOf(win,d,mt,dur)*hipH;walk.u=U;walk.x+=dU;
+      const v=(fwd(d,win,cyc)-fwd(d,win,0))/cyc*hipH,endS=(W.endMs||500)/1000;
+      if(walk.x>=-v*endS/2){walk.phase="end";walk.t1=now;walk.xB=walk.x;cur.win.fadeOut=endS;cur.win.repeat=(mt+endS)/cyc}return}  // 남은 거리 = 고르게 느려지며 endMs 동안 가는 거리
+    if(walk.phase==="end"){const k=Math.min(1,(now-walk.t1)/(W.endMs||500));walk.x=walk.xB*(1-(2*k-k*k));walk.z=0;cur.win.turn=90*(1-smooth(k));if(k>=1){walk.x=0}}}
+  function walkDone(){const f=walk&&walk.res;walk=null;if(f)f()}
+  // 걸어 나가기: 화면 왼쪽으로 돌며 걷기 시작 → 3D 칸 밖까지 → 멈춤(화면 밖에 서 있음). 끝나면 풀리는 약속
+  async function walkOut(){const W=walkC(),wid=W.motion||"x22";if(!md||!XS[wid])return false;const d=await xsLoad(wid);if(!d)return false;
+    if(walk&&walk.phase==="off")return true;
+    return new Promise(res=>{walk={phase:"out",x:0,z:0,u:0,t0:performance.now(),res:()=>res(true)};
+      play(wid,{quiet:true,walk:true,win:{repeat:1000,turn:0}})})}
+  // 걸어 들어오기: 3D 칸 왼쪽 밖에서 오른쪽을 향해 걸어 원래 자리로 → 앞을 향해 돌며 기본 자세로
+  async function walkIn(){const W=walkC(),wid=W.motion||"x22";if(!md||!XS[wid]){walk=null;return false}const d=await xsLoad(wid);if(!d){walk=null;return false}
+    return new Promise(res=>{walk={phase:"in",x:outX(),z:0,u:0,t0:performance.now(),res:()=>res(true)};blend=null;
+      play(wid,{quiet:true,walk:true,blendMs:0,win:{repeat:1000,turn:90}})})}
+  // 화면 밖에 바로 세우기(이어하기 때 걸어 들어오기 전) · 제자리로 바로(장면 취소·줄기 바꿈)
+  function walkPlace(where){if(where==="off"){cur=null;walk={phase:"off",x:outX(),z:0,u:0,t0:performance.now(),res:null}}else{const f=walk&&walk.res;walk=null;if(cur&&cur.win)cur=null;if(f)f()}}
   function play(mid,o={}){
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
+    if(walk&&!o.walk)return;  // 42: 걸어 나가고 들어오는 동안(화면 밖에 있는 동안 포함)은 다른 몸짓(시계 보기·인사·답장 몸짓)을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
     blendFromPre(o.blendMs);  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게)
     const sp0=o.speed>0?o.speed:1;
-    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null};
+    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null};
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
@@ -1012,7 +1056,7 @@ const Stage=(()=>{
     if(a&&b)return(a.getWorldPosition(new THREE.Vector3()).y+b.getWorldPosition(new THREE.Vector3()).y)/2;const h=md.bones.Head;return h?h.getWorldPosition(new THREE.Vector3()).y:height()*.93}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1235,7 +1279,7 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;Stage.pano.show(i);$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
-function setScene(i,o){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene]&&!(e.places||[]).includes(i))i=e.scene}  // 40: 에피소드 places 안에서는 장소 이동 허용 · 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
+function setScene(i,o){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene]&&(!(e.places||[]).includes(i)||!EpStage.placeOk(i)))i=e.scene}  // 42: 에피소드 단계로 아직 안 열린 장소(placeFrom)도 막음  // 40: 에피소드 places 안에서는 장소 이동 허용 · 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
   if(!SCENES[i])i=0;S.scene=i;S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);if(SCENES[i].name)story().location=SCENES[i].name;
   // 39: o.fade = 대화 중 장소가 바뀜 → 어두워졌다 밝아지는 전환(Place). 의상도 어두운 동안 바꿈. 돌려주는 약속은 새 장소로 바뀐 순간(밝아지기 시작) 풀림
   if(o&&o.fade)return Place.go(i,{dark:!!o.dark,then:()=>{if(typeof Outfit!=="undefined")Outfit.sync()}});
@@ -1850,7 +1894,7 @@ const Demo=(()=>{
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
     introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cards.close();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
-    FirstMeet.stop();View.rest(true);Stage.play(IDLE);
+    FirstMeet.stop();EpScene.stop();View.rest(true);Stage.play(IDLE);
   }
   function refresh(){save();renderTop();renderBond();
     if(curTab==="album")renderAlbum();else if(curTab==="my")renderMy();else if(curTab==="home")renderHome();else if(S.room)renderLog();else renderList();
@@ -2209,6 +2253,7 @@ function startStory(id){
   if(!fresh&&chatOf("seoa").length){return}
   setScene(sc0,{fade:true,dark:true});  // 39: 대화방이 어두운 채 열리고 에피소드 장소로 밝아짐Outfit.sync();Stage.setFace(st.face||"soft");
   addMsg("sys",UI("home.storyStart",{name:st.name}),null,"seoa");
+  if(st.stageScenes&&st.stageScenes["1"]){setTimeout(()=>EpScene.run(1),300);return}  // 42: 단계가 있는 에피소드는 1단계 장면이 시작 장면
   if(st.opening&&st.opening.paragraphs){setTimeout(()=>runOpening(st.opening,()=>{const t=chatOf("seoa");const last=t[t.length-1];if(last)last.tag=UI("home.storyTag",{name:MNAME[st.m]});renderLog()}),300);return}
   setTimeout(()=>{addMsg("c",st.line,{tag:UI("home.storyTag",{name:MNAME[st.m]})});react({m:st.m,f:st.f,t:st.line},UI("home.storySceneTag"))},600);
 }
@@ -2313,6 +2358,7 @@ function openRoom(cid){
   placeStage();renderLog();renderUnread();
   if(cid==="seoa")Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
+  if(cid==="seoa")EpScene.resume();  // 42: 에피소드 단계 장면이 끊겼으면 그 자리부터
   if(cid==="seoa")SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
 }
 // 특별 에피소드 첫 장면(16): 문단을 하나씩, 정해진 문단에서 몸짓·표정·장소. 원고 data/episodes.json special[].opening
@@ -2386,8 +2432,75 @@ const EpStage={
   // /judge 에 보낼 상태: 본 이야기 상태를 바탕으로 단계·호감·플래그만 에피소드 값(본 이야기 사건·출발 일수는 빼고)
   judgeState(){const s=this.st();return{...story(),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},
   // 시연 패널: 단계 n 으로(호감 = 그 단계 기준, 플래그·신호 비움). 4단계 이상이면 자취방이 열리고, dressFrom 이상이면 자취방 옷
+  // 자취방 옷(outfitByScene)을 입을 때인지: 장면에서 갈아입은 뒤(dressed) 또는 dressFrom 단계부터
+  dressed(){const s=this.st(),C=this.cfg();return !s||!!s.dressed||this.n()>=(C.dressFrom||5)},
   setStage(n){const s=this.st(),C=this.cfg();if(!s)return;n=Math.max(1,Math.min(6,n));s.stage=n;s.aff=C.affectionAt[n-1]||0;s.flags=[];s.miss=0;s.signaled=[];s.dressed=n>=(C.dressFrom||5);s.play=null;save()}
 };
+// 42: 에피소드 단계 장면(data/episodes.json stageScenes). 단계가 오르면 그 단계 장면을 오프닝처럼 문단 간격을 두고 보여 주고, 끝나면 자유 대화.
+// 1단계 장면 = 에피소드 시작 장면. 진행 중인 장면은 저장(ep.play = {n 단계, k 다음에 보일 문단, pend 끝나기 전 끊긴 문단의 걷기})해서 다시 들어오면 그 자리부터 이어 감.
+// cue.walk: out = 걸어서 화면 밖으로(끝나면 dress 면 outfitByScene 옷으로 바꾸고 모델을 기다림) · in = 걸어서 화면 안으로. 3D 가 안 보이면 걷지 않고 옷만 바꿈
+const EpScene=(()=>{
+  let tok=0,running=false,queue=[];
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const cfgOf=n=>{const e=Thread.ep();return e&&e.stageScenes&&e.stageScenes[n]||null};
+  const W=()=>(DATA.config&&DATA.config.walk)||{};
+  const vis=()=>{const st=$("#stage");return S.room==="seoa"&&curTab==="chat"&&!Cam.isOpen()&&!Stage.isLent()&&st&&st.style.display!=="none"&&st.getBoundingClientRect().height>40};
+  // 몸짓(배열이면 앞 몸짓이 거의 끝날 때 다음 몸짓)
+  function motion(m,alive){const L=Array.isArray(m)?m:[m];let at=0;
+    L.forEach((id,i)=>{if(!i)Stage.play(id);else setTimeout(()=>{if(alive()&&vis())Stage.play(id)},at);at+=Math.max(600,Stage.dur(id)*1000*.9)})}
+  function cue(c,t,alive){if(!vis())return;if(c.motion)motion(c.motion,alive);if(c.face){Stage.setFace(c.face);faceReset()}const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
+  // 옷 바꾸고 그 모델이 올라올 때까지(최대 modelWaitMs)
+  async function dress(){const s=EpStage.st();if(s&&!s.dressed){s.dressed=true;save()}Outfit.sync();const k=Outfit.want(),t0=performance.now();
+    while(Stage.outfitNow()!==k&&performance.now()-t0<(W().modelWaitMs||8000))await sleep(100)}
+  async function walkOut(c,alive){let ok=false;
+    if(vis())ok=await Stage.walk.out();
+    const t0=performance.now();  // 화면 밖에 나간 순간부터 offMinMs
+    if(!alive())return;if(c.dress)await dress();
+    if(ok){const left=(W().offMinMs||900)-(performance.now()-t0);if(left>0)await sleep(left)}}
+  async function walkIn(alive){const s=EpStage.st();if(s&&!s.dressed)await dress();if(!alive())return;
+    if(!vis()){Stage.walk.place("in");return}
+    if(Stage.walk.phase()!=="off")Stage.walk.place("off");
+    const ok=await Stage.walk.in();if(!ok)Stage.walk.place("in")}
+  // 단계 n 장면을 처음부터(o 가 있으면 저장된 자리부터)
+  async function run(n,o){const sc=cfgOf(n);if(!sc)return;
+    if(running){if(!o)queue.push(n);return}
+    const my=++tok,th=Thread.cur(),ep=EpStage.st(),alive=()=>my===tok&&Thread.cur()===th;
+    const P=sc.paragraphs||[],gap=sc.intervalMs||1900,cueAt=k=>(sc.cues||[]).find(c=>c.at===k)||{};
+    running=true;busy=true;renderLog();
+    ep.play=o?{n,k:o.k||0,pend:o.pend!=null?o.pend:null}:{n,k:0,pend:null};save();
+    if(!o&&sc.place!=null&&S.scene!==sc.place&&!(cueAt(0).scene!=null)){await setScene(sc.place,{fade:true});if(!alive())return}
+    else if(o)Outfit.sync();
+    await sleep(400);if(!alive())return;
+    // 끊긴 걷기 마저(문단은 이미 보였음)
+    if(ep.play.pend!=null){const c=cueAt(ep.play.pend);if(c.walk==="out")await walkOut(c,alive);else if(c.walk==="in")await walkIn(alive);if(!alive())return;ep.play.pend=null;save()}
+    for(let k=ep.play.k;k<P.length;k++){
+      const c=cueAt(k),t=P[k];
+      if(c.walk==="in"&&vis()&&Stage.walk.phase()!=="off")Stage.walk.place("off");  // 이어하기 등으로 화면 안에 있으면 먼저 화면 밖에
+      addMsg("c",t,{intro:true},"seoa");ep.play.k=k+1;ep.play.pend=c.walk?k:null;save();renderLog();
+      if(c.scene!=null)setScene(c.scene,{fade:true});
+      cue(c,t,alive);
+      if(c.walk==="out"){await walkOut(c,alive);if(!alive())return;ep.play.pend=null;save();continue}
+      if(c.walk==="in"){await walkIn(alive);if(!alive())return;ep.play.pend=null;save();if(k<P.length-1)await sleep(gap);continue}
+      if(k<P.length-1){await sleep(gap);if(!alive())return}
+    }
+    running=false;busy=false;ep.play=null;(ep.seen||(ep.seen=[])).includes(n)||ep.seen.push(n);save();renderLog();
+    if(sc.card)award(sc.card);
+    const nx=queue.shift();if(nx)run(nx)}
+  // 장면이 끝나면 주는 카드(42-C)
+  function award(id){}
+  // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
+  function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in")}
+  // 다시 들어왔을 때 끊긴 장면 이어 가기
+  function resume(){const ep=EpStage.on()&&EpStage.st();if(!running&&ep&&ep.play)run(ep.play.n,ep.play)}
+  // 오래 머물 때 신호 한 줄(그 단계에서 한 번)
+  function maybeSignal(){const s=EpStage.st(),C=EpStage.cfg();if(!s||running)return;const n=EpStage.n(),sc=cfgOf(n),g=sc&&sc.signal;
+    if(!g||!g.text||(s.signaled||[]).includes(n)||(s.miss||0)<(C.signalAfterJudges||3))return;
+    (s.signaled||(s.signaled=[])).push(n);save();addMsg("c",g.text,{intro:true,signal:n},"seoa");renderLog();cue(g,g.text,()=>true)}
+  // 시연 패널에서 단계를 바꾼 뒤: 갈 수 없는 장소면 그 단계 장면 장소로, 옷 맞춤
+  function fit(){stop();const s=EpStage.st();if(s)s.play=null;const e=Thread.ep(),sc=cfgOf(EpStage.n());
+    if(!EpStage.placeOk(S.scene))setScene(sc&&sc.place!=null?sc.place:e.scene,{fade:true});else Outfit.sync();save()}
+  return{run,stop,resume,maybeSignal,fit,stageUp:n=>run(n),isOn:()=>running,award:id=>award(id)};
+})();
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)
 function runIntro(){
@@ -2437,7 +2550,8 @@ const IdleWatch=(()=>{
     if($("#inp").value.length)return "typing";
     if(document.activeElement===$("#inp"))return "focus";  // 33-1: 입력창 포커스(키보드) 중엔 처음부터
     if(waiting||busy)return "waiting";
-    if(Greet.pending())return "greet";  // 34: 다시 들어올 때 인사가 끝난 뒤부터 셈
+    if(Greet.pending())return "greet";
+    if(Stage.walk.busy()||EpScene.isOn())return "walk";  // 42: 걸어 나가고 들어오는 동안·단계 장면 동안  // 34: 다시 들어올 때 인사가 끝난 뒤부터 셈
     if(Stage.recentMotion(1200))return "motion";
     if(View.isBig()||View.isPushed()||View.moving())return "zoom";
     if(SeoaPhoto.isSending())return "photo";
@@ -2489,7 +2603,7 @@ const Greet=(()=>{
   // 들어올 때 인사하지 않는 이유(없으면 "")
   function why(){const c=C();
     if(curStage()<(c.minStage!=null?c.minStage:5))return "stage";
-    if(!S.introDone||busy)return "intro";if(FirstMeet.isOn())return "firstMeet";if(Thread.ep())return "episode";
+    if(!S.introDone||busy)return "intro";if(FirstMeet.isOn())return "firstMeet";if(Thread.ep())return "episode";if(Stage.walk.busy())return "walk";
     if(typeof Scenes!=="undefined"&&Scenes.cur())return "scene";
     const lt=lastTalk();if(!lt)return "new";if(Date.now()-lt<hours()*3600e3)return "recent";
     if(!pick())return "motion";return ""}

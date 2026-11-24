@@ -1,5 +1,5 @@
 {
-  "_설명": "홈 에피소드 목록(8-A). basic = 캐릭터마다 기본 에피소드(제목·상황 한 줄, 누르면 그 캐릭터 대화방). special = 특별 에피소드(예전 index.html STORIES). char = 캐릭터 id, price = 💎(0이면 무료), scene = 서아 장소 번호(data/seoa_story.json locations: 0 바 1층, 1 바 2층, 2 네온 골목, 3 비 내리는 골목, 4 바 옥상, 5 드라큘라의 성, 6 크리스마스 거리), m = 전용 모션, f = 표정, line = 첫 대사. 원고 docs/drafts/8-홈-문구.md · outfit = 에피소드 전용 의상(data/config.json outfits, 14단계) · places = 에피소드 안에서 오갈 수 있는 장소, outfitByScene = 장소별 의상, placeWords = 그 장소로 옮기는 말(정규식, 40단계) · new: true = 홈 특별 에피소드 줄 맨 앞 + NEW 표시(23) · stage = 에피소드만의 관계 단계(42, 있으면 그 에피소드 안 판정은 에피소드 호감에만 쌓임): affectionAt 단계 기준 호감, cap 단계별 호감 상한(다음 기준 − 1, 한 번에 한 단계만), needFlags 그 단계로 오르는 데 필요한 판정 플래그(하나라도), signalAfterJudges 단계를 못 올린 판정이 이만큼 이어지면 그 단계 신호 한 번, placeFrom 장소 → 그 장소가 열리는 단계, dressFrom 이 단계부터는 처음부터 outfitByScene 옷(그 전에는 장면에서 갈아입은 뒤에만), noServerGain 서버 v1·서버 없음일 때 판정 대신 judgeEvery 턴마다 더하는 호감",
+  "_설명": "홈 에피소드 목록(8-A). basic = 캐릭터마다 기본 에피소드(제목·상황 한 줄, 누르면 그 캐릭터 대화방). special = 특별 에피소드(예전 index.html STORIES). char = 캐릭터 id, price = 💎(0이면 무료), scene = 서아 장소 번호(data/seoa_story.json locations: 0 바 1층, 1 바 2층, 2 네온 골목, 3 비 내리는 골목, 4 바 옥상, 5 드라큘라의 성, 6 크리스마스 거리), m = 전용 모션, f = 표정, line = 첫 대사. 원고 docs/drafts/8-홈-문구.md · outfit = 에피소드 전용 의상(data/config.json outfits, 14단계) · places = 에피소드 안에서 오갈 수 있는 장소, outfitByScene = 장소별 의상, placeWords = 그 장소로 옮기는 말(정규식, 40단계) · new: true = 홈 특별 에피소드 줄 맨 앞 + NEW 표시(23) · stage = 에피소드만의 관계 단계(42, 있으면 그 에피소드 안 판정은 에피소드 호감에만 쌓임): affectionAt 단계 기준 호감, cap 단계별 호감 상한(다음 기준 − 1, 한 번에 한 단계만), needFlags 그 단계로 오르는 데 필요한 판정 플래그(하나라도), signalAfterJudges 단계를 못 올린 판정이 이만큼 이어지면 그 단계 신호 한 번, placeFrom 장소 → 그 장소가 열리는 단계, dressFrom 이 단계부터는 처음부터 outfitByScene 옷(그 전에는 장면에서 갈아입은 뒤에만), noServerGain 서버 v1·서버 없음일 때 판정 대신 judgeEvery 턴마다 더하는 호감 · stageScenes = 단계별 장면(42, 원고 docs/drafts/42-크리스마스-에피소드-원고.md 2절): 단계 → place 시작 장소, intervalMs 문단 간격, paragraphs 문단, cues(at 문단 번호, motion 몸짓(배열이면 차례로), face 표정, scene 장소 이동, walk out 걸어서 화면 밖으로 · in 걸어서 화면 안으로, dress 화면 밖에 있는 동안 outfitByScene 옷으로), signal 오래 머물 때 한 번 넣는 서아 지문, card 장면이 끝나면 주는 카드(data/collection.json id). 1단계 장면이 에피소드 시작 장면(opening 대신)",
   "basic": {
     "seoa":  {"title":"라스트 오더","situation":"새벽 2시, 문 닫을 시간. 2주째 같은 자리에 앉는 손님이, 오늘은 손등에 피를 묻히고 왔다."},
     "doyun": {"title":"막아서는 사람","situation":"골목에서 시비가 붙은 순간, 낯선 남자가 말없이 당신 앞을 막아선다."},
@@ -21,11 +21,88 @@
       "outfit": "xmas",
       "face": "soft",
       "line": "…지금은 아무도 안 봐. 이리 와.",
-      "opening": {"intervalMs":1900,"cues":[{"at":0,"face":"soft"},{"at":1,"motion":"c02","face":"soft"},{"at":2,"motion":"m15","face":"fun"},{"at":3,"motion":"m05","face":"soft"},{"at":4,"motion":"m11","face":"soft"},{"at":5,"motion":"m12","face":"fun"},{"at":6,"motion":"m24","face":"soft"},{"at":7,"face":"soft"},{"at":8,"motion":"m11","face":"fun"},{"at":9,"scene":7,"face":"soft"},{"at":10,"motion":"m05","face":"soft"},{"at":11,"motion":"m24","face":"soft"}],"paragraphs":["*크리스마스 이브, 밤 11시. 도시 전체가 정전됐다. 네온이 모두 꺼진 거리에서, 단 한 곳만 비상 전력으로 빛나고 있다.*","*커다란 트리 아래, 하얀 니트 차림의 서아가 머리에 앉은 눈을 털어 낸다. 작전복이 아닌 서아는 처음이다.*","\"…늦었어.\"","\"뭘 봐. 쉬는 날이야.\"","*서아가 장갑 낀 손을 내민다.*","\"한 바퀴만 돌자. …지금은 아무도 안 봐.\"","\"오늘은, 조금 솔직해도 돼.\"","*멀리서 건물들이 하나씩 다시 불을 켠다. 불빛이 블록을 넘어 이쪽으로 다가온다.*","\"…카메라 켜지기 전에 숨자. 우리 집, 여기서 두 블록이야.\"","*작은 자취방. 창밖 도시는 아직 어둡고, 방 안엔 어설프게 걸린 전구 한 줄뿐이다. 서아가 니트를 벗어 의자에 건다.*","\"…너 온다길래 걸어 둔 거야. 웃지 마.\"","\"여긴 아무도 몰라. 그러니까 오늘은, 끝까지 솔직해도 돼.\""]},
       "places": [6,7],
       "outfitByScene": {"7":"xmasRoom"},
       "placeWords": {"6":"나가|밖으로|밖에|거리로|거리에|트리|산책|걷자|걸으러","7":"집에|집으로|너네 ?집|네 ?집|서아 ?집|우리 ?집|방으로|방에|자취방|들어가|안으로|숨자|숨으러"},
-      "stage": {"affectionAt":[0,8,18,30,42,55],"cap":[7,17,29,41,54,100],"needFlags":{"6":["sincere","pursue","comfort"]},"signalAfterJudges":3,"placeFrom":{"7":4},"dressFrom":5,"noServerGain":4}
+      "stage": {"affectionAt":[0,8,18,30,42,55],"cap":[7,17,29,41,54,100],"needFlags":{"6":["sincere","pursue","comfort"]},"signalAfterJudges":3,"placeFrom":{"7":4},"dressFrom":5,"noServerGain":4},
+      "stageScenes": {
+        "1": {
+          "place": 6,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*크리스마스 이브, 밤 11시. 도시 전체가 정전됐다. 네온이 모두 꺼진 거리에서, 커다란 트리 하나만 비상 전력으로 빛나고 있다.*",
+            "*트리 아래, 하얀 니트 차림의 서아가 머리에 앉은 눈을 털어 낸다. 작전복이 아닌 서아는 처음이다.*",
+            "\"…늦었어.\"",
+            "\"뭘 봐. 쉬는 날이야.\""
+          ],
+          "cues": [{"at":0,"face":"soft"},{"at":1,"motion":"c02","face":"soft"},{"at":2,"motion":"m07","face":"neutral"},{"at":3,"motion":"m05","face":"soft"}],
+          "signal": {"text":"*서아가 장갑 낀 손을 비빈다.* \"…춥다. 걸을 거야, 말 거야.\""}
+        },
+        "2": {
+          "place": 6,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*서아가 먼저 걷기 시작한다. 나란히 걷는 동안, 장갑 낀 손끝이 자꾸 꼼지락거린다.*",
+            "*눈사람 앞에서 서아가 멈춘다. 비뚤어진 목도리를 고쳐 매 준다.*",
+            "\"얘도 혼자네.\""
+          ],
+          "cues": [{"at":0,"motion":"x15","face":"soft"},{"at":1,"motion":"m09","face":"fun"},{"at":2,"motion":"m01","face":"fun"}],
+          "signal": {"text":"*손끝이 또 꼼지락거린다. 서아는 앞만 본다.* \"…손 시려.\""}
+        },
+        "3": {
+          "place": 6,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*불 꺼진 카페 창 안에서 촛불 하나가 흔들린다. 서아가 한참 그걸 본다.*",
+            "\"크리스마스, 원래 일하는 날이었어.\"",
+            "\"…오늘은 빼 달라고 했어.\""
+          ],
+          "cues": [{"at":0,"face":"soft"},{"at":1,"motion":"m04","face":"soft"},{"at":2,"motion":"m05","face":"shy"}],
+          "signal": {"text":"\"…안 물어봐? 왜 뺐는지.\""}
+        },
+        "4": {
+          "place": 6,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*멀리서 건물들이 하나씩 다시 불을 켠다. 불빛이 블록을 넘어 이쪽으로 다가온다.*",
+            "\"…카메라 켜지기 전에 숨자.\"",
+            "\"우리 집, 여기서 두 블록이야.\"",
+            "*작은 자취방. 창밖 도시는 아직 어둡다. 촛불 몇 개와 창가의 작은 트리만 불을 밝히고 있다.*",
+            "*서아가 탁자 위 머그잔 하나를 집어 건넨다.* \"목 말라? …마셔.\"",
+            "\"잠깐 기다려 봐.\"",
+            "*서아가 방 안쪽으로 걸어 들어간다.*",
+            "*잠시 뒤, 편한 옷으로 갈아입고 나온다. 묶은 머리가 목덜미에 닿는다.*"
+          ],
+          "cues": [{"at":0,"face":"soft"},{"at":1,"motion":"m12","face":"soft"},{"at":2,"motion":"m11","face":"soft"},{"at":3,"scene":7,"face":"soft"},{"at":4,"motion":"m09","face":"soft"},{"at":5,"face":"soft"},{"at":6,"walk":"out","dress":true},{"at":7,"walk":"in","face":"soft"}],
+          "signal": {"text":"\"…거기 서 있을 거야? 앉아.\""}
+        },
+        "5": {
+          "place": 7,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*서아가 소파 옆에 앉는다. 어깨가 닿을 만큼.* \"…여기, 나 말고 들어온 사람 처음이야.\"",
+            "*창밖으로 도시의 불이 한 블록씩 되살아난다. 방 안까지 네온이 스민다.*",
+            "*서아가 몸을 뗀다.* \"…너무 빨라, 이거.\"",
+            "\"이러다 또 나만 다쳐.\"",
+            "*손끝이 칼라를 만지작거린다.* \"믿는 순간, 등 뒤가 비거든.\"",
+            "*서아가 촛불 하나를 끈다. 시선은 창밖에 둔 채.*"
+          ],
+          "cues": [{"at":0,"motion":"m24","face":"shy"},{"at":1,"face":"neutral"},{"at":2,"motion":"m10","face":"neutral"},{"at":3,"motion":"m04","face":"sorrow"},{"at":4,"motion":"c01","face":"neutral"},{"at":5,"motion":"m07","face":"neutral"}],
+          "signal": {"text":"*서아가 머그잔을 내려다본다.* \"…차 식었어.\""}
+        },
+        "6": {
+          "place": 7,
+          "intervalMs": 1900,
+          "paragraphs": [
+            "*서아가 붙잡힌 손을 한참 내려다본다.* \"…한 번만이야. 믿어 보는 거.\"",
+            "*멀리서 자정 종소리가 울린다.*",
+            "*이번엔 서아가 먼저 다가온다. 숨결이 닿을 만큼.*",
+            "\"…메리 크리스마스, 사장님.\"",
+            "*서아가 트리 밑 작은 상자를 발끝으로 밀어 준다.* \"그건, 이따가 열어.\""
+          ],
+          "cues": [{"at":0,"motion":"c01","face":"soft"},{"at":1,"face":"soft"},{"at":2,"motion":["m12","c05"],"face":"shy"},{"at":3,"face":"soft"},{"at":4,"motion":"m09","face":"fun"}]
+        }
+      }
     },
     {"id":"s3","char":"seoa","name":"할로윈, 드라큘라의 밤","desc":"할로윈 밤, 고성의 가면무도회. 드라큘라로 변장한 서아가 당신의 팔짱을 낀다.","price":150,"scene":5,"m":"m20","f":"fun","outfit":"dracula","face":"soft","line":"오늘 밤은, 옆에서 떨어지지 마.","opening":{"intervalMs":1900,"cues":[{"at":0,"face":"soft"},{"at":1,"motion":"m11","face":"fun"},{"at":2,"motion":"m09","face":"soft"},{"at":3,"motion":"m05","face":"soft"},{"at":4,"motion":"m12","face":"fun"},{"at":5,"motion":"m20","face":"joy"}],"paragraphs":["*할로윈 밤. 도시 외곽의 오래된 고성에서 가면무도회가 열린다. 오늘 밤 이곳 어딘가에, 서아가 노리는 '물건'이 있다.*","*샹들리에 아래, 양갈래로 묶은 보랏빛 머리와 검은 드레스. 송곳니 장식을 단 서아가 당신의 팔짱을 낀다.* \"표정 풀어. 오늘 너는 드라큘라 백작님의 손님이야.\"","*지나가는 웨이터의 쟁반에서 붉은 잔 두 개를 집어 하나를 건넨다.*","\"…작전용이야. 어울린다는 말은 하지 마.\"","*서아가 당신 목덜미 가까이 얼굴을 기울였다가, 코앞에서 멈춘다.*","\"놀랐어? …오늘 밤은, 옆에서 떨어지지 마.\""]}}
   ]
