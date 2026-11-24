@@ -7,16 +7,16 @@
   
   "_countAt": "서버 v1·서버 없음: 대화 횟수로 단계를 올리는 기준 (기존 5단계 0·4·10·18·30을 6단계로 나눔)",
   "countAt": [0, 4, 9, 15, 22, 30],
-  "_locations": "location 값은 서버와 1:1. short = 무빙 카드 아래 띠에 쓰는 짧은 이름(38, 없으면 name). temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체 (원래 파일명: bg_seoa_room.jpg). 15단계: 바 1층 전용 배경(bg_seoa_bar.jpg) 들어옴. episode=true 는 특별 에피소드 전용 장소(5 드라큘라의 성, 6 크리스마스 거리) — 서버 장소 목록에는 없음. 30단계: pano = 360도 배경 그림(가로:세로 2:1, 수평선이 그림 세로 한가운데). 있으면 평평한 img 대신 3D 장면 안의 구에 입혀 배경으로 쓰고(img 는 불러오는 동안·실패 때 그대로 보임), 없으면 지금처럼 img. panoYaw = 그림 가운데가 서아 바로 뒤에 오는 것을 0으로, 구를 돌리는 각도(도, + = 위에서 볼 때 시계 반대 방향). panoBright = 그림 밝기 곱(1 = 그대로, 배경 어둡게 data/look.json background 다음에 곱함)",
+  "_locations": "location 값은 서버와 1:1. short = 무빙 카드 아래 띠에 쓰는 짧은 이름(38, 없으면 name). temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체(41단계부터 쓰는 곳 없음). 15단계: 바 1층 전용 배경(bg_seoa_bar.jpg) 들어옴. episode=true 는 특별 에피소드 전용 장소(5 드라큘라의 성, 6 크리스마스 거리, 7 서아의 자취방) — 서버 장소 목록에는 없음. 30단계: pano = 360도 배경 그림(가로:세로 2:1, 수평선이 그림 세로 한가운데). 있으면 평평한 img 대신 3D 장면 안의 구에 입혀 배경으로 쓰고(img 는 불러오는 동안·실패 때 그대로 보임), 없으면 지금처럼 img. panoYaw = 그림 가운데가 서아 바로 뒤에 오는 것을 0으로, 구를 돌리는 각도(도, + = 위에서 볼 때 시계 반대 방향). panoBright = 그림 밝기 곱(1 = 그대로, 배경 어둡게 data/look.json background 다음에 곱함). 41단계: 8곳 모두 pano. 바 2층·자취방의 img 는 그 360도 그림 가운데를 1600×900 으로 자른 것",
   "locations": [
     { "name": "바 '라스트 오더' 1층", "short": "바 1층", "img": "bg_seoa_bar.jpg", "pano": "pano_seoa_bar.webp", "panoYaw": 0, "panoBright": 1 },
-    { "name": "바 '라스트 오더' 2층", "short": "바 2층", "img": "bg_seoa_roof.jpg", "temp": true },
+    { "name": "바 '라스트 오더' 2층", "short": "바 2층", "img": "bg_seoa_room.jpg", "pano": "pano_seoa_room.webp", "panoYaw": 0, "panoBright": 1 },
     { "name": "네온 골목", "img": "bg_seoa_street.jpg", "pano": "pano_seoa_street.webp", "panoYaw": 0, "panoBright": 1 },
-    { "name": "비 내리는 골목", "img": "bg_seoa_rain.jpg" },
-    { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg" },
-    { "name": "드라큘라의 성", "img": "bg_seoa_castle.jpg", "episode": true },
-    { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "episode": true },
-    { "name": "서아의 자취방", "img": "bg_seoa_roof.jpg", "temp": true, "episode": true }
+    { "name": "비 내리는 골목", "img": "bg_seoa_rain.jpg", "pano": "pano_seoa_rain.webp", "panoYaw": 0, "panoBright": 1 },
+    { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg", "pano": "pano_seoa_rooftop.webp", "panoYaw": 0, "panoBright": 0.9 },
+    { "name": "드라큘라의 성", "img": "bg_seoa_castle.jpg", "pano": "pano_seoa_castle.webp", "panoYaw": 0, "panoBright": 1.1, "episode": true },
+    { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "pano": "pano_seoa_xmas.webp", "panoYaw": 0, "panoBright": 1, "episode": true },
+    { "name": "서아의 자취방", "img": "bg_seoa_xmas_room.jpg", "pano": "pano_seoa_xmas_room.webp", "panoYaw": 0, "panoBright": 1.15, "episode": true }
   ],
   "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
   "ban": ["m14", "m16", "m22"],

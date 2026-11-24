@@ -934,9 +934,10 @@ const Stage=(()=>{
   function panoShow(i,ms){panoWant=panoOf(i)?i:-1;if(panoWant>=0&&(!panoHold||borrowed||panoMesh[panoWant]))panoMeshOf(panoWant);
     if(ms===0)for(const k in panoMesh){const m=panoMesh[k].mesh;if(m)m.material.opacity=+k===panoWant?1:0;if(m)m.visible=+k===panoWant}}
   // 매 프레임: 원하는 구는 진하게, 나머지는 옅게. 다 사라진 구는 그리지 않음
+  // 41: 이미 목표 투명도면 그대로(전에는 1일 때도 줄였다가 다음 프레임에 다시 올려, 구가 매 프레임 살짝 비쳐 깜빡임)
   function panoTick(now){const dt=panoLast?Math.min(.25,(now-panoLast)/1000):0;panoLast=now;const st=dt*1000/(panoC().fadeMs||600);
     for(const k in panoMesh){const m=panoMesh[k].mesh;if(!m)continue;const o=m.material.opacity,goal=+k===panoWant?1:0;
-      m.material.opacity=goal>o?Math.min(1,o+st):Math.max(0,o-st);m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}
+      m.material.opacity=goal>o?Math.min(1,o+st):goal<o?Math.max(0,o-st):o;m.visible=m.material.opacity>0;m.material.transparent=m.material.opacity<1}
     panoPrune()}
   // 30-1: 360도 그림은 지금 보이는 장소(빌린 칸이면 그 장소 + 대화방 장소)와 사진·카드 그림을 만드는 중인 장소 것만 메모리에 둔다.
   // 나머지는 다 사라진 뒤(투명도 0) 구·재질·텍스처를 내려놓음. 다시 오면 다시 불러옴(그동안은 평평한 배경 그림)

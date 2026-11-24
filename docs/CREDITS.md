@@ -30,6 +30,8 @@
 | --- | --- | --- |
 | `bg_seoa_street.jpg`, `bg_seoa_rooftop.jpg`, `bg_seoa_alley.jpg`, `bg_seoa_rain.jpg`, `bg_seoa_roof.jpg` | 서아 배경 | **확인 필요** |
 | `pano_seoa_bar.webp`, `pano_seoa_street.webp` | 360도 배경 (30단계, 바 1층·네온 골목) | AI 이미지 생성 후 확대(Upscayl 4x)·수평선 보정. 그림체 참고 `bg_seoa_street.jpg`·`bg_seoa_rain.jpg`·`bg_seoa_bar.jpg`. 4096×2048 webp |
+| `pano_seoa_room.webp`, `pano_seoa_rain.webp`, `pano_seoa_rooftop.webp`, `pano_seoa_castle.webp`, `pano_seoa_xmas.webp`, `pano_seoa_xmas_room.webp` | 360도 배경 (41단계, 바 2층·비 내리는 골목·바 옥상·드라큘라의 성·크리스마스 거리·서아의 자취방) | 기획자가 다운로드 폴더로 준 것(2026-11-25). 이미 4096×2048 webp 로 다듬어져 있어 그대로 씀. 만든 방법 **확인 필요**(30단계 두 장과 같은 방식으로 보임) |
+| `bg_seoa_room.jpg`, `bg_seoa_xmas_room.jpg` | 바 2층·서아의 자취방 평평한 배경(41단계, 360도 그림을 불러오는 동안·실패 때, 홈 썸네일 등) | 위 `pano_seoa_room.webp`·`pano_seoa_xmas_room.webp` 의 가운데를 1600×900 으로 자른 것 |
 | `bg_jihu_class.jpg`, `bg_jihu_hall.jpg`, `bg_jihu_night.jpg` | 지후 배경 (`v1.html`) | **확인 필요** |
 | `card_doyun.jpg`, `card_haram.jpg`, `card_ijun.jpg`, `card_jihu.jpg`, `card_seoa.jpg` | 캐릭터 카드 | **확인 필요** |
 | `icons/gift_button.png`, `icons/gift_coffee.png`, `icons/gift_flower.png`, `icons/gift_ramen.png`, `icons/gift_ring.png` | 선물 버튼·아이콘 | 커밋 `040b5ed`「받은 디자인 이미지」. 만든 사람 **확인 필요** |
