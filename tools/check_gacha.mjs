@@ -13,8 +13,10 @@ let bad = 0;
 const fail = m => { bad++; console.log("  ✗ " + m); };
 
 console.log("## 데이터 검사\n");
-const chat = col.items.filter(x => x.source === "chat"), gift = col.items.filter(x => x.source === "gift");
-console.log(`- 도감 칸: 대화 ${chat.length} + 선물 ${gift.length} = ${col.items.length}`);
+// 47: 보류(hold) 칸·연출(only) 칸은 unlock 비교에서 뺌. 선물 몸짓 수는 보류 포함 12
+const chat = col.items.filter(x => x.source === "chat" && !x.hold && !x.only), gift = col.items.filter(x => x.source === "gift");
+const held = col.items.filter(x => x.hold);
+console.log(`- 도감 칸: 대화 ${chat.length} + 연출 ${col.items.filter(x => x.only).length} + 선물 ${gift.length} = ${col.items.length} (그중 보류 ${held.map(x => x.id).join("·") || "없음"}, 보이는 칸 ${col.items.length - held.length})`);
 const ids = col.items.map(x => x.id);
 if (new Set(ids).size !== ids.length) fail("id 중복");
 const want = new Set();
@@ -31,7 +33,7 @@ for (const src of ["chat", "gift", "all"]) {
 for (const x of col.items) if (!G.ORDER.includes(x.grade)) fail(`${x.id} 등급 이상: ${x.grade}`);
 console.log("\n| 선물 | 기분 맞춤 | 확률(일반/희귀/특별) | 합 | 기분 맞춤 적용 | 합 |\n|---|---|---|---|---|---|");
 for (const g of gifts.list) {
-  const a = G.odds(g, false, gifts.moodBonus), b = G.odds(g, true, gifts.moodBonus);
+  const a = G.odds(g, false, gifts.moodBonus, col.items), b = G.odds(g, true, gifts.moodBonus, col.items);
   const sa = G.ORDER.reduce((s, k) => s + a[k], 0), sb = G.ORDER.reduce((s, k) => s + b[k], 0);
   console.log(`| ${g.e} ${g.name} | ${g.rec} | ${G.ORDER.map(k => a[k]).join(" / ")} | ${sa} | ${G.ORDER.map(k => b[k]).join(" / ")} | ${sb} |`);
   if (sa !== 100) fail(`${g.name} 확률 합 ${sa}`);
@@ -48,7 +50,7 @@ console.log("| 선물 | 조건 | 확률(%) 일반/희귀/특별 | 결과(%) 일�
 for (const g of gifts.list) {
   for (const mode of ["천장 끔", "천장 켬", "기분 맞춤 + 천장 끔", "기분 맞춤 + 천장 켬"]) {
     const matched = mode.startsWith("기분"), pityOn = mode.endsWith("켬");
-    const o = G.odds(g, matched, gifts.moodBonus);
+    const o = G.odds(g, matched, gifts.moodBonus, col.items);
     const cnt = { common: 0, rare: 0, special: 0 };
     let left = gifts.pity.count, run = 0, maxRun = 0, forced = 0;
     for (let i = 0; i < N; i++) {
@@ -57,6 +59,7 @@ for (const g of gifts.list) {
       cnt[gr]++;
       const it = G.pickItem(col.items, gr, rnd);
       if (!it || it.grade !== gr) fail(`${g.name} ${gr} 몸짓을 못 고름`);
+      if (it && it.hold) fail(`${g.name} 보류 몸짓 ${it.id} 이 나옴`);
       if (pityOn) left = G.nextPity(gr, left, gifts.pity);
       run = gr === "common" ? run + 1 : 0; maxRun = Math.max(maxRun, run);
     }
@@ -71,11 +74,16 @@ for (const g of gifts.list) {
   let left = gifts.pity.count, run = 0, maxRun = 0;
   for (let i = 0; i < N * 4; i++) {
     const g = gifts.list[Math.floor(rnd() * 4)];
-    const gr = G.rollGrade(G.odds(g, false, gifts.moodBonus), left, gifts.pity, rnd);
+    const gr = G.rollGrade(G.odds(g, false, gifts.moodBonus, col.items), left, gifts.pity, rnd);
     left = G.nextPity(gr, left, gifts.pity); run = gr === "common" ? run + 1 : 0; maxRun = Math.max(maxRun, run);
   }
   console.log(`\n- 4종 섞어 ${(N * 4).toLocaleString()}번(천장 공유): 가장 긴 연속 일반 ${maxRun}`);
   if (maxRun >= gifts.pity.count) fail("섞어 주기에서 연속 일반 10");
+}
+// 47: 특별 선물 몸짓이 모두 보류면 특별 → 레어
+if (!gift.some(x => x.grade === "special" && !x.hold)) {
+  if (G.fit("special", col.items) !== "rare") fail("특별이 레어로 내려가지 않음");
+  console.log(`- 특별 선물 몸짓 모두 보류 → 특별 결과는 ${KO[G.fit("special", col.items)]}로 (확률 표 열: ${G.grades(col.items).map(k => KO[k]).join("·")})`);
 }
 // 대사 규칙
 for (const g of gifts.list) {
