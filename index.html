@@ -508,7 +508,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0}}
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1}}
   if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col||!ph)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
@@ -710,18 +710,27 @@ const Stage=(()=>{
     for(const n in keep)md.bones[n].quaternion.copy(keep[n]);md.root.position.copy(kp);md.root.updateMatrixWorld(true);
     d.al.set(md.root,a);return a;
   }
-  const q0=new THREE.Quaternion(),q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),q3=new THREE.Quaternion(),qT=new THREE.Quaternion(),UP=new THREE.Vector3(0,1,0);
+  const q0=new THREE.Quaternion(),q1=new THREE.Quaternion(),q2=new THREE.Quaternion(),q3=new THREE.Quaternion(),qT=new THREE.Quaternion(),UP=new THREE.Vector3(0,1,0);const xsTW={};
   // 34: win.turn = 모션 전체를 세로축으로 돌리는 각도(도, + = 위에서 볼 때 시계 반대). 원본 배우가 옆을 보고 찍힌 모션(입 가리고 웃기)을 정면으로
+  // 43: skipBlend = 건너뛰기(skip) 이음매 앞 몇 초 동안 건너뛴 뒤 자세와 섞음(이음매에서 툭 튀지 않게). damp = 뼈마다 모션을 따르는 몫(0~1, 나머지는 기본 자세. 고개를 너무 숙이는 모션 등)
   function xsApply(d,mt,win){
-    const cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1);let tt=win.from+(win.repeat>1?mt%cyc:mt);if(win.skip&&tt>=win.skip[0])tt+=win.skip[1]-win.skip[0];
+    const cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1);let tt=win.from+(win.repeat>1?mt%cyc:mt),t2=0,kb=0;
+    if(win.skip){const SL=win.skip[1]-win.skip[0],sb=win.skipBlend||0;if(tt>=win.skip[0])tt+=SL;else if(sb>0&&tt>win.skip[0]-sb){const k=(tt-win.skip[0]+sb)/sb;kb=k*k*(3-2*k);t2=tt+SL}}
     const a=xsAlign(d),N=d.frames,f=tt*d.fps,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
+    const f2=t2*d.fps,i2=Math.min(N-1,Math.floor(f2)),j2=Math.min(N-1,i2+1),u2=f2-i2;
     const C=((DATA.config&&DATA.config.stage)||{}),fi=win.fadeIn||C.xsFadeIn||.5,fo=win.fadeOut||C.xsFadeOut||.7;  // 처음·끝에 기본 자세와 섞는 시간(초)
     const x=Math.max(0,Math.min(1,mt/fi,(dur-mt)/fo)),w=x*x*(3-2*x);
     md.root.updateMatrixWorld(true);const tn=win.turn?win.turn*Math.PI/180:0;if(tn)qT.setFromAxisAngle(UP,tn);
     for(const n of XORD){const b=md.bones[n],tr=d.tracks[n];if(!b||!tr)continue;
-      q0.set(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]).slerp(q1.set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]),u);if(tn)q0.premultiply(qT);q0.multiply(a.A[n]).multiply(a.W[n]);
-      b.parent.getWorldQuaternion(q2);q3.copy(q2.invert()).multiply(q0);b.quaternion.slerp(q3,w);b.updateMatrixWorld(true)}
-    const h=d.hip,ip=k=>(h[i*3+k]+(h[j*3+k]-h[i*3+k])*u)*a.hipH*w;
+      q0.set(tr[i*4],tr[i*4+1],tr[i*4+2],tr[i*4+3]).slerp(q1.set(tr[j*4],tr[j*4+1],tr[j*4+2],tr[j*4+3]),u);
+      if(kb)q0.slerp(q1.set(tr[i2*4],tr[i2*4+1],tr[i2*4+2],tr[i2*4+3]).slerp(q2.set(tr[j2*4],tr[j2*4+1],tr[j2*4+2],tr[j2*4+3]),u2),kb);
+      if(tn)q0.premultiply(qT);q0.multiply(a.A[n]).multiply(a.W[n]);
+      // damp 를 준 뼈: 목표 자세를 「모션 안 부모의 목표」 기준 지역 회전으로(부모를 덜 따르게 해도 자식이 세계 방향을 되찾으려 꺾이지 않게). 나머지 뼈(팔 등)는 예전처럼 세계 방향
+      const pt=win.damp&&win.damp[n]!=null&&b.parent&&xsTW[b.parent.name];if(pt)q2.copy(pt);else b.parent.getWorldQuaternion(q2);
+      q3.copy(q2.invert()).multiply(q0);if(win.damp)(xsTW[n]||(xsTW[n]=new THREE.Quaternion())).copy(q0);
+      b.quaternion.slerp(q3,win.damp&&win.damp[n]!=null?w*Math.max(0,Math.min(1,+win.damp[n])):w);b.updateMatrixWorld(true)}
+    if(win.damp)for(const k in xsTW)delete xsTW[k];
+    const h=d.hip,h1=k=>h[i*3+k]+(h[j*3+k]-h[i*3+k])*u,ip=k=>(kb?h1(k)+(h[i2*3+k]+(h[j2*3+k]-h[i2*3+k])*u2-h1(k))*kb:h1(k))*a.hipH*w;
     if(!win.inPlace){const hx=ip(0),hz=ip(2),c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);
   }
   // 카메라 구도 (data/config.json camera): normal 상반신 · motion 허벅지 중간 · full 전신(춤)
@@ -771,7 +780,7 @@ const Stage=(()=>{
     if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
       mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?(cur.win?xsCyc({...XS[cur.id],...cur.win},xsCache[cur.id]?xsCache[cur.id].duration:null)*(cur.win.repeat||XS[cur.id].repeat||1):xsDur(cur.id)):RIG.M[cur.id].d;  // 42: cur.win = 이번 재생만 바꾼 구간 값(걷기)
       if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
-      else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now};cur=null;$("#cap").classList.remove("on")}}
+      else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now,wait:cur.wait};cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
@@ -872,9 +881,9 @@ const Stage=(()=>{
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(walk&&!o.walk)return;  // 42: 걸어 나가고 들어오는 동안(화면 밖에 있는 동안 포함)은 다른 몸짓(시계 보기·인사·답장 몸짓)을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
-    blendFromPre(o.blendMs);  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게)
+    blendFromPre(o.blendMs!=null?o.blendMs:blendOnce);blendOnce=null;  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게). 43: blendOnce = 다음 한 번만 섞는 시간(답장을 기다리던 몸짓에서 넘어갈 때)
     const sp0=o.speed>0?o.speed:1;
-    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null};
+    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null,wait:!!o.wait};  // 43: wait = 답장을 기다리는 몸짓(촬영 화면·카드 그림이 이어받지 않음)
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
@@ -909,8 +918,8 @@ const Stage=(()=>{
   // ── 촬영 화면(10-B) ──
   // 지금 몸짓(대기 몸짓 제외) 또는 끝난 지 ms 안의 몸짓. {id, sp, name(선물 몸짓 이름), ref(선물 몸짓 도감 id)}
   function recentMotion(ms){const p=x=>({id:x.id,sp:x.sp||1,name:x.name||null,ref:x.ref||null});
-    if(cur&&cur.id!==IDLE)return p(cur);
-    if(lastEnd&&lastEnd.id!==IDLE&&performance.now()-lastEnd.at<=ms)return p(lastEnd);return null}
+    if(cur&&cur.id!==IDLE&&!cur.wait)return p(cur);
+    if(lastEnd&&lastEnd.id!==IDLE&&!lastEnd.wait&&performance.now()-lastEnd.at<=ms)return p(lastEnd);return null}
   // x 몸짓을 반복(지금 그 몸짓이 재생 중이면 그 자리에서 이어서). null 이면 기본 자세
   function camLoop(x){if(!x){cur=null;return}if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
     cur={id:x.id,start:performance.now()/1000,sp:x.sp||1,name:x.name,ref:x.ref,loop:true}}
@@ -928,7 +937,7 @@ const Stage=(()=>{
     if(on){shadowM.scale.set(c.w||.78,c.d||.5,1);shadowM.material.opacity=c.alpha!=null?c.alpha:.5;scene.add(shadowM)}else scene.remove(shadowM)}
   // ── 포토부스(11) ──
   // lock: 포토부스가 서아를 쓰는 동안 바깥의 몸짓·표정·입을 막음(서아는 말하지 않음). 눈 깜빡임도 끔(찍는 순간 눈 감지 않게)
-  let locked=false,noBlink=false,blend=null;
+  let locked=false,noBlink=false,blend=null,blendOnce=null;
   function lock(on){locked=!!on;noBlink=!!on;if(on){talkUntil=0;blinkT=-1}}
   // 몸짓 mid 를 mt 초(몸짓 시간) 순간에서 멈춤. o.blendMs 동안 지금 자세에서 부드럽게 넘어감(0 이면 바로)
   function freeze(mid,mt,o={}){
@@ -1058,7 +1067,7 @@ const Stage=(()=>{
     if(a&&b)return(a.getWorldPosition(new THREE.Vector3()).y+b.getWorldPosition(new THREE.Vector3()).y)/2;const h=md.bones.Head;return h?h.getWorldPosition(new THREE.Vector3()).y:height()*.93}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1385,9 +1394,11 @@ function renderLog(){
     m.r==="ph"?SeoaPhoto.bubble(m):
     m.r==="c"?cParts(m).slice(0,reveal&&reveal.m===m?reveal.n:undefined).map(p=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")
     :m.r==="u"?userParts(m.t).map(p=>p.k==="n"?`<div class="mnarr u">${esc(p.x)}</div>`:`<div class="msg u">${esc(p.x)}</div>`).join("")
-    :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+SeoaPhoto.sendingHtml()+(busy||reveal?`<div class="msg c typing">${esc(waiting&&!serverAwake&&DATA.config.waitText||UI("chat.typing"))}</div>`:"");
+    :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+SeoaPhoto.sendingHtml()+(busy||reveal?`<div class="msg c typing">${esc(typingText())}</div>`:"");
   L.scrollTop=L.scrollHeight;
 }
+// 43: 답장을 기다리는 줄 — 처음엔 chat.typing, 기다린 지 chat.typingLongMs 가 지나면 chat.typingLong(Wait). 서버가 깨기 전 첫 답장은 예전처럼 config.waitText
+function typingText(){return waiting&&!serverAwake&&DATA.config.waitText||UI(Wait.long()?"chat.typingLong":"chat.typing")}
 const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
 function renderQuick(){$("#quick").innerHTML=QUICK.map(q=>`<button>${q}</button>`).join("");$("#quick").querySelectorAll("button").forEach(b=>b.onclick=()=>send(b.textContent))}
 
@@ -1486,6 +1497,7 @@ function motionsSoon(){const C=DATA.config||{},out=[],add=id=>{if(id&&XS[id]&&!o
   const g=(C.greet||{}).motions||{};for(const k in g)if(curStage()>=+k)(g[k]||[]).forEach(add);
   unlockedIds().forEach(add);
   add((C.idle||{}).motion);
+  ((C.wait||{}).motions||[]).forEach(add);  // 43: 답장을 기다리는 몸짓
   return out}
 function allowedMotions(){const o={};for(const id of unlockedIds())o[id]=MNAME[id]||id;return o}
 // 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 (서아에게 안 맞는 몸짓 제외). 9단계에서 「선물로 배운 몸짓」은 없앰
@@ -1730,8 +1742,8 @@ async function send(text){
   finishReveal();  // 앞 답장이 아직 나오는 중이면 마저 다 보여 주고 보냄
   const P=perfStart();
   const prevAt=room==="seoa"?chatOf("seoa").reduce((t,m)=>(m.r==="u"||m.r==="c"||m.r==="g"||m.r==="ph")&&m.at&&!m.greet?Math.max(t,m.at):t,0):0;  // 17-1B: 다시 만남(34-1: 다시 들어올 때 인사 한 줄은 안 셈 → 그 뒤 첫 답장이 다시 만남)
-  $("#inp").value="";autoGrow();IdleWatch.reset();Greet.cancel("send");addMsg("u",text,null,room);busy=true;renderLog();
-  if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;addReply(line,null,room);perfEnd(P);return}
+  $("#inp").value="";autoGrow();IdleWatch.reset();Greet.cancel("send");addMsg("u",text,null,room);busy=true;Wait.start(room==="seoa");renderLog();
+  if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;Wait.stop();addReply(line,null,room);perfEnd(P);return}
   if(!Cam.isOpen())Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저). 촬영 중엔 촬영 화면 몸짓 그대로(10-B)
   P.typing=performance.now();
   const g0=GEN;
@@ -1750,8 +1762,9 @@ async function send(text){
   waiting=true;renderLog();
   lastRaw=null;const a0=performance.now();
   const v=await askSeoa(text);
+  const slow=+qs.get("slow")||0;if(slow>0)await new Promise(r=>setTimeout(r,Math.max(0,slow-(performance.now()-P.t0))));  // 43: 확인용 ?slow=ms — 보낸 뒤 적어도 이만큼 기다렸다 답장(답장 기다리는 몸짓·문구 보기)
   if(gen!==GEN)return;  // 기다리는 사이 시연 패널에서 초기화·장면 이동 → 이 답장은 버림
-  busy=false;waiting=false;P.src=v.src||"local";
+  busy=false;waiting=false;Wait.stop();P.src=v.src||"local";
   Demo.setLast({ms:Math.round(performance.now()-a0),src:v.src==="server"?"server":lastRaw&&lastRaw.error?lastRaw.error:"local",mode:serverMode(),raw:lastRaw,reply:v});
   const prevMood=S.mood;S.mood=v.mood||S.mood;
   // 장면 바로가기(②~⑤) 중에는 예비 대사·Claude 미리보기의 단어 규칙으로 장소를 바꾸지 않음(S.placeLock). 서버 location 은 그대로 따름
@@ -2520,11 +2533,12 @@ const EpScene=(()=>{
   return{run,stop,resume,maybeSignal,fit,stageUp:n=>run(n),isOn:()=>running,award:id=>award(id)};
 })();
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
+let introEnd=0;  // 43: 오프닝 문단이 다 나오는 때(답장 기다리는 몸짓을 막음)
 let introT=[];  // 인트로 문단 타이머 (시연 패널에서 초기화·장면 이동 때 취소)
 function runIntro(){
   const I=DATA.intro,P=I.paragraphs||[],gap=I.intervalMs||1700;
   introT.forEach(clearTimeout);introT=[];
-  S.introDone=true;save();busy=true;renderLog();Stage.setFace("soft");  // 16: 첫 장면은 부드러운 얼굴로 시작
+  S.introDone=true;save();busy=true;introEnd=performance.now()+400+P.length*gap;renderLog();Stage.setFace("soft");  // 16: 첫 장면은 부드러운 얼굴로 시작
   P.forEach((t,k)=>introT.push(setTimeout(()=>{
     addMsg("c",t,{intro:true},"seoa");
     const cue=(I.cues||[]).find(c=>c.at===k);
@@ -2557,6 +2571,48 @@ function headerNote(c,line){
 // 33: 내가 말이 없을 때 서아가 시계 보기(data/config.json idle). 몸짓만(글자·이름 칩·컬렉션 기록·서버·턴·판정 없음)
 // 조건이 모두 맞는 채로 afterSec 이 지나면 한 번. 조건이 깨지면 처음부터, 페이지가 뒤에 있는(다른 탭) 동안은 멈춤. cooldownSec · 들어와 있는 동안 maxPerVisit 번까지
 // 다른 캐릭터 먼저 말 걸기(ping, 180초+0~30초마다, 서아는 안 보냄) 알림이 헤더에 떠 있는 순간이면 건너뜀
+// 43: 답장을 기다리는 동안 생각하는 몸짓(data/config.json wait). 내 메시지를 보낸 뒤 waitStartMs 가 지나도 답이 없으면 motions 를 차례로
+//   (x24 턱 괴고 생각하기 → m07 팔짱 → x24 …, 사이에 waitGapMs 쉼, 같은 것을 바로 되풀이하지 않음). 서버·턴·판정·최근 몸짓 목록·컬렉션에 안 넣음(Stage.play quiet + wait).
+//   막는 때: 서아 대화방 아님·3D 안 보임·촬영·걷기·단계 장면·첫 만남·오프닝·확대·사진 그리기·해금 연출·다시 들어올 때 인사·카드 크게 보기·다른 몸짓 재생 중 → 풀릴 때까지 retryMs 마다 다시 봄.
+//   답이 오면(stop) 하던 몸짓에서 endBlendMs 동안 섞으며 답장 몸짓(없으면 대기 자세)으로. 문구는 chat.typing → chat.typingLongMs 뒤 chat.typingLong
+const Wait=(()=>{
+  const C=()=>(DATA.config&&DATA.config.wait)||{};
+  const longMs=()=>{const v=((DATA.ui||{}).chat||{}).typingLongMs;return v!=null?+v:8000};
+  let t0=0,gen=-1,motionOn=false,timer=null,txtT=null,k=0,last=null,mine=null,faced=false;const log=[];
+  const inRoom=()=>curTab==="chat"&&S.room==="seoa";
+  const stageVis=()=>{const s=$("#stage");if(!s||Stage.isLent())return false;const r=s.getBoundingClientRect();return r.height>40&&r.width>40&&$("#room").style.display!=="none"};
+  const on=()=>t0>0&&busy&&gen===GEN;
+  function why(){
+    if(!inRoom())return "room";if(!stageVis())return "stage";
+    if(Cam.isOpen())return "camera";
+    if(Stage.walk.busy()||EpScene.isOn())return "scene";
+    if(FirstMeet.isOn())return "firstMeet";
+    if(performance.now()<introEnd)return "intro";
+    if(View.isBig()||View.isPushed()||View.moving())return "zoom";
+    if(SeoaPhoto.isSending())return "photo";
+    if(unlockBusy||unlockQ.length)return "unlock";
+    if(Greet.pending())return "greet";
+    if(Cards.isOpen()||PhotoUI.isViewOn())return "card";
+    if(Stage.recentMotion(0))return "motion";
+    return ""}
+  function pick(){const L=(C().motions||[]).filter(id=>canPlay(id));if(!L.length)return null;let m=L[k%L.length];if(m===last&&L.length>1){k++;m=L[k%L.length]}k++;return m}
+  function tick(){timer=null;if(!on()||!motionOn)return;
+    const r=why();if(r){if(log[log.length-1]!==r)log.push(r);if(log.length>20)log.shift();timer=setTimeout(tick,C().retryMs||400);return}
+    const m=pick();if(!m)return;last=m;mine=m;Stage.play(m,{quiet:true,wait:true});if(C().face&&!faced){Stage.setFace(C().face);faced=true}
+    log.push(m+"@"+Math.round(performance.now()-t0));if(log.length>20)log.shift();
+    const chk=()=>{if(!on()){timer=null;return}if(Stage.playing()===m&&Stage.playingWait()){timer=setTimeout(chk,150);return}
+      mine=null;timer=setTimeout(tick,C().waitGapMs!=null?C().waitGapMs:1500)};
+    timer=setTimeout(chk,300)}
+  function setText(){const e=$("#log .typing");if(e)e.textContent=typingText()}
+  // 보낸 순간. motion = 서아 대화방이면 몸짓도(다른 캐릭터는 문구만)
+  function start(motion){stop(true);t0=performance.now();gen=GEN;motionOn=!!motion;k=0;last=null;faced=false;log.length=0;
+    if(motionOn)timer=setTimeout(tick,C().waitStartMs!=null?C().waitStartMs:2500);
+    txtT=setTimeout(()=>{if(on())setText()},longMs()+20)}
+  // 답이 옴: 기다리는 몸짓 중이면 다음 몸짓(답장)을 endBlendMs 동안 섞으며 시작하게
+  function stop(quiet){clearTimeout(timer);clearTimeout(txtT);timer=txtT=null;const was=!!(mine&&Stage.playing()===mine&&Stage.playingWait());
+    t0=0;mine=null;if(was&&!quiet)Stage.blendNext(C().endBlendMs||600);return was}
+  return{start,stop,why,long:()=>t0>0&&performance.now()-t0>=longMs(),info:()=>({on:on(),ms:t0?Math.round(performance.now()-t0):0,playing:mine,why:why(),log:log.slice()})};
+})();
 const IdleWatch=(()=>{
   const C=()=>(DATA.config&&DATA.config.idle)||{};
   let el=0,last=0,wasIn=false,n=0,lastAt=-1e9,mine=null,endT=null;const log=[];
@@ -2676,7 +2732,7 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(()=>Cards.refresh());renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;
