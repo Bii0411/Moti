@@ -499,6 +499,8 @@
       "nameK": 0.06,
       "gradeK": 0.032,
       "markK": 0.03,
+      "_logoK": "35: 오른쪽 아래 moti 는 로고 그림(assets/logo_moti.svg). 높이 = 카드 너비 × markK × logoK(예전 글자 잉크 높이쯤)",
+      "logoK": 0.8,
       "marginK": 0.045
     },
     "quietMs": 1200,

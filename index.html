@@ -12,6 +12,11 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .app{width:100%;max-width:440px;height:100dvh;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;overflow:clip}
 header{display:flex;align-items:center;gap:8px;padding:12px 14px 8px}
 header h1{font-size:18px;font-weight:800;flex:none}
+/* 35: 로고 「moti」 = assets/logo_moti.svg(Fredoka SemiBold 글자를 그림으로, tools/logo2svg.mjs). 글자색(currentColor)으로 칠함(마스크). 크기는 높이만 주면 가로는 그림 비율(1901:735)대로.
+   아래 끝이 글자 기준선에 오게 vertical-align:baseline(예전 글자 로고와 같은 자리). 안의 .sr 「moti」는 화면에 안 보이는 검색·복사용 글자 */
+.logo{display:inline-block;vertical-align:baseline;height:1em;width:calc(var(--lh,1em)*2.5864);background:currentColor;-webkit-mask:url(assets/logo_moti.svg) center/100% 100% no-repeat;mask:url(assets/logo_moti.svg) center/100% 100% no-repeat}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+header h1 .logo{--lh:14px;height:14px}
 /* 다른 캐릭터 알림(6-C): 헤더 안, 로고와 💎 사이 빈자리에 한 줄. 길면 말줄임, 누르면 그 대화방으로 */
 .hnote{flex:1;min-width:0;display:flex;justify-content:flex-start}
 .hnote button{max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--text);background:#211b33;border:1px solid #6d4bd1;border-radius:999px;padding:5px 10px;opacity:0;transform:translateY(-3px);transition:opacity .25s,transform .25s;pointer-events:none}
@@ -389,7 +394,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <body>
 <div class="app">
   <header>
-    <h1>moti<small id="aiTag"></small></h1>
+    <h1><span class="logo" role="img" aria-label="moti"><span class="sr">moti</span></span><small id="aiTag"></small></h1>
     <div class="hnote"><button id="hNote" type="button" tabindex="-1"></button></div>
     <button class="hsearch" id="hSearch" type="button"></button>
     <span class="pill dpill"><svg class="gem" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z" fill="#7c5cff"/><path d="M2 9h20L12 21z" fill="#5b3fd6"/><path d="M6 3l3 6h6l3-6" fill="#a993ff"/><path d="M9 9l3 12 3-12z" fill="#6d4cf0"/></svg><span id="dia">0</span></span>

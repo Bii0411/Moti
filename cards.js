@@ -98,7 +98,7 @@ const Cards=(()=>{
       return `<button class="mc got g-${x.grade}" data-f="${x.id}" aria-label="${esc(T("open",{name:x.name}))}"><span class="mcin">${u?`<img class="mcimg" src="${u}" alt="">`:`${SIL}<img class="mcimg" alt="" hidden>`}${badge(x)}<span class="mcnm">${esc(x.name)}</span></span></button>`}
     // 선물 카드는 처음부터 선물로 만날 수 있으니 「열렸지만 못 본」 칸. 대화 카드는 지금 단계까지 열린 몸짓
     if(x.source==="gift"||isSoon(x.id))return `<button class="mc unseen g-${x.grade}" data-h="${x.id}"><span class="mcin">${SIL}${badge(x)}<span class="mctx">${esc(T("unseen."+x.source))}</span></span></button>`;
-    return `<button class="mc lock" data-h="${x.id}"><span class="mcin">${Icon.svg("lock",26)}<small class="mcmo">${esc(T("back"))}</small></span></button>`}
+    return `<button class="mc lock" data-h="${x.id}"><span class="mcin">${Icon.svg("lock",26)}<small class="mcmo"><span class="logo" role="img" aria-label="${esc(T("back"))}"><span class="sr">${esc(T("back"))}</span></span></small></span></button>`}
   const grid=L=>`<div class="mcards" style="${vars()}">${L.map(cell).join("")}</div>`;
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
   function hydrate(root){root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
@@ -187,6 +187,9 @@ const Cards=(()=>{
   // ── 공유: 카드 그림(이름·등급·moti 표시 포함)을 그림으로. 영상 공유는 아직 ──
   const loadImg=b=>new Promise(res=>{const u=URL.createObjectURL(b),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);res(null)};i.src=u});
   function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+  // 35: 공유 그림 오른쪽 아래 moti 표시 = 로고 그림(assets/logo_moti.svg 의 경로). 못 읽으면 예전처럼 글자
+  let logoP=null;
+  const logoPath=()=>logoP||(logoP=fetch("assets/logo_moti.svg").then(r=>r.text()).then(t=>{const d=(t.match(/\sd="([^"]+)"/)||[])[1],vb=((t.match(/viewBox="([^"]+)"/)||[])[1]||"").split(/\s+/).map(Number);return d&&vb.length===4?{p:new Path2D(d),vb}:null}).catch(()=>null));
   async function shareImage(id){const a=S.col[id],x=colBy(id);if(!a||!x)return null;const b=await blob(a.char,id);if(!b)return null;const img=await loadImg(b);if(!img)return null;
     const L=C().look||{},Sh=C().share||{},W=img.naturalWidth,H=img.naturalHeight,pad=Math.round(W*.05),bw=Math.max(3,Math.round(W*.01)),R=Math.round(W*.05);
     const c=document.createElement("canvas");c.width=W+pad*2;c.height=H+pad*2;const g=c.getContext("2d"),font=(wt,px)=>`${wt} ${px}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;
@@ -203,7 +206,9 @@ const Cards=(()=>{
     g.strokeStyle=x.grade==="rare"?(L.rare||"#ff7eb6"):x.grade==="special"?"#ffffff":(L.common||"#e6e1f5");g.stroke();g.fillStyle=g.strokeStyle;g.fillText(gt,gx+gf*.6,gy+gh/2+1);
     // 아래 이름 · 오른쪽 아래 moti
     g.fillStyle="#fff";g.font=font(800,nf);g.textBaseline="alphabetic";g.fillText(x.name,pad+mg,pad+H-mg,W-mg*2-mf*4);
-    g.font=font(700,mf);g.fillStyle="rgba(255,255,255,.85)";const mt=T("mark");g.fillText(mt,pad+W-mg-g.measureText(mt).width,pad+H-mg);
+    g.fillStyle="rgba(255,255,255,.85)";const lg=await logoPath();
+    if(lg){const [vx,,vw]=lg.vb,lh=mf*(Sh.logoK||.8),k=lh/lg.vb[3];g.save();g.translate(pad+W-mg-vw*k,pad+H-mg);g.scale(k,k);g.translate(-vx,0);g.fill(lg.p);g.restore()}  // 기준선(y 0)을 예전 글자 기준선에
+    else{g.font=font(700,mf);const mt=T("mark");g.fillText(mt,pad+W-mg-g.measureText(mt).width,pad+H-mg)}
     return await new Promise(r=>c.toBlob(r,"image/jpeg",.9))}
   const fname=id=>`moti-card-${id}.jpg`;
   // 공유 파일을 미리 만들어 둠(아이폰: 누른 순간 바로 공유 창을 열어야 함)
