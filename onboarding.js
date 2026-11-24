@@ -157,10 +157,10 @@ const Onboard=(()=>{
     leaveT.push(setTimeout(()=>{if(step!=="ticket")return;const st=root.querySelector("#obStage");st.style.setProperty("--stfade",fade+"ms");st.classList.add("fade")},t2));
     leaveT.push(setTimeout(()=>{if(step==="ticket")goLogin()},t2+fade));
   }
-  // 인사: 서아 손 인사(34: x20, data/onboarding.json greet.motion) + 필름 띠가 잠깐 밝고 빨라짐. 글자(ticket.welcome)는 trim.welcome 이 켜져 있고 문구가 있을 때만(20단계부터 끔)
+  // 인사: 서아 손 흔들기(34-1: m13, data/onboarding.json greet.motion. 34 의 x20 손 인사는 남겨 둠) + 필름 띠가 잠깐 밝고 빨라짐. 글자(ticket.welcome)는 trim.welcome 이 켜져 있고 문구가 있을 때만(20단계부터 끔)
   function greet(){
     const G=D().greet||{};
-    if(typeof Stage!=="undefined"){Stage.play(G.motion||"x20",{quiet:true});Stage.setFace(G.face||"joy")}
+    if(typeof Stage!=="undefined"){Stage.play(G.motion||"m13",{quiet:true});Stage.setFace(G.face||"joy")}
     Film.punch();
     root.querySelector("#obGuide").classList.add("off");
     if(trim().welcome&&T("ticket.welcome")){const w=root.querySelector("#obWelcome");w.classList.remove("on");void w.offsetWidth;w.classList.add("on")}
@@ -177,7 +177,7 @@ const Onboard=(()=>{
     const f=C.fog||{};Stage.fog(f.color||"#120e1f",f.near!=null?f.near:2.4,f.far!=null?f.far:6);
     if(typeof Look!=="undefined")Look.setPlace(null);
     Stage.setFace(C.face||"soft");
-    const G=D().greet||{};if(Stage.xs)Stage.xs(G.motion||"x20");  // 34: 인사 모션 파일을 입장권이 보일 때 먼저 받아 둠(펀치 때 기다리면 몸짓과 카드 사라지기가 어긋남)
+    const G=D().greet||{};if(Stage.xs)Stage.xs(G.motion||"m13");  // 34: 인사 모션 파일을 입장권이 보일 때 먼저 받아 둠(펀치 때 기다리면 몸짓과 카드 사라지기가 어긋남)
     Film.show();
   }
   // 3D 칸은 화면 아래 끝까지(서아 몸 전체가 그려짐, 아래쪽은 평소 카드가 가림). scene3d.frame 은
