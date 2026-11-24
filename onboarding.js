@@ -13,6 +13,8 @@ const Onboard=(()=>{
   const M={};  // 확인용 시간 기록(ms): firstShown·tap·ticketShown·loginShown·done
   const mark=k=>{M[k]=Math.round(performance.now())};
 
+  // 35: 로고 그림(index.html .logo, assets/logo_moti.svg) + 화면 읽기 이름 · 안 보이는 글자(data 의 first.logo)
+  function logoMark(el,name){const m=document.createElement("span"),t=document.createElement("span");m.className="logo";m.setAttribute("role","img");m.setAttribute("aria-label",name);t.className="sr";t.textContent=name;m.appendChild(t);el.replaceChildren(m)}
   // ── 어두운 네온 도시 배경(CSS·SVG). 같은 씨앗이면 늘 같은 모양 ──
   function rnd(seed){let s=seed>>>0;return()=>(s=(s*1664525+1013904223)>>>0)/4294967296}
   function city(){
@@ -67,7 +69,7 @@ const Onboard=(()=>{
     if(!root||filled||!D().first)return;filled=true;
     const q=id=>root.querySelector("#"+id);
     root.style.setProperty("--fade",tm("fadeInMs",600)+"ms");
-    q("obLogo").textContent=T("first.logo");q("obTag").textContent=T("first.tagline");q("obGoT").textContent=T("first.button");
+    logoMark(q("obLogo"),T("first.logo"));q("obTag").textContent=T("first.tagline");q("obGoT").textContent=T("first.button");
     q("obGuide").textContent=T("ticket.guide");q("obWelcome").textContent=T("ticket.welcome");
     q("obCTitle").textContent=T("ticket.title");q("obCSmall").textContent=T("ticket.small");q("obAi").textContent=T("ticket.ai");q("obAll").textContent=T("ticket.all");
     q("obList").innerHTML=(D().ticket.items||[]).map(it=>`<div class="obrow"><label class="obchk"><input type="checkbox" data-k="${E(it.id)}"${it.required?" data-req":""}><span class="box"></span><span class="tx">${E(it.text)}</span></label>${it.view?`<button type="button" class="obview" data-view="${E(it.view)}">${E(T("ticket.view"))}</button>`:""}</div>`).join("");
