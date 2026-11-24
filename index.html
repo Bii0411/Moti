@@ -726,7 +726,9 @@ const Stage=(()=>{
   function frame(now){
     requestAnimationFrame(frame);
     const cv=R.domElement,w=cv.clientWidth,h=cv.clientHeight;
-    if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio()))){
+    // 32-A: 그림판 픽셀 크기뿐 아니라 카메라 비율이 어긋나도 다시 맞춤(빌려 쓰지 않을 때만. 빌린 쪽은 자기 카메라 계산을 함). 대화 무대는 시야 자르기(view offset)를 쓰지 않음
+    if(!borrowed&&cam.view&&cam.view.enabled){cam.clearViewOffset();cam.aspect=0}
+    if(w&&h&&(cv.width!==Math.round(w*R.getPixelRatio())||cv.height!==Math.round(h*R.getPixelRatio())||!borrowed&&Math.abs(cam.aspect-w/h)>1e-3)){
       R.setSize(w,h,false);cam.aspect=w/h;tall=w/h<.8;cam.updateProjectionMatrix()}
     camAt(now);Look.tick(now,w,h);panoTick(now);
     if(extraTick)extraTick(now,w,h);
@@ -813,9 +815,19 @@ const Stage=(()=>{
   // 온보딩(7-B): 3D 그림판(canvas)을 다른 칸으로 잠깐 빌려줌 → 모델을 두 번 불러오지 않는다. release 로 대화 3D 칸에 돌려놓음
   let extraTick=null;
   // 30: o.pano = 빌린 칸에서 보여 줄 360도 장소 번호(없으면 360도 없이: 온보딩 입장권·필름 사진). release 하면 대화 장소의 360도로
-  function borrow(el,frame,tick,o){el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0);borrowed=true;panoShow(o&&o.pano!=null?o.pano:-1,0)}
+  // 32-A: 빌릴 때 카메라 aspect·fov·그림판 크기(픽셀 비율 포함)를 저장 → release 에서 그 값으로 되돌린 뒤 지금 대화 무대 크기로 다시 맞춤(fit).
+  //   확대(View) 중이면 확대가 끝날 때 한 번 더 맞춤. 이미 빌려준 상태에서 또 빌리면 처음 저장값을 그대로 둠
+  let lent=null,refitT=null;
+  function borrow(el,frame,tick,o){if(!borrowed)lent={aspect:cam.aspect,fov:cam.fov,size:R.getSize(new THREE.Vector2()),pr:R.getPixelRatio()};
+    el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0);borrowed=true;panoShow(o&&o.pano!=null?o.pano:-1,0)}
   function release(){const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
-    scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null;borrowed=false;panoShow(panoMain,0)}
+    scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null;borrowed=false;panoShow(panoMain,0);
+    if(lent){cam.fov=lent.fov;cam.aspect=lent.aspect;if(R.getPixelRatio()!==lent.pr)R.setPixelRatio(lent.pr);R.setSize(lent.size.x,lent.size.y,false);lent=null}
+    fit();clearTimeout(refitT);const left=typeof View!=="undefined"&&View.moving?View.moving():0;if(left>0)refitT=setTimeout(fit,left+40)}
+  // 지금 대화 무대(그림판이 놓인 칸) 크기로 그림판·카메라 비율을 맞춤. 시야 자르기는 끔. 칸이 안 보이면(0) 다음에 보일 때 frame 이 맞춤
+  function fit(){if(!R||borrowed)return;const cv=R.domElement,w=cv.clientWidth,h=cv.clientHeight;
+    if(cam.view&&cam.view.enabled)cam.clearViewOffset();
+    if(w&&h){R.setSize(w,h,false);cam.aspect=w/h;tall=w/h<.8}cam.updateProjectionMatrix()}
   function fog(color,near,far){scene.fog.color.set(color);scene.fog.near=near;scene.fog.far=far}
   // ── 촬영 화면(10-B) ──
   // 지금 몸짓(대기 몸짓 제외) 또는 끝난 지 ms 안의 몸짓. {id, sp, name(선물 몸짓 이름), ref(선물 몸짓 도감 id)}
@@ -951,7 +963,7 @@ const Stage=(()=>{
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -959,7 +971,7 @@ const Stage=(()=>{
 // 그보다 작은 순간은 화면 그대로 카메라만 pushIn 만큼 다가감. 몸짓이 끝나고 backDelayMs 뒤 원래 높이·상반신으로. (data/config.json stage)
 // 입력창에 포커스가 있을 때(키보드)는 커지지 않는다. 앨범 다시 보기는 카메라만 바꾼다.
 const View=(()=>{
-  let big=false,pushed=false,h0=0,backT=null,tok=0;
+  let big=false,pushed=false,h0=0,backT=null,tok=0,moveEnd=0,fitT=null;
   const cfg=()=>(DATA.config&&DATA.config.stage)||{};
   const focused=()=>document.activeElement===$("#inp");
   function keepBottom(ms){const L=$("#log"),end=performance.now()+ms;(function f(){L.scrollTop=L.scrollHeight;if(performance.now()<end)requestAnimationFrame(f)})()}
@@ -969,7 +981,9 @@ const View=(()=>{
     // 17-D: 지금 높이를 px 로 고정할 때는 전환을 끈 채로(켠 채로 하면 「36% → 지금 px」 전환이 먼저 생겨, 커지기 시작이 min-height 에 걸려 늦고 갑자기 튐)
     if(on){st.style.transition="background-image .6s";h0=st.offsetHeight;st.style.height=h0+"px";void st.offsetHeight;st.style.transition=tr;st.style.height=bigH(st)+"px"}
     else{st.style.transition=tr;st.style.height=h0+"px";setTimeout(()=>{if(!big){st.style.transition="background-image .6s";st.style.height=""}},ms+30)}
-    big=on;keepBottom(ms+80);
+    big=on;keepBottom(ms+80);moveEnd=performance.now()+ms;
+    // 32-A: 크기 바뀌기가 끝나면 그림판·카메라 비율을 한 번 더 맞춤(그사이 사진 그리기·빌려 쓰기와 겹쳤을 때)
+    clearTimeout(fitT);fitT=setTimeout(()=>Stage.fit(),ms+40);
   }
   // 확대 높이: 3D 칸 가로 폭 × bigAspect(1 = 정사각형), 화면 높이 × bigMaxRatio 가 상한. 예전 값(bigRatio)만 있으면 그것을 씀.
   // 대화 목록이 minLogPx(말풍선 두 줄) 아래로 줄어들 만큼 화면이 낮으면(375×667 등) 그만큼만 키움
@@ -998,7 +1012,7 @@ const View=(()=>{
     backT=setTimeout(()=>{if(my===tok)rest()},delay+Stage.dur(mid)/(sp||1)*1000+(c.backDelayMs!=null?c.backDelayMs:1500));
     return delay;
   }
-  return{motion,rest,isBig:()=>big,isPushed:()=>pushed};
+  return{motion,rest,isBig:()=>big,isPushed:()=>pushed,moving:()=>Math.max(0,moveEnd-performance.now())};  // moving = 크기 바뀌기가 끝날 때까지 남은 ms
 })();
 
 // ───────────────────────── 첫 만남 연출(31) ─────────────────────────

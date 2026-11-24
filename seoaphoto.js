@@ -44,10 +44,12 @@ const SeoaPhoto=(()=>{
     const mid=spec.mid||pickMotion(K);if(spec.mid)await Stage.xs(mid);
     const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
     const yaw=pick(K.yaw)||0,shift=pick(K.shift)||0,bgX=pick(K.bgX);
+    // 32-A: 확대(View)가 커지거나 줄어드는 중이면 끝날 때까지 미룸(그림판 크기가 매 프레임 바뀌는 중에 크기를 빌리지 않게)
+    for(let i=0;i<20&&typeof View!=="undefined"&&View.moving&&View.moving()>0;i++)await wait(View.moving()+60);
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
     g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img&&!pano){Shot.cover(g,img,W,H,bgX!=null?bgX:.5,.4);Shot.dimLayer(g,W,H)}
     const ok=Stage.still(mid,mt,face,()=>{
-      const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone(),vw=cam.view?{...cam.view}:null;
+      const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone(),vw=cam.view&&cam.view.enabled?{...cam.view}:null;  // 32-A: 꺼진 시야 자르기(온보딩이 남긴 값)를 되살리지 않음
       try{if(vw)cam.clearViewOffset();R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H,K,yaw,shift);
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
         const back=pano?Stage.pano.use(pi):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
