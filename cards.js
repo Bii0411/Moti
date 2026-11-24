@@ -80,6 +80,8 @@ const Cards=(()=>{
   async function fill(){await init();let n=0;
     for(const id in S.col){const a=S.col[id];if(!a||!colBy(id))continue;
       if(!a.outfit){a.outfit=C().defaultOutfit||"ops";if(a.scene==null||!SCENES[a.scene])a.scene=C().defaultScene||0;if(!a.char)a.char="seoa";a.old=1;n++}
+      // 27: 장소와 의상이 안 맞게 저장된 카드(크리스마스 거리에 작전복 등)는 맞는 의상으로 고치고 그림을 다시 만듦
+      if(typeof outfitForScene==="function"){const fit=outfitForScene(a.scene,a.outfit);if(fit!==a.outfit){a.outfit=fit;n++;if(has(a.char,id))await remove(a.char,[id])}}
       if(!has(a.char,id))capture(id,{delay:0})}
     if(n)save();return n}
 
