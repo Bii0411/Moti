@@ -859,11 +859,12 @@ const Stage=(()=>{
   // 걸어 나가기: 화면 왼쪽으로 돌며 걷기 시작 → 3D 칸 밖까지 → 멈춤(화면 밖에 서 있음). 끝나면 풀리는 약속
   async function walkOut(){const W=walkC(),wid=W.motion||"x22";if(!md||!XS[wid])return false;const d=await xsLoad(wid);if(!d)return false;
     if(walk&&walk.phase==="off")return true;
+    $("#cap").classList.remove("on");  // 42-1: 앞 몸짓 이름표(▶ …)가 걷는 동안 남지 않게
     return new Promise(res=>{walk={phase:"out",x:0,z:0,u:0,t0:performance.now(),res:()=>res(true)};
       play(wid,{quiet:true,walk:true,win:{repeat:1000,turn:0}})})}
   // 걸어 들어오기: 3D 칸 왼쪽 밖에서 오른쪽을 향해 걸어 원래 자리로 → 앞을 향해 돌며 기본 자세로
   async function walkIn(){const W=walkC(),wid=W.motion||"x22";if(!md||!XS[wid]){walk=null;return false}const d=await xsLoad(wid);if(!d){walk=null;return false}
-    return new Promise(res=>{walk={phase:"in",x:outX(),z:0,u:0,t0:performance.now(),res:()=>res(true)};blend=null;
+    $("#cap").classList.remove("on");return new Promise(res=>{walk={phase:"in",x:outX(),z:0,u:0,t0:performance.now(),res:()=>res(true)};blend=null;
       play(wid,{quiet:true,walk:true,blendMs:0,win:{repeat:1000,turn:90}})})}
   // 화면 밖에 바로 세우기(이어하기 때 걸어 들어오기 전) · 제자리로 바로(장면 취소·줄기 바꿈)
   function walkPlace(where){if(where==="off"){cur=null;walk={phase:"off",x:outX(),z:0,u:0,t0:performance.now(),res:null}}else{const f=walk&&walk.res;walk=null;if(cur&&cur.win)cur=null;if(f)f()}}
@@ -1065,7 +1066,7 @@ const Stage=(()=>{
 // 그보다 작은 순간은 화면 그대로 카메라만 pushIn 만큼 다가감. 몸짓이 끝나고 backDelayMs 뒤 원래 높이·상반신으로. (data/config.json stage)
 // 입력창에 포커스가 있을 때(키보드)는 커지지 않는다. 앨범 다시 보기는 카메라만 바꾼다.
 const View=(()=>{
-  let big=false,pushed=false,h0=0,backT=null,tok=0,moveEnd=0,fitT=null;
+  let big=false,pushed=false,h0=0,backT=null,tok=0,moveEnd=0,fitT=null,held=null;  // 42-1: held = 붙잡은 확대 구도 이름(걷는 동안). 그동안 다른 확대(몸짓·쿨다운·처음 보기)는 받지 않음
   const cfg=()=>(DATA.config&&DATA.config.stage)||{};
   const focused=()=>document.activeElement===$("#inp");
   function keepBottom(ms){const L=$("#log"),end=performance.now()+ms;(function f(){L.scrollTop=L.scrollHeight;if(performance.now()<end)requestAnimationFrame(f)})()}
@@ -1085,7 +1086,7 @@ const View=(()=>{
     if(c.bigAspect==null&&c.bigRatio!=null)return Math.round(vh*c.bigRatio);
     const room=st.offsetHeight+$("#log").clientHeight-(c.minLogPx!=null?c.minLogPx:80);
     return Math.round(Math.max(st.offsetHeight,Math.min(W*(c.bigAspect!=null?c.bigAspect:1),vh*(c.bigMaxRatio!=null?c.bigMaxRatio:.58),room)))}
-  function rest(instant){clearTimeout(backT);tok++;const was=big,wasPush=pushed;pushed=false;setBig(false,instant);
+  function rest(instant){if(!instant)held=null;clearTimeout(backT);tok++;const was=big,wasPush=pushed;pushed=false;setBig(false,instant);
     Stage.frameTo("normal",instant?0:was?(cfg().shrinkMs||800):wasPush?(cfg().pushBackMs||1200):undefined)}
   // 17-1A: 카메라 다가가기 = 평소 구도(normal)의 위·아래 폭과 너비를 pushIn(0.08)만큼 줄인 구도(가운데는 그대로) → 서아 쪽으로 약 8% 다가감
   function pushFrame(){const n=((DATA.config&&DATA.config.camera)||{}).normal||{top:1.05,bottom:.57,width:.45,lift:.03},k=1-(cfg().pushIn!=null?cfg().pushIn:.08),c=(n.top+n.bottom)/2;
@@ -1094,6 +1095,7 @@ const View=(()=>{
   // 이미 커져 있거나 다가가 있으면 그 상태로 이번 몸짓이 끝날 때까지 유지. 돌려주는 값 = 몸짓 시작을 늦출 ms(지금 막 커지기 시작했으면 motionDelayMs)
   function motion(mid,sp,fx){
     if(fx===true)fx="big";
+    if(held)return 0;  // 42-1: 걷기 확대를 붙잡은 동안은 그대로(줄었다 커지지 않게)
     if(!fx&&!big&&!pushed)return 0;
     const my=++tok;clearTimeout(backT);const c=cfg();
     let delay=0;
@@ -1106,7 +1108,13 @@ const View=(()=>{
     backT=setTimeout(()=>{if(my===tok)rest()},delay+Stage.dur(mid)/(sp||1)*1000+(c.backDelayMs!=null?c.backDelayMs:1500));
     return delay;
   }
-  return{motion,rest,isBig:()=>big,isPushed:()=>pushed,moving:()=>Math.max(0,moveEnd-performance.now())};  // moving = 크기 바뀌기가 끝날 때까지 남은 ms
+  // 42-1: 확대를 붙잡음(걸어 나가기 ~ 걸어 들어와 선 뒤 한 번). name = data/config.json camera 구도 이름. 이미 붙잡았으면 그대로(이어하기 때 다시 불러도 한 번)
+  // 다른 탭에 다녀오면(rest(true)) 크기는 돌아가지만 붙잡음은 남아, 대화방에 다시 들어오면 hold 로 다시 커짐. 돌려주는 값 = 다 커질 때까지 ms
+  function hold(name){const c=cfg();if(held===name&&big)return Math.max(0,moveEnd-performance.now());
+    held=name;tok++;clearTimeout(backT);pushed=false;const grow=!big&&curTab==="chat"&&S.room==="seoa";
+    Stage.frameTo(name,grow?(c.growMs||700):undefined);if(grow){setBig(true);return c.growMs||700}return 0}
+  function release(){if(!held)return;held=null;rest()}
+  return{motion,rest,hold,release,held:()=>held,isBig:()=>big,isPushed:()=>pushed,moving:()=>Math.max(0,moveEnd-performance.now())};  // moving = 크기 바뀌기가 끝날 때까지 남은 ms
 })();
 
 // ───────────────────────── 첫 만남 연출(31) ─────────────────────────
@@ -2363,6 +2371,7 @@ function openRoom(cid){
   placeStage();renderLog();renderUnread();
   if(cid==="seoa")Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
+  if(cid==="seoa"&&View.held()&&Stage.walk.busy())View.hold(View.held());  // 42-1: 걷는 중에 다른 탭에 다녀오면 확대 다시
   if(cid==="seoa")EpScene.resume();  // 42: 에피소드 단계 장면이 끊겼으면 그 자리부터
   if(cid==="seoa")SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
 }
@@ -2457,15 +2466,18 @@ const EpScene=(()=>{
   // 옷 바꾸고 그 모델이 올라올 때까지(최대 modelWaitMs)
   async function dress(){const s=EpStage.st();if(s&&!s.dressed){s.dressed=true;save()}Outfit.sync();const k=Outfit.want(),t0=performance.now();
     while(Stage.outfitNow()!==k&&performance.now()-t0<(W().modelWaitMs||8000))await sleep(100)}
+  // 42-1: 걷는 동안 3D 칸 확대(data/config.json walk.zoom 구도). 걸어 나가기 직전에 커지고, 화면 밖에 있는 동안 그대로, 걸어 들어와 선 뒤 돌아옴
+  const zoom=()=>W().zoom||"walkBig";
   async function walkOut(c,alive){let ok=false;
-    if(vis())ok=await Stage.walk.out();
+    if(vis()){const ms=View.hold(zoom());if(ms>0)await sleep(ms);if(!alive())return;ok=await Stage.walk.out()}
     const t0=performance.now();  // 화면 밖에 나간 순간부터 offMinMs
     if(!alive())return;if(c.dress)await dress();
     if(ok){const left=(W().offMinMs||900)-(performance.now()-t0);if(left>0)await sleep(left)}}
   async function walkIn(alive){const s=EpStage.st();if(s&&!s.dressed)await dress();if(!alive())return;
-    if(!vis()){Stage.walk.place("in");return}
+    if(!vis()){Stage.walk.place("in");View.release();return}
     if(Stage.walk.phase()!=="off")Stage.walk.place("off");
-    const ok=await Stage.walk.in();if(!ok)Stage.walk.place("in")}
+    const ms=View.hold(zoom());if(ms>0)await sleep(ms);if(!alive())return;  // 이어하기 때: 화면 밖에 세운 채 커진 뒤 걸어 들어옴
+    const ok=await Stage.walk.in();if(!ok)Stage.walk.place("in");View.release()}
   // 단계 n 장면을 처음부터(o 가 있으면 저장된 자리부터)
   async function run(n,o){const sc=cfgOf(n);if(!sc)return;
     if(running){if(!o)queue.push(n);return}
@@ -2495,7 +2507,7 @@ const EpScene=(()=>{
   function award(id){const it=colBy(id);if(!it||S.col[id])return;
     S.col[id]=seenNow({scene:it.scene!=null?it.scene:S.scene,outfit:it.outfit||Outfit.want(),stage:EpStage.n(),line:""});save();Cards.capture(id);notifyNew(it);if(curTab==="album")renderAlbum(id)}
   // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
-  function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in")}
+  function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in");View.release()}
   // 다시 들어왔을 때 끊긴 장면 이어 가기
   function resume(){const ep=EpStage.on()&&EpStage.st();if(!running&&ep&&ep.play)run(ep.play.n,ep.play)}
   // 오래 머물 때 신호 한 줄(그 단계에서 한 번)
@@ -2687,7 +2699,7 @@ $("#actBtn").addEventListener("pointerdown",e=>e.preventDefault());
 $("#actBtn").onclick=()=>{const t=$("#inp"),a=t.selectionStart??t.value.length,b=t.selectionEnd??a;
   t.focus();t.setRangeText("("+t.value.slice(a,b)+")",a,b,"start");t.setSelectionRange(a+1,a+1+(b-a));autoGrow()};
 Stage.init();
-$("#inp").addEventListener("focus",()=>{Fn.set(false);if(View.isBig())View.rest()});
+$("#inp").addEventListener("focus",()=>{Fn.set(false);if(View.isBig()&&!View.held())View.rest()});  // 42-1: 걷기 확대 중엔 그대로
 // 대화 목록이 맨 아래를 보고 있었으면, 3D가 커져 목록이 줄어들어도 맨 아래(최신 말풍선)를 유지
 let logStick=true;$("#log").addEventListener("scroll",()=>{const L=$("#log");logStick=L.scrollHeight-L.scrollTop-L.clientHeight<40});
 if(window.ResizeObserver)new ResizeObserver(()=>{if(logStick){const L=$("#log");L.scrollTop=L.scrollHeight}}).observe($("#log"));
