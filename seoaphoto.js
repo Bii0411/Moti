@@ -162,7 +162,7 @@ const SeoaPhoto=(()=>{
   function check(){const s=st();if(!s.pend.length||sending)return;
     if(!inRoom())return;  // 대화방에 들어오면 enter() 가 다시 부름
     if(!idle())return kick();
-    if(s.pend[0].type!=="away"&&typeof Greet!=="undefined"&&Greet.holds())return kick();  // 34: 다시 들어올 때 인사 중이면 첫 대사 자리(lineDelayMs)까지 기다림(부재중 사진은 인사보다 먼저)
+    if(s.pend[0].type!=="away"&&typeof Greet!=="undefined"&&Greet.holds())return kick();  // 34: 다시 들어올 때 인사 중이면 기다림(부재중 사진은 인사보다 먼저). 34-1: 첫 대사 한 줄 뒤 greet.photoAfterMs 까지
     const it=s.pend.shift();save();
     // 대화 중 사진은 보낼 때 다시 확인: 시연 장면이 시작됐으면 버림
     if(it.type==="casual"&&typeof Scenes!=="undefined"&&Scenes.cur())return kick(0);
