@@ -121,9 +121,6 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .inp:placeholder-shown{padding-top:5px;padding-bottom:5px;word-break:keep-all;overflow-wrap:normal}
 .abtn{flex:none;height:46px;padding:0 9px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:12px;font-weight:700;color:var(--pri2);line-height:1.15}
 .send{width:46px;height:46px;border-radius:50%;background:var(--pri);font-size:18px;font-weight:800;flex:none}
-.quick{display:flex;gap:6px;padding:0 12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0;max-width:100%;flex:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
-.quick::-webkit-scrollbar{display:none}
-.quick button{flex:none;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--sub)}
 
 /* 앨범 */
 .album{flex:1;overflow-y:auto;padding:12px 14px 16px}
@@ -432,7 +429,6 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
       <div class="roomhd"><button class="bk" id="backBtn" aria-label="메시지 목록">‹</button><span class="av" id="roomAv"></span><span><b id="roomName">윤서아</b><small id="roomSub"></small></span><button class="thr" id="thrBtn" style="display:none"></button></div>
       <div id="stageSlot"></div>
       <div class="log" id="log"></div>
-      <div class="quick" id="quick"></div>
       <div class="bar">
         <button class="fnbtn" id="fnBtn" aria-expanded="false" aria-controls="fnPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         <button class="abtn" id="actBtn" aria-label="행동 묘사 넣기">( )<br>행동</button>
@@ -1413,8 +1409,6 @@ function renderLog(){
 }
 // 43: 답장을 기다리는 줄 — 처음엔 chat.typing, 기다린 지 chat.typingLongMs 가 지나면 chat.typingLong(Wait). 서버가 깨기 전 첫 답장은 예전처럼 config.waitText
 function typingText(){return waiting&&!serverAwake&&DATA.config.waitText||UI(Wait.long()?"chat.typingLong":"chat.typing")}
-const QUICK=["오늘 진짜 힘들었어","나 시험 붙었어!","너 좀 바보 같아","미안해, 내가 잘못했어","옥상 가서 야경 보자","좋아해"];
-function renderQuick(){$("#quick").innerHTML=QUICK.map(q=>`<button>${q}</button>`).join("");$("#quick").querySelectorAll("button").forEach(b=>b.onclick=()=>send(b.textContent))}
 
 let busy=false,waiting=false,sampleFn=undefined;  // waiting: 서아 답장을 서버에서 기다리는 중
 async function getSample(){
@@ -2393,8 +2387,9 @@ function openRoom(cid){
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   Thread.chip(cid);  // 25-1: 이름 밑 설명 줄은 특별 에피소드 안에서만(data/ui.json thread.sub)
-  $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
-  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
+  $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);
+  // 45-1: 괄호 ( ) 안은 줄바꿈 없이 한 덩어리(넘치면 괄호 앞에서 다음 줄로)
+  $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name).replace(/\([^)]*\)/g,m=>[...m.replace(/ /g,"\u00a0")].join("\u2060"));  // 띄어쓰기는 붙는 빈칸, 글자 사이는 단어 잇개(U+2060, 「·」 뒤에서도 안 끊기게)
   placeStage();renderLog();renderUnread();
   if(cid==="seoa")Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
@@ -2745,7 +2740,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();renderQuick();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(()=>Cards.refresh());renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
