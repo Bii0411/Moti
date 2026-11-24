@@ -703,8 +703,8 @@ const Stage=(()=>{
     if(h)HY0=h;return H0=h&&nk?h+(camCfg().headTopK||2.4)*(h-nk):1.6}
   // 25: 카메라가 머리를 따라 내려감(data/config.json camera.follow). 그 몸짓이 재생되는 동안만, 머리가 평소 높이(HY0)보다 내려간 만큼 × 몫.
   // 위로는 따라가지 않음. 내려갈 때 smoothSec, 다시 올라갈 때 upSec(없으면 smoothSec)로 부드럽게 따라가고, 몸짓이 끝나면 원래 구도로 돌아옴
-  let HY0=0,folY=0,folLast=0;const folV=new THREE.Vector3();
-  function followDy(now){const F=camCfg().follow||{},k=cur&&F.motions?+F.motions[cur.id]||0:0;
+  let HY0=0,folY=0,folLast=0,folOff=false;const folV=new THREE.Vector3();  // 31-1: folOff = 잠깐 따라가지 않음(첫 만남 연출 동안)
+  function followDy(now){const F=camCfg().follow||{},k=cur&&F.motions&&!folOff?+F.motions[cur.id]||0:0;
     const dt=folLast?Math.min(.1,Math.max(0,now-folLast)/1000):0;folLast=now;
     let goal=0;if(k&&md&&md.bones.Head){height();goal=Math.min(0,md.bones.Head.getWorldPosition(folV).y-HY0)*k}
     folY+=(goal-folY)*(1-Math.exp(-dt/(goal>folY&&F.upSec?F.upSec:(F.smoothSec||.3))));if(Math.abs(folY)<1e-4&&!goal)folY=0;return folY}  // 25-1: 다시 올라갈 때(일어설 때)는 upSec 로 더 빨리
@@ -951,7 +951,7 @@ const Stage=(()=>{
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1008,6 +1008,9 @@ const View=(()=>{
 // 넘어가는 순간은 25단계 섞기(Stage.play blendMs). 3D 가 준비되지 않았거나 모션을 못 받으면 연출 없이 바로 대화로. 건너뛰기 = ④ 끝 상태로 바로.
 // 끝까지 보거나 건너뛰면 무빙 카드 시크릿 「첫 만남」(data/collection.json 의 firstMeet 칸). 값 data/config.json firstMeet, 문구 data/ui.json firstMeet
 const FirstMeet=(()=>{
+  const info={};let preloaded=false;
+  // 31-1: 처음 시작이라 연출이 나올 예정이면(firstMeet·오프닝 전) 온보딩이 떠 있는 동안 연출 장소의 360도 그림을 미리 받아 둠(텍스처만, 구는 연출 때 만듦)
+  function preload(){if(S.firstMeet||S.introDone)return;Promise.all([Stage.ready,dataReady]).then(([ok])=>{const sc=C().scene;if(!ok||S.firstMeet||!Stage.pano.has(sc))return;preloaded=true;Stage.pano.load(sc)})}
   let armed=false,on=false,pend=false,tok=0,T=[],el=null,then=null,replay=false,back=null,pinned=-1;
   const C=()=>(DATA.config&&DATA.config.firstMeet)||{};
   const later=(f,ms)=>T.push(setTimeout(f,ms));
@@ -1031,7 +1034,7 @@ const FirstMeet=(()=>{
   // ④ 대화 화면 자리로 돌아옴. 끝나면 원래 스타일로
   function shrink(ms){const st=$("#stage");if(!back)return;const s=rect($("#stageSlot")),c=(DATA.config&&DATA.config.stage)||{};
     st.style.transition=tr(ms,c.ease||"ease-in-out");put(st,{l:s.l+back.dl,t:s.t,w:s.w-back.dw,h:back.h});st.style.borderRadius="20px"}
-  function plain(){const st=$("#stage");st.classList.remove("fm");["transition","left","top","width","height","borderRadius"].forEach(k=>st.style[k]="");$("#stageSlot").style.height="";back=null;
+  function plain(){Stage.followOff(false);const st=$("#stage");st.classList.remove("fm");["transition","left","top","width","height","borderRadius"].forEach(k=>st.style[k]="");$("#stageSlot").style.height="";back=null;
     if(el){el.shade.classList.remove("on");el.veil.classList.remove("on");el.top.classList.remove("on");el.bot.classList.remove("on");el.skip.classList.remove("on")}}
   function bars(onOff,ms){const c=C(),st=$("#stage");st.style.setProperty("--fmBar",(c.barK!=null?c.barK:.11)*100+"%");st.style.setProperty("--fmBarMs",ms+"ms");el.top.classList.toggle("on",onOff);el.bot.classList.toggle("on",onOff)}
   const frame=yaw=>({...(c=>c.frame||{top:1.2,bottom:-.1,width:1.2,lift:.03})(C()),yaw});
@@ -1041,7 +1044,7 @@ const FirstMeet=(()=>{
     if(my!==tok)return;
     if(!ok)return finish(false);  // 3D 가 아직이거나 실패: 연출 없이 바로 대화
     if(!replay){S.firstMeet=Date.now();save()}
-    on=true;busy=true;if(S.room==="seoa")renderLog();build();
+    on=true;busy=true;if(S.room==="seoa")renderLog();build();Stage.followOff(true);  // 31-1: 연출 동안 x16 카메라 따라감 끔(대화 중 따라감은 그대로)
     const loads=Promise.all([Stage.xs(c.kick),Stage.xs(c.alert)]);
     pinned=Stage.pano.has(c.scene)?c.scene:-1;const pano=pinned>=0?Stage.pano.ready(c.scene):null;
     el.skip.textContent=UI("firstMeet.skip");el.skip.setAttribute("aria-label",UI("firstMeet.skipAria"));
@@ -1051,7 +1054,8 @@ const FirstMeet=(()=>{
     await wait(Math.round(fm/2));if(my!==tok)return;
     const got=await within(loads,c.loadWaitMs||4000);if(my!==tok)return;
     if(!got||!got[0]||!got[1])return end(false);  // 모션을 못 받음: 대화 화면으로 바로(카드 없음)
-    if(pano)await within(pano,c.panoWaitMs||2000);if(my!==tok)return;
+    const w0=performance.now();if(pano)await within(pano,c.panoWaitMs||2000);if(my!==tok)return;
+    info.panoWaitMs=Math.round(performance.now()-w0);info.preloaded=preloaded;  // 31-1: 검은 막 뒤에서 360도 그림을 기다린 시간(확인용)
     // ② 네온 골목, 넓은 구도에서 돌려차기. 카메라가 yawFrom → yawTo 로 천천히 돎
     showScene(c.scene);Stage.pano.show(c.scene,0);Stage.play(IDLE,{quiet:true,blendMs:0});Stage.frameTo(frame(c.yawFrom||0),0);
     el.veil.style.transitionDuration=Math.round(fm/2)+"ms";el.veil.classList.remove("on");
@@ -1082,7 +1086,7 @@ const FirstMeet=(()=>{
     S.col[id]=seenNow({scene:c.scene,outfit:outfitForScene(c.scene,Outfit.want())});save();Cards.capture(id);notifyNew(colBy(id));if(curTab==="album")renderAlbum(id)}
   // 시연 패널 초기화·장면 이동: 연출을 멈추고 원래 화면으로(카드·이어지는 일 없음)
   function stop(){tok++;then=null;pend=false;if(!on&&!T.length&&!back)return;T.forEach(clearTimeout);T=[];plain();if(pinned>=0){Stage.pano.done(pinned);pinned=-1}if(on){on=false;busy=false}}
-  return{arm,take,run,skip,stop,isOn:()=>on||pend};
+  return{arm,take,run,skip,stop,preload,info,isOn:()=>on||pend};
 })();
 
 // ───────────────────────── 화면 확대·카메라 다가가기 규칙 (17-1A) ─────────────────────────
