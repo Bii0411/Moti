@@ -41,7 +41,8 @@
     "x17": { "name": "돌려차기", "emo": "자신감" },
     "x18": { "name": "시계 보기", "emo": "냉담" },
     "x19": { "name": "입 가리고 웃기", "emo": "수줍음", "only": "gift" },
-    "x20": { "name": "손 인사", "emo": "기쁨", "only": "onboarding" }
+    "x20": { "name": "손 인사", "emo": "기쁨", "only": "onboarding" },
+    "x21": { "name": "뒤돌아보며 달리기", "emo": "긴장", "only": "prologue" }
   },
   "_xstageReserve": "따로 둔 XSTAGE 모션(액션 계열). 감정 태그 없음, 사이트에서 불러오지도 재생하지도 않음(몸짓 고르기·시연 패널에 안 나옴). 쓰려면 motions 에 이름·감정을 넣고 xstage 로 옮긴다. 파일은 motions/ 에 그대로 있음",
   "xstageReserve": {
@@ -69,7 +70,8 @@
     "x18": { "file": "motions/xstage_checking_watch.json", "from": 1.75, "to": 8.4, "skip": [4.43, 7.1], "fadeIn": 0.6, "fadeOut": 0.9, "inPlace": true },
     "m13": { "file": "motions/xstage_wave_and_laugh.json", "from": 3.3, "to": 5.4, "fadeIn": 0.5, "fadeOut": 0.5, "inPlace": true },
     "x19": { "file": "motions/xstage_shy_short_laugh.json", "from": 1.6, "to": 4.5, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 95 },
-    "x20": { "file": "motions/xstage_wave_hand.json", "from": 0.1, "to": 2.6, "fadeIn": 0.3, "fadeOut": 0.5 }
+    "x20": { "file": "motions/xstage_wave_hand.json", "from": 0.1, "to": 2.6, "fadeIn": 0.3, "fadeOut": 0.5 },
+    "x21": { "file": "motions/xstage_run_look_back.json", "from": 0.05, "inPlace": true }
   },
   "_faceEmotion": "감정 글자가 없는 답장(Claude 미리보기·예시 대사)은 표정 이름으로 감정을 대신한다. 몸짓은 감정으로 고르지 않는다(몸짓 고르기는 data/motion_keywords.json).",
   "faceEmotion": {

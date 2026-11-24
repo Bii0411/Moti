@@ -389,6 +389,11 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .fmbar{position:absolute;left:0;right:0;height:var(--fmBar,11%);z-index:6;background:#000;pointer-events:none;transition:transform var(--fmBarMs,.5s) ease-in-out}
 .fmbar.t{top:-1px;transform:translateY(-101%)}.fmbar.b{bottom:-1px;transform:translateY(101%)}
 .fmbar.on{transform:none}
+/* 37: 프롤로그 자막. 아래 띠 바로 위 가운데, 지문(.n)은 흐린 기울임, 대사(.s)는 굵게 */
+.fmcap{position:absolute;left:16px;right:16px;bottom:calc(var(--fmBar,11%) + 18px);z-index:6;text-align:center;color:#fff;font-size:15px;line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.85);opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .35s ease,transform .35s ease;text-wrap:balance}
+.fmcap.on{opacity:1;transform:none}
+.fmcap.n{color:rgba(255,255,255,.82);font-style:italic}
+.fmcap.s{font-weight:800;font-size:16px}
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
@@ -1059,9 +1064,15 @@ const FirstMeet=(()=>{
   function arm(){armed=!S.firstMeet&&!S.introDone}
   function take(){const a=armed;armed=false;return a&&!S.firstMeet}
   function build(){if(el)return el;const st=$("#stage"),mk=(t,c)=>{const e=document.createElement(t);e.className=c;return e};
-    el={shade:mk("div","fmshade"),veil:mk("div","fmveil"),top:mk("div","fmbar t"),bot:mk("div","fmbar b"),skip:mk("button","fmskip")};
+    el={shade:mk("div","fmshade"),veil:mk("div","fmveil"),top:mk("div","fmbar t"),bot:mk("div","fmbar b"),skip:mk("button","fmskip"),cap:mk("p","fmcap")};
     el.skip.type="button";el.skip.onclick=skip;
-    $(".app").appendChild(el.shade);st.append(el.veil,el.top,el.bot,el.skip);return el}
+    $(".app").appendChild(el.shade);st.append(el.veil,el.top,el.bot,el.cap,el.skip);return el}
+  // 37: 자막 한 줄. *…* = 지문(기울임), 그 밖 = 대사. 없으면 지움
+  function caption(t){if(!el)return;const c=el.cap;if(!t){c.classList.remove("on");return}
+    const n=/^\*(.*)\*$/.exec(t.trim());c.textContent=n?n[1]:t;c.className="fmcap "+(n?"n":"s");void c.offsetWidth;c.classList.add("on")}
+  // 37: 장면 목록(config firstMeet.beats). 없으면 31단계 순서(돌려차기 → 경계)
+  const beatsOf=c=>Array.isArray(c.beats)&&c.beats.length?c.beats:[{motion:c.kick,sec:c.kickSec||2.8,fadeOut:c.kickFadeOut,yawTo:c.yawTo,orbitMs:c.orbitMs},{motion:c.alert,sec:c.alertSec||1,from:c.alertFrom||1,blendMs:c.alertBlendMs||450}];
+  const linesOf=()=>((DATA.intro||{}).prologue||{}).lines||[];
   const rect=e=>{const r=e.getBoundingClientRect();return{l:r.left,t:r.top,w:r.width,h:r.height}};
   const put=(st,r)=>{st.style.left=r.l+"px";st.style.top=r.t+"px";st.style.width=r.w+"px";st.style.height=r.h+"px"};
   const tr=(ms,ease)=>["left","top","width","height","border-radius"].map(k=>`${k} ${ms}ms ${ease}`).join(",")+",background-image .6s";
@@ -1074,7 +1085,7 @@ const FirstMeet=(()=>{
   function shrink(ms){const st=$("#stage");if(!back)return;const s=rect($("#stageSlot")),c=(DATA.config&&DATA.config.stage)||{};
     st.style.transition=tr(ms,c.ease||"ease-in-out");put(st,{l:s.l+back.dl,t:s.t,w:s.w-back.dw,h:back.h});st.style.borderRadius="20px"}
   function plain(){Stage.followOff(false);const st=$("#stage");st.classList.remove("fm");["transition","left","top","width","height","borderRadius"].forEach(k=>st.style[k]="");$("#stageSlot").style.height="";back=null;
-    if(el){el.shade.classList.remove("on");el.veil.classList.remove("on");el.top.classList.remove("on");el.bot.classList.remove("on");el.skip.classList.remove("on")}}
+    if(el){el.shade.classList.remove("on");el.veil.classList.remove("on");el.top.classList.remove("on");el.bot.classList.remove("on");el.skip.classList.remove("on");el.cap.classList.remove("on")}}
   function bars(onOff,ms){const c=C(),st=$("#stage");st.style.setProperty("--fmBar",(c.barK!=null?c.barK:.11)*100+"%");st.style.setProperty("--fmBarMs",ms+"ms");el.top.classList.toggle("on",onOff);el.bot.classList.toggle("on",onOff)}
   const frame=yaw=>({...(c=>c.frame||{top:1.2,bottom:-.1,width:1.2,lift:.03})(C()),yaw});
   async function run(o={}){
@@ -1084,7 +1095,7 @@ const FirstMeet=(()=>{
     if(!ok)return finish(false);  // 3D 가 아직이거나 실패: 연출 없이 바로 대화
     if(!replay){S.firstMeet=Date.now();save()}
     on=true;busy=true;if(S.room==="seoa")renderLog();build();Stage.followOff(true);  // 31-1: 연출 동안 x16 카메라 따라감 끔(대화 중 따라감은 그대로)
-    const loads=Promise.all([Stage.xs(c.kick),Stage.xs(c.alert)]);
+    const beats=beatsOf(c),lines=linesOf(),loads=Promise.all(beats.map(b=>Stage.xs(b.motion)));
     pinned=Stage.pano.has(c.scene)?c.scene:-1;const pano=pinned>=0?Stage.pano.ready(c.scene):null;
     el.skip.textContent=UI("firstMeet.skip");el.skip.setAttribute("aria-label",UI("firstMeet.skipAria"));
     // ① 어두워짐 + 전체 화면 + 띠
@@ -1092,17 +1103,20 @@ const FirstMeet=(()=>{
     void el.shade.offsetWidth;el.shade.classList.add("on");el.veil.classList.add("on");grow(fm);bars(true,fm);el.skip.classList.add("on");
     await wait(Math.round(fm/2));if(my!==tok)return;
     const got=await within(loads,c.loadWaitMs||4000);if(my!==tok)return;
-    if(!got||!got[0]||!got[1])return end(false);  // 모션을 못 받음: 대화 화면으로 바로(카드 없음)
+    if(!got||got.some(x=>!x))return end(false);  // 모션을 못 받음: 대화 화면으로 바로(카드 없음)
     const w0=performance.now();if(pano)await within(pano,c.panoWaitMs||2000);if(my!==tok)return;
     info.panoWaitMs=Math.round(performance.now()-w0);info.preloaded=preloaded;  // 31-1: 검은 막 뒤에서 360도 그림을 기다린 시간(확인용)
-    // ② 네온 골목, 넓은 구도에서 돌려차기. 카메라가 yawFrom → yawTo 로 천천히 돎
+    // ② 연출 장소(37: 비 내리는 골목), 넓은 구도. 장면(beats)마다 몸짓 + 자막(data/seoa_intro.json prologue.lines[line]) + 카메라 yawTo
     showScene(c.scene);Stage.pano.show(c.scene,0);Stage.play(IDLE,{quiet:true,blendMs:0});Stage.frameTo(frame(c.yawFrom||0),0);
     el.veil.style.transitionDuration=Math.round(fm/2)+"ms";el.veil.classList.remove("on");
-    Stage.play(c.kick,{quiet:true,fadeOut:c.kickFadeOut});Stage.frameTo(frame(c.yawTo!=null?c.yawTo:18),c.orbitMs||4000);
-    await wait((c.kickSec||2.8)*1000);if(my!==tok)return;
-    // ③ 몸 낮춰 경계하기(낮춘 자세가 다 된 순간부터) → 대기 자세로 일어섬
-    Stage.play(c.alert,{quiet:true,at:c.alertFrom||1,blendMs:c.alertBlendMs||450});
-    await wait((c.alertSec||1)*1000);if(my!==tok)return;
+    for(const b of beats){
+      Stage.play(b.motion,{quiet:true,at:b.from,blendMs:b.blendMs,fadeOut:b.fadeOut});
+      if(b.yawTo!=null)Stage.frameTo(frame(b.yawTo),b.orbitMs||b.sec*1000);
+      caption(b.line!=null?lines[b.line]:null);
+      await wait((b.sec||2)*1000);if(my!==tok)return;
+    }
+    caption(null);
+    // ③ 대기 자세로 일어섬
     Stage.play(IDLE,{quiet:true,blendMs:c.standBlendMs||900});
     await wait(c.standMs||700);if(my!==tok)return;
     // ④ 바 1층(다시 보기는 지금 대화 장소), 띠가 걷히며 무대가 대화 화면 크기로
