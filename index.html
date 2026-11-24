@@ -509,7 +509,11 @@ let GIFT={moodBonus:{rare:10,from:"common"},pity:{count:10,min:"rare"},list:[]},
 // 26-1 무빙 카드: 처음 본 순간의 캐릭터·의상·이야기 줄기(main 또는 에피소드 id)·관계 단계를 같이 남기고(seenNow), 카드 그림은 cards.js 가 따로 저장
 let COL={items:[],grades:{},notify:{},gradeOrder:["common","rare","special"]};
 const colBy=id=>COL.items.find(x=>x.id===id);
-const seenNow=(o={})=>({at:Date.now(),scene:S.scene,char:"seoa",outfit:Outfit.want(),thread:Thread.cur(),stage:curStage(),...o});
+// 27: 장소와 의상은 세트. 에피소드 전용 장소(크리스마스 거리·드라큘라의 성 등)면 그 에피소드 의상, 아니면 지금 의상
+// (에피소드 장소인데 다른 옷, 에피소드 옷인데 다른 장소로 저장되던 것 막기)
+function outfitForScene(sc,cur){const ep=STORIES.find(x=>x.scene===sc&&x.outfit&&SCENES[sc]&&SCENES[sc].episode);if(ep)return ep.outfit;
+  const epKeys=new Set(STORIES.map(x=>x.outfit).filter(Boolean));if(cur&&epKeys.has(cur)&&!STORIES.some(x=>x.outfit===cur&&x.scene===sc))return "ops";return cur||"ops"}
+const seenNow=(o={})=>({at:Date.now(),scene:S.scene,char:"seoa",outfit:outfitForScene(S.scene,Outfit.want()),thread:Thread.cur(),stage:curStage(),...o});
 const pityLeft=()=>S.pity==null?GIFT.pity.count:S.pity;
 const gBy=id=>GIFTS.find(g=>g.id===id);
 // 캐릭터 목록은 data/characters.json(8-A). loadData 가 채운다. REC = 추천 탭 순서
