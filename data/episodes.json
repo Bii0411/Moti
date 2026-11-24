@@ -100,7 +100,8 @@
             "\"…메리 크리스마스, 사장님.\"",
             "*서아가 트리 밑 작은 상자를 발끝으로 밀어 준다.* \"그건, 이따가 열어.\""
           ],
-          "cues": [{"at":0,"motion":"c01","face":"soft"},{"at":1,"face":"soft"},{"at":2,"motion":["m12","c05"],"face":"shy"},{"at":3,"face":"soft"},{"at":4,"motion":"m09","face":"fun"}]
+          "cues": [{"at":0,"motion":"c01","face":"soft"},{"at":1,"face":"soft"},{"at":2,"motion":["m12","c05"],"face":"shy"},{"at":3,"face":"soft"},{"at":4,"motion":"m09","face":"fun"}],
+          "card": "e01"
         }
       }
     },

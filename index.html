@@ -484,7 +484,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 <script src="film.js"></script>
 <script src="photos.js"></script>
 <script src="seoaphoto.js"></script>
-<script src="cards.js"></script>
+<script src="cards.js?v=42"></script>
 <script src="onboarding.js"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
@@ -767,6 +767,7 @@ const Stage=(()=>{
     if(!md){if(w&&h)R.render(scene,cam);return}
     const t=now/1000;let id=null,mt=0;
     // 10-B 촬영 화면: cur.loop = 끝나면 처음부터 다시, cur.hold = 그 순간에 멈춤(멈춘 시각을 붙잡아 둠). 끝난 몸짓은 lastEnd 에 남김(끝난 지 1초 안이면 촬영 화면이 이어받음)
+    if(cur&&!XS[cur.id]&&!RIG.M[cur.id])cur=null;  // 42: 모르는 몸짓 id(예전 cards.js 캐시가 카드 id 를 몸짓으로 넘김 등)면 멈춤 — 매 프레임 오류로 무대가 멈추지 않게
     if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
       mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?(cur.win?xsCyc({...XS[cur.id],...cur.win},xsCache[cur.id]?xsCache[cur.id].duration:null)*(cur.win.repeat||XS[cur.id].repeat||1):xsDur(cur.id)):RIG.M[cur.id].d;  // 42: cur.win = 이번 재생만 바꾼 구간 값(걷기)
       if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
@@ -1445,7 +1446,7 @@ async function askServer(cid,text){
     // v2 요청: 최근 16턴, 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
     const hist=talkOf(cid).slice(0,-1).slice(-32).map(m=>({r:m.r,t:turnText(m)}));
     const pn=photoNote(cid,hist);
-    const j=await postChat({char:cid,message:text,history:hist,state:cid==="seoa"?story():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
+    const j=await postChat({char:cid,message:text,history:hist,state:cid==="seoa"?chatState():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
     if(j&&typeof j.dialogue==="string"&&isFiller(j.dialogue)&&lastRaw)lastRaw.error="filler";  // 시연 패널 「마지막 답장」 출처
     else if(j&&pn)SeoaPhoto.noteDone();
     return readReply(j);
@@ -1458,6 +1459,10 @@ async function askServer(cid,text){
   if(j&&pn)SeoaPhoto.noteDone();
   return readReply(j);
 }
+// 42: /chat 에 보내는 이야기 상태. 에피소드 단계가 있는 에피소드 중이면 episode(에피소드 id)·episode_stage(1~6)·episode_stage_name·location(그 에피소드 장소 이름)을 더함.
+// stage·affection 은 본 이야기 값 그대로(서버가 에피소드를 아직 몰라도 지금처럼 동작). 서버에 넣을 블록은 docs/server-sync.md
+function chatState(){const st=story();if(!EpStage.on())return st;const sc=SCENES[S.scene];
+  return{...st,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location}}
 // 서아가 사진을 보낸 뒤(12) 다음 요청: 대화 기록 끝(이번 내 메시지 앞)에 원고 5절의 한 줄을 서아 쪽 기록처럼 덧붙임. 화면에는 보이지 않음
 // 34-1: 사진이 다시 들어올 때 인사 한 줄보다 앞(부재중 사진)이면 기록 끝의 인사 한 줄 앞에 넣음(실제 순서대로)
 function photoNote(cid,hist){const n=cid==="seoa"&&SeoaPhoto.note();if(!n)return n;
@@ -2430,7 +2435,7 @@ const EpStage={
   // 서버 v1·서버 없음: 판정 대신 judgeEvery 턴마다 noServerGain 만큼(플래그 없음)
   turn(){const s=this.st();if(!s)return;s.turns=(s.turns||0)+1;save();if(s.turns%judgeEvery()===0)this.judged(this.cfg().noServerGain||0,[])},
   // /judge 에 보낼 상태: 본 이야기 상태를 바탕으로 단계·호감·플래그만 에피소드 값(본 이야기 사건·출발 일수는 빼고)
-  judgeState(){const s=this.st();return{...story(),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},
+  judgeState(){const s=this.st();return{...chatState(),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},  // 42-C: episode 신호도 같이
   // 시연 패널: 단계 n 으로(호감 = 그 단계 기준, 플래그·신호 비움). 4단계 이상이면 자취방이 열리고, dressFrom 이상이면 자취방 옷
   // 자취방 옷(outfitByScene)을 입을 때인지: 장면에서 갈아입은 뒤(dressed) 또는 dressFrom 단계부터
   dressed(){const s=this.st(),C=this.cfg();return !s||!!s.dressed||this.n()>=(C.dressFrom||5)},
@@ -2486,8 +2491,9 @@ const EpScene=(()=>{
     running=false;busy=false;ep.play=null;(ep.seen||(ep.seen=[])).includes(n)||ep.seen.push(n);save();renderLog();
     if(sc.card)award(sc.card);
     const nx=queue.shift();if(nx)run(nx)}
-  // 장면이 끝나면 주는 카드(42-C)
-  function award(id){}
+  // 장면이 끝나면 주는 카드(42-C, data/collection.json). 장소·의상은 카드에 적힌 값(자취방·자취방 옷), 관계 단계는 에피소드 단계
+  function award(id){const it=colBy(id);if(!it||S.col[id])return;
+    S.col[id]=seenNow({scene:it.scene!=null?it.scene:S.scene,outfit:it.outfit||Outfit.want(),stage:EpStage.n(),line:""});save();Cards.capture(id);notifyNew(it);if(curTab==="album")renderAlbum(id)}
   // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
   function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in")}
   // 다시 들어왔을 때 끊긴 장면 이어 가기
