@@ -13,7 +13,10 @@ const SVG={
   share:'<path d="M12 3.5v11M8 7.5l4-4 4 4"/><path d="M7.5 10.5H6a1.5 1.5 0 0 0-1.5 1.5v7A1.5 1.5 0 0 0 6 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1.5"/>',
   heart:'<path d="M12 19.5s-7.5-4.6-7.5-10.1A4.1 4.1 0 0 1 12 7.1a4.1 4.1 0 0 1 7.5 2.3c0 5.5-7.5 10.1-7.5 10.1z"/>',
   trash:'<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/>',
-  down:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/>'
+  down:'<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/>',
+  // 41: 포즈(세로 카드 안 사람 + 오른쪽 위 작은 반짝임) · 카메라(「이 포즈로 찍기」)
+  pose:'<rect x="4" y="5" width="11.5" height="15.5" rx="2"/><circle cx="9.75" cy="10.3" r="1.9"/><path d="M6.6 17.2c.6-1.9 1.8-2.8 3.15-2.8s2.55.9 3.15 2.8"/><path d="M18.6 3.2l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z"/>',
+  camera:'<path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9.5A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13.3" r="3.4"/>'
 };
 const icon=(k,cls)=>`<svg class="${cls||"ic"}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[k]}</svg>`;
 
@@ -113,15 +116,16 @@ const Cam=(()=>{
       <div class="cammid" id="camMid"><div class="camv" id="camV"><div class="bgdim" id="camDim"></div><div class="camgl" id="camGl"></div>
         <div class="camfull" id="camFull"><p></p><div><button data-c="clear"></button><button data-c="grow"></button></div></div>
         <span class="camchip" id="camChip"></span><div class="camflash" id="camFlash"></div></div></div>
-      <div class="cambot"><button class="cambtn" data-c="pause" id="camPause"></button><button class="camshut" data-c="shoot"><i></i></button><button class="camlast" data-c="last" id="camLast"></button></div>`;
+      <div class="cambot"><div class="camleft"><button class="cambtn" data-c="pause" id="camPause"></button><button class="cambtn campose" data-c="pose" id="camPose">${icon("pose")}<span></span></button></div><button class="camshut" data-c="shoot"><i></i></button><button class="camlast" data-c="last" id="camLast"></button></div>`;
     $(".app").appendChild(root);fr=root.querySelector("#camV");gl=root.querySelector("#camGl");
     root.querySelector('[data-c="close"]').setAttribute("aria-label",UI("cam.ariaClose"));
     root.querySelector('[data-c="shoot"]').setAttribute("aria-label",UI("cam.ariaShutter"));
     root.querySelector('[data-c="last"]').setAttribute("aria-label",UI("cam.ariaLast"));
+    root.querySelector("#camPose span").textContent=UI("pose.camBtn");  // 41: 멈춤 옆 「포즈」 → 모은 카드에서 골라 그 포즈를 반복
     root.querySelector('[data-c="clear"]').textContent=UI("photoFull.clear");root.querySelector('[data-c="grow"]').textContent=UI("photoFull.grow");
     root.querySelector("#camFull p").textContent=UI("photoFull.notice");
     root.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;const k=b.dataset.c;
-      if(k==="close")close();else if(k==="shoot")shutter();else if(k==="pause")togglePause();
+      if(k==="close")close();else if(k==="shoot")shutter();else if(k==="pause")togglePause();else if(k==="pose")Pose.sheet("cam");
       else if(k==="last"){if(Photos.count())PhotoUI.sheet()}else if(k==="clear")PhotoUI.sheet();else if(k==="grow")PhotoUI.fullSheet()});
     // 두 손가락 확대 · 한 손가락 돌기 (포인터 이벤트, 마우스 끌기도 같음). 페이지 확대·스크롤로 새지 않게 touch-action:none + 기본 동작 막기
     fr.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;try{fr.setPointerCapture(e.pointerId)}catch(err){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});base()});
@@ -162,17 +166,18 @@ const Cam=(()=>{
   const motionName=x=>x?(x.name||MNAME[x.id]||x.id):"";
   function render(){if(!root)return;
     root.querySelector("#camCount").textContent=UI("cam.count",{n:Photos.count(),cap:Photos.cap()});
-    root.querySelector("#camChip").textContent=info?UI(paused?"cam.paused":"cam.loop",{name:motionName(info)}):UI("cam.idle");
+    root.querySelector("#camChip").textContent=info?UI(paused?"cam.paused":info.pose?"pose.chip":"cam.loop",{name:motionName(info)}):UI("cam.idle");  // 41: 고른 포즈면 「{이름} · 부탁한 포즈」
     const pb=root.querySelector("#camPause");pb.innerHTML=icon(paused?"play":"pause");pb.disabled=!info;pb.setAttribute("aria-label",UI(paused?"cam.ariaPlay":"cam.ariaPause"));
     // 서아가 보낸 사진(12)은 빼고 내가 찍은 마지막 사진. 24: 주석 안에 묻혀 있던 줄을 되살림. 사진이 날아가는 중엔 도착할 때 바꿈
     const L=Photos.list().find(m=>m.kind!=="received"),lb=root.querySelector("#camLast");
     if(!flying){lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L)}
     root.querySelector("#camFull").classList.toggle("on",Photos.full())}
-  function open(){
+  // o.pose: 41 포즈에서 고른 몸짓({id,sp,name,ref,f,pose}). 없으면 예전처럼 열기 직전 recentMs 안의 몸짓
+  function open(o){
     if(on)return;if(!root)build();
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
-    info=Stage.recentMotion(C().recentMs!=null?C().recentMs:1000);paused=false;held=null;Stage.camLoop(info);
+    info=o&&o.pose?o.pose:Stage.recentMotion(C().recentMs!=null?C().recentMs:1000);paused=false;held=null;Stage.camLoop(info);if(o&&o.pose&&o.pose.f)Stage.setFace(o.pose.f);
     const [pa,pb]=pLim();yaw=C().startYawDeg||0;zoom=clamp(C().startZoom||0,0,1);pitch=clamp(C().startPitchDeg!=null?C().startPitchDeg:0,pa,pb);ptrs.clear();pinch=drag=null;
     const sc=SCENES[S.scene]||SCENES[0];fr.style.backgroundImage=`url(${sc.img})`;Shot.loadImg(sc.img);
     const d=$("#bgdim"),cd=root.querySelector("#camDim");if(d){cd.className=d.className;cd.style.cssText=d.style.cssText}
@@ -190,6 +195,8 @@ const Cam=(()=>{
     if(h){react(h.r,"",false,Fx.first(h.mid));firstSeen(h.mid)}else faceReset();
     if(unlockQ.length&&!unlockBusy)setTimeout(unlockNext,h&&h.mid?Stage.dur(h.mid)*1000+700:600);
   }
+  // 41: 촬영 중에 포즈를 바꿈(멈춤을 풀고 처음부터 반복)
+  function setPose(x){if(!on||!x)return;info=x;paused=false;Stage.camLoop(null);Stage.camLoop(info);if(x.f)Stage.setFace(x.f);render()}
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
   // 셔터 소리: 짧은 잡음 두 덩어리(찰-칵). 아이폰은 누른 그 순간(같은 작업) 안에서 소리 장치를 깨워야 해서 셔터 처리 맨 앞에서 부름
   let ac=null;
@@ -231,7 +238,7 @@ const Cam=(()=>{
     busy=false;render();
   }
   Photos.onChange(()=>{if(on)render()});
-  return{open,close,isOpen:()=>on,hold:x=>{held=x},setCam,render,sound,audio,state:()=>({yaw,pitch,zoom,info,paused}),view:(y,z,p)=>{yaw=y;zoom=z;if(p!=null)pitch=p}};
+  return{open,close,setPose,isOpen:()=>on,hold:x=>{held=x},setCam,render,sound,audio,state:()=>({yaw,pitch,zoom,info,paused}),view:(y,z,p)=>{yaw=y;zoom=z;if(p!=null)pitch=p}};
 })();
 
 // ───────────────────────── 작은 창(24) ─────────────────────────
