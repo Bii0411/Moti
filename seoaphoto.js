@@ -197,7 +197,9 @@ const SeoaPhoto=(()=>{
     const lt=lastTalk();
     // 32-1: 들어가는 순간(대화방이 처음 그려지는 같은 작업 안에서) 그 시각 자리에 말풍선·시각과 사진 크기 자리를 먼저 넣음. 사진 그림은 만들어지면 조용히 채움(fill).
     //   새 메시지 알림·소리·자동 스크롤 없음. 기다리던 단계 사진이 있어도 오랜만 사진은 그보다 앞(지난 시각)에 들어감
-    if(curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.some(p=>p.type==="away")){
+    // 46: 부재중 사진은 본 이야기로만(특별 에피소드 대화방에 들어올 때는 안 옴)
+    const main=typeof Thread==="undefined"||Thread.cur()==="main";
+    if(main&&curStage()>=(A.minStage||3)&&lt&&Date.now()-lt>=(A.hours||6)*3600e3&&!s.pend.some(p=>p.type==="away")){
       const x=resolve({type:"away",at:awayAt(lt)});
       if(x){x.pid=Photos.newId();s.pend.unshift(x);insertMsg({r:"ph",t:x.msg,at:x.at,pid:x.pid,away:1,wait:1},"seoa");save();return kick(A.delayMs!=null?A.delayMs:300)}}
     if(s.pend.length)kick(A.delayMs||1500)}
