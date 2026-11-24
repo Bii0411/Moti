@@ -36,7 +36,7 @@ const SeoaPhoto=(()=>{
   async function make(spec){
     await Stage.ready;
     const P={...(((DATA.photos||{}).image)||{}),...(spec.image||{})},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img);
+    const K=spec.K||((D().kinds||{})[spec.shot])||{top:1.07,bottom:.6,width:.46},sc=SCENES[spec.scene]||SCENES[0],img=await Shot.loadImg(sc.img),pano=await Stage.pano.ready(SCENES[spec.scene]?spec.scene:0);  // 30: 360도 배경
     // 26-2: 다른 의상 모델은 그리는 동안 붙잡아 둠(내려놓기 prune 에서 빠짐). 다 그리면 놓고, 쓰지 않으면 바로 내려놓음
     const pin=spec.outfit&&spec.outfit!==Stage.outfitNow()?spec.outfit:null;if(pin)Stage.use(pin,1);
     try{
@@ -45,12 +45,12 @@ const SeoaPhoto=(()=>{
     const mt=(spec.at!=null?spec.at:moment(mid))/100*Stage.dur(mid),ff=filmShot(mid),faces=K.faces||["soft"],face=spec.face||(ff&&faces.includes(ff.face)?ff.face:pick(faces));
     const yaw=pick(K.yaw)||0,shift=pick(K.shift)||0,bgX=pick(K.bgX);
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img)Shot.cover(g,img,W,H,bgX!=null?bgX:.5,.4);Shot.dimLayer(g,W,H);
+    g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img&&!pano){Shot.cover(g,img,W,H,bgX!=null?bgX:.5,.4);Shot.dimLayer(g,W,H)}
     const ok=Stage.still(mid,mt,face,()=>{
       const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone(),vw=cam.view?{...cam.view}:null;
       try{if(vw)cam.clearViewOffset();R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H,K,yaw,shift);
         if(K.lens)Stage.aimAt(cam.position,K.lens);  // 셀카: 목·머리·눈을 렌즈 쪽으로
-        R.render(scene,cam);g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
+        const back=pano?Stage.pano.use(SCENES[spec.scene]?spec.scene:0):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H)}  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
       finally{R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;if(vw)cam.setViewOffset(vw.fullWidth,vw.fullHeight,vw.offsetX,vw.offsetY,vw.width,vw.height);cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq)}
     },{shadow:(((DATA.config||{}).camera||{}).photo||{}).shadow||{},place:sc.name,model});
     if(!ok)throw new Error("서아 모델이 아직 없음");

@@ -78,13 +78,13 @@ const Shot=(()=>{
   // 지금 3D 장면을 사진 크기로 한 번 더 그려서 배경 위에 얹음. setCam(cam,aspect) = 카메라 자리(촬영 화면의 지금 구도)
   async function take(sceneIdx,setCam,o={}){
     const P=PCFG().image||{},A=P.aspect||[3,4],H=P.longPx||1440,W=Math.round(H*A[0]/A[1]);
-    const sc=SCENES[sceneIdx]||SCENES[0],img=await loadImg(sc.img);
+    const sc=SCENES[sceneIdx]||SCENES[0],img=await loadImg(sc.img),pano=await Stage.pano.ready(SCENES[sceneIdx]?sceneIdx:0);  // 30: 360도 배경이 있는 장소는 3D 장면 안의 구가 배경
     const t0=performance.now(),c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img)cover(g,img,W,H,.5,.4);dimLayer(g,W,H);
+    g.fillStyle="#140a24";g.fillRect(0,0,W,H);if(img&&!pano){cover(g,img,W,H,.5,.4);dimLayer(g,W,H)}
     const {R,scene,cam}=Stage.three(),pr=R.getPixelRatio(),sz=R.getSize(new THREE.Vector2()),asp=cam.aspect,kp=cam.position.clone(),kq=cam.quaternion.clone();
     if(o.shadow)Stage.shadow(true,(((DATA.config||{}).camera||{}).photo||PCFG().camera||{}).shadow);
     R.setPixelRatio(1);R.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix();setCam(cam,W/H);
-    R.render(scene,cam);g.drawImage(R.domElement,0,0,W,H);  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
+    const back=pano?Stage.pano.use(SCENES[sceneIdx]?sceneIdx:0):null;try{R.render(scene,cam)}finally{if(back)back()}g.drawImage(R.domElement,0,0,W,H);  // 같은 작업 안에서 바로 옮겨 그림(그림판이 지워지기 전)
     R.setPixelRatio(pr);R.setSize(sz.x,sz.y,false);cam.aspect=asp;cam.updateProjectionMatrix();cam.position.copy(kp);cam.quaternion.copy(kq);
     if(o.shadow)Stage.shadow(false);
     if(o.onCanvas)try{o.onCanvas(c)}catch(e){console.error(e)}  // 24: 다 그린 사진(줄이기 전)을 촬영 화면의 「날아가는 사진」으로
@@ -175,7 +175,7 @@ const Cam=(()=>{
     const sc=SCENES[S.scene]||SCENES[0];fr.style.backgroundImage=`url(${sc.img})`;Shot.loadImg(sc.img);
     const d=$("#bgdim"),cd=root.querySelector("#camDim");if(d){cd.className=d.className;cd.style.cssText=d.style.cssText}
     on=true;root.classList.add("on");root.setAttribute("aria-hidden","false");layout();
-    Stage.borrow(gl,null,tick);Stage.shadow(true,C().shadow);
+    Stage.borrow(gl,null,tick,{pano:S.scene});Stage.shadow(true,C().shadow);  // 30: 360도 배경이면 끌어서 돌릴 때 배경도 같이 돎
     document.addEventListener("gesturestart",stopG,{passive:false});document.addEventListener("gesturechange",stopG,{passive:false});
     render();
   }

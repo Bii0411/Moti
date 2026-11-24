@@ -56,6 +56,8 @@
       "fly": { "ms": 400, "ease": "cubic-bezier(0.4, 0, 0.2, 1)", "endOpacity": 0.7, "bounceMs": 260, "bounceScale": 1.14 }
     }
   },
+  "_pano": "360도 배경(30단계). 장소에 pano 그림이 있을 때(data/seoa_story.json locations) 서아를 둘러싼 구. height = 구 중심 높이(m, 그림 수평선 = 카메라 눈높이. 서아 키 1.72m 기준 평소 구도 눈높이 약 1.43), radius = 구 반지름(m, 카메라가 보는 거리 20m 안). 중심보다 height 넘게 아래는 바닥(y=0) 평면으로 눌러 서아 발이 그림 바닥 위에 선다. height 를 올리면 그림 속 공간이 서아보다 작아 보이고(서아가 커 보임), 내리면 반대. fadeMs = 장소가 바뀔 때 구가 나타나고 사라지는 시간(배경 그림 전환 .6초와 같게). 주소 뒤 ?pano=off 면 360도 없이 평평한 그림",
+  "pano": { "height": 1.43, "radius": 12, "fadeMs": 600 },
   "_stage": "몸짓 연출(17-C·D, 17-1A). 확대 = 3D 칸 높이를 growMs 동안 「3D 칸 가로 폭 × bigAspect」까지 키우되 화면 높이의 bigMaxRatio 를 넘지 않게(대화 목록이 minLogPx 아래로 줄면 그만큼만). 몸짓은 커지기 시작하고 motionDelayMs 뒤 시작, 끝나고 backDelayMs 뒤 shrinkMs 동안 되돌림. ease = 크기 곡선(CSS). 확대하는 때: 관계 단계 상승 대표 몸짓(늘)·선물 반응·레어/시크릿 몸짓을 처음 볼 때, 내 메시지 zoomCooldownTurns 턴에 한 번까지(단계 상승은 쿨다운과 상관없이 확대하고 쿨다운을 다시 셈). 쿨다운 안이거나 일반 몸짓을 처음 볼 때·결정적 순간은 화면 그대로 카메라만 pushIn(평소 구도의 8%)만큼 pushInMs 동안 다가갔다가 몸짓이 끝나고 backDelayMs 뒤 pushBackMs 동안 돌아옴. 오프닝·특별 에피소드 첫 장면·평소 답장은 그대로. xsFadeIn·xsFadeOut(25) = XSTAGE 모션 처음·끝에 기본 자세와 섞는 시간(초, 예전 0.5·0.7. 몸짓마다 data/motions.json xstage 의 fadeIn·fadeOut 이 우선). motionBlendMs(25) = 새 몸짓을 시작할 때 지금 자세(대기 몸짓 중간·앞 몸짓 중간)에서 섞으며 넘어가는 시간(ms, 0 = 섞지 않음).",
   "_notify": "다른 캐릭터가 먼저 말 거는 알림(6-C). 알림 사이 최소 간격 minGapMs(3분) + 0~jitterMs 무작위, 헤더에 보이는 시간 showMs. 예전에는 45~75초마다였다. 문구는 data/ui.json notify",
   "notify": { "minGapMs": 180000, "jitterMs": 30000, "showMs": 3000 },
