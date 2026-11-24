@@ -551,8 +551,10 @@ let COL={items:[],grades:{},notify:{},gradeOrder:["common","rare","special"]};
 const colBy=id=>COL.items.find(x=>x.id===id);
 // 27: 장소와 의상은 세트. 에피소드 전용 장소(크리스마스 거리·드라큘라의 성 등)면 그 에피소드 의상, 아니면 지금 의상
 // (에피소드 장소인데 다른 옷, 에피소드 옷인데 다른 장소로 저장되던 것 막기)
-function outfitForScene(sc,cur){const ep=STORIES.find(x=>x.scene===sc&&x.outfit&&SCENES[sc]&&SCENES[sc].episode);if(ep)return ep.outfit;
-  const epKeys=new Set(STORIES.map(x=>x.outfit).filter(Boolean));if(cur&&epKeys.has(cur)&&!STORIES.some(x=>x.outfit===cur&&x.scene===sc))return "ops";return cur||"ops"}
+function outfitForScene(sc,cur){const inEp=x=>x.scene===sc||(x.places||[]).includes(sc);
+  const ep=STORIES.find(x=>inEp(x)&&x.outfit&&SCENES[sc]&&SCENES[sc].episode);if(ep)return (ep.outfitByScene||{})[sc]||ep.outfit;  // 40: 장소별 의상
+  const fits=k=>STORIES.some(x=>inEp(x)&&(x.outfit===k||Object.values(x.outfitByScene||{}).includes(k)));
+  const epKeys=new Set(STORIES.flatMap(x=>[x.outfit,...Object.values(x.outfitByScene||{})]).filter(Boolean));if(cur&&epKeys.has(cur)&&!fits(cur))return "ops";return cur||"ops"}
 const seenNow=(o={})=>({at:Date.now(),scene:S.scene,char:"seoa",outfit:outfitForScene(S.scene,Outfit.want()),thread:Thread.cur(),stage:curStage(),...o});
 const pityLeft=()=>S.pity==null?GIFT.pity.count:S.pity;
 const gBy=id=>GIFTS.find(g=>g.id===id);
@@ -591,7 +593,8 @@ const Outfit={
   cfg:()=>(DATA.config&&DATA.config.outfits)||{files:{ops:"seoa_vroid.glb?v=20261124b"},comfortStage:3},
   url(k){const f=this.cfg().files||{};return f[k]||f.ops||"seoa_vroid.glb"},
   // 16: 본 이야기의 흰 옷은 친해진 뒤(comfortStage) 와인 바(privatePlaces 장소)에서만. 배경과 세트
-  want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit])return S.epOutfit;  // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
+  want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit]){const e=typeof Thread!=="undefined"&&Thread.ep(),bs=e&&e.outfitByScene&&e.outfitByScene[S.scene];return bs&&(this.cfg().files||{})[bs]?bs:S.epOutfit}  // 40: 에피소드 안 장소별 의상(outfitByScene)
+  // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
 const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
   // 지금 상황에 맞는 의상으로. 처음 흰 옷으로 바뀌는 순간에는 서아 한마디(data/ui.json outfit.firstPrivate)
   sync(){const k=this.want();if(typeof Stage!=="undefined"&&Stage.outfit)Stage.outfit(k);
@@ -1231,7 +1234,7 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;Stage.pano.show(i);$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
 let sceneBackT;
-function setScene(i,o){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene])i=e.scene}  // 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
+function setScene(i,o){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene]&&!(e.places||[]).includes(i))i=e.scene}  // 40: 에피소드 places 안에서는 장소 이동 허용 · 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
   if(!SCENES[i])i=0;S.scene=i;S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);if(SCENES[i].name)story().location=SCENES[i].name;
   // 39: o.fade = 대화 중 장소가 바뀜 → 어두워졌다 밝아지는 전환(Place). 의상도 어두운 동안 바꿈. 돌려주는 약속은 새 장소로 바뀐 순간(밝아지기 시작) 풀림
   if(o&&o.fade)return Place.go(i,{dark:!!o.dark,then:()=>{if(typeof Outfit!=="undefined")Outfit.sync()}});
@@ -2291,7 +2294,7 @@ function runOpening(I,done){
     if(Thread.cur()!==th)return;
     addMsg("c",t,{intro:true},"seoa");
     const cue=(I.cues||[]).find(c=>c.at===k);
-    if(cue&&cue.scene!=null)setScene(cue.scene);
+    if(cue&&cue.scene!=null)setScene(cue.scene,{fade:true});  // 40: 첫 장면 중 장소 이동은 어두워졌다 밝아지는 전환
     if(S.room==="seoa"&&curTab==="chat"&&!Cam.isOpen()){if(cue&&cue.motion)Stage.play(cue.motion);if(cue&&cue.face){Stage.setFace(cue.face);faceReset()}const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
     if(k===P.length-1){busy=false;renderLog();if(done)done()}
   },400+k*gap)));
@@ -2305,7 +2308,7 @@ const Thread={
   // 다른 줄기로. 처음 들어가는 줄기면 true
   go(to){if(to===this.cur())return false;introT.forEach(clearTimeout);introT=[];busy=false;
     this.save();const t=(S.threads||{})[to],st=story();S.thread=to;
-    if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?e0.scene:t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
+    if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?((e0.places||[]).includes(t.scene)?t.scene:e0.scene):t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
     const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");return !t},
   // 대화방 머리의 「본 이야기로」 단추(에피소드 중일 때만)

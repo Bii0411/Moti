@@ -15,7 +15,8 @@
     { "name": "비 내리는 골목", "img": "bg_seoa_rain.jpg" },
     { "name": "바 옥상", "img": "bg_seoa_rooftop.jpg" },
     { "name": "드라큘라의 성", "img": "bg_seoa_castle.jpg", "episode": true },
-    { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "episode": true }
+    { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "episode": true },
+    { "name": "서아의 자취방", "img": "bg_seoa_roof.jpg", "temp": true, "episode": true }
   ],
   "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓",
   "ban": ["m14", "m16", "m22"],
