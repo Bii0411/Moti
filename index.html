@@ -1331,7 +1331,7 @@ function unlockedIds(){
   (S.unlocked||[]).forEach(id=>set.add(id));
   // 25: 판정·사건 묶음에 나중에 더한 몸짓(protect 의 x16 등)은 그 묶음의 몸짓 하나라도 이미 열렸으면 같이 열림(예전 저장값)
   for(const sec of ["flag","event"])for(const k in U[sec]||{}){const M=U[sec][k].motions||[];if(M.some(id=>(S.unlocked||[]).includes(id)))M.forEach(id=>set.add(id))}
-  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id));
+  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
 }
 
 // ───────────────────────── 관계 6단계 · 판정 · 해금 ─────────────────────────
@@ -1470,11 +1470,15 @@ const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!r
 function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
 // 답장의 지문: v2 action + 예전 형식의 *…* 부분
 const actionText=v=>[v.action||"",...msgParts(v.line).filter(p=>p.k==="n").map(p=>p.x)].join(" / ");
-// 이번 답장 몸짓: ① 서버가 준 몸짓(해금된 것만) → ② 지문의 행동 단어(먼저 나온 것) → ③ 없으면 null(대기 동작 유지)
+// 이번 답장 몸짓: ⓪ 내 메시지의 작별 인사 단어(34, keywords mine) → ① 서버가 준 몸짓(해금된 것만) → ② 지문의 행동 단어(먼저 나온 것) → ③ 없으면 null(대기 동작 유지)
 const MOTION_LOG=[];  // 확인용: 턴마다 지문과 고른 몸짓
-function pickMotion(want,act){
+function pickMotion(want,act,mine){
   const ok=pickable();let r={mid:null,by:"없음"};
-  if(want&&ok.includes(want))r={mid:want,by:"서버"};
+  if(mine)for(const k of DATA.keywords.keywords||[]){if(!k.mine||!ok.includes(k.id))continue;
+    let t=String(mine);for(const n of k.mineNot||[])t=t.split(n).join(" ".repeat(n.length));
+    const w=k.mine.find(x=>t.includes(x));if(w){r={mid:k.id,by:"내 말",word:w};break}}
+  if(r.mid){}
+  else if(want&&ok.includes(want))r={mid:want,by:"서버"};
   else{let at=Infinity;
     for(const k of DATA.keywords.keywords||[]){if(!ok.includes(k.id))continue;
       let t=act;for(const n of k.not||[])t=t.split(n).join(" ".repeat(n.length));  // not 에 든 말은 지움 (예: 코웃음 속 웃)
@@ -1553,7 +1557,7 @@ async function send(text){
   finishReveal();  // 앞 답장이 아직 나오는 중이면 마저 다 보여 주고 보냄
   const P=perfStart();
   const prevAt=room==="seoa"?chatOf("seoa").reduce((t,m)=>(m.r==="u"||m.r==="c"||m.r==="g"||m.r==="ph")&&m.at?Math.max(t,m.at):t,0):0;  // 17-1B: 다시 만남
-  $("#inp").value="";autoGrow();IdleWatch.reset();addMsg("u",text,null,room);busy=true;renderLog();
+  $("#inp").value="";autoGrow();IdleWatch.reset();Greet.cancel("send");addMsg("u",text,null,room);busy=true;renderLog();
   if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;addReply(line,null,room);perfEnd(P);return}
   if(!Cam.isOpen())Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저). 촬영 중엔 촬영 화면 몸짓 그대로(10-B)
   P.typing=performance.now();
@@ -1581,7 +1585,7 @@ async function send(text){
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){setScene(v.scene);addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa")}
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
-  let mid=pickMotion(v.motion,actionText(v));
+  let mid=pickMotion(v.motion,actionText(v),text);
   // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
   const keyM=Fx.key(text,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})};
@@ -1741,7 +1745,7 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0});
+    Cards.clear();Object.assign(S,{bond:0,col:{},pity:null,giftNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null});
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
@@ -2167,6 +2171,7 @@ function openRoom(cid){
   $("#fnBtn").style.display=cid==="seoa"?"":"none";if(cid!=="seoa")Fn.set(false);$("#quick").style.display=cid==="seoa"?"":"none";
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name);
   placeStage();renderLog();renderUnread();
+  if(cid==="seoa")Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
   if(cid==="seoa")SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
 }
@@ -2250,6 +2255,7 @@ const IdleWatch=(()=>{
     if($("#inp").value.length)return "typing";
     if(document.activeElement===$("#inp"))return "focus";  // 33-1: 입력창 포커스(키보드) 중엔 처음부터
     if(waiting||busy)return "waiting";
+    if(Greet.pending())return "greet";  // 34: 다시 들어올 때 인사가 끝난 뒤부터 셈
     if(Stage.recentMotion(1200))return "motion";
     if(View.isBig()||View.isPushed()||View.moving())return "zoom";
     if(SeoaPhoto.isSending())return "photo";
@@ -2275,6 +2281,58 @@ const IdleWatch=(()=>{
     play(false)}
   function init(){setInterval(tick,250);document.addEventListener("visibilitychange",()=>{last=performance.now()})}
   return{init,reset,play,why,info:()=>({sec:+(el/1000).toFixed(2),count:n,why:why(),log:log.slice()})};
+})();
+// 34: 다시 들어올 때 인사(data/config.json greet). 서아 대화방에 들어올 때 관계 minStage 이상 · 마지막 대화(또는 마지막 인사) 뒤 reunionHours 이상 ·
+// 첫 만남 연출·오프닝·특별 에피소드·시연 장면 아님이면 인사 몸짓 한 번(몸짓만: 글자·이름 칩·컬렉션 기록·서버·턴 없음).
+// 순서: 대화 기록(부재중 사진 자리 포함)이 그려짐 → 부재중 사진 그림이 채워질 때까지·3D 준비될 때까지 기다림(waitMaxMs 넘기면 안 함) → 인사 몸짓 →
+// lineDelayMs 뒤 「첫 대사」 자리를 엶(기다리던 서아 사진·메시지는 그때까지 안 보냄. 다시 들어올 때 서아가 먼저 하는 대사는 지금 코드에 없음 → 없으면 몸짓만).
+// motions = 단계별 후보(그 단계 이하 가장 가까운 줄), 후보가 둘 이상이면 직전에 쓴 것(S.greet.last)이 아닌 것. 내 메시지를 보내면 취소
+const Greet=(()=>{
+  const C=()=>(DATA.config&&DATA.config.greet)||{};
+  let plan=null,T=[];const log=[];
+  const gs=()=>S.greet||(S.greet={});
+  const later=(f,ms)=>T.push(setTimeout(f,ms));
+  function hours(){const c=C();let h=c.hours;if(typeof c.hoursFrom==="string")h=c.hoursFrom.split(".").reduce((o,k)=>o&&o[k],DATA.config);return h!=null?+h:6}
+  // 마지막 대화 = 서아 방의 내 메시지·서아 답장·선물·사진(부재중 사진은 내가 없던 동안이라 뺌)과 마지막 인사 중 늦은 것
+  function lastTalk(){let t=0;for(const m of chatOf("seoa"))if((m.r==="u"||m.r==="c"||m.r==="ph"||m.r==="g")&&m.at&&!m.away)t=Math.max(t,m.at);return Math.max(t,gs().at||0)}
+  function pick(){const M=C().motions||{},ok=unlockedIds();let L=null;for(let k=curStage();k>=1&&!L;k--)if(M[k])L=M[k];
+    L=(L||[]).filter(id=>canPlay(id)&&ok.includes(id));if(!L.length)return null;const o=L.filter(id=>id!==gs().last);return(o.length?o:L)[0]}
+  // 들어올 때 인사하지 않는 이유(없으면 "")
+  function why(){const c=C();
+    if(curStage()<(c.minStage!=null?c.minStage:5))return "stage";
+    if(!S.introDone||busy)return "intro";if(FirstMeet.isOn())return "firstMeet";if(Thread.ep())return "episode";
+    if(typeof Scenes!=="undefined"&&Scenes.cur())return "scene";
+    const lt=lastTalk();if(!lt)return "new";if(Date.now()-lt<hours()*3600e3)return "recent";
+    if(!pick())return "motion";return ""}
+  const inRoom=()=>curTab==="chat"&&S.room==="seoa";
+  const stageOk=()=>{const s=$("#stage");if(Stage.readyMs()==null||Stage.isLent()||!s)return false;const r=s.getBoundingClientRect();return r.height>40&&r.width>40};
+  // 지금 인사를 시작하면 안 되는 이유(기다림)
+  function hold(){if(!plan.loaded){if(!plan.loading){plan.loading=true;const p=plan;Stage.xs(p.mid).then(()=>{p.loaded=true})}return "load"}  // XSTAGE 모션 파일을 받은 뒤에(타이머가 몸짓 길이와 맞게)
+    if(SeoaPhoto.awayPending()||SeoaPhoto.isSending())return "photo";if(!stageOk())return "stage";
+    if(waiting||busy||unlockBusy||unlockQ.length)return "busy";if(Stage.recentMotion(0))return "motion";
+    if($("#scrim").classList.contains("on")||document.querySelector(".sheet.on")||Cards.isOpen()||Cam.isOpen()||(typeof Onboard!=="undefined"&&Onboard.isOpen()))return "sheet";return ""}
+  function clear(){T.forEach(clearTimeout);T=[]}
+  function cancel(why){if(!plan)return;clear();if(plan.framed)Stage.frameTo("normal");if(why)log.push({at:Math.round(performance.now()),cancel:why});plan=null;SeoaPhoto.kick(0)}
+  // 대화 탭으로 올 때와 openRoom 이 한 번에 두 번 불릴 수 있음(setTab → openRoom) → 이미 잡힌 인사는 그대로 둠
+  function enter(){if(plan)return;const w=why();log.push({at:Math.round(performance.now()),enter:w||"greet"});if(log.length>20)log.shift();if(w)return;
+    plan={t0:performance.now(),mid:pick()};later(tick,C().startDelayMs!=null?C().startDelayMs:100)}  // 부재중 사진 자리가 먼저 잡히게(openRoom 의 SeoaPhoto.enter 뒤에 첫 확인)
+  function tick(){if(!plan||plan.on)return;
+    if(!inRoom())return cancel("room");
+    const h=hold(),c=C();
+    if(h){if(performance.now()-plan.t0>(c.waitMaxMs!=null?c.waitMaxMs:10000))return cancel("wait:"+h);return later(tick,100)}
+    play()}
+  function play(){const c=C(),mid=plan.mid,F=(c.frame||{})[mid],L=c.lineDelayMs,ld=L&&typeof L==="object"?L[mid]:L,dur=Stage.dur(mid)*1000;
+    plan.on=true;plan.at=performance.now();
+    Stage.play(mid,{quiet:true});Stage.setFace((c.face||{})[mid]||"joy");
+    if(F){Stage.frameTo(F,c.frameMs);plan.framed=true}
+    const g=gs();g.last=mid;g.at=Date.now();save();
+    log.push({at:Math.round(plan.at),play:mid});
+    later(()=>{if(plan)plan.line=true;SeoaPhoto.kick(0)},ld!=null?ld:Math.max(0,dur-400));  // 첫 대사 자리
+    later(()=>{if(!plan)return;if(plan.framed)Stage.frameTo("normal",c.frameMs);if(!Stage.recentMotion(0))Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"soft");plan=null},dur+200)}
+  return{enter,cancel,why,
+    holds:()=>!!plan&&!plan.line,  // 서아 사진(부재중 사진 빼고)을 첫 대사 자리까지 미룸
+    pending:()=>!!plan,             // 인사를 기다리거나 하는 중(시계 보기 타이머가 세지 않음)
+    info:()=>({why:why(),plan:plan&&{...plan},last:gs().last||null,lastAt:gs().at||null,hours:hours(),lastTalk:lastTalk(),log:log.slice()})};
 })();
 function start(){
   if(!S.chats.seoa||!S.chats.seoa.length){
