@@ -101,6 +101,7 @@ const Onboard=(()=>{
     root.querySelector("#obGo").classList.remove("loading");
     if(typeof dataReady!=="undefined")dataReady.then(fill);fill();
     stageOut();
+    if(typeof FirstMeet!=="undefined")FirstMeet.preload();  // 31-1: 첫 만남 연출 장소(네온 골목) 360도 그림 미리 받기
     // 첫 화면이 뜨는 동안 필름 띠 사진도 미리 불러와 셰이더까지 준비(7-2)
     if(typeof Stage!=="undefined")Promise.all([Stage.ready,typeof dataReady!=="undefined"?dataReady:null]).then(()=>Film.prepare());
     showScr("obFirst");
