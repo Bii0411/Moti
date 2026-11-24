@@ -183,10 +183,20 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .card ul{list-style:none;font-size:13px;line-height:1.9;color:#ddd6f3}
 .card .cta{margin-top:10px;width:100%;padding:11px;border-radius:12px;background:var(--pri);font-weight:800;font-size:14px}
 .card.plus{background:#17132a;border-color:#3b2f6b}
-.mbh{display:flex;align-items:center;gap:8px;margin-bottom:12px}.mbh b{font-size:16px}
-.mbh .lv{display:inline-flex;--hn:10px}
-.mbh .nx{margin-left:auto;font-size:12px;color:var(--sub)}
-.mybond .prog i{background:#f472b6}
+/* 28: 마이 「관계」 묶음. 게이지는 대화 화면 .bgauge 그대로(단계 색은 config bondTop) */
+.relh{display:flex;align-items:baseline;justify-content:space-between}.relh small{font-size:12px;color:var(--sub)}
+.rels{padding:4px 14px}
+.rel{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;text-align:left;color:inherit}
+.rel+.rel{border-top:1px solid var(--line)}
+.rel .av{flex:none;width:46px;height:46px;border-radius:50%;background:#2a2635 center/cover}
+.rmid{flex:1;min-width:0;display:flex;flex-direction:column}
+.rtop{display:flex;align-items:baseline;gap:8px}.rn{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rcd{margin-left:auto;flex:none;font-size:11px;color:var(--sub)}
+.rst{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:12px}.rst b{font-weight:700}.rh{display:inline-flex}
+.rel .bgauge{margin-top:6px}
+.rsoon{margin-top:4px;font-size:12px;color:var(--sub)}
+.relempty{padding:18px 0;text-align:center;font-size:13px;color:var(--sub)}
+.relempty button{margin-top:10px;padding:8px 14px;border-radius:999px;background:var(--pri);color:#fff;font-weight:700;font-size:13px}
 .mrow{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--sub)}.mrow b{color:var(--text);font-weight:700}
 .mph{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
 .mph .wm{font-size:18px;font-weight:900;letter-spacing:-.3px}.mph .wm span{color:#a78bfa}
@@ -1706,11 +1716,8 @@ const Scenes=(()=>{
 // 단계는 story().stage (서버 v2 판정 또는 대화 횟수). 게이지: v2는 호감도, 아니면 대화 횟수 기준
 function renderBond(){
   Outfit.sync();  // 관계 단계가 바뀌면 의상도(14)
-  const i=curStage()-1,D=DATA.story||{},v2=serverVer()===2;
-  const at=(v2?D.affectionAt:D.countAt)||[],val=v2?(story().affection||0):(S.bond||0);
-  const nx=i<5?{n:stageName(i+2)}:null;
-  const pct=!nx?100:at[i+1]!=null?Math.max(0,Math.min(100,(val-(at[i]||0))/((at[i+1]-(at[i]||0))||1)*100)):0;
-  BondTop.draw(i+1,pct);return{i,nx,pct}}
+  const {n,pct}=bondNow();  // 28: 계산은 bondNow 로 옮김(마이 「관계」 줄과 같은 값)
+  BondTop.draw(n,pct);return{i:n-1,pct}}
 // 19: 대화 화면 오른쪽 위 「{n}단계 · {이름}」 + 얇은 게이지. 단계가 오르면 색이 바뀌며 0에서 새 값까지 다시 참.
 // 평소 답장으로 늘 때는 조용히 늘기만. 결정적 순간(17-1B)엔 shine() 으로 밝은 띠가 한 번 지나감. 값 data/config.json bondTop
 const bondColor=n=>(((DATA.config||{}).bondTop||{}).colors||{})[n]||"#B4B2A9";  // 21: 단계 색(하트·게이지 같이)
@@ -1849,16 +1856,36 @@ function startStory(id){
 const MYI={"infinity": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9.828 9.172a4 4 0 1 0 0 5.656 10 10 0 0 0 2.172-2.828 10 10 0 0 1 2.172-2.828 4 4 0 1 1 0 5.656 10 10 0 0 1-2.172-2.828 10 10 0 0 0-2.172-2.828\"/></svg>", "history": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 8v4l2 2\"/><path d=\"M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5\"/></svg>", "message": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 20l1.3-3.9c-2.324-3.437-1.426-7.872 2.1-10.374 3.526-2.501 8.59-2.296 11.845.48 3.255 2.777 3.695 7.266 1.029 10.501-2.666 3.235-7.615 4.215-11.574 2.293L3 20\"/></svg>", "diamond": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 5h12l3 5-8.5 9.5a.7.7 0 0 1-1 0L3 10l3-5\"/><path d=\"M10 12l-2-2.2.6-1\"/></svg>", "photo": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 8h.01\"/><path d=\"M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z\"/><path d=\"M3 16l5-5c.928-.893 2.072-.893 3 0l5 5\"/><path d=\"M14 14l1-1c.928-.893 2.072-.893 3 0l3 3\"/></svg>"};
 // 다이아 재화 아이콘(12단계, 직접 그림). 💎 이모지 대신 재화 표시에 씀
 const GEM=Icon.gem;  // 21: 아이콘은 icons.js 한 곳으로 옮김
+// 28: 「관계」 묶음 = 대화방에 들어간 적 있는 캐릭터(S.rooms)마다 한 줄, 최근 대화 순(대화 목록과 같은 기준).
+// 하트·게이지는 대화 화면 위쪽(BondTop)과 같은 값·색(config bondTop). bond: true 가 아닌 캐릭터는 「곧 열려요」만
+function bondNow(){  // 지금 단계와 게이지 %(renderBond 와 같은 계산)
+  const i=curStage()-1,D=DATA.story||{},v2=serverVer()===2;
+  const at=(v2?D.affectionAt:D.countAt)||[],val=v2?(story().affection||0):(S.bond||0);
+  const pct=i>=5?100:at[i+1]!=null?Math.max(0,Math.min(100,(val-(at[i]||0))/((at[i+1]-(at[i]||0))||1)*100)):0;
+  return{n:i+1,pct}}
+// 캐릭터별 무빙 카드: 모은 카드는 저장된 char(26-1) 기준, 아직 못 모은 칸은 컬렉션 화면처럼 서아 칸으로 셈
+function cardCount(cid){const L=COL.items.filter(x=>{const a=S.col[x.id];return a?(a.char||"seoa")===cid:cid==="seoa"});return{n:L.filter(x=>S.col[x.id]).length,total:L.length}}
+const lastAtOf=cid=>{const L=chatOf(cid).filter(m=>m.r!=="sys"),l=L[L.length-1];return l?l.at||0:0};
+const roomsRecent=()=>CH.filter(c=>S.rooms.includes(c.id)).sort((a,b)=>lastAtOf(b.id)-lastAtOf(a.id));
+function relHTML(){
+  const rows=roomsRecent(),c=(DATA.config||{}).bondTop||{};
+  const row=ch=>{
+    const k=cardCount(ch.id),cards=k.n?`<span class="rcd">${esc(UI("my.collection",{n:k.n,total:k.total}))}</span>`:"";
+    let mid;
+    if(ch.bond){const b=bondNow(),col=bondColor(b.n);
+      mid=`<span class="rst"><span class="rh" style="color:${col}" role="img" aria-label="${esc(UI("my.lv",{n:b.n}))}">${Icon.heart(b.n,18)}</span><b>${esc(stageName(b.n))}</b></span>
+        <span class="bgauge rg" style="--gh:${c.gaugeH||4}px;${c.track?`--gt:${c.track}`:""}"><i style="width:${b.pct}%;background-color:${col}"></i></span>`}
+    else mid=`<span class="rsoon">${esc(UI("my.relSoon"))}</span>`;
+    return`<button class="rel" data-rel="${ch.id}" aria-label="${esc(UI("my.relAria",{name:ch.name}))}"><span class="av" style="background-image:url(${ch.img})"></span>
+      <span class="rmid"><span class="rtop"><b class="rn">${esc(ch.name)}</b>${cards}</span>${mid}</span></button>`};
+  return`<div class="relh"><h2>${esc(UI("my.relTitle"))}</h2><small>${esc(UI("my.relCount",{n:rows.length}))}</small></div>
+  <div class="card rels">${rows.length?rows.map(row).join(""):`<div class="relempty"><p>${esc(UI("my.relEmpty"))}</p><button id="relHome">${esc(UI("my.relGoHome"))}</button></div>`}</div>`}
 function renderMy(){
-  const {i,nx,pct}=renderBond();const n=COL.items.filter(x=>S.col[x.id]).length;const M=(DATA.ui||{}).my||{};
+  renderBond();const M=(DATA.ui||{}).my||{};
   const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
   const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
   const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
-  $("#my").innerHTML=`<h2>나와 서아</h2>
-  <div class="card mybond"><div class="mbh"><span class="lv" style="color:${bondColor(i+1)}" aria-label="${esc(UI("my.lv",{n:i+1}))}" role="img">${Icon.heart(i+1,24)}</span><b>${esc(stageName(i+1))}</b><span class="nx">${esc(nx?UI("my.next",{name:nx.n}):UI("my.max"))}</span></div>
-    <div class="prog"><i style="width:${pct}%"></i></div>
-    <p class="alnote" style="margin:10px 0 0">${esc(UI("my.bondNote1"))}<b>${esc(UI("my.bondNoteB"))}</b>${esc(UI("my.bondNote2"))}</p>
-    <div class="mrow"><span>${esc(UI("my.collectionLabel"))}</span><b>${n} / ${COL.items.length}</b></div></div>
+  $("#my").innerHTML=`${relHTML()}
   <div class="card plus"><div class="mph"><span class="wm">moti <span>PLUS</span></span>${S.plus?`<small class="on">${esc(UI("my.plusOn"))}</small>`:`<span class="pp"><b>${esc(UI("my.plusPrice"))}</b> ${esc(UI("my.plusPer"))}</span>`}</div>
     <ul class="perks">${perks}</ul>
     <button class="cta" id="plusBtn">${esc(S.plus?UI("my.plusStop"):UI("my.plusStart"))}</button><p class="fine">${esc(UI("my.demoNote"))}</p></div>
@@ -1866,6 +1893,8 @@ function renderMy(){
     <div class="packs">${packs}</div>
     <p class="alnote" style="margin:10px 0 0">${esc(UI("my.chargeNote"))}</p></div>
   <p class="alnote" style="text-align:center"><a href="v1.html" style="color:var(--sub)">이전 버전(v1) 보기</a></p>`;
+  $("#my").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.rel));
+  const rh=$("#relHome");if(rh)rh.onclick=()=>setTab("home");
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
   $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:b.dataset.p})))});
 }
