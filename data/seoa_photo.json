@@ -70,13 +70,25 @@
   "afterStageMs": 900,
 
   "_kinds": "사진 종류별 구도. 키(발~머리 꼭대기) 비율로 top·bottom(보여 줄 위·아래), width(최소 너비). lift = 카메라를 구도 가운데보다 올리는 값(키 비율, +면 위에서 내려다봄). center = 구도의 돌 중심(0 = 몸 뿌리, 1 = 머리 뼈; 몸짓이 서아를 옮겨도 서아를 따라감). yaw = 정면 기준 좌우 각도 후보(도, +면 서아의 왼쪽 앞에서 찍음). shift = 서아를 옆으로 비키는 양 후보(키 비율, +면 서아가 사진 왼쪽에). bgX = 장소 그림 가로 위치(0~1). lens = 렌즈를 보게 목·머리·눈을 카메라 쪽으로 돌리는 몫(0~1)과 최대 각도(도). faces = 고를 표정(data 의 FACE 이름). avoid = 이 종류에서 쓰지 않을 몸짓",
+  "_shotWeight": "32-B: 사진 종류가 뽑히는 비중. 서아가 보내는 사진은 모두 셀카라 풍경 0(풍경 구도 kinds.landscape 는 지우지 않고 둠). 비중이 0 인 종류가 원고(stage·away 의 shot)에 적혀 있으면 비중대로 다시 뽑음",
+  "shotWeight": { "selfie": 1, "landscape": 0 },
+
+  "_selfie": "32-B 진짜 셀카: kinds.selfie 의 값이 기본, types(셀카 종류) 중 하나를 사진마다 뽑아 덮음(직전 셀카와 같은 종류는 피함). fov = 셀카 렌즈 화각(도, 대화 무대는 30). pitch = 눈 높이에서 카메라를 올리는 각도(도, 범위). roll = 사진 기울기(도, 범위, 좌우 무작위). headTilt = 머리를 옆으로 기울이는 각도(도, 범위, 좌우 무작위). arm.side = 뻗는 팔 후보(R 서아의 오른팔 = 사진 왼쪽, L), arm.offset = 손(폰)의 자리를 렌즈에서 [팔 쪽, 위(-면 아래), 뒤]로 옮기는 양(키 비율), arm.elbow = 팔꿈치 굽힘(위팔이 겨누는 점을 내리는 양, m), arm.shoulder = 어깨도 그쪽으로 돌리는 몫(0~1). mids = 몸 자세로 쓸 몸짓(팔은 따로 뻗음). top·bottom·width·center·yaw 는 kinds 설명과 같음",
   "kinds": {
     "selfie": {
       "top": 1.04, "bottom": 0.63, "width": 0.42, "lift": 0.1, "center": 1,
       "lens": { "neck": 0.3, "head": 0.7, "eyes": 1, "neckMax": 20, "headMax": 35, "eyeMax": 12 },
       "yaw": [-14, -8, 8, 14], "shift": [0], "bgX": [0.5],
       "faces": ["soft", "fun", "shy"],
-      "avoid": ["m10", "m23", "m21", "m18", "c05", "m06", "m09", "m11"]
+      "avoid": ["m10", "m23", "m21", "m18", "c05", "m06", "m09", "m11"],
+      "fov": 60, "pitch": [10, 15], "roll": [2, 6], "headTilt": [0, 3],
+      "arm": { "side": ["R", "L"], "offset": [0.2, -0.12, 0.0], "elbow": 0.05, "shoulder": 0.3 },
+      "mids": ["m25"],
+      "types": [
+        { "id": "arm", "name": "한 팔 뻗기", "top": 1.05, "bottom": 0.75, "width": 0.4, "yaw": [-10, -5, 5, 10] },
+        { "id": "close", "name": "얼굴 가까이", "top": 1.04, "bottom": 0.8, "width": 0.34, "pitch": [12, 15], "roll": [2, 5], "headTilt": [2, 5], "yaw": [-6, 0, 6] },
+        { "id": "lean", "name": "살짝 옆으로 기울이기", "top": 1.05, "bottom": 0.75, "width": 0.4, "pitch": [10, 14], "roll": [3, 6], "headTilt": [10, 14], "yaw": [-14, -8, 8, 14] }
+      ]
     },
     "landscape": {
       "top": 1.32, "bottom": -0.18, "width": 1.25, "lift": 0.02, "center": 0,

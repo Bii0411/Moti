@@ -961,9 +961,23 @@ const Stage=(()=>{
   function aimAt(target,o={}){if(!md)return;md.root.updateMatrixWorld(true);
     aimBone(md.bones.neck?"neck":"Neck",target,o.neck!=null?o.neck:.3,o.neckMax||20);aimBone("Head",target,o.head!=null?o.head:.7,o.headMax||35);
     ["J_Adj_L_FaceEye","J_Adj_R_FaceEye"].forEach(n=>aimBone(n,target,o.eyes!=null?o.eyes:1,o.eyeMax||12))}
+  // 32-B 셀카 자세(still 의 draw 안에서만, still 이 끝나면 원래대로): reach = 한쪽 팔(위팔·아래팔)을 target(월드 좌표) 쪽으로 뻗음.
+  //   elbow = 위팔이 겨눌 점을 target 보다 아래로 내리는 양(m, 팔꿈치가 살짝 굽음). tilt = 머리를 target 쪽 축으로 deg 만큼 기울임(+ = 서아의 오른쪽 어깨 쪽)
+  function pointBone(name,child,target,k){const b=md.bones[name],c=md.bones[child];if(!b||!c||!b.parent)return;
+    const bp=b.getWorldPosition(new THREE.Vector3()),now=c.getWorldPosition(new THREE.Vector3()).sub(bp).normalize(),want=target.clone().sub(bp).normalize();
+    const wq=b.getWorldQuaternion(new THREE.Quaternion()),dq=new THREE.Quaternion().slerp(new THREE.Quaternion().setFromUnitVectors(now,want),k==null?1:k);
+    const pq=b.parent.getWorldQuaternion(new THREE.Quaternion()).invert();b.quaternion.copy(pq.multiply(dq.multiply(wq)));b.updateMatrixWorld(true)}
+  function reach(side,target,o={}){if(!md)return;md.root.updateMatrixWorld(true);const s=side==="L"?"Left":"Right";
+    if(o.shoulder)pointBone(s+"Shoulder",s+"Arm",target,o.shoulder);
+    pointBone(s+"Arm",s+"ForeArm",target.clone().add(new THREE.Vector3(0,-(o.elbow||0),0)),1);pointBone(s+"ForeArm",s+"Hand",target,1)}
+  function tiltHead(deg,target){const b=md.bones.Head;if(!b||!b.parent||!deg)return;md.root.updateMatrixWorld(true);
+    const axis=target.clone().sub(b.getWorldPosition(new THREE.Vector3())).normalize(),wq=b.getWorldQuaternion(new THREE.Quaternion());
+    const pq=b.parent.getWorldQuaternion(new THREE.Quaternion()).invert();b.quaternion.copy(pq.multiply(new THREE.Quaternion().setFromAxisAngle(axis,-deg*Math.PI/180).multiply(wq)));b.updateMatrixWorld(true)}
+  function eyeY(){if(!md)return 0;const a=md.bones.J_Adj_L_FaceEye,b=md.bones.J_Adj_R_FaceEye;md.root.updateMatrixWorld(true);
+    if(a&&b)return(a.getWorldPosition(new THREE.Vector3()).y+b.getWorldPosition(new THREE.Vector3()).y)/2;const h=md.bones.Head;return h?h.getWorldPosition(new THREE.Vector3()).y:height()*.93}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i)},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,play,setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
