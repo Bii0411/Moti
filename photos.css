@@ -1,0 +1,138 @@
+/* moti 사진(10단계): 촬영 화면 · 사진 시트 · 크게 보기. 코드 photos.js, 값 data/photos.json
+   blur·filter·그림자·그라데이션 없음(아이폰 사파리). 움직임은 투명도·transform 전환만 */
+.ic{width:24px;height:24px;display:block}
+
+/* ── 촬영 화면: 대화 위로 앱 전체를 덮음. 시트(20~21)·토스트(30)는 그 위에 ── */
+.cam{position:absolute;inset:0;z-index:19;background:#07060c;display:none;flex-direction:column;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:contain}
+.cam.on{display:flex}
+.camtop{flex:none;display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px}
+.camx,.camsp{flex:none;width:40px;height:40px}
+.camx{display:grid;place-items:center;border-radius:50%;color:var(--text);-webkit-tap-highlight-color:transparent}
+.camx:active{background:#ffffff14}
+.camcount{flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--text)}
+.cammid{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.camv{position:relative;overflow:hidden;isolation:isolate;border-radius:4px;background:#140a24 center 40%/cover no-repeat;touch-action:none;cursor:grab}
+.camv:active{cursor:grabbing}
+.camgl{position:absolute;inset:0}
+.camgl canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+.camchip{position:absolute;left:10px;bottom:10px;font-size:12px;font-weight:700;background:#000a;padding:5px 10px;border-radius:999px;pointer-events:none;max-width:calc(100% - 20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+/* 가득 찼을 때 안내 한 줄(들어갈 때) */
+.camfull{position:absolute;left:8px;right:8px;top:8px;z-index:3;display:none;align-items:center;gap:8px;background:#15131df2;border:1px solid #ef444466;border-radius:12px;padding:8px 8px 8px 11px}
+.camfull.on{display:flex}
+.camfull p{flex:1;min-width:0;font-size:12px;line-height:1.4;word-break:keep-all}
+.camfull div{flex:none;display:flex;gap:5px}
+.camfull button{height:30px;padding:0 9px;border-radius:9px;font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--line)}
+.camfull button[data-c="grow"]{background:var(--pri);border-color:var(--pri)}
+.cambot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 28px calc(18px + env(safe-area-inset-bottom,0px))}
+.cambtn,.camlast{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
+.cambtn{background:#1d1a27;color:#d9d2ee}
+.cambtn:disabled{opacity:.35}
+.camlast{background:#1d1a27;border:1px solid #ffffff2a;overflow:hidden;padding:0}
+.camlast img,.camlast canvas{width:100%;height:100%;object-fit:cover;display:block}
+/* 24: 찍은 직후 날아가는 사진(틀과 같은 자리·크기에서 시작, transform·opacity 만) */
+.camfly{position:absolute;z-index:6;display:block;transform-origin:50% 50%;pointer-events:none;will-change:transform,opacity}
+.camlast.empty{border-style:dashed}
+.camshut{width:72px;height:72px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
+.camshut i{width:58px;height:58px;border-radius:50%;background:#fff;transition:transform .1s}
+.camshut:active i{transform:scale(.9)}
+
+/* ── 사진 시트 ── */
+.psheet{max-height:88%;padding-bottom:0}
+/* 닫히는 중(아래로 내려가는 동안)에는 누르기를 받지 않음: 아래쪽 줄(칸 늘리기·PLUS)이 ＋ 기능판을 가로채지 않게 */
+.psheet:not(.on),#fullSheet:not(.on){pointer-events:none}
+.phd{display:flex;align-items:baseline;gap:8px}
+.phd h2{margin:0}
+.phd span{margin-left:auto;font-size:13px;font-weight:800;color:var(--pri2)}
+/* 24: 「0 / 20」 옆 작은 + 버튼 → 칸 늘리기 결제 방식 작은 창 */
+.phd{align-items:center}
+.padd{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--pri2);-webkit-tap-highlight-color:transparent}
+.padd:active{transform:scale(.94)}
+.pslot{aspect-ratio:3/4;border-radius:8px;border:1.5px dashed #ffffff22}
+.phd span.full{color:#f87171}
+.pprog{height:6px;background:var(--line);border-radius:9px;overflow:hidden;margin:8px 0 12px}
+.pprog i{display:block;height:100%;background:var(--pri);border-radius:9px;transition:width .3s}
+.pprog.full i{background:#ef4444}
+.pseg{margin-bottom:10px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;grid-auto-flow:row dense}
+.pth{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--card);padding:0}
+.pth img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.pth.tall{grid-row:span 2;aspect-ratio:auto}
+/* 포토부스 사진(11): 세로로 긴 사진을 자르지 않고 칸 안에 다 보이게(남는 곳은 프레임 색) */
+.pth.tall img{object-fit:contain}
+.plike{position:absolute;right:5px;top:5px;color:var(--pink);background:#0009;border-radius:999px;padding:3px}
+.plike .ic{width:14px;height:14px}
+.plike svg path{fill:currentColor}
+.psheet{padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+/* 가득 참 시트 */
+.fopts{display:flex;flex-direction:column;gap:8px}
+.fopts button{height:48px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
+.fopts button[data-o="grow"]{background:var(--pri);border-color:var(--pri)}
+.fopts button.plus{border-color:#7c5cff}
+
+/* ── 크게 보기 ── */
+.pview{position:absolute;inset:0;z-index:23;background:#07060c;display:none;flex-direction:column}
+.pview.on{display:flex}
+.pvtop{flex:none;display:flex;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 4px}
+.pvx{width:40px;height:40px;display:grid;place-items:center;border-radius:50%}
+.pvimg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:0 12px;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.pvimg img{max-width:100%;max-height:100%;border-radius:10px;display:block;-webkit-user-drag:none;pointer-events:none}
+.pvinfo{flex:none;text-align:center;padding:12px 16px 4px;display:flex;flex-direction:column;gap:3px}
+.pvinfo b{font-size:14px}
+.pvinfo small{font-size:12px;color:var(--sub);min-height:1em}
+.pvbar{flex:none;display:flex;justify-content:center;gap:28px;padding:12px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.pvbar button{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:#1d1a27;color:#d9d2ee;-webkit-tap-highlight-color:transparent}
+.pvbar button.on{color:var(--pink)}
+.pvbar button.on svg path{fill:currentColor}
+.pvsh{position:relative}
+.pvmenu{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translate(-50%,4px);background:#211d2c;border:1px solid var(--line);border-radius:12px;padding:4px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+.pvmenu.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.pvmenu button{width:auto;height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;background:none;border-radius:9px;font-size:14px;font-weight:700;color:var(--text);white-space:nowrap}
+.pvmenu .ic{width:20px;height:20px}
+/* 24: 작은 창(사진 칸 늘리기 결제 방식, 선물 확률 보기). 지우기 확인과 같은 겹 */
+.mini{position:absolute;inset:0;z-index:24;background:#0009;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .18s}
+.mini.on{opacity:1;pointer-events:auto}
+.minibox{position:relative;width:100%;max-width:320px;background:#1b1826;border:1px solid var(--line);border-radius:16px;padding:16px 14px 14px;transform:scale(.96);transition:transform .18s}
+.mini.on .minibox{transform:none}
+.minibox h3{font-size:15px;font-weight:800;margin:0 36px 12px 2px}
+.minix{position:absolute;right:8px;top:8px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--sub)}
+.mopts{display:flex;flex-direction:column;gap:8px}
+.mopts button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:48px;padding:0 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700;text-align:left}
+.mopts button b{flex:none;font-size:13px;color:var(--pri2);white-space:nowrap}
+.mopts button.plus{border-color:#7c5cff}
+/* 선물 확률 표 */
+.otab{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.otab th{font-size:11px;font-weight:700;color:var(--sub);text-align:right;padding:0 4px 6px}
+.otab th:first-child,.otab td:first-child{text-align:left}
+.otab td{text-align:right;padding:7px 4px;border-top:1px solid var(--line);white-space:nowrap}
+.otab tr.m td{border-top:0;padding-top:0;font-size:11.5px;color:#e9dcc0}
+.otab tr.m td:first-child{color:var(--sub);padding-left:10px}
+.onote{font-size:11.5px;color:var(--sub);line-height:1.5;margin-top:10px;word-break:keep-all}
+/* 지우기 확인 */
+.pconfirm{position:absolute;inset:0;z-index:24;background:#0009;display:none;align-items:center;justify-content:center;padding:24px}
+.pconfirm.on{display:flex}
+.pcbox{width:100%;max-width:300px;background:#1b1826;border:1px solid var(--line);border-radius:16px;padding:18px 16px 14px;text-align:center}
+.pcbox p{font-size:15px;font-weight:700;margin-bottom:14px}
+.pcbox div{display:flex;gap:8px}
+.pcbox button{flex:1;height:42px;border-radius:11px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700}
+.pcbox .danger{background:#ef4444;border-color:#ef4444;color:#fff}
+
+/* ── 서아가 보낸 사진(12): 대화 기록의 사진 말풍선(사진 작게 + 아래 메시지 말풍선 + 저장 알림 줄) ── */
+.phmsg{flex:none;align-self:flex-start;width:52%;max-width:200px;aspect-ratio:3/4;border-radius:16px;border-top-left-radius:6px;overflow:hidden;background:var(--card);border:1px solid var(--line);padding:0;display:block;-webkit-tap-highlight-color:transparent}
+.phmsg img{width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none}
+.phmsg.gone{aspect-ratio:auto;height:0;border:0;margin:0}
+.phmsg+.msg.c{margin-top:-2px}
+.phsave{flex:none;align-self:flex-start;font-size:11px;color:var(--sub);padding:0 4px;margin-top:-2px}
+
+/* ── 사진 화면 「받은 사진」(12): 단계 사진 진행도 + 2~6단계 다섯 칸 + 그 밖에 받은 사진 ── */
+.pseg button{font-size:12.5px;padding:0 2px;white-space:nowrap}
+.rhd{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.rhd b{font-size:13px;color:var(--sub);font-weight:700}
+.rhd span{margin-left:auto;font-size:13px;font-weight:800;color:var(--pri2)}
+.rprog{margin:6px 0 10px}
+.rstage{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.rslot{aspect-ratio:3/4;border-radius:8px;border:1.5px dashed #ffffff33;display:grid;place-items:center;text-align:center;padding:4px}
+.rslot span{font-size:10.5px;line-height:1.3;color:var(--sub);word-break:keep-all}
+.rgot .rlab{position:absolute;left:0;right:0;bottom:0;font-size:10px;font-weight:700;padding:3px 0;background:#0009;text-align:center}
+.rh3{font-size:13px;color:var(--sub);font-weight:700;margin:16px 0 8px}
+.rnote{font-size:12px;color:var(--sub);margin:12px 0 4px;line-height:1.5}

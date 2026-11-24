@@ -1,0 +1,13 @@
+{
+  "_설명": "발표 시연 장면 6개 (시연 패널 「장면 바로가기」, ?debug=1 일 때 숫자키 1~6). 장면에 들어가면 서아 대화를 비우고(앞 대화를 만들지 않음) 아래 상태로 맞춘 뒤 장 제목을 titleMs 동안 띄운다. 장 제목 = 「{n}장 · 이름」, 이름은 titleStage 가 있으면 그 단계 이름(data/seoa_story.json stageNames), 없으면 name.",
+  "_필드": "reset=seoa: 서아 전체 초기화 후 오프닝 재생 · stage: 관계 단계(그 단계까지 해금) · place: 장소 이름(data/seoa_story.json locations) · mood: normal|tired|sulky|birthday · next: 다음 답장 뒤 실행할 예약 {stage: n} 또는 {event: 사건 이름} · album: 앨범 탭을 열고 그 묶음(all|chat|gift, 9-B)으로, 상태는 바꾸지 않음",
+  "titleMs": 2000,
+  "scenes": [
+    { "n": 1, "name": "첫 만남", "titleStage": 1, "reset": "seoa" },
+    { "n": 2, "name": "티키타카", "titleStage": 2, "stage": 1, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 2 } },
+    { "n": 3, "name": "썸", "titleStage": 3, "stage": 2, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 3 } },
+    { "n": 4, "name": "고백 직전", "titleStage": 4, "stage": 3, "place": "바 '라스트 오더' 1층", "mood": "normal", "next": { "stage": 4 } },
+    { "n": 5, "name": "옥상", "stage": 4, "place": "바 옥상", "mood": "normal", "next": { "event": "ROOFTOP" } },
+    { "n": 6, "name": "컬렉션", "album": "all" }
+  ]
+}

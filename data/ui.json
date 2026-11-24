@@ -1,0 +1,304 @@
+{
+  "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. {gem} 은 다이아 아이콘 자리(21, 코드가 icons.js 의 그림으로 바꿈). 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
+  "album": {
+    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, progress = 진행도 왼쪽 글(묶음별), count = 진행도 오른쪽({n} 모은 칸, {total} 그 묶음 전체), hint = 개별 힌트(data/seoa_story.json hints)가 없는 잠긴 칸. 등급 이름은 collection.grade. firstSeen = 일반 등급 새 몸짓 작은 알림({name} 몸짓 이름, 26에서 data/seoa_story.json firstSeenText 를 옮겨 옴). infoAria = 제목 옆 (!) 버튼 접근성 이름. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "title": "무빙 카드",
+    "infoAria": "무빙 카드 설명 보기",
+    "intro": {
+      "_intro": "26: 컬렉션 탭에 처음 들어갈 때 한 번 자동으로 뜨는 소개 창. 제목 옆 (!) 버튼으로 다시 열림. list = 가운데 목록, foot = 아래 줄, ok = 버튼",
+      "title": "무빙 카드",
+      "body": "대화하고 선물하며 처음 본 모습이 카드로 모여요.",
+      "list": ["대화에서 처음 나온 몸짓", "선물에 대한 반응", "관계가 깊어질수록 열리는 카드"],
+      "foot": "잠긴 카드를 누르면 힌트가 보여요. 시크릿 카드도 숨어 있어요.",
+      "ok": "확인"
+    },
+    "firstSeen": "새 무빙 카드 · {name}",
+    "seg": {
+      "all": "전체",
+      "chat": "대화",
+      "gift": "선물"
+    },
+    "progress": {
+      "all": "전체 몸짓",
+      "chat": "대화 몸짓",
+      "gift": "선물 몸짓"
+    },
+    "count": "{n} / {total}",
+    "hint": {
+      "chat": "대화에서 만나요",
+      "gift": "선물로 만나요"
+    },
+    "unlockTag": "새 무빙 카드",
+    "unlockSaved": "무빙 카드 +1",
+    "card": {
+      "_card": "26-1 무빙 카드 모양·확대. unseen = 열렸지만 아직 못 본 카드 위 글(chat 대화 카드, gift 선물 카드). back = 잠긴 카드 뒷면의 작은 글자. loading = 카드 확대 때 의상 모델을 불러오는 동안. info = 확대 카드 아래 줄({stage} 처음 봤을 때 관계 단계 이름, {date} 날짜. 단계 기록이 없으면 날짜만), date = 날짜 모양. prev·share·next = 아래 버튼, close = 닫기 접근성 이름, open = 카드 누르기 접근성 이름({name}). mark = 공유 그림 오른쪽 아래 표시. saved = 공유 창을 열 수 없는 브라우저에서 그림을 저장했을 때. chipsAria = 캐릭터 칩 줄 접근성 이름",
+      "unseen": {
+        "chat": "대화에서 만나요",
+        "gift": "선물로 만나요"
+      },
+      "back": "moti",
+      "loading": "불러오는 중",
+      "info": "{stage} · {date}",
+      "date": "{y}.{m}.{d}",
+      "prev": "이전",
+      "share": "공유",
+      "next": "다음",
+      "close": "카드 닫기",
+      "open": "{name} 카드 크게 보기",
+      "mark": "moti",
+      "saved": "카드 그림을 저장했어요",
+      "chipsAria": "캐릭터별 카드"
+    }
+  },
+  "chatList": {
+    "_chatList": "대화 탭 메시지 목록이 비어 있을 때(앱을 처음 열었을 때 등). 홈에서 캐릭터 카드를 눌러 들어가야 목록에 생긴다",
+    "empty": "아직 대화가 없어요",
+    "goHome": "홈으로 가기"
+  },
+  "notify": {
+    "_notify": "다른 캐릭터가 먼저 말 거는 알림. 헤더의 로고와 💎 사이에 한 줄로 보인다. 간격·보이는 시간은 data/config.json notify",
+    "format": "{name}: {line}",
+    "aria": "{name} 대화방으로 가기"
+  },
+  "nav": {
+    "_nav": "하단 탭 이름(7-1에서 예전 이름을 「앨범」으로, 26에서 「컬렉션」으로 바꿈). 홈·대화·마이 탭 이름은 아직 index.html 에 있다",
+    "album": "컬렉션"
+  },
+  "gift": {
+    "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절, 24에서 다듬음). moodNote 의 {mood} = 지금 기분 이름. match = 지금 기분에 맞는 선물 카드 표시. pity 의 {n} = 천장 남은 횟수. oddsOpen = 시트 아래 「확률 보기」 줄, odds* = 그걸 누르면 열리는 확률 표 작은 창(oddsTitle 제목, oddsGift 첫 열 이름, 등급 열 이름은 collection.grade, pct 의 {v} = %, oddsMatch 의 {mood} = 그 선물에 맞는 기분 이름 — 기분에 맞을 때 오른 확률 줄, oddsNote 의 {bonus} = data/gifts.json moodBonus.rare, {from} = 빼는 등급 이름, {n} = 천장 횟수, {min} = 천장 등급 이름). logTag = 대화 기록에 남는 선물 결과 줄. title = 선물 창 제목(18)",
+    "title": "서아에게 선물하기",
+    "moodNote": "서아 기분 · {mood}",
+    "match": "기분에 맞음",
+    "pity": "{n}번 안에 레어 확정",
+    "oddsOpen": "확률 보기",
+    "oddsTitle": "선물 확률",
+    "oddsGift": "선물",
+    "pct": "{v}%",
+    "oddsMatch": "{mood}일 때",
+    "oddsNote": "서아 기분에 맞는 선물은 레어 +{bonus}%p(그만큼 {from}에서 뺌). 모든 선물을 합쳐 {n}번 안에 {min} 이상 1번 확정",
+    "oddsAriaClose": "닫기",
+    "noDia": "다이아가 부족해요",
+    "logTag": "{gift} · {grade}"
+  },
+  "top": {
+    "_top": "대화 화면 위쪽(19). bond = 오른쪽 위 관계 줄 글자({name} 단계 이름, 21부터 단계 번호는 앞의 하트 아이콘이 그림). bondAria = 하트 아이콘의 접근성 이름({n} 단계 번호). moodToast·moodGift = 기분이 바뀌었을 때 알림 두 줄({mood} 기분 이름, {gift} 그 기분에 맞는 선물 이름. 받침 없는 이름이면 코드가 「이라면」을 「라면」으로 고침). 기분이 평소로 돌아가거나 맞는 선물이 없으면 첫 줄만",
+    "bond": "{name}",
+    "bondAria": "{n}단계",
+    "moodToast": "서아 기분 · {mood}",
+    "moodGift": "{gift}이라면 반응이 다를 거예요"
+  },
+  "chat": {
+    "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",
+    "seoaFirst": "＋ 에서 선물하고 사진도 찍어요",
+    "placeChanged": "장소가 바뀌었어요 · {place}"
+  },
+  "home": {
+    "_home": "홈 화면(8, 23). 23에서 위에서 아래로: 검색 → 특별 에피소드 줄(specialRow, 24-2에서 「이어서 대화」 줄 뺌) → 캐릭터 찾기(find, 태그 칩 tagChips + 정렬 버튼 sorts). search = 검색 칸 안내, searchEmpty = 검색 결과 없음, all = 칩 「전체」, newTag = 새 특별 에피소드 표시, sortLabel = 정렬 버튼 읽기용 이름, back = 캐릭터 화면 뒤로 가기 읽기용 이름. sorts = 정렬 버튼이 도는 순서(추천 → 인기 → 신규). basic·special = 캐릭터 화면 섹션 이름. btn* = 에피소드 버튼 표시. soon = 특별 에피소드가 없는 캐릭터의 칸. specialNote = 특별 에피소드 아래 안내. motion 의 {name} 은 전용 모션 이름. storyStart 의 {name} 은 에피소드 이름(대화방 맨 위 표시), storyTag 는 첫 대사 옆 표시, storySceneTag 는 첫 장면 무대 위 표시(18)",
+    "search": "캐릭터, 태그 검색",
+    "searchEmpty": "찾는 캐릭터가 없어요",
+    "specialRow": "특별 에피소드",
+    "find": "캐릭터 찾기",
+    "all": "전체",
+    "tagChips": [
+      "사이버펑크",
+      "혐관",
+      "첫사랑",
+      "티키타카",
+      "연습생"
+    ],
+    "newTag": "NEW",
+    "sortLabel": "정렬",
+    "back": "홈으로",
+    "close": "검색 닫기",
+    "sorts": {
+      "rec": "추천",
+      "hot": "인기",
+      "new": "신규"
+    },
+    "basic": "기본 에피소드",
+    "special": "특별 에피소드",
+    "btnStart": "시작",
+    "btnContinue": "이어하기",
+    "btnAdult": "19+ 인증",
+    "btnFree": "무료",
+    "btnPrice": "{gem} {price}",
+    "btnOwned": "구매함",
+    "soon": "곧 공개돼요",
+    "specialNote": "이 이야기에서만 보는 모습이 있어요",
+    "motion": "전용 모션 · {name}",
+    "storyStart": "특별 이야기 「{name}」 시작",
+    "storyTag": "이야기 전용 장면 · {name}",
+    "storySceneTag": "이야기 장면",
+    "noDia": "다이아가 부족해요"
+  },
+  "collection": {
+    "_collection": "명장면 수집(몸짓 도감, 9단계). grade = 등급 이름. notify = 새 몸짓 알림(희귀·특별, 일반은 data/seoa_story.json firstSeenText). giftGrade = 선물 결과 카드 첫 줄({grade} 등급 이름, {gift} 선물 이름, 17-2). owned = 선물로 이미 모은 몸짓이 나왔을 때 카드 셋째 줄(17-2, 예전 already 「이미 본 모습이에요」 알림을 대신함)",
+    "grade": {
+      "common": "일반",
+      "rare": "레어",
+      "special": "시크릿"
+    },
+    "notify": {
+      "rare": "레어 · {name}",
+      "special": "시크릿 · {name}"
+    },
+    "giftGrade": "{grade} · {gift}",
+    "owned": "이미 모은 모습"
+  },
+  "my": {
+    "_my": "마이 페이지 카드 문구(12단계). charged = 충전 버튼을 눌렀을 때 알림({n} 다이아 개수, 18). lv = 관계 카드 하트 아이콘의 접근성 이름(21부터 화면에는 하트 안 숫자), next·max = 관계 카드 머리줄. bondNote1+bondNoteB(굵게)+bondNote2 = 관계 안내. perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
+    "collection": "무빙 카드 {n} / {total}",
+    "plusPhotos": "사진 {plusCap}장까지 저장",
+    "lv": "{n}단계",
+    "next": "다음 단계 · {name}",
+    "max": "최고 단계",
+    "bondNote1": "관계는 ",
+    "bondNoteB": "대화로만",
+    "bondNote2": " 쌓여요",
+    "collectionLabel": "무빙 카드",
+    "plusPrice": "9,900원",
+    "charged": "다이아 {n} 충전 (시연)",
+    "plusPer": "/ 월",
+    "plusOn": "이용 중",
+    "perks": [
+      {
+        "icon": "infinity",
+        "text": "하루 대화 무제한",
+        "sub": "무료는 하루 30번"
+      },
+      {
+        "icon": "history",
+        "text": "서아가 예전 대화까지 기억해요"
+      },
+      {
+        "icon": "message",
+        "text": "서아가 먼저 말을 걸어요"
+      },
+      {
+        "icon": "diamond",
+        "text": "매달 300 다이아 지급"
+      },
+      {
+        "icon": "photo",
+        "text": "사진 {plusCap}장까지 저장"
+      }
+    ],
+    "plusStart": "PLUS 시작하기",
+    "plusStop": "구독 해지",
+    "demoNote": "시연 버전이라 실제로 결제되지 않아요",
+    "chargeTitle": "다이아 충전",
+    "packs": [
+      {
+        "dia": 100,
+        "price": "7,000원"
+      },
+      {
+        "dia": 500,
+        "price": "35,000원",
+        "tag": "인기"
+      },
+      {
+        "dia": 1200,
+        "price": "84,000원"
+      }
+    ],
+    "chargeNote": "1다이아 70원"
+  },
+  "fn": {
+    "_fn": "＋ 기능판(10단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md). gift·camera·photo = 기능 이름. open·close = ＋ 버튼의 접근성 이름(화면에는 아이콘만)",
+    "gift": "선물하기",
+    "camera": "카메라",
+    "photo": "사진",
+    "open": "기능 열기",
+    "close": "기능 닫기"
+  },
+  "cam": {
+    "_cam": "촬영 화면(10단계). count 의 {n}·{cap} = 저장한 사진 수·칸 수. loop·paused 의 {name} = 몸짓 이름. aria* = 아이콘 버튼의 접근성 이름(화면에는 아이콘만)",
+    "close": "✕",
+    "count": "사진 {n} / {cap}",
+    "loop": "{name} · 반복 중",
+    "paused": "{name} · 멈춤",
+    "idle": "기본 자세",
+    "saved": "사진에 저장했어요",
+    "ariaClose": "나가기",
+    "ariaShutter": "촬영",
+    "ariaPause": "멈춤",
+    "ariaPlay": "다시 재생",
+    "ariaLast": "사진"
+  },
+  "photoFull": {
+    "_photoFull": "사진 칸이 가득 찼을 때(카메라·포토부스 공통). notice·clear·grow = 들어갈 때 안내 한 줄과 옆 버튼, title·desc·opt* = 셔터를 눌렀을 때 시트. {price} = data/photos.json slots.stepPrice, {plusCap} = slots.plusCap",
+    "notice": "사진 칸이 가득 찼어요",
+    "clear": "칸 비우기",
+    "grow": "칸 늘리기",
+    "title": "사진 칸이 가득 찼어요",
+    "desc": "한 장 지우거나 칸을 늘려 주세요",
+    "optDelete": "사진 하나 지우기",
+    "optGrow": "칸 늘리기 +10 · {gem} {price}",
+    "optPlus": "PLUS · 사진 {plusCap}장",
+    "noDia": "다이아가 부족해요"
+  },
+  "photo": {
+    "_photo": "사진 시트·크게 보기(10단계). count = 진행도({n}/{cap}). seg = 묶음 버튼, empty = 묶음별 빈 상태(24부터 화면에 쓰지 않음: 사진이 없으면 빈 칸만). add = 「n / cap」 옆 + 버튼 접근성 이름, buyTitle = + 버튼으로 여는 결제 방식 작은 창 제목, growRow·growPrice·plusRow·plusPrice = 그 창 안 두 줄(24 전에는 시트 아래 줄). grown = 칸 늘린 뒤 알림. share·like·delete = 크게 보기 아이콘의 접근성 이름. info = 정보 줄 첫째 줄({name} 몸짓, 몸짓이 없으면 cam.idle), infoBooth = 포토부스 사진 정보 줄(22단계에서 포토부스는 뺐지만 전에 찍은 사진을 보일 때 씀), date = 날짜 모양. mark = 공유 이미지 구석 표시. plusStart = PLUS 를 시작했을 때(마이 페이지와 같은 문구). ariaClose = 크게 보기 닫기 버튼 접근성 이름",
+    "title": "사진",
+    "count": "{n} / {cap}",
+    "seg": {
+      "all": "전체",
+      "liked": "좋아요",
+      "received": "받은 사진"
+    },
+    "empty": {
+      "all": "아직 사진이 없어요",
+      "liked": "좋아요한 사진이 없어요.",
+      "received": "아직 서아가 보낸 사진이 없어요."
+    },
+    "add": "사진 칸 늘리기",
+    "buyTitle": "사진 칸 늘리기",
+    "growRow": "칸 늘리기 +10",
+    "growPrice": "{gem} {price}",
+    "plusRow": "PLUS · 사진 {plusCap}장",
+    "plusPrice": "월 9,900원",
+    "grown": "사진 칸이 {cap}칸이 됐어요",
+    "share": "공유하기",
+    "like": "좋아요",
+    "delete": "지우기",
+    "info": "{name} · {place}",
+    "infoBooth": "포토부스 · {date}",
+    "date": "{y}.{m}.{d} {hh}:{mm}",
+    "delConfirm": "이 사진을 지울까요?",
+    "delOk": "지우기",
+    "delCancel": "취소",
+    "deleted": "사진을 지웠어요",
+    "download": "내려받기",
+    "mark": "moti · 윤서아",
+    "plusStart": "PLUS 시작 · 다이아 300 지급",
+    "ariaClose": "닫기"
+  },
+  "seoaPhoto": {
+    "_seoaPhoto": "서아가 먼저 보내는 사진(12단계, 원고 docs/drafts/12-서아가-보내는-사진-원고.md 4절). sending = 만드는 동안 대화 기록 맨 아래. saved = 사진 말풍선 아래 저장 알림, savedStage = 단계 사진일 때 덧붙임({n} 받은 단계 사진 수, {total} 5). info·infoStage = 크게 보기 정보 첫째 줄(둘째 줄은 날짜, data/ui.json photo.date). stageLabel = infoStage 의 {stage}. 사진 화면 「받은 사진」: progress·progressCount = 단계 사진 진행도, slot = 못 받은 단계 사진 칸, others = 그 밖에 받은 사진 제목, note = 안내 한 줄({cap} 사진 칸), empty = 빈 상태. aria = 사진 말풍선 접근성 이름",
+    "sending": "서아가 사진을 보내는 중…",
+    "saved": "받은 사진에 저장",
+    "savedStage": " · 단계 사진 {n} / {total}",
+    "info": "서아가 보낸 사진 · {place}",
+    "infoStage": "{stage} · {name}",
+    "stageLabel": "{k}단계",
+    "progress": "단계 사진",
+    "progressCount": "{n} / {total}",
+    "slot": "{k}단계 사진",
+    "others": "그 밖에 받은 사진",
+    "note": "받은 사진은 칸을 차지하지 않아요",
+    "empty": "아직 서아가 보낸 사진이 없어요.",
+    "aria": "서아가 보낸 사진 크게 보기"
+  },
+  "outfit": {
+    "_outfit": "의상(14단계, 원고 docs/drafts/14-의상-원고.md). firstPrivate = 처음 흰 옷으로 바뀔 때 서아 한마디",
+    "firstPrivate": "*작전복을 벗어 의자에 걸쳐 두고, 흰 셔츠 차림으로 돌아선다.* …여기선 작전 얘기 안 해. 그냥, 나로 있을게.",
+    "firstPrivateTag": "처음 보는 옷"
+  },
+  "thread": {
+    "_thread": "이야기 줄기(16단계). 특별 에피소드 대화는 본 이야기와 따로 이어짐. back = 대화방 머리 단추, sub = 특별 에피소드 안에서 대화방 이름 밑 설명 줄({name} 에피소드 이름, 25-1: 본 이야기·다른 캐릭터는 설명 줄 없이 이름만)",
+    "back": "본 이야기로",
+    "sub": "{name}",
+    "backToast": "본 이야기로 돌아왔어요"
+  }
+}

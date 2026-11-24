@@ -407,3 +407,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent2);outlin
 .intro .itx p.on{opacity:1;transform:none}
 .intro .itx .narr{font-style:italic;color:#b4b1c2;font-size:13.5px}
 .intro .itx .say{font-weight:700;color:var(--text)}
+/* 나레이션은 말풍선 밖, 대사는 줄마다 따로 말풍선 */
+.mnarr{max-width:88%;padding:2px 4px;font-style:italic;font-size:13.5px;line-height:1.6;color:#a3a1ae;align-self:flex-start;white-space:pre-wrap}
+.mnarr.u{align-self:flex-end;text-align:right}
+.chatwrap .mnarr{font-size:14px;color:#b4b1c2}
+.conly .mnarr{color:#d2cfdc;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.mact{font-size:12px;color:var(--accent2);align-self:flex-start;padding:0 4px;margin-bottom:-4px}
+.mact.u{align-self:flex-end}
+.msgs .msg.c,.msgs .msg.u{white-space:pre-wrap}
