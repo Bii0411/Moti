@@ -502,7 +502,7 @@ async function loadData(){
   const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
   const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json")]);
   DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
-  if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items)COL=col;
+  if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items){COL=col;COL.held=COL.items.filter(x=>x.hold);COL.items=COL.items.filter(x=>!x.hold)}  // 44: 보류 칸(hold)은 앱 어디에도 안 나오고 세지 않음(저장값 S.col 은 그대로)
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
   DATA.look=lk;DATA.demo=dm||{};DATA.scenes=dsc||{scenes:[]};DATA.ui=ui||{};DATA.onboarding=ob||{};
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
