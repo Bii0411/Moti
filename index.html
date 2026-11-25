@@ -371,6 +371,8 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .gsub{font-size:11px;color:var(--sub);margin:-2px 2px 8px;line-height:1.45}
 .item.locked{opacity:.7}.item.locked .gi.lk{background:#1b1826;color:#8c84a3;box-shadow:none}.item.locked .gi.lk svg{width:24px;height:24px}
 .item.locked b{color:#8c84a3;letter-spacing:2px}
+.item.mo.dim .gi{opacity:.35;filter:grayscale(.6)}
+.item.gt .gw{font-size:10px;color:var(--sub);line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all}
 .item.mo.now{border-color:#f5c66b;background:linear-gradient(160deg,#30263a,#1c1626)}
 .mhero{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;margin:2px 0 4px;border-radius:16px;border:1.5px solid #f5c66b;background:linear-gradient(150deg,#3a2c1c,#221a2c 55%,#1a1424);box-shadow:0 0 18px #f5c66b33}
 .mhero .gi.mh{width:64px;height:64px;flex:none;border-radius:14px;box-shadow:0 0 14px #f5c66b55}.mhero .gi.mh.ge{font-size:38px}
@@ -642,7 +644,7 @@ let SCENES=[{name:"",img:"bg_seoa_street.jpg"}];
 const KEY="moti_gift_proto_v2";
 // story: 서아 이야기 상태(서버 v2와 주고받음) · col: 명장면 수집 기록(9단계, 예전 firsts) · packPity: 카드 팩 천장 남은 장 수(49, 예전 pity = 선물 천장) · packNext: 시연 패널 다음 카드 팩 결과 · unlocked: 판정·사건으로 열린 몸짓 · introDone: 인트로를 봤는지
 // rooms: 대화 목록에 보이는 대화방(6-C). 처음엔 비어 있고, 캐릭터 대화방에 들어가면(홈 카드 등) 생긴다
-const blank=()=>({v:4,bond:0,stories:{},plus:false,dia:500,chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},col:{},packPity:null,packNext:null,unlocked:[],introDone:false});
+const blank=()=>({v:5,bond:0,stories:{},plus:false,dia:500,chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},col:{},packPity:null,packNext:null,unlocked:[],introDone:false});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){S=blank()}
 // 예전 저장값 옮기기: 장소 2곳(0 네온 거리, 1 도시 옥상) → 5곳(2 네온 골목, 4 바 옥상). 이미 대화하던 사람은 인트로를 건너뜀
 if(!S.v){const mv=i=>i===1?4:2;S.scene=mv(S.scene||0);
@@ -653,6 +655,8 @@ if(S.v<3){S.col={};(S.firsts||[]).forEach(f=>{if(f&&f.mid&&!S.col[f.mid])S.col[f
 S.col=S.col||{};
 // 49: 선물 뽑기 → 카드 팩. 선물로 모은 카드(S.col.g01…)는 id 가 그대로라 그대로 가진 것으로 남음(카드 팩 탭에 보임). 선물 천장·다음 선물 결과는 버리고 카드 팩 천장은 새로 시작
 if(S.v<4){delete S.pity;delete S.giftNext;S.packPity=null;S.packNext=null;S.v=4}
+// 50-1: 50 의 순간 카드 gm01~gm03(칵테일 · 차가움/흔들림/솔직함, 확인용으로만 생길 수 있던 카드)을 지움. 같은 id 를 새 카드가 쓰므로 카드 그림도 지움(Cards.init 뒤)
+if(S.v<5){const old=["gm01","gm02","gm03"].filter(id=>S.col&&S.col[id]);old.forEach(id=>delete S.col[id]);if(old.length)S.dropCards=old;S.v=5}
 delete S.camHelp;delete S.roomAt;  // 24-2: 카메라 도움말·홈 「이어서 대화」를 빼면서 쓰지 않게 된 저장값
 // 예전 저장값(6-C 전): 대화 목록은 사용자가 한마디라도 보낸 대화방만 남기고, 말 건 적 없는 대화방은 뺀다
 if(!Array.isArray(S.rooms)){S.rooms=Object.keys(S.chats||{}).filter(cid=>(S.chats[cid]||[]).some(m=>m.r==="u"));if(S.room&&!S.rooms.includes(S.room))S.room=null}
@@ -1947,8 +1951,9 @@ function giftSheet(focus){
   const st=curState(),open=Moment.open(),og=open&&gBy(open.id),G=S.giftGiven||{};
   const tile=g=>{const m=g.rec&&g.rec===st;return `<button class="item gt ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`};
-  const mtile=g=>{const isOpen=open&&open.id===g.id,known=isOpen||G[g.id];
-    return known?`<button class="item gt mo ${isOpen?"now":""}" data-m="${g.id}">${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`
+  // 50-1: 단계 순서 여섯 칸. 아직 그 단계가 아님(또는 반응 몸짓 없음) = ??? + 자물쇠, 단계는 됐지만 안 줌 = 이름 + 흐린 그림, 한 번이라도 줌 = 이름 + 그림 + when
+  const mtile=g=>{const isOpen=open&&open.id===g.id,reach=isOpen||(Moment.stageOk(g)&&Moment.reactionOf(g)),given=isOpen||G[g.id];
+    return reach?`<button class="item gt mo ${isOpen?"now":""} ${given?"":"dim"}" data-m="${g.id}">${giftPic(g)}<b>${esc(g.name)}</b>${given&&!isOpen&&g.when?`<small class="gw">${esc(g.when)}</small>`:`<div class="p">${Icon.gem(13)} ${g.price}</div>`}</button>`
       :`<button class="item gt mo locked" data-m="${g.id}" aria-label="${esc(UI("gift.lockedAria"))}"><span class="gi ge lk">${LOCK_SVG}</span><b>${esc(UI("gift.locked"))}</b><div class="p">&nbsp;</div></button>`};
   const card=og&&Moment.cardOf(og),own=card&&S.col[card.id];
   $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
@@ -1960,7 +1965,7 @@ function giftSheet(focus){
   <div class="items g3">${GIFTS.filter(g=>g.kind==="moment").map(mtile).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
   $("#giftSheet").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const g=gBy(b.dataset.m);if(Moment.isOpen(g.id))return give(g.id);
-    toast(`<b>${esc(UI("gift.lockedToast"))}</b>`+(S.giftGiven&&S.giftGiven[g.id]&&g.when?`<br><small>${esc(g.when)}</small>`:""))});
+    toast(`<b>${esc(UI("gift.lockedToast"))}</b>`)});
   openSheet("#giftSheet");
 }
 // 50: 처음 「선물」을 누르면 한 번만 안내(그 뒤로는 시트 안 「특별한 순간에」 줄 설명)
@@ -2002,11 +2007,12 @@ function give(id){
 // S.momentLast[id] = 닫힌 때의 내 메시지 수(S.turnN) — 임시 규칙은 cooldownTurns 동안 같은 선물을 다시 안 엶
 const Moment={
   cfg(){return GIFT.moment||{}},
-  bond(){const n=EpStage.n();const b=(GIFT.bonds||[]).find(x=>(x.stages||[]).includes(n));return b||null},
-  reactionOf(g){const b=this.bond(),m=b&&g&&g.reactions&&g.reactions[b.id];return m&&canPlay(m)?m:null},
-  cardOf(g,bid){const b=bid||(this.bond()||{}).id;return COL.items.find(x=>x.source==="moment"&&x.gift===g.id&&x.bond===b)||null},
-  ready(g){return !!(g&&g.kind==="moment"&&this.reactionOf(g))},
-  // 서버에 보내는 「지금 열 수 있는 순간 선물」: 반응 몸짓이 준비된 것만. 하나가 열려 있으면 비움(한 번에 하나)
+  // 50-1: 순간 선물마다 반응 몸짓 하나(reaction)·카드 한 장. 관계 단계 하나에 선물 하나(stage)
+  reactionOf(g){const m=g&&g.reaction;return m&&canPlay(m)?m:null},
+  cardOf(g){return g&&COL.items.find(x=>x.source==="moment"&&x.gift===g.id)||null},
+  stageOk(g){return !!g&&curStage()>=(+g.stage||1)},  // 본 이야기 관계 단계 ≥ 그 선물의 단계
+  ready(g){return !!(g&&g.kind==="moment"&&!Thread.ep()&&this.stageOk(g)&&this.reactionOf(g))},  // 특별 에피소드에서는 늘 닫힘
+  // 서버에 보내는 「지금 열 수 있는 순간 선물」: 단계·반응 몸짓을 앱이 거른 것만. 하나가 열려 있으면 비움(한 번에 하나)
   list(){if(S.moment)return[];return GIFTS.filter(g=>this.ready(g)).map(g=>({id:g.id,name:g.name,when:g.when||""}))},
   open(){return S.moment&&gBy(S.moment.id)?S.moment:null},
   isOpen(id){const o=this.open();return !!(o&&o.id===id&&this.ready(gBy(id)))},
@@ -2970,7 +2976,7 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(()=>Cards.refresh());Pose.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;

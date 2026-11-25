@@ -21,8 +21,14 @@ const packAll = col.items.filter(x => x.source === "pack"), pool = G.pool(col.it
 const held = col.items.filter(x => x.hold), oldGift = col.items.filter(x => x.source === "gift");
 const momentC = col.items.filter(x => x.source === "moment");  // 50: 순간 선물 반응 카드(반응 몸짓이 없으면 앱에서 숨김)
 console.log(`- 도감 칸: 대화 ${chat.length} + 연출 ${col.items.filter(x => x.only).length} + 카드 팩 ${packAll.length} + 보류 선물 ${oldGift.length} + 순간 선물 ${momentC.length} = ${col.items.length} (그중 보류 ${held.map(x => x.id).join("·") || "없음"}, 보이는 칸 ${col.items.length - held.length}, 순간 선물 칸은 반응 몸짓이 있을 때만)`);
-{ const gl = JSON.parse(readFileSync("data/gifts.json", "utf8")).list, bonds = JSON.parse(readFileSync("data/gifts.json", "utf8")).bonds.map(b => b.id);
-  for (const x of momentC) { const g = gl.find(g => g.id === x.gift); if (!g || g.kind !== "moment") fail(`${x.id}: 순간 선물 ${x.gift} 없음`); else if (!bonds.includes(x.bond) || (g.reactions || {})[x.bond] !== (x.play || {}).m) fail(`${x.id}: 반응 몸짓이 gifts.json reactions 와 다름`) }
+{ const GJ = JSON.parse(readFileSync("data/gifts.json", "utf8")), gl = GJ.list, mg = gl.filter(g => g.kind === "moment");
+  // 50-1: 순간 선물마다 카드 한 장, 카드 몸짓 = 선물 reaction, 묶음(bonds) 없음
+  if (GJ.bonds) fail("gifts.json 에 bonds 가 남아 있음(50-1 에서 없앰)");
+  if (gl.some(g => g.reactions)) fail("선물에 reactions(묶음별)가 남아 있음 — reaction 하나로");
+  for (const x of momentC) { const g = gl.find(g => g.id === x.gift); if (!g || g.kind !== "moment") fail(`${x.id}: 순간 선물 ${x.gift} 없음`); else if (g.reaction !== (x.play || {}).m) fail(`${x.id}: 반응 몸짓이 gifts.json reaction 과 다름`); if (x.bond) fail(`${x.id}: bond 가 남아 있음`); if (x.grade !== "rare") fail(`${x.id}: 등급이 레어가 아님`) }
+  for (const g of mg) if (momentC.filter(x => x.gift === g.id).length !== 1) fail(`순간 선물 ${g.id} 카드가 한 장이 아님`);
+  if (momentC.some((x, i) => x.name !== (gl.find(g => g.id === x.gift) || {}).name || x.no !== 46 + i)) fail("순간 카드 이름·번호(46~)가 선물 순서와 다름");
+  for (const r of ((GJ.momentFallback || {}).rules || [])) if (!mg.some(g => g.id === r.gift)) fail(`임시 규칙 ${r.gift}: 순간 선물이 아님`);
   const nos = col.items.map(x => x.no).filter(n => n > 0); if (new Set(nos).size !== nos.length || nos.some(n => (col.retiredNo || []).includes(n))) fail("카드 번호 겹침·은퇴 번호 사용") }
 const ids = col.items.map(x => x.id);
 if (new Set(ids).size !== ids.length) fail("id 중복");
@@ -65,13 +71,14 @@ if (!pool.some(x => x.grade === "special")) {
 }
 // 49: 선물은 뽑기 없이 — 예전 값은 _보류 에만
 if (gifts.list.some(g => g.odds || g.lines)) fail("선물에 odds·lines 가 남아 있음(_보류 로)");
-// 50: 선물 목록 = 언제든 5 + 순간 5, 커피·라멘은 _보류.list
+// 50: 선물 목록 = 언제든 5 + 순간 6(50-1), 커피·라멘은 _보류.list
 const allGifts = [...gifts.list, ...((gifts._보류 || {}).list || [])];
 for (const id of ["coffee", "ramen", "flower", "ring"]) { const g = allGifts.find(x => x.id === id); if (!g || !g._보류 || !g._보류.odds || !g._보류.lines) fail(`선물 ${id} _보류 에 예전 확률·대사가 없음`); }
 const always = gifts.list.filter(g => g.kind === "always"), moment = gifts.list.filter(g => g.kind === "moment");
-if (always.length !== 5 || moment.length !== 5 || always.length + moment.length !== gifts.list.length) fail(`선물 종류 수: 언제든 ${always.length} · 순간 ${moment.length}`);
+if (always.length !== 5 || moment.length !== 6 || always.length + moment.length !== gifts.list.length) fail(`선물 종류 수: 언제든 ${always.length} · 순간 ${moment.length}`);
 if (always.some(g => !g.motion || !(g.price > 0))) fail("언제든 선물에 motion·price 없음");
-if (moment.some(g => !g.when || !(g.price > 0) || !g.reactions)) fail("순간 선물에 when·price·reactions 없음");
+if (moment.some(g => !g.when || !(g.price > 0) || !g.reaction)) fail("순간 선물에 when·price·reaction 없음");
+if (moment.map(g => g.stage).join() !== "1,2,3,4,5,6") fail(`순간 선물 stage 가 1~6 하나씩·단계 순서가 아님: ${moment.map(g => g.stage).join()}`);
 if (gifts.list.some(g => g.id === "coffee" || g.id === "ramen")) fail("커피·라멘이 목록에 남아 있음");
 for (const k of ["srvMoment", "srvMood", "srvAgain"]) if (!ui.gift[k]) fail(`ui.gift.${k} 없음`);
 console.log(`- 선물: 언제든 ${always.map(g => g.name + " " + g.price).join(", ")} / 순간 ${moment.map(g => g.name + " " + g.price).join(", ")}`);
