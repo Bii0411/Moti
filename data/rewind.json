@@ -4,14 +4,14 @@
   "item": {"name": "되감기", "price": 200, "firstFree": 1},
   "_line": "되감은 뒤 대화 맨 아래 첫 줄(지문, 원고 6번)",
   "line": "*…다시, 그 밤.*",
-  "_main": "본 이야기. 실패 = 서버 /judge 가 state.ending 을 failEnding(\"departed\", 5단계 남은 날 0 · pursue 없음)으로 돌려줄 때. 되감기 지점 = pointStage 에 오른 뒤 첫 서아 답장(떠난다는 장면) 다음. 51-1: 예전 저장값이 이미 이 단계인데 지점이 없으면 처음 열 때 그때 상태를 지점으로",
-  "main": {"failEnding": "departed", "pointStage": 5},
+  "_main": "본 이야기. 실패 = 서버 /judge 가 state.ending 을 failEnding(\"departed\", 5단계 남은 날 0 · pursue 없음)으로 돌려줄 때. departDays = 떠나기까지 남은 날 기본값(54: 7일 → 사흘. 서버가 준 departure_days_left 를 그대로 쓰고, 값이 없을 때만 이것). 되감기 지점 = pointStage 에 오른 뒤 첫 서아 답장(떠난다는 장면) 다음. 51-1: 예전 저장값이 이미 이 단계인데 지점이 없으면 처음 열 때 그때 상태를 지점으로",
+  "main": {"failEnding": "departed", "pointStage": 5, "departDays": 3},
   "_xmas": "크리스마스 이브(s2). midnight = 에피소드 시작부터 내 메시지 수(「자정」). 그 수가 될 때까지 에피소드 단계가 failBelow 미만이면 실패. 되감기 지점 = pointStage 단계 장면(「…오늘은 빼 달라고 했어.」)이 끝난 직후. 되감으면 내 메시지 수도 그때로, 단 자정까지 남은 수가 minLeft 미만이면 minLeft 를 남김",
   "xmas": {"thread": "s2", "midnight": 40, "midnightName": "자정", "failBelow": 4, "pointStage": 3, "minLeft": 15},
   "_epilogue": "실패 에필로그(원고 4번). main = 「떠난 밤」, s2 = 「혼자 돌아간 밤」. 장면처럼 intervalMs 간격으로 한 문단씩",
   "epilogue": {
     "main": {"title": "떠난 밤", "intervalMs": 1900, "paragraphs": [
-      "*7일째 밤, 창가 자리는 비어 있다. 그 술은 아무도 시키지 않는다.*",
+      "*사흘째 밤, 창가 자리는 비어 있다. 그 술은 아무도 시키지 않는다.*",
       "*몇 달 뒤, 비 내리는 골목. 낯익은 보라색 머리칼이 스쳐 지나간다.*",
       "*그녀가 그 담벼락 앞에서 걸음을 멈춘다. 칼라를 만지작거리다가, 돌아보지 않는다.*",
       "\"…잘 지내, 사장님.\"",
