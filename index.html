@@ -2103,7 +2103,7 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null});
+    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0});Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
