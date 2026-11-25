@@ -360,6 +360,36 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .item .p{font-size:12px;color:var(--pri2);font-weight:700}
 .item .rec{position:absolute;right:8px;top:8px;font-size:10px;font-weight:800;background:var(--gold);color:#000;border-radius:999px;padding:2px 7px}
 .item.focus{border-color:var(--gold)}
+/* 50: 선물 창 = 순간 선물 칸(열렸을 때) · 「언제든」 줄 · 「특별한 순간에」 줄. 한 줄 3칸 */
+.items.g3{grid-template-columns:repeat(3,1fr);gap:7px}
+.item.gt{padding:9px 6px 8px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.item.gt .gi{width:52px;height:52px;border-radius:12px}.item.gt .gi.ge{font-size:30px}
+.item.gt b{font-size:13px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.item.gt .rec{right:4px;top:4px;font-size:9px;padding:1px 5px}
+.gsec{font-size:13px;font-weight:800;margin:14px 2px 6px;color:#e7e1f5}
+.gsub{font-size:11px;color:var(--sub);margin:-2px 2px 8px;line-height:1.45}
+.item.locked{opacity:.7}.item.locked .gi.lk{background:#1b1826;color:#8c84a3;box-shadow:none}.item.locked .gi.lk svg{width:24px;height:24px}
+.item.locked b{color:#8c84a3;letter-spacing:2px}
+.item.mo.now{border-color:#f5c66b;background:linear-gradient(160deg,#30263a,#1c1626)}
+.mhero{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;margin:2px 0 4px;border-radius:16px;border:1.5px solid #f5c66b;background:linear-gradient(150deg,#3a2c1c,#221a2c 55%,#1a1424);box-shadow:0 0 18px #f5c66b33}
+.mhero .gi.mh{width:64px;height:64px;flex:none;border-radius:14px;box-shadow:0 0 14px #f5c66b55}.mhero .gi.mh.ge{font-size:38px}
+.mhero .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.mhero .mtag{align-self:flex-start;font-size:10px;font-weight:800;color:#1d1730;background:linear-gradient(120deg,#b9873a,#f5c66b 45%,#fff0c6 60%,#e0ad4c);border-radius:999px;padding:2px 8px}
+.mhero b{font-size:16px}.mhero small{font-size:12px;color:#e8dcc0;line-height:1.35}
+.mhero .mcard{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.2px}
+.mhero .mp{flex:none;font-size:13px;font-weight:800;color:var(--pri2)}
+.gguide{text-align:center;padding:22px 20px 22px}
+.gguide .gg-lock{width:54px;height:54px;margin:0 auto 10px;border-radius:16px;display:grid;place-items:center;background:#241f33;color:var(--gold)}.gguide .gg-lock svg{width:28px;height:28px}
+.gguide h2{font-size:16px;margin-bottom:8px}.gguide p{font-size:13px;color:#d6cfe6;line-height:1.6;margin-bottom:16px;word-break:keep-all}
+.gguide .cta{width:100%;padding:12px;border-radius:12px;background:var(--pri);font-weight:800;font-size:14px}
+/* 50: 순간 선물이 열리면 ＋ 버튼이 금빛(포토카드 SECRET 금색) + 작은 점 */
+.fnbtn{position:relative}
+.fnbtn.mo{border-color:#f5c66b;color:#f5c66b;background:radial-gradient(circle at 50% 40%,#3a2c1c,#1d1726);animation:moGlow 1.8s ease-in-out infinite}
+.fnbtn.mo::after{content:"";position:absolute;right:1px;top:1px;width:9px;height:9px;border-radius:50%;background:#f5c66b;box-shadow:0 0 0 2px #0b0a12,0 0 6px #f5c66b}
+.fni.mo .tile{background:linear-gradient(150deg,#3a2c1c,#221a2c);color:#f5c66b;box-shadow:0 0 0 1.5px #f5c66b,0 0 12px #f5c66b55;position:relative}
+.fni.mo .tile::after{content:"";position:absolute;right:-2px;top:-2px;width:9px;height:9px;border-radius:50%;background:#f5c66b;box-shadow:0 0 0 2px #0e0c16}
+@keyframes moGlow{0%,100%{box-shadow:0 0 0 1px #f5c66b55,0 0 8px #f5c66b55}50%{box-shadow:0 0 0 1px #f5c66baa,0 0 16px #f5c66bcc}}
+@media (prefers-reduced-motion:reduce){.fnbtn.mo{animation:none;box-shadow:0 0 0 1px #f5c66baa,0 0 12px #f5c66b99}}
 /* 선물 창(9-A): 기분 맞춤 선물은 금색 테두리 (49: 천장·확률 보기 없음) */
 .item.match{border-color:#f5c66b99;background:linear-gradient(160deg,#2a2236,#1a1426)}
 .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
@@ -488,6 +518,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="giftSheet"></div>
+  <div class="sheet gguide" id="giftGuide"></div>
   <div class="sheet adsheet" id="adultSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet psheet" id="photoSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet" id="fullSheet" role="dialog" aria-modal="true"></div>
@@ -541,6 +572,11 @@ async function loadData(){
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
   for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1}}
+  // 50: ?giftPreview=1(확인용) — 순간 선물 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신함(data/gifts.json preview). ver 0.5 = 진짜 모션이 오면 카드 그림을 다시 만들게
+  if(qs.get("giftPreview")==="1")for(const id in GIFT.preview||{}){const src=GIFT.preview[id];if(id[0]==="_"||XS[id]||RIG.M[id])continue;
+    if(XS[src])XS[id]={...XS[src],ver:.5};else if(RIG.M[src])RIG.M[id]=RIG.M[src];MNAME[id]=(MNAME[src]||src)+" (미리보기)"}
+  // 50: 반응 몸짓이 아직 없는 순간 선물 카드(source moment)는 보류 칸처럼 숨김(목록·개수에 안 나옴)
+  if(COL.items){const no=COL.items.filter(x=>x.source==="moment"&&!(x.play&&(XS[x.play.m]||RIG.M[x.play.m])));if(no.length){COL.held=[...(COL.held||[]),...no];COL.items=COL.items.filter(x=>!no.includes(x))}}
   if(!c||!f||!m||!st||!it||!kw||!chs||!eps||!gf||!col||!ph||!pk)console.warn("data/*.json 일부를 불러오지 못함 (file:// 로 열었으면 로컬 서버로 여세요)");
 }
 // 화면 문구(data/ui.json): UI("album.title"), UI("gift.pity",{n:…}). 없으면 키 이름 그대로
@@ -1515,7 +1551,7 @@ const isFiller=t=>(DATA.config.serverFiller||["…"]).includes(String(t).replace
 function readReply(j){
   if(!j)return null;
   if(typeof j.dialogue==="string"&&isFiller(j.dialogue))return null;  // 29: 서버 대체 응답 「…」 = 실패로 봄 → 예비 대사
-  if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null};
+  if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null,giftMoment:j.gift_moment||null};
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
   return null;
 }
@@ -1550,8 +1586,9 @@ async function askServer(cid,text){
 }
 // 42: /chat 에 보내는 이야기 상태. 에피소드 단계가 있는 에피소드 중이면 episode(에피소드 id)·episode_stage(1~6)·episode_stage_name·location(그 에피소드 장소 이름)을 더함.
 // stage·affection 은 본 이야기 값 그대로(서버가 에피소드를 아직 몰라도 지금처럼 동작). 서버에 넣을 블록은 docs/server-sync.md
-function chatState(){const st=story();if(!EpStage.on())return st;const sc=SCENES[S.scene];
-  return{...st,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location}}
+// 50: gift_moments = 지금 열 수 있는 순간 선물 목록([{id, name, when}], 반응 몸짓이 준비된 것만)
+function chatState(){const st=story(),gm={gift_moments:Moment.list()};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
+  return{...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location}}
 // 서아가 사진을 보낸 뒤(12) 다음 요청: 대화 기록 끝(이번 내 메시지 앞)에 원고 5절의 한 줄을 서아 쪽 기록처럼 덧붙임. 화면에는 보이지 않음
 // 34-1: 사진이 다시 들어올 때 인사 한 줄보다 앞(부재중 사진)이면 기록 끝의 인사 한 줄 앞에 넣음(실제 순서대로)
 function photoNote(cid,hist){const n=cid==="seoa"&&SeoaPhoto.note();if(!n)return n;
@@ -1772,7 +1809,7 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
   if(j){const nm=j.motionNames.map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
     const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
     const sc=j.location?SCENES.findIndex(x=>x.name===j.location):-1;
-    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,src:"server"}}
+    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,src:"server"}}
   return localReply(text,allowed);
 }
 // Claude를 못 쓸 때의 예시 대사
@@ -1816,7 +1853,8 @@ async function send(text,o){
   finishReveal();  // 앞 답장이 아직 나오는 중이면 마저 다 보여 주고 보냄
   const P=perfStart();
   const prevAt=room==="seoa"?chatOf("seoa").reduce((t,m)=>(m.r==="u"||m.r==="c"||m.r==="g"||m.r==="ph")&&m.at&&!m.greet?Math.max(t,m.at):t,0):0;  // 17-1B: 다시 만남(34-1: 다시 들어올 때 인사 한 줄은 안 셈 → 그 뒤 첫 답장이 다시 만남)
-  const poseId=room==="seoa"?Pose.take():null;  // 48: ＋ 포즈에서 고른 카드면 그 몸짓을 꼭 재생하고 답장 아래 「이 포즈로 찍기」
+  const poseId=room==="seoa"?Pose.take():null;
+  if(room==="seoa"&&!(o&&o.moment))Moment.tick();  // 50: 순간 선물이 열린 뒤 내 메시지 수(순간 선물을 건넨 턴은 give 가 닫음)  // 48: ＋ 포즈에서 고른 카드면 그 몸짓을 꼭 재생하고 답장 아래 「이 포즈로 찍기」
   $("#inp").value="";autoGrow();IdleWatch.reset();Greet.cancel("send");addMsg("u",text,o&&o.srv?{srv:o.srv,...(giftId?{gift:giftId}:{})}:null,room);busy=true;Wait.start(room==="seoa");renderLog();
   if(room!=="seoa"){const g1=GEN,line=await askOther(room,text);if(g1!==GEN)return;busy=false;Wait.stop();addReply(line,null,room);perfEnd(P);return}
   if(!Cam.isOpen())Stage.play(IDLE);  // 답장을 기다리는 동안 고개 갸웃하며 듣기 (판정 대기보다 먼저). 촬영 중엔 촬영 화면 몸짓 그대로(10-B)
@@ -1868,6 +1906,7 @@ async function send(text,o){
   else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""));if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   Demo.render();
   afterReply(v);
+  Moment.afterReply(v);  // 50: 순간 선물 열기(서버 gift_moment 또는 임시 규칙)
   SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
   const R=S.demoNext;let keep=null;
@@ -1898,16 +1937,32 @@ function openSheet(id){$("#scrim").classList.add("on");$(id).classList.add("on")
 function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));Mini.close()}
 // 선물 창(9-A, 원고 3절, 24에서 다듬음, 49에서 뽑기를 뺌): 「서아에게 건넬 것」 · 「서아 기분 · {기분}」 · 선물 카드(기분에 맞으면 표시). 확률·천장 표시 없음
 const gradeKo=g=>UI("collection.grade."+g);
+// 50: 맨 위 순간 선물 칸(열려 있을 때만) · 「언제든」 줄 · 「특별한 순간에」 줄(한 번이라도 준 것은 이름·그림, 아직이면 ??? 와 자물쇠)
+const LOCK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>';
 function giftSheet(focus){
-  const st=curState();
+  const st=curState(),open=Moment.open(),og=open&&gBy(open.id),G=S.giftGiven||{};
+  const tile=g=>{const m=g.rec&&g.rec===st;return `<button class="item gt ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
+    ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`};
+  const mtile=g=>{const isOpen=open&&open.id===g.id,known=isOpen||G[g.id];
+    return known?`<button class="item gt mo ${isOpen?"now":""}" data-m="${g.id}">${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`
+      :`<button class="item gt mo locked" data-m="${g.id}" aria-label="${esc(UI("gift.lockedAria"))}"><span class="gi ge lk">${LOCK_SVG}</span><b>${esc(UI("gift.locked"))}</b><div class="p">&nbsp;</div></button>`};
+  const card=og&&Moment.cardOf(og),own=card&&S.col[card.id];
   $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
   <p class="sub">${esc(UI("gift.sub"))} · ${esc(UI("gift.moodNote",{mood:STATES[st].ko}))}</p>
-  <div class="items">${GIFTS.filter(giftable).map(g=>{const m=g.rec===st;return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
-    ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}
-    ${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`}).join("")}</div>`;
+  ${og?`<button class="mhero" data-g="${og.id}">${giftPic(og,"gi mh")}<span class="mt"><span class="mtag">${esc(UI("gift.nowGood"))}</span><b>${esc(og.name)}</b><small>${esc(open.reason||og.when||"")}</small><span class="mcard">${esc(UI("gift.card"))}${own?" · "+esc(UI("gift.cardOwned")):""}</span></span><span class="mp">${Icon.gem(14)} ${og.price}</span></button>`:""}
+  <h3 class="gsec">${esc(UI("gift.secAlways"))}</h3>
+  <div class="items g3">${GIFTS.filter(g=>g.kind!=="moment").map(tile).join("")}</div>
+  <h3 class="gsec">${esc(UI("gift.secMoment"))}</h3><p class="gsub">${esc(UI("gift.secMomentSub"))}</p>
+  <div class="items g3">${GIFTS.filter(g=>g.kind==="moment").map(mtile).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
+  $("#giftSheet").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const g=gBy(b.dataset.m);if(Moment.isOpen(g.id))return give(g.id);
+    toast(`<b>${esc(UI("gift.lockedToast"))}</b>`+(S.giftGiven&&S.giftGiven[g.id]&&g.when?`<br><small>${esc(g.when)}</small>`:""))});
   openSheet("#giftSheet");
 }
+// 50: 처음 「선물」을 누르면 한 번만 안내(그 뒤로는 시트 안 「특별한 순간에」 줄 설명)
+function giftGuide(){if(S.giftGuide)return giftSheet();
+  const el=$("#giftGuide");el.innerHTML=`<div class="gg-lock">${LOCK_SVG}</div><h2>${esc(UI("gift.guide.title"))}</h2><p>${esc(UI("gift.guide.body"))}</p><button class="cta" id="ggOk">${esc(UI("gift.guide.ok"))}</button>`;
+  openSheet("#giftGuide");$("#ggOk").onclick=()=>{S.giftGuide=true;save();closeSheets();setTimeout(giftSheet,200)}}
 // 받침이 있으면 을, 없으면 를(49 「커피를 건넨다」·「꽃다발을 건넨다」)
 // 50: 선물 그림(icon 이 없으면 그림 문자 e)
 const giftPic=(g,c="gi")=>g.icon?`<img class="${c}" src="${g.icon}" alt="">`:`<span class="${c} ge" aria-hidden="true">${esc(g.e||"🎁")}</span>`;
@@ -1925,16 +1980,52 @@ function give(id){
   if(busy){toast(esc(UI("gift.busy")));return}
   S.dia-=g.price;
   // 50: 언제든 선물 = 받는 몸짓 고정(g.motion). 직전 repeat.within 번 안에 같은 걸 또 주면 몸짓을 repeat.motions 중 하나로(번갈아, 그 선물 몸짓과 다른 것), 호감 상승 절반, 서버 줄에 「· 또」
-  const R=GIFT.repeat||{},again=(S.giftLog||[]).slice(-(R.within||3)).includes(g.id);
-  let mid=g.motion||null;
+  const R=GIFT.repeat||{},mom=g.kind==="moment",again=!mom&&(S.giftLog||[]).slice(-(R.within||3)).includes(g.id);
+  let mid=mom?Moment.reactionOf(g):g.motion||null;  // 50-C: 순간 선물 = 지금 관계 묶음의 반응 몸짓
   if(again){const ms=(R.motions||[]).filter(m=>m!==g.motion);if(ms.length){mid=ms[(S.giftAgain||0)%ms.length];S.giftAgain=(S.giftAgain||0)+1}}
   S.giftLog=[...(S.giftLog||[]),g.id].slice(-10);
-  const tags=[];if(g.rec&&g.rec===st)tags.push(UI("gift.srvMood"));if(again)tags.push(UI("gift.srvAgain"));
+  (S.giftGiven||(S.giftGiven={}))[g.id]=((S.giftGiven||{})[g.id]||0)+1;
+  if(mom)Moment.close("given");
+  const tags=[];if(mom)tags.push(UI("gift.srvMoment"));if(g.rec&&g.rec===st)tags.push(UI("gift.srvMood"));if(again)tags.push(UI("gift.srvAgain"));
   if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계는 판정이 정함
   save();renderTop();
   burst(g.icon||g.e);
-  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again});
+  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again,...(mom?{moment:g.id}:{})});
 }
+
+// 50: 순간 선물. 서버 답장 gift_moment({id, reason}) 또는 임시 규칙(data/gifts.json momentFallback)으로 한 번에 하나 열림.
+// 저장값 S.moment = {id, reason, left(남은 내 메시지 수), src}. 열린 뒤 내 메시지 moment.turns 번이 지나면 닫힘. S.momentSrv = 서버가 gift_moment 를 한 번이라도 보냄(임시 규칙 꺼짐)
+// S.momentLast[id] = 닫힌 때의 내 메시지 수(S.turnN) — 임시 규칙은 cooldownTurns 동안 같은 선물을 다시 안 엶
+const Moment={
+  cfg(){return GIFT.moment||{}},
+  bond(){const n=EpStage.n();const b=(GIFT.bonds||[]).find(x=>(x.stages||[]).includes(n));return b||null},
+  reactionOf(g){const b=this.bond(),m=b&&g&&g.reactions&&g.reactions[b.id];return m&&canPlay(m)?m:null},
+  cardOf(g,bid){const b=bid||(this.bond()||{}).id;return COL.items.find(x=>x.source==="moment"&&x.gift===g.id&&x.bond===b)||null},
+  ready(g){return !!(g&&g.kind==="moment"&&this.reactionOf(g))},
+  // 서버에 보내는 「지금 열 수 있는 순간 선물」: 반응 몸짓이 준비된 것만. 하나가 열려 있으면 비움(한 번에 하나)
+  list(){if(S.moment)return[];return GIFTS.filter(g=>this.ready(g)).map(g=>({id:g.id,name:g.name,when:g.when||""}))},
+  open(){return S.moment&&gBy(S.moment.id)?S.moment:null},
+  isOpen(id){const o=this.open();return !!(o&&o.id===id&&this.ready(gBy(id)))},
+  start(id,reason,src){const g=gBy(id);if(S.moment||!this.ready(g))return false;
+    S.moment={id,reason:reason||"",left:Math.max(1,Math.round(+this.cfg().turns||3)),src:src||"server",at:Date.now()};save();this.glow();return true},
+  close(why){if(!S.moment)return;(S.momentLast||(S.momentLast={}))[S.moment.id]=S.turnN||0;S.moment=null;save();this.glow()},
+  // 내 메시지를 보낼 때(서아 방): 열려 있으면 남은 수 하나 줄이고 0이면 닫음
+  tick(){S.turnN=(S.turnN||0)+1;if(!S.moment)return;S.moment.left=(S.moment.left||1)-1;if(S.moment.left<=0)this.close("turns");else save()},
+  // 서아 답장 뒤: 서버 gift_moment → 열기(임시 규칙 끔). 아니면 임시 규칙(켜져 있고 서버가 아직 안 보냈을 때)
+  afterReply(v){
+    const gm=v&&v.src==="server"&&v.giftMoment;
+    if(gm&&typeof gm==="object"){if(!S.momentSrv){S.momentSrv=true;save()}
+      if(gm.id&&this.list().some(x=>x.id===gm.id))this.start(gm.id,typeof gm.reason==="string"?gm.reason:"","server");return}
+    const F=GIFT.momentFallback||{};if(!F.on||S.momentSrv||S.moment)return;
+    const txt=[v.emotion,v.action,v.line].filter(Boolean).join(" "),cd=Math.max(0,+this.cfg().cooldownTurns||0),L=S.momentLast||{};
+    for(const r of F.rules||[]){const g=gBy(r.gift);if(!g||!this.ready(g))continue;
+      if(L[g.id]!=null&&(S.turnN||0)-L[g.id]<cd)continue;
+      try{if(new RegExp(r.words).test(txt)){this.start(g.id,r.reason,"fallback");return}}catch(e){}}
+  },
+  // ＋ 버튼 금빛 + 작은 점(서아 방에서만), 기능판 「선물하기」 칸도
+  glow(){const on=!!this.open()&&(S.room||"seoa")==="seoa",b=$("#fnBtn"),t=document.querySelector('#fnPanel [data-fn="gift"]');
+    if(b)b.classList.toggle("mo",on);if(t)t.classList.toggle("mo",on)}
+};
 
 // ───────────────────────── 앨범 ─────────────────────────
 const fmtD=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
@@ -2520,7 +2611,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
 function openRoom(cid){
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
-  S.room=cid;S.read[cid]=chatOf(cid).length;save();
+  S.room=cid;S.read[cid]=chatOf(cid).length;save();Moment.glow();
   $("#dmWrap").style.display="none";$("#room").style.display="flex";
   const c=chBy(cid);$("#roomAv").style.backgroundImage=`url(${c.img})`;$("#roomName").textContent=c.name;
   Thread.chip(cid);  // 25-1: 이름 밑 설명 줄은 특별 에피소드 안에서만(data/ui.json thread.sub)
@@ -2879,9 +2970,9 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.datase
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;
   function set(v){on=!!v;const p=$("#fnPanel"),b=$("#fnBtn");if(!p)return;p.classList.toggle("on",on);p.setAttribute("aria-hidden",on?"false":"true");
-    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
+    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");Moment.glow();b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
     if(on){const i=$("#inp");if(document.activeElement===i)i.blur();const L=$("#log");setTimeout(()=>{L.scrollTop=L.scrollHeight},240)}}
-  function run(k){set(false);if(k==="gift")giftSheet();else if(k==="camera")Cam.open();else if(k==="pose")Pose.sheet("chat");else if(k==="photo")PhotoUI.sheet()}
+  function run(k){set(false);if(k==="gift")giftGuide();else if(k==="camera")Cam.open();else if(k==="pose")Pose.sheet("chat");else if(k==="photo")PhotoUI.sheet()}
   return{set,toggle:()=>set(!on),run,isOn:()=>on}})();
 $("#fnBtn").onclick=()=>Fn.toggle();
 document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.onclick=()=>Fn.run(b.dataset.fn));
