@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0557">
+<meta name="moti-version" content="20261126-0704">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0557">
-<link rel="stylesheet" href="photos.css?v=20261126-0557">
-<link rel="stylesheet" href="cards.css?v=20261126-0557">
-<link rel="stylesheet" href="pose.css?v=20261126-0557">
-<link rel="stylesheet" href="pack.css?v=20261126-0557">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0704">
+<link rel="stylesheet" href="photos.css?v=20261126-0704">
+<link rel="stylesheet" href="cards.css?v=20261126-0704">
+<link rel="stylesheet" href="pose.css?v=20261126-0704">
+<link rel="stylesheet" href="pack.css?v=20261126-0704">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0557"></script>
-<script src="motion.js?v=20261126-0557"></script>
-<script src="gacha.js?v=20261126-0557"></script>
-<script src="look.js?v=20261126-0557"></script>
-<script src="alive.js?v=20261126-0557"></script>
-<script src="film.js?v=20261126-0557"></script>
-<script src="photos.js?v=20261126-0557"></script>
-<script src="seoaphoto.js?v=20261126-0557"></script>
-<script src="cards.js?v=20261126-0557"></script>
-<script src="pose.js?v=20261126-0557"></script>
-<script src="pack.js?v=20261126-0557"></script>
-<script src="storypic.js?v=20261126-0557"></script>
-<script src="onboarding.js?v=20261126-0557"></script>
+<script src="icons.js?v=20261126-0704"></script>
+<script src="motion.js?v=20261126-0704"></script>
+<script src="gacha.js?v=20261126-0704"></script>
+<script src="look.js?v=20261126-0704"></script>
+<script src="alive.js?v=20261126-0704"></script>
+<script src="film.js?v=20261126-0704"></script>
+<script src="photos.js?v=20261126-0704"></script>
+<script src="seoaphoto.js?v=20261126-0704"></script>
+<script src="cards.js?v=20261126-0704"></script>
+<script src="pose.js?v=20261126-0704"></script>
+<script src="pack.js?v=20261126-0704"></script>
+<script src="storypic.js?v=20261126-0704"></script>
+<script src="onboarding.js?v=20261126-0704"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -705,7 +705,7 @@ const apiUrl=()=>(qs.get("api")||DATA.config.apiUrl||"https://seoa-backand.onren
 // 표정: VRoid 표정 데이터(Fcl_…) 조합
 // 14-3: 기본·미소·뾰로통·슬픔·수줍음을 눈을 뜬 채 부드럽게(눈을 가늘게 뜨던 표정이 어색해 보여서). 예전 값은 주석
 const FACE={
-  neutral:{Fcl_MTH_Fun:.3,Fcl_BRW_Fun:.3},                 // 예전 {} — 입꼬리만 살짝 올린 기본 얼굴
+  neutral:{Fcl_BRW_Fun:.15},                               // 73: 진짜 무표정(웃지 않음). 예전 {Fcl_MTH_Fun:.3,Fcl_BRW_Fun:.3} — 입꼬리를 올려 늘 웃는 얼굴이 됐음
   joy:{Fcl_ALL_Joy:1},
   fun:{Fcl_ALL_Fun:.85},
   soft:{Fcl_MTH_Fun:.5,Fcl_BRW_Fun:.45},                   // 예전 {Fcl_ALL_Fun:.45}
@@ -713,9 +713,18 @@ const FACE={
   angry:{Fcl_ALL_Angry:.8},
   sulky:{Fcl_BRW_Sorrow:.35,Fcl_MTH_Sorrow:.3,Fcl_MTH_Small:.2},    // 예전 {Fcl_BRW_Angry:.8,Fcl_EYE_Angry:.35,Fcl_MTH_Small:.5}
   surprised:{Fcl_ALL_Surprised:1},
-  shy:{Fcl_BRW_Sorrow:.45,Fcl_MTH_Fun:.35,Fcl_EYE_Fun:.2}          // 예전 {Fcl_EYE_Joy:.55,Fcl_BRW_Sorrow:.55,Fcl_MTH_Small:.6}
+  shy:{Fcl_BRW_Sorrow:.45,Fcl_MTH_Fun:.35,Fcl_EYE_Fun:.2},         // 예전 {Fcl_EYE_Joy:.55,Fcl_BRW_Sorrow:.55,Fcl_MTH_Small:.6}
+  // 73: 웃지 않는 표정. 눈썹은 앞머리에 가려 거의 안 보여서 눈·입으로 표정을 냄
+  smirk:{Fcl_MTH_Fun:.35,Fcl_EYE_Joy_R:.4,Fcl_EYE_Angry:.15},     // 피식(한쪽 눈만 살짝 가늘게 + 입꼬리 조금)
+  wink:{Fcl_EYE_Close_R:1,Fcl_MTH_Fun:.45},                       // 윙크
+  glare:{Fcl_EYE_Angry:.9,Fcl_BRW_Angry:.6,Fcl_MTH_Neutral:.5},  // 째려보기
+  bored:{Fcl_EYE_Close:.45,Fcl_MTH_Neutral:.4},                   // 무심(반쯤 감은 눈)
+  pout:{Fcl_MTH_U:.65,Fcl_EYE_Angry:.3,Fcl_BRW_Angry:.3},        // 삐죽
+  serious:{Fcl_EYE_Angry:.38,Fcl_MTH_Neutral:.5,Fcl_BRW_Angry:.3}, // 진지
+  flustered:{Fcl_EYE_Surprised:.55,Fcl_MTH_Small:.6,Fcl_MTH_O:.2,Fcl_BRW_Surprised:.5}, // 당황
+  tired:{Fcl_EYE_Sorrow:.45,Fcl_EYE_Close:.3,Fcl_MTH_Sorrow:.25,Fcl_BRW_Sorrow:.4}       // 지친
 };
-const FACEKO={neutral:"무표정",joy:"활짝 웃음",fun:"웃음",soft:"살짝 미소",sorrow:"슬픔",angry:"화남",sulky:"뾰로통",surprised:"놀람",shy:"수줍음"};
+const FACEKO={neutral:"무표정",joy:"활짝 웃음",fun:"웃음",soft:"살짝 미소",sorrow:"슬픔",angry:"화남",sulky:"뾰로통",surprised:"놀람",shy:"수줍음",smirk:"피식",wink:"윙크",glare:"째려보기",bored:"무심",pout:"삐죽",serious:"진지",flustered:"당황",tired:"지친"};
 
 const STATES={normal:{ko:"평소",e:"😐"},tired:{ko:"지침",e:"😮‍💨"},sulky:{ko:"삐짐",e:"😤"},birthday:{ko:"생일",e:"🎂"}};
 const SORDER=["normal","tired","sulky","birthday"];
@@ -1658,6 +1667,8 @@ async function getSample(){
 }
 // ── moti 대화 서버 (GitHub 사이트에서는 이걸로 대답해요) ──
 // 감정 글자 → 표정 (data/emotion_face.json)
+// 73: 지문 단어 → 표정(data/emotion_face.json words). 감정 표정보다 먼저(예: 「피식 웃는다」 → 피식). 없으면 null
+const wordFace=t=>{for(const x of DATA.face.words||[]){try{if(new RegExp(x.match).test(t||""))return x.face}catch(err){}}return null};
 const emoFace=e=>{for(const x of DATA.face.map||[]){try{if(new RegExp(x.match,"i").test(e||""))return x.face}catch(err){}}return DATA.face.default||"soft"};
 // 대화 기록 → 서버로 보낼 모양 ("*행동* 대사"). 인트로 문단은 서버가 OPENING으로 따로 넣으므로 뺌
 const turnText=m=>(m.act?`*${m.act}* `:"")+(m.srv||m.t);  // 49: 선물 줄은 서버에 「[유저가 선물함: ○○]」
@@ -2003,7 +2014,7 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
   }
   const j=await askServer("seoa",text);
   if(j){const nm=j.motionNames.map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
-    const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
+    const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"||face==="bored"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
     const sc=j.location?SCENES.findIndex(x=>x.name===j.location):-1;
     return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,src:"server"}}
   return localReply(text,allowed);
@@ -2091,6 +2102,7 @@ async function send(text,o){
   if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){moved=true;const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
     await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
+  {const wf=wordFace(actionText(v));if(wf)v.face=wf}  // 73: 지문에 「피식」「노려보」 같은 말이 있으면 그 표정
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
   // 48: 포즈 부탁 — 서버 답장이 아니면(서버 없음·실패) 예비 대사 대신 짧은 기본 대사(data/ui.json pose.fallback)
   if(poseId&&v.src!=="server"){v.line=UI("pose.fallback");v.action=null}
