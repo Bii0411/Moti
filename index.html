@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0756">
+<meta name="moti-version" content="20261126-0818">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0756">
-<link rel="stylesheet" href="photos.css?v=20261126-0756">
-<link rel="stylesheet" href="cards.css?v=20261126-0756">
-<link rel="stylesheet" href="pose.css?v=20261126-0756">
-<link rel="stylesheet" href="pack.css?v=20261126-0756">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0818">
+<link rel="stylesheet" href="photos.css?v=20261126-0818">
+<link rel="stylesheet" href="cards.css?v=20261126-0818">
+<link rel="stylesheet" href="pose.css?v=20261126-0818">
+<link rel="stylesheet" href="pack.css?v=20261126-0818">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0756"></script>
-<script src="motion.js?v=20261126-0756"></script>
-<script src="gacha.js?v=20261126-0756"></script>
-<script src="look.js?v=20261126-0756"></script>
-<script src="alive.js?v=20261126-0756"></script>
-<script src="film.js?v=20261126-0756"></script>
-<script src="photos.js?v=20261126-0756"></script>
-<script src="seoaphoto.js?v=20261126-0756"></script>
-<script src="cards.js?v=20261126-0756"></script>
-<script src="pose.js?v=20261126-0756"></script>
-<script src="pack.js?v=20261126-0756"></script>
-<script src="storypic.js?v=20261126-0756"></script>
-<script src="onboarding.js?v=20261126-0756"></script>
+<script src="icons.js?v=20261126-0818"></script>
+<script src="motion.js?v=20261126-0818"></script>
+<script src="gacha.js?v=20261126-0818"></script>
+<script src="look.js?v=20261126-0818"></script>
+<script src="alive.js?v=20261126-0818"></script>
+<script src="film.js?v=20261126-0818"></script>
+<script src="photos.js?v=20261126-0818"></script>
+<script src="seoaphoto.js?v=20261126-0818"></script>
+<script src="cards.js?v=20261126-0818"></script>
+<script src="pose.js?v=20261126-0818"></script>
+<script src="pack.js?v=20261126-0818"></script>
+<script src="storypic.js?v=20261126-0818"></script>
+<script src="onboarding.js?v=20261126-0818"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1749,7 +1749,8 @@ const userName=()=>String((S.profile&&S.profile.name)||"");
 const NAME_KEYS=["name_state","judge_soon","name_quiet"];
 // 73: 서버 S3 기억 stage_notes·promises 는 본편 판정(/judge)이 돌려준 state 를 통째로 story 에 저장할 때 같이 남고, 본편 /chat·/judge 에 그대로 감.
 //     서버에서도 본편 전용이라 에피소드(크리스마스) 요청에는 빼서 섞지 않음(에피소드 판정은 원래 state 를 통째로 저장하지 않음)
-const MEMO_KEYS=["stage_notes","promises"];
+// 73-1: stage_note_due(서버가 다음에 단계 기록을 남길 단계)도 같은 묶음. 본편 되감기는 story 통째 스냅숏이라 셋 다 그 시점 값으로, 처음부터는 story={} 라 셋 다 비워짐
+const MEMO_KEYS=["stage_notes","promises","stage_note_due"];
 const noNameFlow=o=>{NAME_KEYS.concat(MEMO_KEYS).forEach(k=>delete o[k]);return o};
 function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
   const o=noNameFlow({...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location});
