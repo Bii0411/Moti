@@ -5,6 +5,8 @@
   "_serverFiller": "29: 서버 v2 가 대사 대신 이 글자만 보내면(서버 대체 응답 「…」, 구글 실패) 실패로 보고 예비 대사(fallbackReply·예시 대사)로 넘어감. 이 턴은 판정에 넣지 않음",
   "serverFiller": ["…", "...", "……"],
   "_judge": "29: 서버 v2 판정(/judge)은 서버 답장 judgeEvery 턴에 한 번. 그 사이 턴의 내 말·서아 답을 순서대로 줄바꿈으로 이어 last_user·last_reply 로 넘김(judgeMaxChars = 서버 입력 한도, 넘으면 오래된 앞부분을 자름). 요약(need_summary)은 판정 summaryEveryJudges 번에 한 번(= 약 6턴). 판정 못 한 턴은 저장값에 남아 다음 대화 첫 판정 때 같이 감",
+  "_historyMessages": "73: 서아 /chat 에 보내는 대화 기록(history) 최근 몇 개(내 말·서아 답 하나가 각 1개). 다른 캐릭터·예전 방식(serverVersion 1)은 그대로(32개·11개)",
+  "historyMessages": 80,
   "judgeEvery": 3,
   "_judgeWait": "29-1: 다음 메시지는 직전 판정이 끝난 뒤 보냄(그동안 「서아가 입력 중…」). judgeWaitMs 를 넘기면 그 판정은 버리고(결과가 늦게 와도 반영 안 함, 쌓인 턴은 남아 다음 턴에 다시 판정) 판정 없이 보냄",
   "judgeWaitMs": 20000,
