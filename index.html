@@ -2956,7 +2956,7 @@ const End=(()=>{
   // 시연 패널: 그 줄기로 가서, 지점이 없으면 지금을 지점으로 두고 바로 실패
   function demo(k){
     if(k==="main"){if(th()!=="main")Thread.go("main");Demo.toChat();if(locked(k))return play(k);
-      const st=story();if(curStage()<(M().pointStage||5)){Demo.setStage(M().pointStage||5);st.departure_days_left=7}
+      const st=story();if(curStage()<(M().pointStage||5)){Demo.setStage(M().pointStage||5);st.departure_days_left=M().departDays||3}  // 54-A: 7일 → 사흘(data/rewind.json main.departDays)
       if(!rec(k).point)point(k);st.departure_days_left=0;st.ending=M().failEnding||"departed";save();renderBond();return fail(k)}
     const st0=STORIES.find(x=>x.id===k);if(!st0)return;S.stories[k]=1;
     if(th()!==k){const fresh=Thread.go(k);if(fresh)setScene(st0.scene)}
