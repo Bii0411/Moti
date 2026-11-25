@@ -1,0 +1,98 @@
+/* moti 카드 팩(49). 컬렉션 「카드 팩」 탭 배너 · 확률 보기 · 뽑기 연출(#packFx). 카드 모양은 cards.css(38 포토카드) 그대로 */
+
+/* ── 배너 ── */
+.pkban{display:flex;align-items:center;gap:10px;padding:12px 10px 12px 12px;border-radius:16px;border:1px solid #3a2f5c;
+  background:radial-gradient(120% 140% at 0% 0%,#3a2470 0%,#1d1630 55%,#15121f 100%);margin-bottom:6px;overflow:hidden}
+.pkart{position:relative;flex:none;width:58px;height:80px;margin:2px 4px 2px 0}
+.pkart .mc{width:52px;position:absolute;left:3px;top:2px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+.pkart1 .mc{transform:rotate(-9deg)}
+.pkart2 .mc{transform:rotate(7deg) translate(6px,1px);opacity:.7}
+.pkmid{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pkmid b{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.pkmid small{font-size:12px;font-weight:700;color:var(--pri2);line-height:1.35}
+.pkbtns{flex:none;display:flex;flex-direction:column;gap:6px;width:124px}
+.pkbtn{display:flex;align-items:center;justify-content:space-between;gap:4px;height:36px;padding:0 9px;white-space:nowrap;border-radius:11px;border:1px solid #4b3d78;background:#221b36;color:var(--text);font-size:12.5px;font-weight:800;-webkit-tap-highlight-color:transparent}
+.pkbtn.ten{background:var(--pri);border-color:var(--pri)}
+.pkbtn em{font-style:normal;display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.pkbtn:active,.pkagain:active,.pkdone:active,.pkall:active{transform:scale(.97)}
+.pkoddsrow{display:flex;justify-content:flex-end;margin:0 0 8px}
+.pkodds{padding:4px 2px;font-size:12px;font-weight:600;color:var(--sub);-webkit-tap-highlight-color:transparent}
+
+/* 확률 보기 작은 창 */
+.pkoz h4{font-size:13px;margin:2px 0 6px}
+.pkoz .otab{margin-bottom:12px}
+.pkol td:first-child{text-align:left}
+.pkol i{font-style:normal;color:var(--sub);font-variant-numeric:tabular-nums;margin-right:2px}
+#chargeCard.pkhl{animation:pkhl 1.4s ease-out}
+@keyframes pkhl{0%,40%{box-shadow:0 0 0 2px var(--pri)}100%{box-shadow:0 0 0 2px transparent}}
+
+/* ── 뽑기 연출 ── */
+.pkfx{position:absolute;inset:0;z-index:24;display:none;flex-direction:column;color:var(--text);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.pkfx.on{display:flex;background:radial-gradient(90% 60% at 50% 42%,#2b1b52 0%,#0b0912 70%) #0b0912;isolation:isolate;animation:pkfade .25s}
+.pkbg{display:none}  /* 49: 바탕은 .pkfx 자체에(카드 10장의 3D 칸이 많을 때 따로 둔 바탕 칸이 안 그려지는 일이 있었음) */
+@keyframes pkfade{from{opacity:0}}
+.pkstage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:56px 16px 0}
+/* 팩: 가운데로 커지며 흔들림 → 빛 → 사라짐 */
+.pkpack{position:absolute;left:50%;top:46%;width:150px;height:210px;transform:translate(-50%,-50%) scale(.6);opacity:0;animation:pkin .32s cubic-bezier(.2,.9,.3,1.2) forwards,pkshake .42s .36s ease-in-out}
+.pkpack .mc{position:absolute;left:12px;top:6px;width:128px}
+.pkpack .pkart1 .mc{transform:rotate(-8deg)}
+.pkpack .pkart2 .mc{transform:rotate(7deg) translate(10px,2px);opacity:.75}
+@keyframes pkin{to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+@keyframes pkshake{0%,100%{rotate:0deg}25%{rotate:-4deg}50%{rotate:4deg}75%{rotate:-2deg}}
+.pkflash{position:absolute;left:50%;top:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#e9dcff 30%,rgba(196,181,253,0) 70%);opacity:0;pointer-events:none}
+.pkfx.opened .pkpack{animation:pkout .34s ease-in forwards}
+.pkfx.opened .pkflash{animation:pkflash .5s ease-out}
+@keyframes pkout{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-60%) scale(1.25);opacity:0}}
+@keyframes pkflash{0%{opacity:0;transform:scale(.4)}35%{opacity:1}100%{opacity:0;transform:scale(9)}}
+
+/* 카드(뒤집기). 앞·뒤 두 면, 뒤집으면 rotateY(180deg) */
+.pkcard{position:relative;perspective:900px}
+.pkin{position:relative;width:100%;aspect-ratio:2/3;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transition:transform .52s cubic-bezier(.3,.7,.2,1)}
+.pkcard.flip .pkin{transform:rotateY(180deg)}
+.pkface{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.pkf{transform:rotateY(180deg)}
+.pkface .mc{width:100%;pointer-events:none}
+.pkcard.now .pkin{transition:none}
+/* 레어: 뒤집힐 때 홀로그램 빛(38 레어 테두리 색) */
+.pkcard.g-rare .pkf::after,.pkcard.g-special .pkf::after{content:"";position:absolute;inset:-2px;border-radius:7%;pointer-events:none;opacity:0;mix-blend-mode:screen;
+  background:linear-gradient(115deg,transparent 20%,#bfe4ff 35%,#d8c9ff 45%,#ffd2e8 55%,#c4f3e2 65%,transparent 80%);background-size:250% 100%;background-position:120% 0}
+.pkcard.shine .pkf::after{animation:pkholo .9s ease-out}
+/* 빛 번짐은 3D 바깥 칸(::before)에 — 뒤집히는 칸(.pkin)에 filter 를 걸면 3D 가 납작해져 뒷면이 거울처럼 비침 */
+.pkcard::before{content:"";position:absolute;left:0;right:0;top:0;aspect-ratio:2/3;border-radius:7%;pointer-events:none;opacity:0;transition:opacity .25s;box-shadow:0 0 16px 2px #bfe4ffcc,0 0 34px 8px #d8c9ff88}
+.pkcard.g-special::before{box-shadow:0 0 16px 2px #ffe3a0cc,0 0 34px 8px #f5c66b88}
+.pkcard.shine::before{opacity:1}
+@keyframes pkholo{0%{opacity:0;background-position:120% 0}25%{opacity:.95}100%{opacity:0;background-position:-30% 0}}
+/* 표: NEW / 이미 있어요 (뒤집힌 뒤 보임) */
+.pkmark{position:absolute;left:0;right:0;top:100%;display:flex;justify-content:center;margin-top:8px;opacity:0;transition:opacity .2s}
+.pkcard.show .pkmark{opacity:1}
+.pknew{font-size:12px;font-weight:900;letter-spacing:.08em;color:#1a0f2e;background:linear-gradient(90deg,#ffd2e8,#f5c66b);border-radius:999px;padding:3px 10px}
+.pkdup{font-size:12px;font-weight:700;color:var(--sub);background:#1d1830;border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+
+/* 한 장씩: 가운데 큰 카드 */
+.pkone{position:relative;width:min(58%,230px)}
+.pkone .pkcard.deal{animation:pkdeal .36s cubic-bezier(.2,.8,.2,1)}
+@keyframes pkdeal{0%{transform:translateY(40px) scale(.85);opacity:0}100%{transform:none;opacity:1}}
+.pkfx:not(.opened) .pkone{visibility:hidden}
+
+/* 10장 묶음: 5열 두 줄 */
+.pkgrid[hidden]{display:none}
+.pkfx.gridon .pkone{display:none}
+.pkgrid{width:100%;display:grid;grid-template-columns:repeat(5,1fr);column-gap:8px;row-gap:30px;align-content:center;padding-bottom:14px}
+.pkgrid .pkmark{margin-top:5px}
+.pkgrid .pknew{font-size:9px;padding:2px 6px}
+.pkgrid .pkdup{font-size:0;padding:2px 6px}
+.pkgrid .pkdup::after{content:attr(data-s);font-size:9px}
+.pkgrid .pkcard.dup.show .pkf .mc{opacity:.6}  /* 3D 칸(.pkin)에 opacity 를 걸면 납작해짐 → 앞면 안쪽에 */
+
+/* 아래: 안내 · 몇 번째 · 버튼 */
+.pkfoot{position:relative;flex:none;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));text-align:center;min-height:150px}
+.pkhint{font-size:13px;font-weight:600;color:var(--sub);line-height:1.5;min-height:20px;margin:0 0 4px}
+.pkhint b{color:var(--text);font-size:15px}
+.pkcount{font-size:12px;font-weight:700;color:var(--pri2);font-variant-numeric:tabular-nums;min-height:16px;margin:0 0 10px}
+.pkacts{display:flex;gap:8px;justify-content:center}
+.pkall{height:40px;padding:0 18px;border-radius:12px;border:1px solid #4b3d78;background:#221b36;color:var(--text);font-size:13px;font-weight:800}
+.pkagain,.pkdone{flex:1;max-width:180px;height:46px;border-radius:13px;font-size:14px;font-weight:800;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.pkagain{border:1px solid #4b3d78;background:#221b36}
+.pkagain em{font-style:normal;display:inline-flex;align-items:center;gap:2px;font-size:12px;color:var(--pri2)}
+.pkdone{background:var(--pri)}
+@media (prefers-reduced-motion:reduce){.pkpack,.pkfx.opened .pkpack,.pkflash,.pkone .pkcard.deal{animation-duration:.01s!important}.pkcard.shine .pkf::after{animation:none}}

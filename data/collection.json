@@ -1,5 +1,5 @@
 {
-  "_설명": "명장면 수집(몸짓 도감, 9단계). 44: hold true = 보류 칸(목록·진행 줄 「모은 카드 n / total」·마이·카드 크게 보기에 안 나오고 세지 않음, 번호 no 는 그대로 지킴, 이미 모은 저장값도 지우지 않고 숨김만). m23 바디웨이브 댄스 = 옥상 춤 보류. 47: m15 다정하게 인사하기·g11 손가락 하트·g12 품에 안겨 오기도 보류(선물 특별 등급이 모두 보류라 선물에서 특별이 뜨면 레어로 처리 — gacha.js fit). tools/build_collection.mjs 가 다시 만들어도 hold 칸은 남음. 한 칸 = 몸짓 하나(id, name, source chat|gift, grade common|rare|special). 한 몸짓은 한 곳(대화 또는 선물)에서만 얻는다. 같은 몸짓은 몇 번 얻어도 한 칸. 대화 몸짓 칸은 tools/build_collection.mjs 가 data/seoa_story.json unlock 에서 만들고 gradeRule 로 grade 를 계산해 적는다(ban 제외). 선물 몸짓 g01~g12 는 원고 docs/drafts/9-선물-앨범-원고.md 1절 그대로, play = 임시 재생(몸짓 m, 표정 f, 속도 speed). 모션 파일이 오면 play 와 name 만 바꾼다. 31: only 가 있는 칸은 단계 해금이 아니라 정해진 연출에서만 얻는다(x17 「첫 만남」 = 첫 만남 연출 data/config.json firstMeet, 시크릿, 그림은 x17 돌려차기 멈춘 순간·작전복·네온 골목). build_collection 이 그대로 둔다. 38: no = 카드 번호(카드마다 고유, 01부터 화면에는 두 자리). 한 번 정한 번호는 바꾸지 않고 새 칸은 지금 가장 큰 번호 다음을 받는다(tools/build_collection.mjs 가 지킴). 42: e01 「크리스마스 이브」(45번)는 47에서 뺌(번호 45 는 retiredNo, 이미 가진 저장값 S.col.e01 은 지우지 않고 무시).",
+  "_설명": "명장면 수집(몸짓 도감, 9단계). 44: hold true = 보류 칸(목록·진행 줄 「모은 카드 n / total」·마이·카드 크게 보기에 안 나오고 세지 않음, 번호 no 는 그대로 지킴, 이미 모은 저장값도 지우지 않고 숨김만). m23 바디웨이브 댄스 = 옥상 춤 보류. 47: m15 다정하게 인사하기·g11 손가락 하트·g12 품에 안겨 오기도 보류(선물 특별 등급이 모두 보류라 선물에서 특별이 뜨면 레어로 처리 — gacha.js fit). tools/build_collection.mjs 가 다시 만들어도 hold 칸은 남음. 한 칸 = 몸짓 하나(id, name, source chat|pack|gift, grade common|rare|special). 한 몸짓은 한 곳(대화 또는 선물)에서만 얻는다. 같은 몸짓은 몇 번 얻어도 한 칸. 대화 몸짓 칸은 tools/build_collection.mjs 가 data/seoa_story.json unlock 에서 만들고 gradeRule 로 grade 를 계산해 적는다(ban 제외). 선물 몸짓 g01~g12 는 원고 docs/drafts/9-선물-앨범-원고.md 1절 그대로, play = 임시 재생(몸짓 m, 표정 f, 속도 speed). 모션 파일이 오면 play 와 name 만 바꾼다. 31: only 가 있는 칸은 단계 해금이 아니라 정해진 연출에서만 얻는다(x17 「첫 만남」 = 첫 만남 연출 data/config.json firstMeet, 시크릿, 그림은 x17 돌려차기 멈춘 순간·작전복·네온 골목). build_collection 이 그대로 둔다. 38: no = 카드 번호(카드마다 고유, 01부터 화면에는 두 자리). 한 번 정한 번호는 바꾸지 않고 새 칸은 지금 가장 큰 번호 다음을 받는다(tools/build_collection.mjs 가 지킴). 42: e01 「크리스마스 이브」(45번)는 47에서 뺌(번호 45 는 retiredNo, 이미 가진 저장값 S.col.e01 은 지우지 않고 무시). 49: 선물로 얻던 카드 g01~g10 은 컬렉션 「카드 팩」 카드(source pack, 번호·등급·몸짓·그림 방식 그대로, 뽑기 값은 data/pack.json). 보류 g11·g12 는 source gift 그대로(보류를 풀 때 pack 으로 바꾸면 팩 특별 등급이 다시 나옴).",
   "gradeRule": {
     "_설명": "대화 몸짓 등급 규칙: 1~2단계 일반, 3~4단계 희귀, 5~6단계 특별, 서아 전용 c01~c05 는 단계와 상관없이 특별, flag·event 몸짓은 희귀",
     "stage": {
@@ -390,7 +390,7 @@
       "id": "g01",
       "no": 33,
       "name": "받아 들고 살펴보기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "m25",
@@ -402,7 +402,7 @@
       "id": "g02",
       "no": 34,
       "name": "입 가리고 웃기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "x19",
@@ -414,7 +414,7 @@
       "id": "g03",
       "no": 35,
       "name": "고개 까딱하기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "m02",
@@ -426,7 +426,7 @@
       "id": "g04",
       "no": 36,
       "name": "시큰둥한 척하기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "m17",
@@ -438,7 +438,7 @@
       "id": "g05",
       "no": 37,
       "name": "볼 붉히며 시선 피하기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "m24",
@@ -450,7 +450,7 @@
       "id": "g06",
       "no": 38,
       "name": "툭 받아 챙기기",
-      "source": "gift",
+      "source": "pack",
       "grade": "common",
       "play": {
         "m": "m09",
@@ -462,7 +462,7 @@
       "id": "g07",
       "no": 39,
       "name": "같이 셀카 찍기",
-      "source": "gift",
+      "source": "pack",
       "grade": "rare",
       "play": {
         "m": "m14",
@@ -474,7 +474,7 @@
       "id": "g08",
       "no": 40,
       "name": "들고 흔들어 보이기",
-      "source": "gift",
+      "source": "pack",
       "grade": "rare",
       "play": {
         "m": "m16",
@@ -486,7 +486,7 @@
       "id": "g09",
       "no": 41,
       "name": "바짝 다가와 보기",
-      "source": "gift",
+      "source": "pack",
       "grade": "rare",
       "play": {
         "m": "m12",
@@ -498,7 +498,7 @@
       "id": "g10",
       "no": 42,
       "name": "고개 갸웃하며 웃기",
-      "source": "gift",
+      "source": "pack",
       "grade": "rare",
       "play": {
         "m": "m25",
