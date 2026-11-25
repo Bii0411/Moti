@@ -1,7 +1,7 @@
 {
   "_설명": "앱 화면 문구(6-C). 코드에는 넣지 않고 여기서 읽는다. {이름} 자리는 코드가 채운다. {gem} 은 다이아 아이콘 자리(21, 코드가 icons.js 의 그림으로 바꿈). 서아 앨범의 다른 문구(firstSeenText·soonText·힌트)는 data/seoa_story.json.",
   "album": {
-    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, collected = 위쪽 진행 줄(38, {n} 모은 칸, {total} 그 묶음 전체), count = 선물·해금 카드 셋째 줄의 개수. 38부터 잠긴 칸을 눌러도 힌트를 띄우지 않음. 등급 이름은 collection.grade. firstSeen = 일반 등급 새 몸짓 작은 알림({name} 몸짓 이름, 26에서 data/seoa_story.json firstSeenText 를 옮겨 옴). infoAria = 제목 옆 (!) 버튼 접근성 이름. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄",
+    "_album": "앨범 탭 = 명장면 수집(9-B, 원고 docs/drafts/9-선물-앨범-원고.md 3절). seg = 묶음 버튼, collected = 위쪽 진행 줄(38, {n} 모은 칸, {total} 그 묶음 전체), count = 선물·해금 카드 셋째 줄의 개수. 38부터 잠긴 칸을 눌러도 힌트를 띄우지 않음. 등급 이름은 collection.grade. firstSeen = 일반 등급 새 몸짓 작은 알림({name} 몸짓 이름, 26에서 data/seoa_story.json firstSeenText 를 옮겨 옴). infoAria = 제목 옆 (!) 버튼 접근성 이름. unlockTag = 해금 연출 때 3D 위 몸짓 이름 옆 표시, unlockSaved = 해금 토스트 셋째 줄. 50: seg.gift = 순간 선물 반응 카드 탭, giftEmpty = 그 탭에 카드가 하나도 없을 때(반응 모션이 아직 없을 때)",
     "title": "무빙 카드",
     "infoAria": "무빙 카드 설명 보기",
     "intro": {
@@ -20,6 +20,7 @@
     "seg": {
       "all": "전체",
       "chat": "대화",
+      "gift": "선물",
       "pack": "카드 팩"
     },
     "collected": "모은 카드 {n} / {total}",
@@ -45,7 +46,8 @@
       "mark": "moti",
       "saved": "카드 그림을 저장했어요",
       "chipsAria": "캐릭터별 카드"
-    }
+    },
+    "giftEmpty": "특별한 순간에 선물을 건네면 서아의 반응이 카드로 모여요"
   },
   "chatList": {
     "_chatList": "대화 탭 메시지 목록이 비어 있을 때(앱을 처음 열었을 때 등). 홈에서 캐릭터 카드를 눌러 들어가야 목록에 생긴다",

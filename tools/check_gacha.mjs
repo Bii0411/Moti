@@ -19,7 +19,11 @@ console.log("## 데이터 검사\n");
 const chat = col.items.filter(x => x.source === "chat" && !x.hold && !x.only);
 const packAll = col.items.filter(x => x.source === "pack"), pool = G.pool(col.items);
 const held = col.items.filter(x => x.hold), oldGift = col.items.filter(x => x.source === "gift");
-console.log(`- 도감 칸: 대화 ${chat.length} + 연출 ${col.items.filter(x => x.only).length} + 카드 팩 ${packAll.length} + 보류 선물 ${oldGift.length} = ${col.items.length} (그중 보류 ${held.map(x => x.id).join("·") || "없음"}, 보이는 칸 ${col.items.length - held.length})`);
+const momentC = col.items.filter(x => x.source === "moment");  // 50: 순간 선물 반응 카드(반응 몸짓이 없으면 앱에서 숨김)
+console.log(`- 도감 칸: 대화 ${chat.length} + 연출 ${col.items.filter(x => x.only).length} + 카드 팩 ${packAll.length} + 보류 선물 ${oldGift.length} + 순간 선물 ${momentC.length} = ${col.items.length} (그중 보류 ${held.map(x => x.id).join("·") || "없음"}, 보이는 칸 ${col.items.length - held.length}, 순간 선물 칸은 반응 몸짓이 있을 때만)`);
+{ const gl = JSON.parse(readFileSync("data/gifts.json", "utf8")).list, bonds = JSON.parse(readFileSync("data/gifts.json", "utf8")).bonds.map(b => b.id);
+  for (const x of momentC) { const g = gl.find(g => g.id === x.gift); if (!g || g.kind !== "moment") fail(`${x.id}: 순간 선물 ${x.gift} 없음`); else if (!bonds.includes(x.bond) || (g.reactions || {})[x.bond] !== (x.play || {}).m) fail(`${x.id}: 반응 몸짓이 gifts.json reactions 와 다름`) }
+  const nos = col.items.map(x => x.no).filter(n => n > 0); if (new Set(nos).size !== nos.length || nos.some(n => (col.retiredNo || []).includes(n))) fail("카드 번호 겹침·은퇴 번호 사용") }
 const ids = col.items.map(x => x.id);
 if (new Set(ids).size !== ids.length) fail("id 중복");
 const want = new Set();

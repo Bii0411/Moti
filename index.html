@@ -139,6 +139,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .slot.got::after{content:"▶";position:absolute;right:6px;top:5px;font-size:10px;color:var(--pri2)}
 .slot.lock .e{filter:brightness(0) invert(.25)}
 .slot.lock .s{color:#6b6480}
+.colempty{font-size:12px;color:var(--sub);text-align:center;line-height:1.6;padding:28px 16px;word-break:keep-all}
 .aseg{display:flex;gap:6px;margin-bottom:12px}
 .aseg button{flex:1;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:700;color:var(--sub)}
 .aseg button.on{background:var(--pri);border-color:var(--pri);color:var(--text)}
@@ -1904,6 +1905,9 @@ async function send(text,o){
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
   else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""));if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+  // 50-C: 순간 선물 — 지금 묶음의 반응 카드를 처음이면 얻음(같은 카드를 이미 가졌으면 반응만)
+  if(o&&o.moment&&giftMid){const gc=Moment.cardOf(gBy(o.moment));if(gc&&!S.col[gc.id]){const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
+    S.col[gc.id]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(gc.id);notifyNew(gc);if(curTab==="album")renderAlbum(gc.id)}}
   Demo.render();
   afterReply(v);
   Moment.afterReply(v);  // 50: 순간 선물 열기(서버 gift_moment 또는 임시 규칙)
@@ -2031,10 +2035,11 @@ const Moment={
 const fmtD=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`};
 // 명장면 수집(9-B): 위 3D 무대 + 「전체 / 대화 / 카드 팩」 묶음(49, 카드 팩 탭 맨 위에 배너 — pack.js) + 진행도 + 몸짓 칸(한 줄 3칸). 칸 순서 = 카드 번호 순서(38-1, 예전엔 대화 → 선물, 그 안에서 일반 → 희귀 → 특별)
 let albumSeg="all",colChar="seoa";
-const SEGS=["all","chat","pack"];  // 49: 「선물」 → 「카드 팩」
+const SEGS=["all","chat","gift","pack"];  // 49: 「선물」 → 「카드 팩」 · 50: 「선물」 = 순간 선물 반응 카드(source moment)
+const SEG_SRC={gift:"moment"};
 // 38-1: 칸 순서 = 카드 번호(no) 순서(전체·대화·선물 모두, 잠긴 칸도 제 번호 자리). 크게 보기의 이전·다음도 이 순서. 번호가 없는 칸은 맨 뒤(적힌 순서대로)
 function colList(seg){const N=o=>o.x.no>0?o.x.no:Infinity;
-  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===seg)
+  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===(SEG_SRC[seg]||seg))
     .sort((a,b)=>(N(a)-N(b))||a.i-b.i).map(o=>o.x)}
 function renderAlbum(fresh){
   if(!SEGS.includes(albumSeg))albumSeg="all";
@@ -2047,7 +2052,7 @@ function renderAlbum(fresh){
   ${albumSeg==="pack"?Pack.banner():""}
   <div class="alh col"><b>${esc(UI("album.collected",{n:got,total:L.length}))}</b></div>
   <div class="prog"><i style="width:${L.length?got/L.length*100:0}%"></i></div>
-  ${Cards.grid(L)}`;
+  ${!L.length&&albumSeg==="gift"?`<p class="colempty">${esc(UI("album.giftEmpty"))}</p>`:Cards.grid(L)}`;
   const A=$("#album");Cards.hydrate(A);
   if(fresh){const f=A.querySelector(`.mc[data-f="${fresh}"]`);if(f)f.classList.add("fresh")}
   A.querySelector("[data-info]").onclick=colIntro;
