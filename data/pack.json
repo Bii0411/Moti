@@ -1,0 +1,29 @@
+{
+  "_설명": "49 컬렉션 「카드 팩」 뽑기. 화면 문구는 data/ui.json pack. 카드는 data/collection.json source pack(보류 hold 제외). 계산은 gacha.js(앱과 tools/check_gacha.mjs 가 같이 씀).",
+  "_price": "다이아 가격(임시). one = 1장 뽑기, ten = 10장 뽑기",
+  "price": {
+    "one": 50,
+    "ten": 450
+  },
+  "_odds": "등급 확률(%, 합 100). 임시: 예전 선물 커피 확률 그대로(85/14/1). 특별(special) 카드가 지금 모두 보류라 특별 %는 레어에 더해 보여 주고 뽑는다(47 과 같은 gacha.fit). 특별 카드가 다시 생기면 코드 수정 없이 특별이 나옴",
+  "odds": {
+    "common": 85,
+    "rare": 14,
+    "special": 1
+  },
+  "_pity": "천장: 1장·10장 뽑기를 합쳐 count 장 안에 min 이상 1장 확정(남은 장 수는 저장값 S.packPity). 그래서 10장 뽑기 한 번 안에는 레어가 꼭 1장 이상 있다. min 이상이 나오면 count 로 되돌림",
+  "pity": {
+    "count": 10,
+    "min": "rare"
+  },
+  "_refund": "이미 가진 카드가 나오면 한 장마다 돌려주는 다이아(임시)",
+  "refund": 5,
+  "_fx": "뽑기 연출 시간(ms). open = 팩이 열리는 시간, deal = 뒷면 카드가 한 장씩 나오는 간격, flip = 뒤집기, rareHold = 레어가 뒤집힌 뒤 반짝이는 시간, auto = 「모두 뒤집기」 때 한 장씩 간격",
+  "fx": {
+    "open": 900,
+    "deal": 70,
+    "flip": 520,
+    "rareHold": 900,
+    "auto": 160
+  }
+}

@@ -8,7 +8,11 @@
       "_intro": "26: 컬렉션 탭에 처음 들어갈 때 한 번 자동으로 뜨는 소개 창. 제목 옆 (!) 버튼으로 다시 열림. list = 가운데 목록, foot = 아래 줄, ok = 버튼",
       "title": "무빙 카드",
       "body": "대화하고 선물하며 처음 본 모습이 카드로 모여요.",
-      "list": ["대화에서 처음 나온 몸짓", "선물에 대한 반응", "관계가 깊어질수록 열리는 카드"],
+      "list": [
+        "대화에서 처음 나온 몸짓",
+        "선물에 대한 반응",
+        "관계가 깊어질수록 열리는 카드"
+      ],
       "foot": "시크릿 카드도 숨어 있어요.",
       "ok": "확인"
     },
@@ -66,20 +70,28 @@
     "album": "컬렉션"
   },
   "gift": {
-    "_gift": "선물 창·선물 결과(9-A, 원고 docs/drafts/9-선물-앨범-원고.md 3절, 24에서 다듬음). moodNote 의 {mood} = 지금 기분 이름. match = 지금 기분에 맞는 선물 카드 표시. pity 의 {n} = 천장 남은 횟수. oddsOpen = 시트 아래 「확률 보기」 줄, odds* = 그걸 누르면 열리는 확률 표 작은 창(oddsTitle 제목, oddsGift 첫 열 이름, 등급 열 이름은 collection.grade, pct 의 {v} = %, oddsMatch 의 {mood} = 그 선물에 맞는 기분 이름 — 기분에 맞을 때 오른 확률 줄, oddsNote 의 {bonus} = data/gifts.json moodBonus.rare, {from} = 빼는 등급 이름, {n} = 천장 횟수, {min} = 천장 등급 이름). logTag = 대화 기록에 남는 선물 결과 줄. title = 선물 창 제목(18)",
-    "title": "서아에게 선물하기",
+    "_gift": "선물 창·선물 건네기. 49: 뽑기 없이 건네기만(확률·천장 표시 없음). title = 선물 창 제목, sub = 제목 아래 한 줄, moodNote 의 {mood} = 지금 기분 이름, match = 기분에 맞는 선물 표시. act = 대화에 들어가는 내 행동 한 줄({obj} = 선물 이름 + 을/를), srv = 서버로 가는 줄({gift} = 선물 이름), fallback = 서버 답이 없을 때 서아 지문, busy = 서아가 답하는 중일 때, noDia = 다이아가 모자랄 때",
+    "title": "서아에게 건넬 것",
+    "sub": "고르면 바로 건네요",
     "moodNote": "서아 기분 · {mood}",
     "match": "기분에 맞음",
-    "pity": "{n}번 안에 레어 확정",
-    "oddsOpen": "확률 보기",
-    "oddsTitle": "선물 확률",
-    "oddsGift": "선물",
-    "pct": "{v}%",
-    "oddsMatch": "{mood}일 때",
-    "oddsNote": "서아 기분에 맞는 선물은 레어 +{bonus}%p(그만큼 {from}에서 뺌). 모든 선물을 합쳐 {n}번 안에 {min} 이상 1번 확정",
-    "oddsAriaClose": "닫기",
+    "act": "({obj} 건넨다)",
+    "srv": "[유저가 선물함: {gift}]",
+    "fallback": "*서아가 말없이 받아 든다.*",
+    "busy": "서아가 답하는 중이에요",
     "noDia": "다이아가 부족해요",
-    "logTag": "{gift} · {grade}"
+    "_보류": {
+      "_설명": "48까지 선물 뽑기 문구(49에서 안 씀)",
+      "pity": "{n}번 안에 레어 확정",
+      "oddsOpen": "확률 보기",
+      "oddsTitle": "선물 확률",
+      "oddsGift": "선물",
+      "oddsMatch": "{mood}일 때",
+      "oddsNote": "서아 기분에 맞는 선물은 레어 +{bonus}%p(그만큼 {from}에서 뺌). 모든 선물을 합쳐 {n}번 안에 {min} 이상 1번 확정",
+      "logTag": "{gift} · {grade}"
+    },
+    "pct": "{v}%",
+    "oddsAriaClose": "닫기"
   },
   "top": {
     "_top": "대화 화면 위쪽(19). bond = 오른쪽 위 관계 줄 글자({name} 단계 이름, 21부터 단계 번호는 앞의 하트 아이콘이 그림). bondAria = 하트 아이콘의 접근성 이름({n} 단계 번호). moodToast·moodGift = 기분이 바뀌었을 때 알림 두 줄({mood} 기분 이름, {gift} 그 기분에 맞는 선물 이름. 받침 없는 이름이면 코드가 「이라면」을 「라면」으로 고침). 기분이 평소로 돌아가거나 맞는 선물이 없으면 첫 줄만",
@@ -323,7 +335,10 @@
     "firstPrivateTag": "처음 보는 옷"
   },
   "_firstMeet": "31 첫 만남 연출(서아 기본 에피소드 처음 시작). 버튼은 건너뛰기만. 37부터 골목 프롤로그 자막이 나오지만 자막 문구는 data/seoa_intro.json prologue 에 있음",
-  "firstMeet": { "skip": "건너뛰기", "skipAria": "첫 만남 연출 건너뛰기" },
+  "firstMeet": {
+    "skip": "건너뛰기",
+    "skipAria": "첫 만남 연출 건너뛰기"
+  },
   "thread": {
     "_thread": "이야기 줄기(16단계). 특별 에피소드 대화는 본 이야기와 따로 이어짐. sub = 특별 에피소드 안에서 대화방 이름 밑 설명 줄({name} 에피소드 이름, 25-1: 본 이야기·다른 캐릭터는 설명 줄 없이 이름만). 46: 대화방 머리의 「본 이야기로」 단추(back·backToast)는 없앰 — 이야기 바꾸기는 대화 목록에서 옆으로 넘겨서",
     "sub": "{name}"

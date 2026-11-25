@@ -1,49 +1,102 @@
 {
-  "_설명": "선물 4종(9-A, 예전 index.html GIFTS). 아이콘·이름·가격·기분 맞춤(rec)은 예전 값 그대로. 선물을 주면 💎를 빼고 → odds(일반/희귀/특별 %)로 등급을 정하고 → 그 등급의 선물 몸짓(data/collection.json source gift) 중 하나를 고른다. 선물은 관계 단계·호감도에 영향을 주지 않는다.",
-  "_moodBonus": "기분 맞춤(rec = 지금 서아 기분) 선물이면 희귀 확률 +rare %p, 그만큼 일반(from)에서 뺀다",
-  "moodBonus": { "rare": 10, "from": "common" },
-  "_pity": "천장: 모든 선물 합쳐 count 번 안에 min 이상 1번 확정. 남은 횟수는 저장값(S.pity)에 두고, min 이상이 나오면 count 로 되돌린다. 남은 횟수가 1이면 이번 선물은 min 이상(희귀·특별 확률 비율대로)",
-  "pity": { "count": 10, "min": "rare" },
-  "_lines": "대사(원고 docs/drafts/9-선물-앨범-원고.md 2절). 나온 등급으로 고른다. 기분에 맞는 선물이고 결과가 일반일 때만 common 대신 mood",
+  "_설명": "선물 4종(9-A). 49: 대화방 ＋ 「선물」은 뽑기 없이 건네기만 한다 — 다이아(price)를 빼고, 내 행동 한 줄 「(○○를 건넨다)」(data/ui.json gift.act)가 대화에 들어가고, 서버로는 「[유저가 선물함: 이름]」(gift.srv)이 가서 서아가 장면에 맞게 답한다(몸짓도 서버). 서버 답이 없으면 gift.fallback 지문 한 줄. 기분 맞춤(rec = 지금 서아 기분)은 선물 창의 「기분에 맞음」 표시와, 삐짐(sulky)이면 선물로 풀리는 예전 규칙만 남음(호감도 추가 규칙은 원래 없음). 예전 등급 뽑기·천장·반응 대사는 _보류 에 그대로 둠(카드 뽑기는 data/pack.json).",
+  "_보류": {
+    "_설명": "48까지 선물 뽑기에 쓰던 값(49에서 안 씀). moodBonus = 기분 맞춤 희귀 +%p, pity = 선물 천장",
+    "moodBonus": {
+      "rare": 10,
+      "from": "common"
+    },
+    "pity": {
+      "count": 10,
+      "min": "rare"
+    },
+    "_moodBonus": "기분 맞춤(rec = 지금 서아 기분) 선물이면 희귀 확률 +rare %p, 그만큼 일반(from)에서 뺀다",
+    "_pity": "천장: 모든 선물 합쳐 count 번 안에 min 이상 1번 확정. 남은 횟수는 저장값(S.pity)에 두고, min 이상이 나오면 count 로 되돌린다. 남은 횟수가 1이면 이번 선물은 min 이상(희귀·특별 확률 비율대로)",
+    "_lines": "대사(원고 docs/drafts/9-선물-앨범-원고.md 2절). 나온 등급으로 고른다. 기분에 맞는 선물이고 결과가 일반일 때만 common 대신 mood"
+  },
   "list": [
     {
-      "id": "coffee", "icon": "icons/gift_coffee.png", "e": "☕", "name": "커피", "price": 30, "rec": "tired",
-      "odds": { "common": 85, "rare": 14, "special": 1 },
-      "lines": {
-        "common": "*컵을 받아 들고 냄새부터 맡는다.* 바에서 커피? …나쁘지 않네.",
-        "rare": "*한 모금 마시고, 잠깐 눈을 감는다.* …온도까지 맞췄네.",
-        "special": "*컵을 두 손으로 감싼다.* 오늘은 안 자고 버텨 볼게.",
-        "mood": "*어깨에 들어가 있던 힘이 풀린다.* …딱 이거였어."
+      "id": "coffee",
+      "icon": "icons/gift_coffee.png",
+      "e": "☕",
+      "name": "커피",
+      "price": 30,
+      "rec": "tired",
+      "_보류": {
+        "odds": {
+          "common": 85,
+          "rare": 14,
+          "special": 1
+        },
+        "lines": {
+          "common": "*컵을 받아 들고 냄새부터 맡는다.* 바에서 커피? …나쁘지 않네.",
+          "rare": "*한 모금 마시고, 잠깐 눈을 감는다.* …온도까지 맞췄네.",
+          "special": "*컵을 두 손으로 감싼다.* 오늘은 안 자고 버텨 볼게.",
+          "mood": "*어깨에 들어가 있던 힘이 풀린다.* …딱 이거였어."
+        }
       }
     },
     {
-      "id": "ramen", "icon": "icons/gift_ramen.png", "e": "🍜", "name": "라멘", "price": 50, "rec": "normal",
-      "odds": { "common": 80, "rare": 18, "special": 2 },
-      "lines": {
-        "common": "*뚜껑을 살짝 들어 김을 맡는다.* 새벽 두 시에 라멘이라.",
-        "rare": "*젓가락을 하나 더 꺼내 당신 쪽으로 민다.* 앉아.",
-        "special": "*국물을 한 모금 마시고, 잠깐 말이 없다.* …이상하네. 이런 거.",
-        "mood": "*익숙하게 카운터 자리에 앉는다.* 귀신이야?"
+      "id": "ramen",
+      "icon": "icons/gift_ramen.png",
+      "e": "🍜",
+      "name": "라멘",
+      "price": 50,
+      "rec": "normal",
+      "_보류": {
+        "odds": {
+          "common": 80,
+          "rare": 18,
+          "special": 2
+        },
+        "lines": {
+          "common": "*뚜껑을 살짝 들어 김을 맡는다.* 새벽 두 시에 라멘이라.",
+          "rare": "*젓가락을 하나 더 꺼내 당신 쪽으로 민다.* 앉아.",
+          "special": "*국물을 한 모금 마시고, 잠깐 말이 없다.* …이상하네. 이런 거.",
+          "mood": "*익숙하게 카운터 자리에 앉는다.* 귀신이야?"
+        }
       }
     },
     {
-      "id": "flower", "icon": "icons/gift_flower.png", "e": "💐", "name": "꽃다발", "price": 80, "rec": "sulky",
-      "odds": { "common": 70, "rare": 26, "special": 4 },
-      "lines": {
-        "common": "*꽃다발을 한 손으로 받아 든다.* 꽃? 장례식 준비야?",
-        "rare": "*꽃잎을 손끝으로 건드리다 멈춘다.* …보지 마.",
-        "special": "*꽃다발에 얼굴을 반쯤 묻는다. 귓불이 붉다.* 말려 둘 거야.",
-        "mood": "*팔짱을 낀 채 꽃을 받는다.* 꽃은 반칙이지. …조금만 풀렸어."
+      "id": "flower",
+      "icon": "icons/gift_flower.png",
+      "e": "💐",
+      "name": "꽃다발",
+      "price": 80,
+      "rec": "sulky",
+      "_보류": {
+        "odds": {
+          "common": 70,
+          "rare": 26,
+          "special": 4
+        },
+        "lines": {
+          "common": "*꽃다발을 한 손으로 받아 든다.* 꽃? 장례식 준비야?",
+          "rare": "*꽃잎을 손끝으로 건드리다 멈춘다.* …보지 마.",
+          "special": "*꽃다발에 얼굴을 반쯤 묻는다. 귓불이 붉다.* 말려 둘 거야.",
+          "mood": "*팔짱을 낀 채 꽃을 받는다.* 꽃은 반칙이지. …조금만 풀렸어."
+        }
       }
     },
     {
-      "id": "ring", "icon": "icons/gift_ring.png", "e": "💍", "name": "반지", "price": 200, "rec": "birthday",
-      "odds": { "common": 50, "rare": 40, "special": 10 },
-      "lines": {
-        "common": "*반지를 불빛에 비춰 본다.* 장물 아니지?",
-        "rare": "*반지를 끼려다 말고, 주머니에 넣는다.* …아직은.",
-        "special": "*반지를 낀 손을 네온 불빛에 비춰 본다.* 무르기 없기야.",
-        "mood": "*잠깐 말이 없다.* …어떻게 알았어?"
+      "id": "ring",
+      "icon": "icons/gift_ring.png",
+      "e": "💍",
+      "name": "반지",
+      "price": 200,
+      "rec": "birthday",
+      "_보류": {
+        "odds": {
+          "common": 50,
+          "rare": 40,
+          "special": 10
+        },
+        "lines": {
+          "common": "*반지를 불빛에 비춰 본다.* 장물 아니지?",
+          "rare": "*반지를 끼려다 말고, 주머니에 넣는다.* …아직은.",
+          "special": "*반지를 낀 손을 네온 불빛에 비춰 본다.* 무르기 없기야.",
+          "mood": "*잠깐 말이 없다.* …어떻게 알았어?"
+        }
       }
     }
   ]
