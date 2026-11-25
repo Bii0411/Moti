@@ -43,8 +43,11 @@
     "stayCare": "본편 성공(다정)",
     "xmasWin": "크리스마스 성공",
     "endingsClear": "엔딩 기록 비우기",
-    "endingsCleared": "엔딩 기록을 비웠어요"
+    "endingsCleared": "엔딩 기록을 비웠어요",
+    "finaleNow": "6단계 · 조연 마무리 바로"
   },
+  "_serverStage": "90: 단계 버튼으로 옮길 때 서버(story-routes·side-ending)가 보는 값. minMsgs = 그 단계에서 다음으로 오르는 데 필요한 내 메시지 수(서버와 같게, 버튼을 누르면 이미 채운 것으로). 6단계로 가면 메시지 수 0·첫 아침 전·오른 직후 장면(STAGE_UP_6)·그 갈래 조연 차례 finaleStep(마무리 직전), 다른 조연은 3(끝). 갈래가 없으면 defaultRoute",
+  "serverStage": {"minMsgs": {"2": 15, "3": 20, "4": 15}, "finaleStep": 2, "doneStep": 3, "stageUp6": "STAGE_UP_6", "defaultRoute": "care"},
   "sec": {
     "scenes": "장면 바로가기",
     "server": "서버",
