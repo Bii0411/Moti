@@ -140,9 +140,10 @@ const Cards=(()=>{
   const backCell=(ch,no)=>`<div class="mc back" aria-hidden="true"><span class="pc">${backName(ch||"seoa")}${no?`<i class="pcno">${no}</i>`:""}</span></div>`;
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
   // 52: 아래 띠 이름이 넘치면 잘지 않고 글자만 줄임(이름은 그대로). 가장 작은 글자 data/collection.json card.photocard.nameFitMinPx
-  function fitName(e){if(!e)return;e.style.fontSize="";const cw=e.clientWidth,sw=e.scrollWidth;if(!cw||sw<=cw+.5)return;
-    const fs=parseFloat(getComputedStyle(e).fontSize)||10,min=((C().photocard||{}).nameFitMinPx)||6;e.style.fontSize=Math.max(min,Math.floor(fs*cw/sw*96)/100)+"px"}  // 0.96 = 글자 폭 반올림으로 1px 넘치는 것 막기
-  const fitNames=root=>root&&root.querySelectorAll(".pcnm").forEach(fitName);
+  // 50-2: min = 이 칸에서 가장 작은 글자(px). 그래도 넘치면 끝을 「…」(.pcnm text-overflow) — 카드 팩 10장 결과는 photocard.packNameMinPx(8)
+  function fitName(e,min){if(!e)return;e.style.fontSize="";const cw=e.clientWidth,sw=e.scrollWidth;if(!cw||sw<=cw+.5)return;
+    const fs=parseFloat(getComputedStyle(e).fontSize)||10;min=min||((C().photocard||{}).nameFitMinPx)||6;e.style.fontSize=Math.max(min,Math.floor(fs*cw/sw*96)/100)+"px"}  // 0.96 = 글자 폭 반올림으로 1px 넘치는 것 막기
+  const fitNames=(root,min)=>root&&root.querySelectorAll(".pcnm").forEach(e=>fitName(e,min));
   function hydrate(root){fitNames(root);root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
     url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=b.querySelector(".mcsil");if(sv)sv.remove()})})}
   subs.push(k=>{const r=document.getElementById("album");if(!r||!k)return;const id=k.slice(k.indexOf(":")+1),b=r.querySelector(`.mc.got[data-f="${id}"]`);if(!b)return;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261125-1941">
+<meta name="moti-version" content="20261125-2028">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -62,8 +62,8 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .rcap.on{opacity:1;max-height:120px;padding:10px 12px;border-color:#ffffff22}
 .app.inalbum .where,.app.inalbum .btop{display:none}
 .app.inalbum .cap{font-size:11px;padding:4px 9px}
-.burst{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);font-size:56px;opacity:0;pointer-events:none}
-.burst.go{animation:burst 1.4s ease-out}
+.burst{position:absolute;left:50%;bottom:12%;transform:translate(-50%,0);font-size:56px;line-height:1;opacity:0;pointer-events:none;z-index:4}
+.burst.go{animation:burst 1s ease-out}  /* 50-2: 선물 그림은 3D 칸 가운데 아래에서 1초 떠올랐다 사라짐 → 그 뒤 반응 몸짓 */
 /* 희귀·특별 새 몸짓 알림(9-B): 무대 위 글자 + (특별만) 무대를 살짝 어둡게. 글자·색·크기·투명도만, 전환(transition)이라 화면을 옮겨도 다시 재생되지 않음. 값 data/collection.json notify */
 /* 17-B 새 몸짓 알림 카드(레어·시크릿): 무대 아래쪽에서 올라왔다 사라짐. 시크릿만 무대를 어둡게(--gfDim). 값은 data/collection.json notify */
 .gradefx{position:absolute;inset:0;pointer-events:none;z-index:3;background:rgba(0,0,0,var(--gfDim,0));opacity:0;transition:opacity var(--gfFade,400ms) ease}
@@ -84,7 +84,9 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .gradefx.lite .gcard .c{display:none}
 .gradefx.muted .gcard b{color:var(--sub)}
 .stage.gfon .cap,.stage.gfon .bubble{opacity:0}  /* 17-2: 선물 대사 자막(#bubble)도 카드 동안 숨김 */
-@keyframes burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}25%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-95%) scale(1)}}
+@keyframes burst{0%{opacity:0;transform:translate(-50%,40%) scale(.7)}30%{opacity:1;transform:translate(-50%,0) scale(1.08)}70%{opacity:1;transform:translate(-50%,-25%) scale(1)}100%{opacity:0;transform:translate(-50%,-55%) scale(.95)}}
+@keyframes burstStill{0%{opacity:0}20%{opacity:1}75%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.burst.go{animation:burstStill 1s linear;transform:translate(-50%,0)}}
 
 main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .view{flex:1;min-height:0;min-width:0;display:none;flex-direction:column}
@@ -465,11 +467,11 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261125-1941">
-<link rel="stylesheet" href="photos.css?v=20261125-1941">
-<link rel="stylesheet" href="cards.css?v=20261125-1941">
-<link rel="stylesheet" href="pose.css?v=20261125-1941">
-<link rel="stylesheet" href="pack.css?v=20261125-1941">
+<link rel="stylesheet" href="onboarding.css?v=20261125-2028">
+<link rel="stylesheet" href="photos.css?v=20261125-2028">
+<link rel="stylesheet" href="cards.css?v=20261125-2028">
+<link rel="stylesheet" href="pose.css?v=20261125-2028">
+<link rel="stylesheet" href="pack.css?v=20261125-2028">
 </head>
 <body>
 <div class="app">
@@ -547,19 +549,19 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261125-1941"></script>
-<script src="motion.js?v=20261125-1941"></script>
-<script src="gacha.js?v=20261125-1941"></script>
-<script src="look.js?v=20261125-1941"></script>
-<script src="alive.js?v=20261125-1941"></script>
-<script src="film.js?v=20261125-1941"></script>
-<script src="photos.js?v=20261125-1941"></script>
-<script src="seoaphoto.js?v=20261125-1941"></script>
-<script src="cards.js?v=20261125-1941"></script>
-<script src="pose.js?v=20261125-1941"></script>
-<script src="pack.js?v=20261125-1941"></script>
-<script src="storypic.js?v=20261125-1941"></script>
-<script src="onboarding.js?v=20261125-1941"></script>
+<script src="icons.js?v=20261125-2028"></script>
+<script src="motion.js?v=20261125-2028"></script>
+<script src="gacha.js?v=20261125-2028"></script>
+<script src="look.js?v=20261125-2028"></script>
+<script src="alive.js?v=20261125-2028"></script>
+<script src="film.js?v=20261125-2028"></script>
+<script src="photos.js?v=20261125-2028"></script>
+<script src="seoaphoto.js?v=20261125-2028"></script>
+<script src="cards.js?v=20261125-2028"></script>
+<script src="pose.js?v=20261125-2028"></script>
+<script src="pack.js?v=20261125-2028"></script>
+<script src="storypic.js?v=20261125-2028"></script>
+<script src="onboarding.js?v=20261125-2028"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -595,7 +597,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1}}
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,frame:x.frame||null}}
   // 50: ?giftPreview=1(확인용) — 순간 선물 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신함(data/gifts.json preview). ver 0.5 = 진짜 모션이 오면 카드 그림을 다시 만들게
   if(qs.get("giftPreview")==="1")for(const id in GIFT.preview||{}){const src=GIFT.preview[id];if(id[0]==="_"||XS[id]||RIG.M[id])continue;
     if(XS[src])XS[id]={...XS[src],ver:.5};else if(RIG.M[src])RIG.M[id]=RIG.M[src];MNAME[id]=(MNAME[src]||src)+" (미리보기)"}
@@ -907,6 +909,7 @@ const Stage=(()=>{
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(walk)walkTick(now,id,mt);  // 42: 걷기 = 돌기 각도(cur.win.turn)와 옮긴 거리
     if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur&&cur.win?{...XS[id],...cur.win}:cur&&cur.fo!=null?{...XS[id],fadeOut:cur.fo}:XS[id]);
+    if(isXs&&XS[id].face&&cur&&!cur.faced&&mt>=XS[id].faceAt){cur.faced=true;if(!locked)setFace(XS[id].face,XS[id].faceEmo)}  // 50-2: 몸짓 중 이 순간부터 표정을 바꿔 끝까지(x30 우산 「씩」). data/motions.json xstage face·faceEmo·faceAt
     if(walk){md.root.position.x+=walk.x;md.root.position.z+=walk.z}
     if(blend)blendStep(now);
     keepPre();
@@ -1011,7 +1014,12 @@ const Stage=(()=>{
     if(mid===IDLE&&!o.tag&&!o.name){c.classList.remove("on");return}
     c.innerHTML=`▶ ${esc(o.name||MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
     if((mid!==IDLE||o.name)&&typeof View!=="undefined"){const d=View.motion(mid,cur.sp,o.fx||(o.big?"big":""));if(d)cur.start+=d/1000}  // 17-C: 커지기 시작하고 d ms 뒤 몸짓 시작
+    // 50-2: xstage frame = 평소 구도일 때 이 몸짓 동안만 쓰는 카메라 구도(data/config.json camera 이름). x30 우산은 화면 쪽으로 한 걸음 다가와서 머리가 잘리지 않게 조금 뒤로. 끝나면 평소 구도로
+    clearTimeout(xfT);const xf=XS[mid]&&XS[mid].frame,C=camCfg(),back=()=>{if(xfOn&&!View.isBig()&&!View.isPushed())frameTo("normal",C.xsFrameBackMs||900);xfOn=false};
+    if(xf&&typeof View!=="undefined"&&!View.isBig()&&!View.isPushed()){frameTo(xf,C.xsFrameMs||500);xfOn=true;xfT=setTimeout(back,dur(mid)/(cur.sp||1)*1000)}
+    else if(xfOn&&typeof View!=="undefined")back();  // 다음 몸짓이 오면 평소 구도로
   }
+  let xfT=null,xfOn=false;
   // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
   function setFace(k,emo,force){if(locked&&!force)return;faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
   function talk(ms){if(locked)return;talkUntil=performance.now()+ms}
@@ -1425,7 +1433,7 @@ function say(text,ms,sub){text=speechOnly(text);if(!text)return;Stage.talkFor(te
 // 숨겼다 다시 보일 때(display) 브라우저가 CSS 애니메이션을 처음부터 다시 재생한다 → 화면 이동 때마다 팝업이 다시 뜨던 원인
 let burstT;
 function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<img src="${e}" alt="">`;else b.textContent=e;b.classList.remove("go");void b.offsetWidth;b.classList.add("go");
-  clearTimeout(burstT);burstT=setTimeout(()=>b.classList.remove("go"),1500)}  // 1.4초 애니메이션. 숨겨져 animationend 가 안 와도 뗌
+  clearTimeout(burstT);burstT=setTimeout(()=>b.classList.remove("go"),1100);return performance.now()}  // 50-2: 1초 애니메이션. 숨겨져 animationend 가 안 와도 뗌. 돌려주는 값 = 띄운 시각(반응 몸짓은 1초 뒤)
 // 한 번만 보여 줄 CSS 애니메이션(선물 연출 go, 앨범 새 칸 fresh)은 끝나거나 취소되면 클래스를 뗀다
 ["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
@@ -1953,6 +1961,8 @@ async function send(text,o){
   if(poseX&&poseX.f&&!v.face)v.face=poseX.f;
   // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
   const keyM=Fx.key(say,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
+  // 50-2: 선물 — 그림이 1초 떠올랐다 사라진 뒤 답장·반응 몸짓(서버 답이 그보다 빨리 와도)
+  if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{})};
   addReply(v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
@@ -2049,8 +2059,8 @@ function give(id){
   const tags=[];if(mom)tags.push(UI("gift.srvMoment"));if(g.rec&&g.rec===st)tags.push(UI("gift.srvMood"));if(again)tags.push(UI("gift.srvAgain"));
   if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계는 판정이 정함
   save();renderTop();
-  burst(g.icon||g.e);
-  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again,...(mom?{moment:g.id}:{})});
+  const picAt=burst(g.icon||g.e);
+  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again,picAt,...(mom?{moment:g.id}:{})});
 }
 
 // 50: 순간 선물. 서버 답장 gift_moment({id, reason}) 또는 임시 규칙(data/gifts.json momentFallback)으로 한 번에 하나 열림.

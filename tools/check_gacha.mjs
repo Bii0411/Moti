@@ -66,6 +66,27 @@ if (motions.motions.x23.only !== "onboarding") fail("52: x23 이 시작화면 �
 for (const [m, v] of Object.entries(motions.motions)) if (v.only === "pack" && want.has(m)) fail(`52: 카드 팩 전용 ${m} 이 대화 해금에 있음`);
 // 춤은 전신 구도(m23 과 같은 frameById)
 if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById.m23)) fail("52: 춤 x33 이 전신 구도가 아님");
+// 50-2: 순간 선물 반응 몸짓 — 반지(x31) 말고 모두 모션 파일이 있고(손가락 포함) 선물 전용. 반지는 잠금 그대로
+{ const GJ = JSON.parse(readFileSync("data/gifts.json", "utf8")), mg = GJ.list.filter(g => g.kind === "moment"), ready = [];
+  for (const g of mg) { const m = g.reaction, x = motions.xstage[m], mm = motions.motions[m];
+    if (g.id === "ring") { if (x) fail("50-2: 반지 반응(x31)이 열려 있음"); continue; }
+    if (!x || !mm) { fail(`50-2: ${g.name} 반응 ${m} 모션 없음`); continue; }
+    if (mm.only !== "gift") fail(`50-2: ${m} 이 선물 전용(only gift)이 아님`);
+    const f = JSON.parse(readFileSync(x.file, "utf8")); if (!f.fingers) fail(`50-2: ${m} 손가락 없음`);
+    if (!(x.to > x.from) || x.to > f.duration + .01) fail(`50-2: ${m} 구간 ${x.from}~${x.to} 이 파일 길이 ${f.duration.toFixed(2)} 밖`);
+    if (!(x.fadeIn >= .2 && x.fadeIn <= .3) && m !== "x30") fail(`50-2: ${m} fadeIn 이 0.2~0.3 이 아님`);
+    ready.push(g.name); }
+  const want = { x26: [1, 4, "Glancing"], x27: [3, 8, "Shake_Head"], x28: [0.1, 3, "Touching"], x29: [2, 6, "Avoiding"] };
+  for (const [m, [a, b, src]] of Object.entries(want)) { const x = motions.xstage[m] || {}, f = x.file ? JSON.parse(readFileSync(x.file, "utf8")) : {};
+    if (x.from !== a || x.to !== b || !String(f.src || "").includes(src)) fail(`50-2: ${m} 구간·원본이 지시와 다름(${x.from}~${x.to}, ${f.src})`); }
+  if (motions.xstage.x26 && motions.xstage.x26.damp) fail("50-2: x26 에 damp 가 있음");
+  const u = motions.xstage.x30 || {}; if (!u.face || !(u.faceAt > 0) || !u.frame || !(col.card && 1) || !JSON.parse(readFileSync("data/config.json", "utf8")).camera[u.frame]) fail("50-2: x30 우산 표정·구도 설정 없음");
+  const rules = ((GJ.momentFallback || {}).rules || []).map(r => r.gift).join();
+  if (rules !== "firstaid,cocktail,towel,flower,umbrella,ring") fail(`50-2: 임시 규칙 선물 순서 ${rules}`);
+  const m06 = motions.xstage.m06 || {}; if (!/flustered/.test(m06.file) || m06.to - m06.from < 2 || m06.to - m06.from > 4 || !(m06.motionVer >= 4)) fail("50-2: m06 허둥대기가 Flustered 2~4초·motionVer 4 이상이 아님");
+  const d = motions.xstage.x33 || {}; if (d.from !== 4.7 || d.to !== 12 || !(d.motionVer >= 2)) fail("50-2: 춤 x33 구간이 4.7~12초·motionVer 2 이상이 아님");
+  if (((col.card.photocard || {}).packNameMinPx) !== 8) fail("50-2: 10장 결과 이름 최소 글자(packNameMinPx) 8 이 아님");
+  console.log(`- 50-2 순간 선물 반응 모션: ${ready.join("·")} 준비됨, 반지 잠금 · 임시 규칙 ${rules.split(",").length}개 · m06 ${m06.from}~${m06.to}초 · 춤 ${d.from}~${d.to}초`); }
 // 52: 24 손 흔들기(m13) 일반, m16 응원하기는 대화 몸짓 목록에서 빠짐(ban) · 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로
 if ((col.gradeRule.byId || {}).m13 !== "common" || col.items.find(x => x.id === "m13").grade !== "common") fail("52: m13 손 흔들기가 일반이 아님");
 if (!(story.ban || []).includes("m16")) fail("52: m16 응원하기가 ban 에 없음(대화 몸짓 목록에 나옴)");
