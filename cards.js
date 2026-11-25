@@ -69,7 +69,8 @@ const Cards=(()=>{
   const perf=[];
   // 43: 몸짓의 진짜 모션 버전(data/motions.json xstage 의 motionVer, 없으면 1). 카드 그림을 만들 때 기록(S.col[id].mv)에 남기고,
   //   버전이 바뀐 몸짓의 카드는 그림만 지우고 다시 만든다(의상·장소·날짜·대사는 기록 그대로)
-  const verOf=m=>(typeof XS!=="undefined"&&XS[m]&&XS[m].ver)||1;
+  //   53: XSTAGE 가 아닌 몸짓(motion.js 코드 몸짓)은 data/motions.json motions 의 motionVer(기본 손이 바뀌면 올림)
+  const verOf=m=>(typeof XS!=="undefined"&&XS[m]?XS[m].ver:+(((DATA.motions||{}).motions||{})[m]||{}).motionVer)||1;
   async function make(id){const a=S.col[id];if(!a||has(a.char,id))return;
     await init();if(has(a.char,id))return;
     const mo=motionOf(id);if(!mo.m||!canPlay(mo.m))return;
