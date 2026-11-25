@@ -107,7 +107,7 @@ const Pack=(()=>{
   function grid(){const g=$f(".pkgrid");g.innerHTML=fx.res.map(card).join("");Cards.hydrate(g);
     g.querySelectorAll(".pkcard").forEach(cd=>{if(fx.flipped.has(+cd.dataset.i))cd.classList.add("flip","show","now")});
     g.hidden=false;$f(".pkone").innerHTML="";el.classList.add("gridon");fx.phase="grid";$f(".pkcount").textContent="";
-    Cards.fitNames(g,(((COL.card||{}).photocard||{}).packNameMinPx)||8);return g}  // 52: 보인 뒤에 이름 맞추기(숨긴 채로는 폭을 못 잼) · 50-2: 10장 결과는 8px 까지만 줄이고 넘치면 「…」
+    const pc=(COL.card||{}).photocard||{};g.style.setProperty("--pkNm",(pc.packNamePx||9)+"px");g.style.setProperty("--pkNmLines",pc.packNameLines||2);return g}  // 50-3: 10장 결과 이름은 글자를 줄이지 않고 9px 두 줄, 넘치면 「…」(pack.css)
   function flipAll(){if(fx.phase!=="one")return;const g=grid();$f(".pkacts").innerHTML="";$f(".pkhint").textContent="";
     const rest=[...g.querySelectorAll(".pkcard")].filter(cd=>!fx.flipped.has(+cd.dataset.i));
     rest.forEach((cd,k)=>later(()=>flip(cd,+cd.dataset.i),120+k*FX("auto")));

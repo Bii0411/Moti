@@ -80,12 +80,14 @@ if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById
   for (const [m, [a, b, src]] of Object.entries(want)) { const x = motions.xstage[m] || {}, f = x.file ? JSON.parse(readFileSync(x.file, "utf8")) : {};
     if (x.from !== a || x.to !== b || !String(f.src || "").includes(src)) fail(`50-2: ${m} 구간·원본이 지시와 다름(${x.from}~${x.to}, ${f.src})`); }
   if (motions.xstage.x26 && motions.xstage.x26.damp) fail("50-2: x26 에 damp 가 있음");
-  const u = motions.xstage.x30 || {}; if (!u.face || !(u.faceAt > 0) || !u.frame || !(col.card && 1) || !JSON.parse(readFileSync("data/config.json", "utf8")).camera[u.frame]) fail("50-2: x30 우산 표정·구도 설정 없음");
+  const u = motions.xstage.x30 || {}; if (!u.face || !(u.faceAt > 0) || !u.frame || !(u.frameMs > 0) || !JSON.parse(readFileSync("data/config.json", "utf8")).camera[u.frame]) fail("50-2·50-3: x30 우산 표정·카메라 구도 설정 없음");
   const rules = ((GJ.momentFallback || {}).rules || []).map(r => r.gift).join();
   if (rules !== "firstaid,cocktail,towel,flower,umbrella,ring") fail(`50-2: 임시 규칙 선물 순서 ${rules}`);
   const m06 = motions.xstage.m06 || {}; if (!/flustered/.test(m06.file) || m06.to - m06.from < 2 || m06.to - m06.from > 4 || !(m06.motionVer >= 4)) fail("50-2: m06 허둥대기가 Flustered 2~4초·motionVer 4 이상이 아님");
   const d = motions.xstage.x33 || {}; if (d.from !== 4.7 || d.to !== 12 || !(d.motionVer >= 2)) fail("50-2: 춤 x33 구간이 4.7~12초·motionVer 2 이상이 아님");
-  if (((col.card.photocard || {}).packNameMinPx) !== 8) fail("50-2: 10장 결과 이름 최소 글자(packNameMinPx) 8 이 아님");
+  if (((col.card.photocard || {}).packNamePx) !== 9 || ((col.card.photocard || {}).packNameLines) !== 2) fail("50-3: 10장 결과 이름이 9px 두 줄(packNamePx·packNameLines)이 아님");
+  if (!(motions.xstage.x26 || {}).tiltMax) fail("50-3: x26 숙임 제한(tiltMax) 없음");
+  { const f = JSON.parse(readFileSync(u.file, "utf8")), h = f.hip, mv = Math.max(...h.filter((_, i) => i % 3 !== 1).map(Math.abs)); if (mv > 0.001 || !u.inPlace) fail(`50-3: x30 골반이 앞뒤·좌우로 움직임(${mv})`); }
   console.log(`- 50-2 순간 선물 반응 모션: ${ready.join("·")} 준비됨, 반지 잠금 · 임시 규칙 ${rules.split(",").length}개 · m06 ${m06.from}~${m06.to}초 · 춤 ${d.from}~${d.to}초`); }
 // 52: 24 손 흔들기(m13) 일반, m16 응원하기는 대화 몸짓 목록에서 빠짐(ban) · 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로
 if ((col.gradeRule.byId || {}).m13 !== "common" || col.items.find(x => x.id === "m13").grade !== "common") fail("52: m13 손 흔들기가 일반이 아님");
