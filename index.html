@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0154">
+<meta name="moti-version" content="20261126-0408">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -458,6 +458,13 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .demo h4{font-size:13px;margin:4px 0 2px}
 .demo p{font-size:11px;color:var(--sub);line-height:1.5}
 .toast{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top, 0px));transform:translate(-50%,-10px);background:#211b33;border:1px solid #6d4bd1;color:var(--text);font-size:13px;font-weight:600;padding:9px 14px;border-radius:12px;opacity:0;transition:.3s;z-index:30;width:max-content;max-width:calc(100% - 24px);text-align:center;line-height:1.45}
+/* 68: 앱 안 알림 배너(부재중 셀카). 토스트와 같은 진한 바탕·보라 테두리, 블러 없음(아이폰 사파리). 앱 화면(.app) 위쪽에 */
+.spban{position:absolute;left:50%;top:calc(10px + env(safe-area-inset-top, 0px));transform:translate(-50%,-130%);width:calc(100% - 24px);max-width:366px;display:flex;align-items:center;gap:10px;padding:10px 12px;background:#211b33;border:1px solid #6d4bd1;border-radius:14px;color:var(--text);text-align:left;z-index:70;box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:transform .3s,opacity .3s;font:inherit;cursor:pointer}
+.spban.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.spban .spav{flex:none;width:38px;height:38px;border-radius:50%;background:#140a24 center/cover no-repeat}
+.spban .sptx{display:flex;flex-direction:column;min-width:0;gap:2px;line-height:1.35}
+.spban .sptx b{font-size:14px}
+.spban .spl{font-size:13px;color:var(--sub,#b9b0d0);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 /* 시연 설정 패널(5단계): 헤더의 톱니바퀴 버튼(6-B)으로 열고 닫음. 문구는 data/demo.json */
@@ -514,11 +521,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0154">
-<link rel="stylesheet" href="photos.css?v=20261126-0154">
-<link rel="stylesheet" href="cards.css?v=20261126-0154">
-<link rel="stylesheet" href="pose.css?v=20261126-0154">
-<link rel="stylesheet" href="pack.css?v=20261126-0154">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0408">
+<link rel="stylesheet" href="photos.css?v=20261126-0408">
+<link rel="stylesheet" href="cards.css?v=20261126-0408">
+<link rel="stylesheet" href="pose.css?v=20261126-0408">
+<link rel="stylesheet" href="pack.css?v=20261126-0408">
 </head>
 <body>
 <div class="app">
@@ -596,19 +603,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0154"></script>
-<script src="motion.js?v=20261126-0154"></script>
-<script src="gacha.js?v=20261126-0154"></script>
-<script src="look.js?v=20261126-0154"></script>
-<script src="alive.js?v=20261126-0154"></script>
-<script src="film.js?v=20261126-0154"></script>
-<script src="photos.js?v=20261126-0154"></script>
-<script src="seoaphoto.js?v=20261126-0154"></script>
-<script src="cards.js?v=20261126-0154"></script>
-<script src="pose.js?v=20261126-0154"></script>
-<script src="pack.js?v=20261126-0154"></script>
-<script src="storypic.js?v=20261126-0154"></script>
-<script src="onboarding.js?v=20261126-0154"></script>
+<script src="icons.js?v=20261126-0408"></script>
+<script src="motion.js?v=20261126-0408"></script>
+<script src="gacha.js?v=20261126-0408"></script>
+<script src="look.js?v=20261126-0408"></script>
+<script src="alive.js?v=20261126-0408"></script>
+<script src="film.js?v=20261126-0408"></script>
+<script src="photos.js?v=20261126-0408"></script>
+<script src="seoaphoto.js?v=20261126-0408"></script>
+<script src="cards.js?v=20261126-0408"></script>
+<script src="pose.js?v=20261126-0408"></script>
+<script src="pack.js?v=20261126-0408"></script>
+<script src="storypic.js?v=20261126-0408"></script>
+<script src="onboarding.js?v=20261126-0408"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1742,7 +1749,7 @@ function stageUp(from,to,q){
   for(let n=from+1;n<=to;n++){
     addMsg("sys",((DATA.story||{}).stageUpMessage||"{name}").replace("{name}",stageName(n)),null,"seoa");
     const g=DATA.story&&DATA.story.unlock.stage[n];if(g)q.push(g);
-    SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진
+    SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진(68: 끔, 아무것도 안 함)
   }
   Route.check();  // 51: 갈래 없이 3단계를 넘으면 그때 정함
   End.stageUp(to);  // 51: 5단계에 오르면 다음 서아 답장(떠난다는 장면) 뒤 되감기 지점
@@ -2060,7 +2067,7 @@ async function send(text,o){
   Demo.render();
   afterReply(v);
   Moment.afterReply(v);  // 50: 순간 선물 열기(서버 gift_moment 또는 임시 규칙)
-  SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
+  SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진(68: 끔, 아무것도 안 함)
   // 시연 예약(장면 바로가기): 답장이 보인 뒤 예약된 단계 상승·사건 해금을 실행하고 지움. 이 턴은 판정·대화 횟수가 단계를 바꾸지 못함
   const R=S.demoNext;let keep=null;
   if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
@@ -2343,7 +2350,7 @@ const Demo=(()=>{
       <div class="kv">${esc(T("keyLast",{why:kl?T("keyWhy."+kl.k,{w:kl.w||""}):T("none"),turn:kl?kl.turn:"-"}))}</div>`;
     // 사진(10-C): 견본 사진으로 칸 수까지 채우기 · 모두 비우기
     h+=`<h4>${esc(T("sec.photo"))} <small>${esc(T("photoFilled",{n:Photos.count(),cap:Photos.cap()}))}</small></h4>
-      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}${B("colOpenAll",esc(T("colOpenAll")))}${B("seoaPhotoNow",esc(T("seoaPhotoNow")))}</div>`;
+      <div class="row">${B("photoFill",esc(T("photoFill")))}${B("photoClear",esc(T("photoClear")))}${B("colOpenAll",esc(T("colOpenAll")))}${B("seoaPhotoNow",esc(UI("seoaPhoto.demoNow")))}</div>`;
     if(DEBUG){
       const q=qs.get("server");
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
@@ -2390,7 +2397,7 @@ const Demo=(()=>{
     // 11: 명장면 모두 열기(앨범 시연용). 대사 없이 기록
     if(a==="colOpenAll"){COL.items.forEach(x=>{if(!S.col[x.id])S.col[x.id]=seenNow({line:""})});
       Cards.fill();toast(esc(T("colOpenAll")),1600);return refresh()}
-    if(a==="seoaPhotoNow"){toChat();SeoaPhoto.now();return}  // 12: 지금 단계 묶음에서 바로 한 장
+    if(a==="seoaPhotoNow"){setOpen(false);SeoaPhoto.now();return}  // 68: 떠난 시각을 11분 전으로 → (대화방이면 홈으로 나가) 앱 안 알림 배너
     if(a==="photoFill"){PhotoUI.fill().then(()=>{toast(esc(T("photoFill")),1600);render()});return}
     if(a==="photoClear"){Photos.clear().then(()=>{toast(esc(T("photoClear")),1600);render()});return}
     if(a==="packClear"){Gacha.pool(COL.items).forEach(x=>{delete S.col[x.id]});toast(esc(T("packClear")),1600);return refresh()}
@@ -2836,7 +2843,7 @@ function openRoom(cid){
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
   if(cid==="seoa"&&View.held()&&Stage.walk.busy())View.hold(View.held());  // 42-1: 걷는 중에 다른 탭에 다녀오면 확대 다시
   if(cid==="seoa")EpScene.resume();  // 42: 에피소드 단계 장면이 끊겼으면 그 자리부터
-  if(cid==="seoa"&&!End.locked())SeoaPhoto.enter();  // 12: 오랜만에 들어왔을 때 사진 · 기다리던 사진
+  if(cid==="seoa"&&!End.locked())SeoaPhoto.enter();  // 68: 떠난 지 10분이 지났으면 부재중 셀카 · 기다리던 사진
 }
 // 특별 에피소드 첫 장면(16): 문단을 하나씩, 정해진 문단에서 몸짓·표정·장소. 원고 data/episodes.json special[].opening
 function runOpening(I,done){
