@@ -24,7 +24,12 @@
 .camfull div{flex:none;display:flex;gap:5px}
 .camfull button{height:30px;padding:0 9px;border-radius:9px;font-size:12px;font-weight:700;background:var(--card);border:1px solid var(--line)}
 .camfull button[data-c="grow"]{background:var(--pri);border-color:var(--pri)}
-.cambot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 28px calc(18px + env(safe-area-inset-bottom,0px))}
+.cambot{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:14px 28px calc(18px + env(safe-area-inset-bottom,0px))}
+/* 48: 왼쪽 = 멈춤 + 「포즈」, 가운데 셔터, 오른쪽 최근 사진 */
+.camleft{display:flex;gap:8px;justify-self:start}
+.cambot .camlast{justify-self:end}
+.cambtn.campose{width:auto;padding:0 13px 0 10px;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:#e9e3fb}
+.cambtn.campose .ic{width:21px;height:21px}
 .cambtn,.camlast{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:none;-webkit-tap-highlight-color:transparent}
 .cambtn{background:#1d1a27;color:#d9d2ee}
 .cambtn:disabled{opacity:.35}

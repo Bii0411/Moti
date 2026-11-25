@@ -1,0 +1,19 @@
+/* moti 포즈(48단계). 코드 pose.js, 문구 data/ui.json pose
+   블러·그림자·그라데이션 없음(아이폰 사파리). 움직임은 transform·opacity 만 */
+
+/* ── 카드 목록 시트: 컬렉션 포토카드(cards.css .mcards)를 그대로 3열 ── */
+.posesheet{max-height:86%;padding:16px 14px calc(18px + env(safe-area-inset-bottom,0px))}
+.posesheet h2{font-size:17px;font-weight:900;margin:0 2px 4px}
+.posesheet .sub{font-size:13px;color:var(--sub);margin:0 2px 2px;word-break:keep-all}
+.posesheet .mcards{gap:8px}
+.posesheet .mc.got:active{transform:scale(.96)}
+/* 못 모은 칸: 포토카드 뒷면 + 가운데 자물쇠. 누르면 알림 한 줄만 */
+.posesheet .mc.plock{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.posesheet .mc.plock .pc{opacity:.6}
+.plk{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:5;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#0a0812b3;color:#cfc8e6;pointer-events:none}
+.plk svg{display:block}
+
+/* ── 서아 답장 아래 「이 포즈로 찍기」 ── */
+.poseshoot{flex:none;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 12px;margin:-2px 0 2px 2px;border-radius:18px;background:#221a38;border:1px solid var(--accent,#8b5cf6);color:var(--accent2,#b49cff);font-size:13.5px;font-weight:700;-webkit-tap-highlight-color:transparent}
+.poseshoot .ic{width:17px;height:17px}
+.poseshoot:active{transform:scale(.97)}
