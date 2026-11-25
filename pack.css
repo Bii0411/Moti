@@ -85,7 +85,7 @@
 /* 50-3: 10장 결과 카드 이름 = data/collection.json photocard.packNamePx(9px)·packNameLines(2줄). 두 줄로도 넘칠 때만 끝에 「…」. 크게 보기는 그대로 전체 이름.
    칸이 좁아서 이 화면만: 이름이 아래 띠 너비를 다 쓰고(글자 사이에서도 줄바꿈), 카드 번호는 사진 오른쪽 아래 모서리로, 작은 줄(단계·장소·날짜)은 숨김 */
 .pkgrid .pcbd{position:relative;height:auto;min-height:calc(var(--pcBand)*100cqw);align-items:center}
-.pkgrid .pcnm{font-size:var(--pkNm,9px);line-height:1.15;white-space:normal;word-break:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--pkNmLines,2);line-clamp:var(--pkNmLines,2);overflow:hidden;text-overflow:ellipsis}
+.pkgrid .pcnm{font-size:var(--pkNm,9px);line-height:1.15;white-space:normal;word-break:keep-all;overflow-wrap:break-word;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--pkNmLines,2);line-clamp:var(--pkNmLines,2);overflow:hidden;text-overflow:ellipsis}
 .pkgrid .pcsub{display:none}
 .pkgrid .pcno{position:absolute;right:0;bottom:100%;margin-bottom:5cqw;font-size:10px;color:#fff;text-shadow:0 0 3px #000,0 1px 2px #000}
 .pkgrid .pknew{font-size:9px;padding:2px 6px}
