@@ -32,9 +32,9 @@ const Cards=(()=>{
   async function clear(){try{const {tx,os}=await store("readwrite");os.clear();await done(tx)}catch(e){}have.clear();Object.keys(urls).forEach(revoke);queue=[];emit(null)}
 
   // ── 처음 본 순간 ──
-  // 칸 id → 그릴 몸짓·표정·속도. 선물 칸(g01…)은 임시 재생 설정 play, 대화 칸은 그 몸짓 그대로
+  // 칸 id → 그릴 몸짓·표정·속도. 카드 팩 칸(g01…, 49 전에는 선물)은 임시 재생 설정 play, 대화 칸은 그 몸짓 그대로
   function motionOf(id){const it=colBy(id)||{},p=it.play||{},F=C().faceById||{};
-    if(it.source==="gift"||p.m)return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1};  // 42: 몸짓 칸이 아닌 연출 카드(e01 크리스마스 이브)도 play
+    if(it.source==="gift"||it.source==="pack"||p.m)return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1};  // 42: 몸짓 칸이 아닌 연출 카드(e01 크리스마스 이브)도 play
     const fs=((((DATA.onboarding||{}).film||{}).shots)||[]).find(s=>s.id===id);
     return{m:id,f:F[id]||(fs&&fs.face)||C().face||"soft",sp:1}}
   const frameOf=m=>({...(C().frame||{top:1.08,bottom:.34,width:.56,lift:.03,center:.3}),...((C().frameById||{})[m]||{})});
@@ -136,6 +136,8 @@ const Cards=(()=>{
     // 38: 열렸지만 못 본 칸·잠긴 칸 모두 같은 뒷면. 누를 수 없는 칸(힌트 없음)
     return `<div class="mc back" role="img" aria-label="${esc(T("backAria",{no:no2(x)}))}"><span class="pc">${backName(curChar())}<i class="pcno">${no2(x)}</i></span></div>`}
   const grid=L=>`<div class="mcards" style="${vars()}">${L.map(cell).join("")}</div>`;
+  // 49 카드 팩: 뒷면 한 장(번호 없이 「Seoa」 이름만 — 팩 그림·뽑기 연출의 뒷면)
+  const backCell=(ch,no)=>`<div class="mc back" aria-hidden="true"><span class="pc">${backName(ch||"seoa")}${no?`<i class="pcno">${no}</i>`:""}</span></div>`;
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
   function hydrate(root){root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
     url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=b.querySelector(".mcsil");if(sv)sv.remove()})})}
@@ -278,6 +280,6 @@ const Cards=(()=>{
     if(PhotoUI.canShare(f)){try{await navigator.share({files:[f]})}catch(e){}return}
     PhotoUI.saveFile(f);toast(esc(T("saved")),1800)}
 
-  return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,refresh,stale,verOf,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),
+  return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,refresh,stale,verOf,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),vars,cell,backCell,
     grid,hydrate,open,close,isOpen:()=>vOn,shareImage,state:()=>({vOn,id:vIds[vi],K:!!K,outfit:Stage.outfitNow(),playing:Stage.recentMotion(0)})};
 })();

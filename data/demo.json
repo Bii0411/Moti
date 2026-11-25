@@ -57,9 +57,9 @@
     "birthday": "생일"
   },
   "serverModes": {
+    "0": "없음 (예시 대사)",
     "1": "v1 (지금 배포)",
-    "2": "v2",
-    "0": "없음 (예시 대사)"
+    "2": "v2"
   },
   "serverNow": "지금: {name}",
   "serverQueryWins": "주소의 ?server= 값이 우선이에요",
@@ -100,10 +100,6 @@
   "motionPreview": "연출",
   "motionPreviewTitle": "해금 연출 미리보기 (상태는 그대로)",
   "_gift": "선물(9-B, 항상 보임): 다음 선물 결과(등급 또는 선물 몸짓 g01~g12 를 고르면 다음 선물 한 번에만 적용) · 천장 초기화 · 선물 몸짓 모두 열기 · 선물 몸짓 비우기. 전체 초기화는 도감·천장도 비운다",
-  "giftNext": "다음 선물 결과",
-  "pityReset": "천장 초기화",
-  "giftOpenAll": "선물 몸짓 모두 열기",
-  "giftClear": "선물 몸짓 비우기",
   "chapter": "{n}장 · {name}",
   "keysNote": "단축키: 0 앱 처음 열기 · 1~6 장면 · ← → 이전/다음 · R 다시 · D 패널 · W 서버 깨우기",
   "photoFill": "사진 가득 채우기",
@@ -126,5 +122,16 @@
     "affection": "판정 · 호감 {w}",
     "flag": "판정 · 플래그 {w}",
     "force": "시연 지정"
+  },
+  "packNext": "다음 카드 팩 결과(첫 장)",
+  "packPityReset": "천장 초기화",
+  "packOpenAll": "카드 팩 카드 모두 열기",
+  "packClear": "카드 팩 카드 비우기",
+  "packLeft": "천장까지 {n}장",
+  "_보류49": {
+    "giftNext": "다음 선물 결과",
+    "pityReset": "천장 초기화",
+    "giftOpenAll": "선물 몸짓 모두 열기",
+    "giftClear": "선물 몸짓 비우기"
   }
 }

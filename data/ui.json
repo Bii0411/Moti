@@ -7,10 +7,10 @@
     "intro": {
       "_intro": "26: 컬렉션 탭에 처음 들어갈 때 한 번 자동으로 뜨는 소개 창. 제목 옆 (!) 버튼으로 다시 열림. list = 가운데 목록, foot = 아래 줄, ok = 버튼",
       "title": "무빙 카드",
-      "body": "대화하고 선물하며 처음 본 모습이 카드로 모여요.",
+      "body": "대화하고 카드 팩을 열며 처음 본 모습이 카드로 모여요.",
       "list": [
         "대화에서 처음 나온 몸짓",
-        "선물에 대한 반응",
+        "카드 팩에서 뽑은 카드",
         "관계가 깊어질수록 열리는 카드"
       ],
       "foot": "시크릿 카드도 숨어 있어요.",
@@ -20,7 +20,7 @@
     "seg": {
       "all": "전체",
       "chat": "대화",
-      "gift": "선물"
+      "pack": "카드 팩"
     },
     "collected": "모은 카드 {n} / {total}",
     "count": "{n} / {total}",
@@ -342,5 +342,32 @@
   "thread": {
     "_thread": "이야기 줄기(16단계). 특별 에피소드 대화는 본 이야기와 따로 이어짐. sub = 특별 에피소드 안에서 대화방 이름 밑 설명 줄({name} 에피소드 이름, 25-1: 본 이야기·다른 캐릭터는 설명 줄 없이 이름만). 46: 대화방 머리의 「본 이야기로」 단추(back·backToast)는 없앰 — 이야기 바꾸기는 대화 목록에서 옆으로 넘겨서",
     "sub": "{name}"
+  },
+  "pack": {
+    "_pack": "49 컬렉션 「카드 팩」 탭(배너·확률 보기·뽑기 연출). 숫자는 data/pack.json. title = 배너 가운데 이름, pity = 천장 안내({n} = data/pack.json pity.count, {min} = 그 등급 이름), one·ten = 버튼 이름, odds = 배너 아래 작은 줄, oddsTitle·oddsGrade·oddsCards·oddsNote = 확률 보기 작은 창({n}·{min} 천장, {refund} 중복 환급), pct = %, noDia = 다이아가 모자랄 때(마이 페이지 충전으로 옮겨 감), tapOpen·tapFlip·tapNext = 연출 아래 안내, count = 「몇 번째 / 전체」, flipAll = 10장 모두 뒤집기, new = 새 카드 표, owned = 이미 가진 카드({refund}), ownedShort = 10장 묶음의 짧은 표, summary·summaryNew·summaryDup = 끝난 뒤 한 줄({n} 장 수, {refund} 돌려받은 다이아), again = 한 번 더({label} 뽑기 이름), done = 닫기, artAria = 팩 그림 접근성 이름",
+    "title": "카드 팩",
+    "pity": "{n}장 안에 {min} 1장",
+    "one": "1장 뽑기",
+    "ten": "10장 뽑기",
+    "odds": "확률 보기 ›",
+    "oddsTitle": "카드 팩 확률",
+    "oddsGrade": "등급별 확률",
+    "oddsCards": "팩에 들어 있는 카드 {n}장",
+    "oddsNote": "1장·10장 뽑기를 합쳐 {n}장 안에 {min} 이상 1장 확정(10장 뽑기 한 번에는 꼭 1장). 이미 가진 카드가 나오면 한 장마다 다이아 {refund}개를 돌려받아요.",
+    "pct": "{v}%",
+    "noDia": "다이아가 부족해요 · 마이에서 충전할 수 있어요",
+    "tapOpen": "팩을 여는 중",
+    "tapFlip": "카드를 눌러 뒤집어요",
+    "tapNext": "눌러서 다음 카드",
+    "count": "{i} / {n}",
+    "flipAll": "모두 뒤집기",
+    "new": "NEW",
+    "owned": "이미 있어요 · 다이아 +{refund}",
+    "ownedShort": "보유 +{refund}",
+    "summaryNew": "새 카드 {n}장",
+    "summaryDup": "이미 있던 카드 {n}장 · 다이아 +{refund}",
+    "again": "한 번 더 · {label}",
+    "done": "확인",
+    "artAria": "카드 팩"
   }
 }
