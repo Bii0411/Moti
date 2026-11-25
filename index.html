@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261125-2331">
+<meta name="moti-version" content="20261125-2335">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -266,7 +266,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hcc .pic,.chero .pic{position:relative;display:block;aspect-ratio:4/5;background:center 15%/cover}
 .hcc .tx{display:flex;flex-direction:column;gap:2px;padding:8px 10px 11px;min-width:0}
 .hcc b{font-size:14px}
-.hcc small{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcc small{font-size:12px;color:var(--sub);line-height:1.45;white-space:normal;word-break:keep-all;overflow-wrap:break-word}
 .hcc .pl,.chero .pl{position:absolute;top:8px;right:8px;font-size:11px;font-weight:800;background:#e8467c;color:#fff;border-radius:10px;padding:2px 8px}
 .hcc .pl.age,.chero .pl.age{background:#e11d48;font-weight:900}
 .hnone{padding:36px 0}
@@ -494,11 +494,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261125-2331">
-<link rel="stylesheet" href="photos.css?v=20261125-2331">
-<link rel="stylesheet" href="cards.css?v=20261125-2331">
-<link rel="stylesheet" href="pose.css?v=20261125-2331">
-<link rel="stylesheet" href="pack.css?v=20261125-2331">
+<link rel="stylesheet" href="onboarding.css?v=20261125-2335">
+<link rel="stylesheet" href="photos.css?v=20261125-2335">
+<link rel="stylesheet" href="cards.css?v=20261125-2335">
+<link rel="stylesheet" href="pose.css?v=20261125-2335">
+<link rel="stylesheet" href="pack.css?v=20261125-2335">
 </head>
 <body>
 <div class="app">
@@ -576,19 +576,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261125-2331"></script>
-<script src="motion.js?v=20261125-2331"></script>
-<script src="gacha.js?v=20261125-2331"></script>
-<script src="look.js?v=20261125-2331"></script>
-<script src="alive.js?v=20261125-2331"></script>
-<script src="film.js?v=20261125-2331"></script>
-<script src="photos.js?v=20261125-2331"></script>
-<script src="seoaphoto.js?v=20261125-2331"></script>
-<script src="cards.js?v=20261125-2331"></script>
-<script src="pose.js?v=20261125-2331"></script>
-<script src="pack.js?v=20261125-2331"></script>
-<script src="storypic.js?v=20261125-2331"></script>
-<script src="onboarding.js?v=20261125-2331"></script>
+<script src="icons.js?v=20261125-2335"></script>
+<script src="motion.js?v=20261125-2335"></script>
+<script src="gacha.js?v=20261125-2335"></script>
+<script src="look.js?v=20261125-2335"></script>
+<script src="alive.js?v=20261125-2335"></script>
+<script src="film.js?v=20261125-2335"></script>
+<script src="photos.js?v=20261125-2335"></script>
+<script src="seoaphoto.js?v=20261125-2335"></script>
+<script src="cards.js?v=20261125-2335"></script>
+<script src="pose.js?v=20261125-2335"></script>
+<script src="pack.js?v=20261125-2335"></script>
+<script src="storypic.js?v=20261125-2335"></script>
+<script src="onboarding.js?v=20261125-2335"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2542,7 +2542,7 @@ function openSearch(){H.view=null;H.search=true;renderHome();const i=$("#hQ");if
 function gridHTML(){
   const list=homeList();
   if(!list.length)return `<div class="empty hnone">${esc(UI("home.searchEmpty"))}</div>`;
-  return `<div class="hgrid">${list.map(c=>{const b=(EPS.basic||{})[c.id],bd=badgeOf(c);return `<button class="hcc" data-c="${c.id}"><span class="pic" style="background-image:url(${c.img})">${bd?`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`:""}</span><span class="tx"><b>${esc(c.name)}</b>${b?`<small>${esc(b.title)}</small>`:""}</span></button>`}).join("")}</div>`;
+  return `<div class="hgrid">${list.map(c=>{const b=(EPS.basic||{})[c.id],bd=badgeOf(c);return `<button class="hcc" data-c="${c.id}"><span class="pic" style="background-image:url(${c.img})">${bd?`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`:""}</span><span class="tx"><b>${esc(c.name)}</b>${c.desc?`<small>${esc(c.desc)}</small>`:b?`<small>${esc(b.title)}</small>`:""}</span></button>`}).join("")}</div>`;  // 57: 카드 아래 = 캐릭터 소개(desc)
 }
 function renderGrid(){const g=$("#hGrid");if(!g)return;g.innerHTML=gridHTML();g.querySelectorAll("[data-c]").forEach(x=>x.onclick=()=>openChar(x.dataset.c))}
 function openChar(cid){const h=$("#home");H.top=h.scrollTop;H.view=cid;renderHome();h.scrollTop=0}
