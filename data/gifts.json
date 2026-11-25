@@ -14,7 +14,7 @@
     "turns": 3,
     "cooldownTurns": 10
   },
-  "_momentFallback": "서버가 gift_moment 를 아직 안 보낼 때의 임시 규칙(선물별). on 이면 서아 답장의 감정·지문·대사에 words(정규식)가 있으면 gift 순간을 reason 으로 엶(단계 조건은 그대로). 서버가 gift_moment 를 한 번이라도 보내면 꺼짐(저장값 S.momentSrv). 꽃다발·우산·반지는 규칙 없음(서버로만)",
+  "_momentFallback": "서버가 gift_moment 를 아직 안 보낼 때의 임시 규칙(선물별). on 이면 서아 답장의 감정·지문·대사에 words(정규식)가 있으면 gift 순간을 reason 으로 엶(단계 조건은 그대로). 서버가 gift_moment 를 한 번이라도 보내면 꺼짐(저장값 S.momentSrv). 50-2: 꽃다발·우산·반지 규칙도 더함(반지는 반응 몸짓이 없어 아직 안 열림). 위에서부터 먼저 맞는 규칙",
   "momentFallback": {
     "on": true,
     "rules": [
@@ -32,6 +32,21 @@
         "gift": "towel",
         "words": "젖|흠뻑|비에",
         "reason": "서아가 비에 젖었어요"
+      },
+      {
+        "gift": "flower",
+        "words": "이름|불러 보고",
+        "reason": "서아가 처음으로 이름을 물었어요"
+      },
+      {
+        "gift": "umbrella",
+        "words": "빗속|비 맞|가지 마|떠나",
+        "reason": "서아가 빗속에 서 있어요"
+      },
+      {
+        "gift": "ring",
+        "words": "남을게|안 갈게|돌아올 곳",
+        "reason": "서아가 남기로 했어요"
       }
     ]
   },
