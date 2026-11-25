@@ -390,7 +390,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .endbox{padding:12px 14px 14px;border-top:1px solid var(--line);background:#100e17;text-align:center}
 .endbox h3{font-size:15px;margin-bottom:4px}.endbox p{font-size:12.5px;color:#d6cfe6;line-height:1.55;margin-bottom:10px;word-break:keep-all;white-space:pre-line}
 .endbox .row{display:flex;gap:8px}.endbox button{flex:1;padding:11px 8px;border-radius:12px;font-weight:800;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.endbox .rw{background:var(--pri)}.endbox .rw:disabled{opacity:.45}.endbox .rw small{font-weight:700;font-size:12px;opacity:.9;display:inline-flex;align-items:center;gap:2px}
+.endbox .rw{background:var(--gold);color:#1a1424}.endbox .rw:disabled{opacity:.45}.endbox .rw small{font-weight:700;font-size:12px;opacity:.9;display:inline-flex;align-items:center;gap:2px}
 .endbox .rs{background:#241f33;color:var(--text)}.endbox .free{font-size:12px;color:var(--gold);margin-top:8px}
 .rwc .row{display:flex;gap:8px}.rwc .row .cta{flex:1;width:auto}.rwc .cta.no{background:#241f33}
 /* 50: 순간 선물이 열리면 ＋ 버튼이 금빛(포토카드 SECRET 금색) + 작은 점 */
@@ -1677,7 +1677,7 @@ const Route={
   decide(why){const st=story(),c=this.cnt();if(st.route)return st.route;
     st.route=(c.tease||0)>(c.care||0)?"tease":(this.C().tie||"care");S.routeWhy=why;save();return st.route},
   // 갈래 없이 3단계 이상이 되면(대화 횟수 단계·시연 패널) 그때 정함
-  check(){if(!story().route&&curStage()>(((this.C().decide||{}).stage)||2))this.decide("stage")},
+  check(why){if(!story().route&&curStage()>(((this.C().decide||{}).stage)||2))this.decide(why||"stage")},
   clear(){delete story().route;S.routeCount={tease:0,care:0};delete S.routeWhy;save()}
 };
 // 29: v2 로 처음 열 때 저장값 옮기기(한 번만, S.v2moved). 단계 n 은 그대로 두고 호감도를 맞춤
@@ -2723,7 +2723,7 @@ const Thread={
     S.judgeBuf=t&&t.jb||[];S.judgeN=t&&t.jn||0;S.judgeKeep=null;judgeTok++;judgeP=null;  // 42: 판정 묶음은 줄기마다. 다른 줄기에서 하던 판정은 버림
     if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?((e0.places||[]).includes(t.scene)?t.scene:e0.scene):t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
     else{S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;st.recent_lines=[];st.summary=""}
-    const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(S.room==="seoa")renderLog();this.chip("seoa");renderBond();return !t},  // 42: 하트·게이지도 그 줄기 단계로
+    const e=this.ep();S.epOutfit=e&&e.outfit||null;save();Outfit.sync();if(to==="main"&&typeof End!=="undefined")End.migrate();/* 51-1 */if(S.room==="seoa")renderLog();this.chip("seoa");renderBond();return !t},  // 42: 하트·게이지도 그 줄기 단계로
   // 대화방 이름 밑 설명 줄(25-1): 특별 에피소드 안에서만 thread.sub, 그 밖에는 비우고 숨김(이름만)
   // 46: 「본 이야기로」 단추는 없앰. 이야기 바꾸기는 대화 목록의 서아 줄을 옆으로 넘겨서
   chip(cid){const e=cid==="seoa"?this.ep():null;
@@ -2891,11 +2891,18 @@ const End=(()=>{
     const I=C().item||{},n=S.rwTickets||0,can=!!r.point;
     const tag=n>0?esc(T("end.rewindFree",{n})):esc(T("end.rewindPrice",{price:I.price||0})).split("{gem}").join(Icon.gem(13));
     box.innerHTML=`<h3>${esc(T("end."+k+".title")||T("end.main.title"))}</h3><p>${esc(T("end."+k+".body")||T("end.main.body"))}</p>
-      <div class="row"><button class="rw" data-e="rewind"${can?"":" disabled"}>${esc(T("end.rewind")||I.name||"")} <small>${tag}</small></button><button class="rs" data-e="restart">${esc(T("end.restart"))}</button></div>
+      <div class="row"><button class="rw" data-e="rewind"${can?"":" disabled"}>${esc(T("end."+k+".rewind")||T("end.main.rewind")||I.name||"")} <small>${tag}</small></button><button class="rs" data-e="restart">${esc(T("end.restart"))}</button></div>
       ${!can?`<div class="free">${esc(T("end.noPoint"))}</div>`:n>0&&!S.rwUsed?`<div class="free">${esc(T("end.firstFree"))}</div>`:""}`;
     box.querySelector("[data-e=rewind]").onclick=rewind;box.querySelector("[data-e=restart]").onclick=confirmRestart}
   // 되감기: 장 → 없으면 다이아(모자라면 다른 구매처럼 안내 + 마이 충전). 저장한 지점으로 되돌리고 첫 줄에 지문
-  function rewind(){const k=th(),r=rec(k),p=r.point;if(!p||!r.end)return;const price=+((C().item||{}).price)||0;
+  // 51-1: 다이아로 되감을 때(무료 장이 없을 때)만 확인창(data/rewind.json confirm). 모자라면 확인창 없이 바로 안내
+  function rewind(){const k=th(),r=rec(k);if(!r.point||!r.end)return;const price=+((C().item||{}).price)||0;
+    if((S.rwTickets||0)>0)return doRewind(k);
+    if(S.dia<price){toast(esc(C().noDia||UI("gift.noDia")));Pack.toCharge();return}
+    const el=$("#rwConfirm");
+    el.innerHTML=`<h2>${esc(T("confirm.text",{price}))}</h2><div class="row"><button class="cta no" id="rwNo">${esc(T("confirm.cancel"))}</button><button class="cta" id="rwOk">${esc(T("confirm.ok"))}</button></div>`;
+    openSheet("#rwConfirm");$("#rwNo").onclick=closeSheets;$("#rwOk").onclick=()=>{closeSheets();if(th()===k)doRewind(k)}}
+  function doRewind(k){const r=rec(k),p=r.point;if(!p||!r.end)return;const price=+((C().item||{}).price)||0;
     if((S.rwTickets||0)>0)S.rwTickets--;else{if(S.dia<price){toast(esc(C().noDia||UI("gift.noDia")));Pack.toCharge();return}S.dia-=price}
     S.rwUsed=(S.rwUsed||0)+1;restore(k,p);r.end=null;r.wait=false;save();renderTop();
     addMsg("c",C().line||"",{intro:true,rewind:1},"seoa");renderBond();renderLog();Demo.render()}
@@ -2925,9 +2932,12 @@ const End=(()=>{
     Demo.toChat();EpScene.stop();if(locked(k))return play(k);
     const P=X().pointStage||3;if(EpStage.n()>=(X().failBelow||4)||!rec(k).point){if(EpStage.n()!==P){EpStage.setStage(P);EpScene.fit()}if(!rec(k).point)point(k)}
     EpStage.st().u=X().midnight||40;save();renderBond();checkXmas()}
+  // 51-1 예전 저장값: 본 이야기가 이미 지점 단계(5)인데 지점이 없으면 지금 상태를 지점으로(본 이야기 줄기가 지금 줄기일 때. 아니면 본 이야기로 돌아올 때)
+  function migrate(){if(th()!=="main"||locked("main"))return;const st=story(),r=S.rw&&S.rw.main;
+    if(curStage()===(M().pointStage||5)&&!st.ending&&!(r&&(r.point||r.wait))){point("main");rec("main").old=Date.now();save()}}
   function info(){const r=S.rw||{},f=k=>{const x=r[k]||{};return `${k}: ${x.point?"지점 ✓":"지점 -"}${x.end?" · 실패":""}${x.wait?" · 5단계 답장 기다림":""}`},es=Thread.ep()&&EpStage.st();
     return `${f("main")} / ${f(X().thread||"s2")} · 되감기 ${S.rwTickets||0}장${es?` · ${X().midnightName||"자정"}까지 ${left()}`:""}`}
-  return{locked,stageUp,replied,sceneDone,checkXmas,fail,play,stop,resume,render,rewind,restart,demo,info,left,isPlaying:()=>playing};
+  return{locked,stageUp,replied,sceneDone,checkXmas,fail,play,stop,resume,render,rewind,restart,demo,info,left,migrate,isPlaying:()=>playing};
 })();
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introEnd=0;  // 43: 오프닝 문단이 다 나오는 때(답장 기다리는 몸짓을 막음)
@@ -3128,7 +3138,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
