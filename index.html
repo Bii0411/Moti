@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
+<meta name="moti-version" content="51">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -464,11 +465,11 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css">
-<link rel="stylesheet" href="photos.css">
-<link rel="stylesheet" href="cards.css">
-<link rel="stylesheet" href="pose.css">
-<link rel="stylesheet" href="pack.css?v=49h">
+<link rel="stylesheet" href="onboarding.css?v=51">
+<link rel="stylesheet" href="photos.css?v=51">
+<link rel="stylesheet" href="cards.css?v=51">
+<link rel="stylesheet" href="pose.css?v=51">
+<link rel="stylesheet" href="pack.css?v=51">
 </head>
 <body>
 <div class="app">
@@ -546,19 +547,19 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js"></script>
-<script src="motion.js"></script>
-<script src="gacha.js?v=49"></script>
-<script src="look.js"></script>
-<script src="alive.js"></script>
-<script src="film.js"></script>
-<script src="photos.js"></script>
-<script src="seoaphoto.js"></script>
-<script src="cards.js?v=49"></script>
-<script src="pose.js"></script>
-<script src="pack.js?v=49c"></script>
-<script src="storypic.js"></script>
-<script src="onboarding.js"></script>
+<script src="icons.js?v=51"></script>
+<script src="motion.js?v=51"></script>
+<script src="gacha.js?v=51"></script>
+<script src="look.js?v=51"></script>
+<script src="alive.js?v=51"></script>
+<script src="film.js?v=51"></script>
+<script src="photos.js?v=51"></script>
+<script src="seoaphoto.js?v=51"></script>
+<script src="cards.js?v=51"></script>
+<script src="pose.js?v=51"></script>
+<script src="pack.js?v=51"></script>
+<script src="storypic.js?v=51"></script>
+<script src="onboarding.js?v=51"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -572,8 +573,18 @@ const IDLE="m25";               // 답장을 기다릴 때 · 고를 몸짓이 �
 
 // ── 데이터 파일 (data/*.json) ──
 const DATA={config:{},face:{map:[],default:"soft"},motions:{motions:{},faceEmotion:{}},keywords:{keywords:[]}};
+// 51: 배포 버전(tools/version.mjs 가 index.html meta 와 data/version.json 을 같이 바꿈). 화면과 데이터 버전이 다르면(옛 index 가 캐시에 남음) 한 번만 새로고침
+const APP_V=(document.querySelector('meta[name="moti-version"]')||{}).content||"";
+async function checkVersion(){let v=null;
+  try{const r=await fetch("data/version.json?t="+Date.now(),{cache:"no-store"});if(r.ok)v=(await r.json()).v}catch(e){}
+  if(!v||v===APP_V)return;
+  const k="moti_vreload";let done=null;try{done=sessionStorage.getItem(k)}catch(e){}
+  if(done===v){console.warn("버전이 달라 한 번 새로고침했지만 그대로",APP_V,"→",v);return}  // 두 번은 안 함
+  try{sessionStorage.setItem(k,v)}catch(e){}
+  const u=new URL(location.href);u.searchParams.set("v",v);location.replace(u.href);await new Promise(()=>{})}  // 주소가 달라져 새 index 를 받음
 async function loadData(){
-  const get=p=>fetch(p,{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
+  await checkVersion();
+  const get=p=>fetch(p+(APP_V?"?v="+encodeURIComponent(APP_V):""),{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
   const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json")]);
   if(pk&&pk.price)DATA.pack=pk;  // 49 카드 팩
   DATA.rewind=rw||{};  // 51 실패 엔딩 · 되감기
@@ -1623,7 +1634,10 @@ function motionsSoon(){const C=DATA.config||{},out=[],add=id=>{if(id&&XS[id]&&!o
   add((C.idle||{}).motion);
   ((C.wait||{}).motions||[]).forEach(add);  // 43: 답장을 기다리는 몸짓
   return out}
-function allowedMotions(){const o={};for(const id of unlockedIds())o[id]=MNAME[id]||id;return o}
+function allowedMotions(){const o={};for(const id of unlockedIds())if(placeOkMotion(id))o[id]=MNAME[id]||id;return o}
+// 51: 장소별로 빼는 몸짓(data/seoa_story.json placeBan). 바 2층(사장님 집)에서는 정한 몸짓을 빼고, fromStage 의 몸짓은 그 관계 단계부터만
+function placeOkMotion(id,sc=S.scene){const B=((DATA.story||{}).placeBan||{})[sc];if(!B||!(B.motions||[]).includes(id))return true;
+  const from=(B.fromStage||{})[id];return from!=null&&curStage()>=from}
 // 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 (서아에게 안 맞는 몸짓 제외). 9단계에서 「선물로 배운 몸짓」은 없앰
 function unlockedIds(){
   const U=DATA.story&&DATA.story.unlock;if(!U)return Object.keys(BASE);
@@ -1798,7 +1812,7 @@ const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
 // 반복 방지: 최근 recentLimit 번 안에 나온 몸짓은 고르지 않음 (data/motion_keywords.json)
 const recentMotions=()=>Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3);
-const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id))};
+const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id)&&placeOkMotion(id))};  // 51: 장소별 ban
 function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
 // 답장의 지문: v2 action + 예전 형식의 *…* 부분
 const actionText=v=>[v.action||"",...msgParts(v.line).filter(p=>p.k==="n").map(p=>p.x)].join(" / ");
