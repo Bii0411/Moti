@@ -133,6 +133,7 @@ const SeoaPhoto=(()=>{
       const left=away?0:(D().sendingMs||1500)-(performance.now()-t0);if(left>0)await wait(left);
       const fw=fps.stop();
       if(my!==GEN)return;  // 그사이 시연 패널에서 초기화·장면 이동
+      if(typeof End!=="undefined"&&End.locked()){if(x.type==="stage"){st().pend.unshift(it);save()}return}  // 51: 그사이 실패해 잠김 → 단계 사진은 다시 기다리고, 그 밖은 버림
       // 단계 사진은 단계마다 한 장: 시연 장면으로 다시 받으면 예전 것을 지우고 새것으로
       if(x.type==="stage"){const old=Photos.list().filter(m=>m.kind==="received"&&m.stage===x.stage);for(const m of old)await Photos.remove(m.id)}
       const sc=SCENES[x.scene]||SCENES[0];
@@ -181,6 +182,7 @@ const SeoaPhoto=(()=>{
   function kick(ms){clearTimeout(loopT);loopT=setTimeout(check,ms!=null?ms:(D().waitMs||700))}
   function check(){const s=st();if(!s.pend.length||sending)return;
     if(!inRoom())return;  // 대화방에 들어오면 enter() 가 다시 부름
+    if(typeof End!=="undefined"&&End.locked())return;  // 51: 실패해 잠긴 줄기에는 안 보냄(되감은 뒤 다음 답장·다시 들어올 때 보냄)
     if(!idle())return kick();
     if(s.pend[0].type!=="away"&&typeof Greet!=="undefined"&&Greet.holds())return kick();  // 34: 다시 들어올 때 인사 중이면 기다림(부재중 사진은 인사보다 먼저). 34-1: 첫 대사 한 줄 뒤 greet.photoAfterMs 까지
     const it=s.pend.shift();save();
