@@ -1,19 +1,32 @@
 {
-  "_설명": "서버가 보내는 감정(emotion) 글자 → 서아 표정. match 는 정규식, 위에서부터 먼저 맞는 것을 쓴다. face 가 글자면 index.html FACE 의 표정 이름, 객체면 VRoid 표정 데이터(Fcl_…) 값을 직접 쓴다.",
-  "default": "soft",
+  "_설명": "서버가 보내는 감정(emotion) 글자 → 서아 표정. match 는 정규식, 위에서부터 먼저 맞는 것을 쓴다. face 가 글자면 index.html FACE 의 표정 이름, 객체면 VRoid 표정 데이터(Fcl_…) 값을 직접 쓴다. default = 감정 글자가 맞지 않을 때(73: soft 살짝 미소 → neutral 무표정). words(73) = 서아 지문(행동 묘사)에 이 말이 있으면 감정보다 먼저 이 표정(위에서부터 먼저 맞는 것).",
+  "default": "neutral",
+  "words": [
+    { "match": "윙크|한쪽 눈을 (찡긋|감)", "face": "wink" },
+    { "match": "노려|째려|쏘아보|눈을 가늘게", "face": "glare" },
+    { "match": "삐죽|뾰로통|입을 내밀", "face": "pout" },
+    { "match": "하품|나른|심드렁|무심하게|시큰둥", "face": "bored" },
+    { "match": "피식|입꼬리|비웃|코웃음|씩 웃", "face": "smirk" },
+    { "match": "당황|허둥|말을 더듬|얼굴이 (붉|빨개)", "face": "flustered" },
+    { "match": "지친|피곤|기진", "face": "tired" }
+  ],
   "map": [
     { "match": "평온", "face": "neutral" },
-    { "match": "도발", "face": { "Fcl_ALL_Fun": 0.4 } },
-    { "match": "진심", "face": { "Fcl_ALL_Sorrow": 0.3 } },
-    { "match": "질투", "face": { "Fcl_ALL_Angry": 0.35 } },
-    { "match": "당황", "face": { "Fcl_ALL_Surprised": 0.5, "Fcl_ALL_Joy": 0.2 } },
+    { "match": "도발|자신감", "face": "smirk" },
+    { "match": "진심|긴장|진지", "face": "serious" },
+    { "match": "질투", "face": "pout" },
+    { "match": "당황", "face": "flustered" },
+    { "match": "지침|피곤|tired", "face": "tired" },
+    { "match": "짜증", "face": "glare" },
     { "match": "기쁨|행복|joy|happy", "face": "joy" },
     { "match": "설렘|수줍|부끄|shy", "face": "shy" },
     { "match": "슬픔|우울|sad|sorrow", "face": "sorrow" },
     { "match": "분노|화|angry", "face": "angry" },
     { "match": "놀람|surpris", "face": "surprised" },
-    { "match": "냉담|삐", "face": "sulky" },
-    { "match": "장난|재미|fun|자신감", "face": "fun" },
+    { "match": "삐", "face": "sulky" },
+    { "match": "냉담", "face": "bored" },
+    { "match": "장난", "face": "wink" },
+    { "match": "재미|fun", "face": "fun" },
     { "match": "위로|다정|편안|calm", "face": "soft" }
   ]
 }

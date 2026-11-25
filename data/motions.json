@@ -164,6 +164,14 @@
     "angry": "분노",
     "sulky": "질투",
     "surprised": "놀람",
-    "shy": "수줍음"
+    "shy": "수줍음",
+    "smirk": "도발",
+    "wink": "장난",
+    "glare": "분노",
+    "bored": "냉담",
+    "pout": "질투",
+    "serious": "진심",
+    "flustered": "당황",
+    "tired": "지침"
   }
 }
