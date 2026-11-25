@@ -3046,7 +3046,7 @@ const Ending=(()=>{
   // 마이 화면 칸
   function html(){const L=C().list||[];if(!L.length)return "";const g=got(),n=L.filter(x=>g[x.id]).length;
     return `<div class="card endrec"><div class="mch"><b>${esc(T("ui.title"))}</b><span class="bal">${esc(T("ui.count",{n,total:L.length}))}</span></div>
-      <ul>${L.map(x=>`<li class="${g[x.id]?"on":""}"><b>${esc(x.name)}</b><small>${esc(x.desc||"")}</small></li>`).join("")}</ul>
+      <ul>${L.map(x=>`<li class="${g[x.id]?"on":""}"><b>${esc(x.name)}</b>${g[x.id]&&x.desc?`<small>${esc(x.desc)}</small>`:""}</li>`).join("")}</ul>
       ${n<L.length?`<p class="alnote" style="margin:8px 0 0">${esc(T("ui.hint"))}</p>`:""}</div>`}
   return{mark,fail,scene,migrate,check,start,stop,resume,render,html,isPlaying:()=>playing}
 })();
