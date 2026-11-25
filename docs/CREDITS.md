@@ -64,6 +64,9 @@
 | 이름 | 쓰는 곳 | 출처 · 라이선스 |
 | --- | --- | --- |
 | three.js r128, GLTFLoader | `index.html`, `v1.html`, `xstage.html` | cdnjs / jsDelivr · MIT |
+| `motions/xstage_sexy_standing_still.json` (x35 섹시하게 서 있기) | `index.html`(대화 몸짓, 서아의 자취방에서만) | XSTAGE 「[standard] Sexy - Standing still」. 라이선스 범위 **확인 필요** | 원본 `standard_Sexy_-_Standing_still.fbx`(2026-11-25 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps). FBX는 저장소에 없음 |
+| `motions/xstage_sexy_hesitating.json` (x36 섹시하게 머뭇거리기) | `index.html`(대화 몸짓, 서아의 자취방에서만) | XSTAGE 「[standard] Sexy - Hesitating」. 라이선스 범위 **확인 필요** | 원본 `standard_Sexy_-_Hesitating.fbx`(2026-11-25 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps). FBX는 저장소에 없음 |
+| `motions/xstage_sexy_walking_show_neck.json` (x37 걸으며 목선 강조) | `index.html`(대화 몸짓, 어디서나: 어디 가자·걸어갈 때·장소가 바뀔 때) | XSTAGE 「[standard] Sexy - Walking Show Neck」. 라이선스 범위 **확인 필요** | 원본 `standard_Sexy_-_Walking_Show_Neck.fbx`(2026-11-25 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps). FBX는 저장소에 없음 |
 | Noto Sans KR | `v1.html` | Google Fonts · SIL Open Font License |
 | Fredoka SemiBold(600) | 로고 「moti」 그림 `assets/logo_moti.svg` (35단계: 시작 화면, 헤더, 카드 뒷면, 카드 공유 그림). 글꼴 파일은 앱에서 불러오지 않고 저장소에도 없음(`_src/Fredoka-SemiBold.ttf`), `tools/logo2svg.mjs` 로 글자 모양만 경로로 바꿈 | [Google Fonts · Fredoka](https://fonts.google.com/specimen/Fredoka) (정적 600 TTF, fonts.gstatic.com, 2026-11-24 받음) · SIL Open Font License 1.1 |
 | Great Vibes Regular | 무빙 카드 뒷면(잠긴 칸) 가운데 영문 이름 그림 `assets/name_seoa.svg` (38단계). 글꼴 파일은 앱에서 불러오지 않고 저장소에도 없음(`_src/GreatVibes-Regular.ttf`), `tools/logo2svg.mjs` 로 「Seoa」 글자 모양만 경로로 바꿈 | [Google Fonts · Great Vibes](https://fonts.google.com/specimen/Great+Vibes) (TTF, fonts.gstatic.com, 2026-11-25 받음, 글꼴 안 저작권 「Copyright 2010 The Great Vibes Pro Project Authors」, [github.com/googlefonts/great-vibes](https://github.com/googlefonts/great-vibes)) · SIL Open Font License 1.1 |
