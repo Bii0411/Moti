@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261125-2247">
+<meta name="moti-version" content="20261125-2325">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -473,11 +473,11 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261125-2247">
-<link rel="stylesheet" href="photos.css?v=20261125-2247">
-<link rel="stylesheet" href="cards.css?v=20261125-2247">
-<link rel="stylesheet" href="pose.css?v=20261125-2247">
-<link rel="stylesheet" href="pack.css?v=20261125-2247">
+<link rel="stylesheet" href="onboarding.css?v=20261125-2325">
+<link rel="stylesheet" href="photos.css?v=20261125-2325">
+<link rel="stylesheet" href="cards.css?v=20261125-2325">
+<link rel="stylesheet" href="pose.css?v=20261125-2325">
+<link rel="stylesheet" href="pack.css?v=20261125-2325">
 </head>
 <body>
 <div class="app">
@@ -555,19 +555,19 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261125-2247"></script>
-<script src="motion.js?v=20261125-2247"></script>
-<script src="gacha.js?v=20261125-2247"></script>
-<script src="look.js?v=20261125-2247"></script>
-<script src="alive.js?v=20261125-2247"></script>
-<script src="film.js?v=20261125-2247"></script>
-<script src="photos.js?v=20261125-2247"></script>
-<script src="seoaphoto.js?v=20261125-2247"></script>
-<script src="cards.js?v=20261125-2247"></script>
-<script src="pose.js?v=20261125-2247"></script>
-<script src="pack.js?v=20261125-2247"></script>
-<script src="storypic.js?v=20261125-2247"></script>
-<script src="onboarding.js?v=20261125-2247"></script>
+<script src="icons.js?v=20261125-2325"></script>
+<script src="motion.js?v=20261125-2325"></script>
+<script src="gacha.js?v=20261125-2325"></script>
+<script src="look.js?v=20261125-2325"></script>
+<script src="alive.js?v=20261125-2325"></script>
+<script src="film.js?v=20261125-2325"></script>
+<script src="photos.js?v=20261125-2325"></script>
+<script src="seoaphoto.js?v=20261125-2325"></script>
+<script src="cards.js?v=20261125-2325"></script>
+<script src="pose.js?v=20261125-2325"></script>
+<script src="pack.js?v=20261125-2325"></script>
+<script src="storypic.js?v=20261125-2325"></script>
+<script src="onboarding.js?v=20261125-2325"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1673,13 +1673,16 @@ function motionsSoon(){const C=DATA.config||{},out=[],add=id=>{if(id&&XS[id]&&!o
   return out}
 function allowedMotions(){const o={};for(const id of unlockedIds())if(placeOkMotion(id))o[id]=MNAME[id]||id;return o}
 // 51: 장소별로 빼는 몸짓(data/seoa_story.json placeBan). 바 2층(사장님 집)에서는 정한 몸짓을 빼고, fromStage 의 몸짓은 그 관계 단계부터만
-function placeOkMotion(id,sc=S.scene){const B=((DATA.story||{}).placeBan||{})[sc];if(!B||!(B.motions||[]).includes(id))return true;
+// 55: 장소 전용 몸짓(data/seoa_story.json extraMotions.placeOnly) — 그 장소가 아니면 빠짐
+function placeOnlyOk(id,sc=S.scene){const P=(((DATA.story||{}).extraMotions||{}).placeOnly)||{};let mine=false;for(const k in P)if((P[k]||[]).includes(id)){if(+k===sc)return true;mine=true}return !mine}
+function placeOkMotion(id,sc=S.scene){if(!placeOnlyOk(id,sc))return false;const B=((DATA.story||{}).placeBan||{})[sc];if(!B||!(B.motions||[]).includes(id))return true;
   const from=(B.fromStage||{})[id];return from!=null&&curStage()>=from}
 // 대화에서 쓸 수 있는 몸짓 = 지금 단계까지 열린 몸짓 + 판정·사건으로 열린 몸짓 (서아에게 안 맞는 몸짓 제외). 9단계에서 「선물로 배운 몸짓」은 없앰
 function unlockedIds(){
   const U=DATA.story&&DATA.story.unlock;if(!U)return Object.keys(BASE);
   const set=new Set();for(let k=1;k<=curStage();k++)((U.stage[k]||{}).motions||[]).forEach(id=>set.add(id));
   (S.unlocked||[]).forEach(id=>set.add(id));
+  {const X=DATA.story.extraMotions||{};(X.always||[]).forEach(id=>set.add(id));((X.placeOnly||{})[S.scene]||[]).forEach(id=>set.add(id))}  // 55: 해금 없이 쓰는 몸짓(어디서나 · 그 장소에서만)
   // 25: 판정·사건 묶음에 나중에 더한 몸짓(protect 의 x16 등)은 그 묶음의 몸짓 하나라도 이미 열렸으면 같이 열림(예전 저장값)
   for(const sec of ["flag","event"])for(const k in U[sec]||{}){const M=U[sec][k].motions||[];if(M.some(id=>(S.unlocked||[]).includes(id)))M.forEach(id=>set.add(id))}
   return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
@@ -1979,7 +1982,8 @@ async function send(text,o){
     // 40-1: 에피소드 placeWords — 내 말(없으면 서아 말)에 장소 단어가 있으면 그 에피소드 안 장소(places)로 이동
     const e=Thread.ep(),W=e.placeWords||{},hit=src=>{for(const k in W){if(+k!==S.scene&&(e.places||[]).includes(+k)&&EpStage.placeOk(+k)&&new RegExp(W[k]).test(src||""))return +k}return null};
     const h=hit(text);v.scene=h!=null?h:hit(v.dialogue||v.line||"");v.src="server"}
-  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
+  let moved=false;
+  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){moved=true;const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
     await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
@@ -1992,6 +1996,7 @@ async function send(text,o){
   if(poseX&&poseX.f&&!v.face)v.face=poseX.f;
   // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
   const keyM=Fx.key(say,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
+  {const mv=((DATA.story||{}).extraMotions||{}).move;if(moved&&mv&&!poseX&&!giftMid&&canPlay(mv)&&placeOkMotion(mv))mid=mv}  // 55: 이번 답장에서 장소가 바뀌었으면(어디 가자 → 걸어감) 걸으며 목선 강조
   // 50-2: 선물 — 그림이 1초 떠올랐다 사라진 뒤 답장·반응 몸짓(서버 답이 그보다 빨리 와도)
   if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{})};
