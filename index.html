@@ -222,6 +222,24 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .perks .mi{width:30px;height:30px;border-radius:9px;background:rgba(167,139,250,.12);color:#a78bfa;display:flex;align-items:center;justify-content:center;flex:none}
 .perks .mi svg{width:17px;height:17px}
 .card .fine{text-align:center;font-size:11px;color:var(--dim,#6b6878);margin:8px 0 0}
+/* 70: 마이 탭 「내 정보」 · 이름 바꾸기 시트 */
+.card.me .mch{margin-bottom:10px}
+.merow{display:flex;align-items:center;gap:12px}
+.merow .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.merow small{font-size:12px;color:var(--sub)}
+.merow b{font-size:19px;font-weight:800;overflow-wrap:anywhere}
+.merow button{flex:none;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#1f1d27;font-size:12.5px;font-weight:700}
+.namesheet .nshd{display:flex;align-items:center;margin-bottom:12px}
+.namesheet .nshd h2{margin:0;flex:1}
+.namesheet .nsx{width:32px;height:32px;border-radius:50%;background:#ffffff12;font-size:18px;line-height:32px;text-align:center}
+.namesheet input{width:100%;padding:12px 13px;border-radius:12px;border:1px solid #4a3f7a;background:#0d0c13;color:var(--text);font-size:16px;outline:none}
+.namesheet input:focus{border-color:var(--pri)}
+.namesheet .nsnote{font-size:12.5px;color:var(--sub);margin:9px 2px 14px}
+.namesheet .nsgo{width:100%;padding:12px;border-radius:12px;background:var(--pri);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;gap:5px}
+.namesheet .nsgo:disabled{opacity:.35}
+.namesheet .nslack{display:flex;align-items:center;gap:10px}
+.namesheet .nslack span{flex:1;font-size:13.5px;font-weight:700;color:#ffb4c4}
+.namesheet .nslack button{padding:10px 16px;border-radius:12px;background:var(--pri);font-weight:800;font-size:13.5px}
 .mch{display:flex;align-items:center;margin-bottom:12px}.mch b{font-size:16px}
 .mch .bal{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:13px;font-weight:800;background:#1f1d27;border-radius:999px;padding:4px 10px 4px 7px}
 .packs .amt{display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px}
@@ -484,10 +502,6 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .dp .hd button{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
 .dp h4{font-size:12px;margin:12px 0 2px;color:var(--pri2)}
 /* 69: 「부르는 이름」 한 줄(누르면 입장권 뒷면) */
-.dp .dpname{display:flex;align-items:center;gap:8px;width:100%;margin:4px 0 2px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#0006;font-size:13px;text-align:left}
-.dp .dpname span{color:var(--sub);flex:none}
-.dp .dpname b{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dp .dpname::after{content:"›";color:var(--sub);font-size:15px}
 .dp h4 small{color:var(--sub);font-weight:500;margin-left:4px}
 .dp .row{margin:4px 0 6px;gap:5px}
 .dp .row button{padding:5px 9px}
@@ -605,6 +619,7 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
   <div class="sheet psheet" id="photoSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet" id="fullSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet posesheet" id="poseSheet" role="dialog" aria-modal="true"></div>
+  <div class="sheet namesheet" id="nameSheet" role="dialog" aria-modal="true"></div>
   <div class="pview" id="pView" role="dialog" aria-modal="true"></div>
   <div class="pconfirm" id="pConfirm"></div>
   <div class="mini" id="mini"></div>
@@ -2363,7 +2378,6 @@ const Demo=(()=>{
     if(!open||!P())return;
     const st=story(),cs=curStage();
     let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
-    h+=`<button type="button" data-a="userName" class="dpname"><span>${esc(T("userName"))}</span><b>${esc(userName()||T("noName"))}</b></button>`;  // 69
     h+=Scenes.html(T,B);
     // 42: 에피소드 단계(그 에피소드 안에서만). 판정 버튼 = 서버 판정 한 번처럼(켠 플래그와 같이), 단계 = 그 단계 시작 호감으로 바로
     if(EpStage.on()){const es=EpStage.st(),en=EpStage.n(),ef=DS.epFlags||[];
@@ -2420,7 +2434,6 @@ const Demo=(()=>{
     const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
     if(a==="close")return setOpen(false);
     if(a==="nameScene"){if(!userName()){setOpen(false);Onboard.openBack({onDone:()=>nameScene()});return}return nameScene()}  // 69: 이름이 없으면 입장권 뒷면부터
-    if(a==="userName"){setOpen(false);Onboard.openBack({onDone:()=>refresh()});return}  // 69: 입장권 뒷면만 열어 이름 바꾸기(다음 요청부터)
     if(a==="wake")return wakeServer();
     if(a==="opening")return opening();
     if(a==="firstMeet"){cancel();toChat();return FirstMeet.run({replay:true})}  // 31: 첫 만남 다시 보기(저장값·대화는 그대로, 끝나면 지금 대화 장소로)
@@ -2732,13 +2745,53 @@ function relHTML(){
       <span class="rmid"><span class="rtop"><b class="rn">${esc(ch.name)}</b>${cards}</span>${mid}</span></button>`};
   return`<div class="relh"><h2>${esc(UI("my.relTitle"))}</h2><small>${esc(UI("my.relCount",{n:rows.length}))}</small></div>
   <div class="card rels">${rows.length?rows.map(row).join(""):`<div class="relempty"><p>${esc(UI("my.relEmpty"))}</p><button id="relHome">${esc(UI("my.relGoHome"))}</button></div>`}</div>`}
+// 70: 「내 정보」 = 서아가 부르는 이름(S.profile.name). 바꾸기는 이름 시트 한 곳에서
+function meHTML(){const N=((DATA.ui||{}).my||{}).me||{};
+  return`<div class="card me"><div class="mch"><b>${esc(N.title||"")}</b></div>
+  <div class="merow"><span class="mt"><small>${esc(N.nameLabel||"")}</small><b id="meName">${esc(userName()||N.noName||"")}</b></span><button type="button" id="meEdit">${esc(N.edit||"")}</button></div></div>`}
+// 70: 이름 바꾸기 시트. 규칙은 입장권 뒷면과 같은 함수(Onboard.cleanLive·cleanName). 첫 변경 무료(my.firstChangeFree), 그 뒤 my.nameChangeDia 다이아. 횟수 S.profile.nameChanges
+const NameSheet=(()=>{
+  const M=()=>(DATA.ui||{}).my||{},N=()=>M().me||{};
+  const n=()=>+((S.profile||{}).nameChanges)||0;
+  const cost=()=>(M().firstChangeFree!==false&&n()===0)?0:Math.max(0,+M().nameChangeDia||0);
+  const vt=s=>String(s||"").split("{n}").join(cost());
+  let composing=false;
+  function draw(){const el=$("#nameSheet"),c=cost();
+    el.innerHTML=`<div class="nshd"><h2>${esc(N().sheetTitle||"")}</h2><button type="button" class="nsx" id="nsX" aria-label="${esc(N().close||"")}">×</button></div>
+    <form id="nsForm" autocomplete="off"><input id="nsIn" type="text" enterkeyhint="done" placeholder="${esc(N().placeholder||"")}" aria-label="${esc(N().nameLabel||"")}">
+    <p class="nsnote">${esc(c?vt(N().paidNote):N().freeNote||"")}</p>
+    ${S.dia<c?`<div class="nslack"><span>${esc(N().lack||"")}</span><button type="button" id="nsCharge">${esc(N().charge||"")}</button></div>`
+      :`<button type="submit" class="nsgo" id="nsGo">${c?GEM(16)+esc(vt(N().paid)):esc(N().free||"")}</button>`}</form>`;
+    const i=$("#nsIn");i.value=userName();
+    i.addEventListener("compositionstart",()=>composing=true);
+    i.addEventListener("compositionend",()=>{composing=false;live()});
+    i.addEventListener("input",()=>{if(!composing)live();else ok()});
+    $("#nsX").onclick=close;
+    $("#nsForm").onsubmit=e=>{e.preventDefault();go()};
+    const ch=$("#nsCharge");if(ch)ch.onclick=()=>{close();Pack.toCharge()};
+    ok()}
+  function live(){const i=$("#nsIn"),c=Onboard.cleanLive(i.value);if(c!==i.value)i.value=c;ok()}
+  const val=()=>Onboard.cleanName(($("#nsIn")||{}).value);
+  function ok(){const b=$("#nsGo");if(!b)return;const v=val();b.disabled=!v||v===userName()}
+  function go(){const b=$("#nsGo");if(!b||b.disabled)return;const v=val(),c=cost();if(!v||v===userName())return;
+    if(S.dia<c)return draw();
+    S.dia-=c;S.profile={...(S.profile||{}),name:v,nameAt:Date.now(),nameChanges:n()+1};save();
+    const i=$("#nsIn");if(i)i.blur();close();renderTop();if(curTab==="my")renderMy();toast(esc(N().done||""),2000)}
+  // 키보드가 올라오면 시트를 키보드 위로(아이폰 사파리는 화면이 줄지 않음)
+  function kb(){const el=$("#nameSheet"),vv=window.visualViewport;if(!el)return;
+    const k=vv&&el.classList.contains("on")?Math.max(0,innerHeight-vv.height-vv.offsetTop):0;el.style.bottom=k?k+"px":""}
+  if(window.visualViewport){visualViewport.addEventListener("resize",kb);visualViewport.addEventListener("scroll",kb)}
+  function open(){draw();openSheet("#nameSheet")}
+  function close(){closeSheets();kb()}
+  return{open,close,cost}})();
 function renderMy(){
   renderBond();const M=(DATA.ui||{}).my||{};
   const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
   const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
   const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
-  $("#my").innerHTML=`${relHTML()}
-  ${Ending.html()}
+  $("#my").innerHTML=`${meHTML()}
+  ${relHTML()}
+  ${M.showEndings?Ending.html():""}
   <div class="card plus"><div class="mph"><span class="wm">moti <span>PLUS</span></span>${S.plus?`<small class="on">${esc(UI("my.plusOn"))}</small>`:`<span class="pp"><b>${esc(UI("my.plusPrice"))}</b> ${esc(UI("my.plusPer"))}</span>`}</div>
     <ul class="perks">${perks}</ul>
     <button class="cta" id="plusBtn">${esc(S.plus?UI("my.plusStop"):UI("my.plusStart"))}</button><p class="fine">${esc(UI("my.demoNote"))}</p></div>
@@ -2749,6 +2802,7 @@ function renderMy(){
   <p class="alnote" style="text-align:center"><a href="v1.html" style="color:var(--sub)">이전 버전(v1) 보기</a></p>`;
   $("#my").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.rel));
   const rh=$("#relHome");if(rh)rh.onclick=()=>setTab("home");
+  $("#meEdit").onclick=()=>NameSheet.open();
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
   $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:b.dataset.p})))});
 }

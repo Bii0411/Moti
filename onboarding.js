@@ -133,7 +133,13 @@ const Onboard=(()=>{
       if(step!=="first")return;showTicket()});
   }
   function showTicket(){step="ticket";resetTicket();mark("ticketShown");showScr("obTicket");stageIn()}
-  function goLogin(){step="login";mark("loginShown");showScr("obLogin");setTimeout(()=>{if(step!=="ticket")stageOut()},380)}
+  // 70: 로그인 제목 두 줄 — 이름이 있으면 첫 줄 login.welcome({name}님 환영합니다!), 둘째 줄 login.title. 첫 줄은 한 줄 그대로(이름을 자르지 않고 넘치면 글자만 줄임)
+  function loginTitle(){if(!root)return;const h=root.querySelector("#obLTitle"),n=(typeof S!=="undefined"&&S.profile&&S.profile.name)||"",w=T("login.welcome");
+    h.innerHTML=(n&&w?`<span class="obwel">${E(w.split("{name}").join(n))}</span>`:"")+EB(T("login.title"));h.hidden=!h.textContent.trim();fitWelcome()}
+  function fitWelcome(){const el=root&&root.querySelector("#obLTitle .obwel");if(!el)return;el.style.fontSize="";
+    const max=el.parentNode.clientWidth;if(!max)return;let f=parseFloat(getComputedStyle(el).fontSize)||28;const min=+tm("welcomeMinPx",16);
+    while(el.scrollWidth>max&&f>min){f-=1;el.style.fontSize=f+"px"}}
+  function goLogin(){step="login";mark("loginShown");showScr("obLogin");loginTitle();requestAnimationFrame(fitWelcome);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitWelcome);setTimeout(()=>{if(step!=="ticket")stageOut()},380)}
 
   // ── 입장권 카드: 체크·약관 시트·펀치 ──
   const boxes=()=>[...root.querySelectorAll("#obList input[data-k]")];
@@ -271,5 +277,5 @@ const Onboard=(()=>{
     Promise.all([typeof dataReady!=="undefined"?dataReady:null,Promise.race([typeof Stage!=="undefined"?Stage.ready:null,wait])]).then(()=>{
       if(!openFlag||!backOnly||step!=="back")return;fill();step="ticket";resetTicket();showScr("obTicket");stageIn()});
     return true}
-  return{T,open,openBack,hide,fill,cleanName:v=>cleanName(v,true),isOpen:()=>openFlag,step:()=>step,times:()=>({...M})};
+  return{T,open,openBack,hide,fill,cleanName:v=>cleanName(v,true),cleanLive:v=>cleanName(v,false),maxName:()=>Math.max(1,+BK().maxLength||8),loginTitle,isOpen:()=>openFlag,step:()=>step,times:()=>({...M})};
 })();
