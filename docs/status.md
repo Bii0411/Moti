@@ -1,6 +1,6 @@
 # 진행 현황
 
-기준: 2026-11-25, 50-3 병합 후
+기준: 2026-11-25, 53 병합 후
 
 ## 지금 main에 있는 화면
 
@@ -549,6 +549,15 @@
 - **춤 카드 x33:** 4.7~12초(7.3초 되풀이, motionVer 2)
 - **10장 뽑기 결과 이름:** 8px 까지만 줄이고 넘치면 「…」, 크게 보기는 전체 이름
 
+## 53단계에서 main에 들어온 것 (`step/53-fingers` 병합, 2026-11-25)
+
+보고서: [reports/53-손가락.md](reports/53-손가락.md)
+
+- **기본 손 = 편한 손:** 손가락 데이터가 없는 몸짓(손가락 없는 XSTAGE 모션 13개·코드 몸짓·대기 동작·표정만 있는 상태)은 쫙 편 손 대신 살짝 굽은 손. 모양은 XSTAGE 걷기(x22)의 손가락에서 뽑아 `data/motions.json` `hands`(amount 0.45, 엄지 0.4). 손가락 데이터가 있는 모션은 그대로
+- **몸짓별 손(`hands.byMotion`):** x11 손 들어 막기 = 편 손, m09 툭 건네주기 = 쥔 손, m21 원투 펀치 = 주먹, c04 옷깃 잡아당기기·x09 붙잡기 = 쥔 손, m11 손 내밀기·m08 머리 쓰다듬기 = 거의 편 손
+- **카드 그림 다시 만들기:** 손가락 없는 XSTAGE 13개 `motionVer` +1, 코드 몸짓 19개도 `motions` 에 `motionVer` 2(`cards.js verOf` 가 코드 몸짓 버전도 읽음)
+- **손가락 넣어 다시 변환(A):** 13개 모두 원본 FBX 가 다운로드 폴더·zip·`_src/` 에 없어 못 함 → 편한 손을 씀
+
 ## 50-3단계에서 main에 들어온 것 (`step/50-2-gift-motion` 병합, 2026-11-25)
 
 보고서: [reports/50-순간-선물.md](reports/50-순간-선물.md) 「50-3」 절
@@ -566,6 +575,9 @@
 - 앱: GitHub Pages `https://bii0411.github.io/Moti/` 응답 200.
 
 ## 남은 일
+
+- **XSTAGE 원본 FBX 13개 받기 (53-A):** Shy - Surprise1(m03) · Hold Forehead(m04) · Rub Neck_One Hand(m05) · Blunt - Handing out candy 1(m09) · Lovely – Embarrassing 3(m24) · Annoyance_1(x01) · Raise Hand to Stop(x11) · Proud - Persuasion(m19) · Bent Over(x02) · Maid_Grab(x09) · Shy Walk(x15) · Stealth_Squat_Idle_Alert(x16) · run_look back(x21) → 오면 `_src/` 복사 → `node tools/fbx2motion.mjs` → 그 몸짓의 `hands.byMotion` 예외 지우기 · `motionVer` +1 ([53단계 보고서](reports/53-손가락.md))
+- 아이폰 사파리 확인 (53단계): 손가락 뼈 30개를 매 프레임 기본 손으로 돌림(모든 몸짓·대기 중) — 낮은 기기 프레임, 앱을 열 때 카드 그림 다시 만들기가 한꺼번에 몰려 버벅이는지 ([53단계 보고서](reports/53-손가락.md))
 
 - ~~51 원고 받기~~ — 51-1 에서 넣음. 서버: `state.route`·갈래별 사건(server-sync 51 절)
 - 아이폰 사파리 확인 (51): 끝 화면 자리·단추 폭, 처음부터 확인창, 배포 뒤 한 번 새로고침 ([51단계 보고서](reports/51-갈래-되감기.md))
