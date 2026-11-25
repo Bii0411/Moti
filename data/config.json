@@ -24,8 +24,8 @@
   "wakeTimeoutMs": 60000,
   "_serverRetry": "서버가 바로 실패(5xx, 구글이 붐빌 때 502)하면 delayMs 뒤 /chat 을 한 번 더 보낸다. 답장 기다리는 시간(replyTimeoutMs)에서 남은 시간이 minLeftMs 보다 적으면 다시 보내지 않는다. 시간 초과는 다시 보내지 않는다.",
   "serverRetry": { "delayMs": 1500, "minLeftMs": 5000 },
-  "_fallbackReply": "서버가 끝내 답하지 못했고 내 메시지에 예시 대사 키워드(미안·힘들 등)도 없을 때 서아 대사. 몸짓 없음. 32: 대사 다듬기 원고(docs/drafts/32-대사-다듬기.md 6절)로 바꿈. 처음엔 서버 llm.py 의 FALLBACK_REPLY 를 옮겼던 문장(예전에는 무작위 예시 대사 3개 + 몸짓이라 대화와 안 맞았음).",
-  "fallbackReply": { "line": "*서아가 잔 테두리를 손끝으로 훑는다.* …다시 말해 봐.", "face": "soft" },
+  "_fallbackReply": "서버가 끝내 답하지 못했을 때 서아 쪽에 넣는 한 줄. 91: 장소·소품과 상관없는 지문만(대사 없음), lines 중 직전과 다른 것을 돌아가며. retry = 그 줄 아래 「다시 보내기」(방금 내 말을 서버에 한 번 더, 선물·포즈 메시지는 빼고). keywordsOnlyNoServer = 내 말 단어로 고르는 예시 대사(미안·옥상·작전 등, 장소도 바꿈)는 시연 패널 「서버 없음」에서만 쓰고, 서버를 쓰는 중 실패했을 때와 특별 에피소드에서는 쓰지 않음(장소가 튀고 본편 설정이 나와서). 처음엔 서버 llm.py 의 FALLBACK_REPLY, 32 에서 원고 6절 「잔 테두리」 한 줄이었음",
+  "fallbackReply": { "lines": ["*서아가 대답 대신 당신을 빤히 본다.*", "*서아가 고개를 살짝 기울인다. 말이 바로 나오지 않는다.*", "*서아가 잠깐 시선을 내렸다가, 다시 당신을 본다.*", "*서아가 입을 열다 말고 닫는다.*"], "face": "soft", "retry": true, "keywordsOnlyNoServer": true },
   "_camera": "세로 화면 카메라 구도. 값은 모두 캐릭터 키(발=0, 머리 꼭대기=1)에 대한 비율: 보여 줄 위(top)·아래(bottom), 최소 너비(width), 카메라를 화면 중심보다 올리는 값(lift). 키는 모델마다 Head 뼈 높이 + headTopK × (Head−목) 으로 잰다. normal 상반신(평소) · motion 허벅지 중간(몸짓, 6-B에서 무릎 위 0.31 → 0.40) · full 전신(춤 m23만). moveMs 는 구도가 바뀌는 시간. 가로 화면은 예전 값을 그대로 쓴다.",
   "camera": {
     "headTopK": 2.4,

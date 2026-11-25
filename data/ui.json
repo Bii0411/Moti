@@ -127,6 +127,8 @@
     "_typing": "29-1: 내 메시지를 보낸 순간부터 답장이 올 때까지(직전 판정을 기다리는 시간 포함) 보이는 줄. 43: 「입력 중」 → 「생각 중」, 기다린 지 typingLongMs 가 지나면 typingLong(답장 기다리는 몸짓이 팔짱으로 넘어가는 때쯤, data/config.json wait). 답이 오면 다음 기다림은 다시 typing 부터",
     "typing": "서아가 생각 중…",
     "typingLong": "서아가 고민 중…",
+    "retry": "다시 보내기",
+    "_retry": "91: 서버가 답하지 못해 넣은 예비 지문 아래 칩",
     "typingLongMs": 8000
   },
   "home": {
