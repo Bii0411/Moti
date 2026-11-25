@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0454">
+<meta name="moti-version" content="20261126-0509">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -483,6 +483,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .dp .hd .dbg{font-size:10px;font-weight:800;color:#000;background:var(--gold);border-radius:999px;padding:1px 7px}
 .dp .hd button{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
 .dp h4{font-size:12px;margin:12px 0 2px;color:var(--pri2)}
+/* 69: 「부르는 이름」 한 줄(누르면 입장권 뒷면) */
+.dp .dpname{display:flex;align-items:center;gap:8px;width:100%;margin:4px 0 2px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#0006;font-size:13px;text-align:left}
+.dp .dpname span{color:var(--sub);flex:none}
+.dp .dpname b{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp .dpname::after{content:"›";color:var(--sub);font-size:15px}
 .dp h4 small{color:var(--sub);font-weight:500;margin-left:4px}
 .dp .row{margin:4px 0 6px;gap:5px}
 .dp .row button{padding:5px 9px}
@@ -529,11 +534,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0454">
-<link rel="stylesheet" href="photos.css?v=20261126-0454">
-<link rel="stylesheet" href="cards.css?v=20261126-0454">
-<link rel="stylesheet" href="pose.css?v=20261126-0454">
-<link rel="stylesheet" href="pack.css?v=20261126-0454">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0509">
+<link rel="stylesheet" href="photos.css?v=20261126-0509">
+<link rel="stylesheet" href="cards.css?v=20261126-0509">
+<link rel="stylesheet" href="pose.css?v=20261126-0509">
+<link rel="stylesheet" href="pack.css?v=20261126-0509">
 </head>
 <body>
 <div class="app">
@@ -611,19 +616,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0454"></script>
-<script src="motion.js?v=20261126-0454"></script>
-<script src="gacha.js?v=20261126-0454"></script>
-<script src="look.js?v=20261126-0454"></script>
-<script src="alive.js?v=20261126-0454"></script>
-<script src="film.js?v=20261126-0454"></script>
-<script src="photos.js?v=20261126-0454"></script>
-<script src="seoaphoto.js?v=20261126-0454"></script>
-<script src="cards.js?v=20261126-0454"></script>
-<script src="pose.js?v=20261126-0454"></script>
-<script src="pack.js?v=20261126-0454"></script>
-<script src="storypic.js?v=20261126-0454"></script>
-<script src="onboarding.js?v=20261126-0454"></script>
+<script src="icons.js?v=20261126-0509"></script>
+<script src="motion.js?v=20261126-0509"></script>
+<script src="gacha.js?v=20261126-0509"></script>
+<script src="look.js?v=20261126-0509"></script>
+<script src="alive.js?v=20261126-0509"></script>
+<script src="film.js?v=20261126-0509"></script>
+<script src="photos.js?v=20261126-0509"></script>
+<script src="seoaphoto.js?v=20261126-0509"></script>
+<script src="cards.js?v=20261126-0509"></script>
+<script src="pose.js?v=20261126-0509"></script>
+<script src="pack.js?v=20261126-0509"></script>
+<script src="storypic.js?v=20261126-0509"></script>
+<script src="onboarding.js?v=20261126-0509"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1708,8 +1713,14 @@ async function askServer(cid,text){
 // stage·affection 은 본 이야기 값 그대로(서버가 에피소드를 아직 몰라도 지금처럼 동작). 서버에 넣을 블록은 docs/server-sync.md
 // 50: gift_moments = 지금 열 수 있는 순간 선물 목록([{id, name, when}], 반응 몸짓이 준비된 것만)
 // 51: route = 본 이야기 갈래("tease"·"care", 아직 없으면 null)
-function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
-  const o={...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location};
+// 69: 유저가 정한 부르는 이름(입장권 뒷면, 저장값 S.profile.name). 없으면 ""
+const userName=()=>String((S.profile&&S.profile.name)||"");
+// 69: user_name = 늘 S.profile.name(본편·크리스마스). 서버가 돌려준 이름 흐름 키(name_state·judge_soon·name_quiet·used_events.NAME_ASK)는 본편 story 에 받은 그대로 두고 본편 요청에만 보냄.
+//     에피소드(크리스마스) 요청에는 본편 이름 흐름 키를 빼서 섞지 않음(서버도 크리스마스에서는 이름 흐름을 무시)
+const NAME_KEYS=["name_state","judge_soon","name_quiet"];
+const noNameFlow=o=>{NAME_KEYS.forEach(k=>delete o[k]);return o};
+function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
+  const o=noNameFlow({...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location});
   if(Thread.cur()===(((DATA.rewind||{}).xmas||{}).thread||"s2"))o.episode_turns_left=End.left();  // 90: 크리스마스 자정까지 남은 내 메시지 수(서버 자정 기색)
   return o}
 // 서아가 사진을 보낸 뒤(12) 다음 요청: 대화 기록 끝(이번 내 메시지 앞)에 원고 5절의 한 줄을 서아 쪽 기록처럼 덧붙임. 화면에는 보이지 않음
@@ -1763,6 +1774,16 @@ function stageUp(from,to,q){
   End.stageUp(to);  // 51: 5단계에 오르면 다음 서아 답장(떠난다는 장면) 뒤 되감기 지점
   renderBond();
 }
+// 69: 판정 뒤 단계가 내려가면(이름 거절 → 2단계): 하트·게이지·단계 이름만 내려간 값으로, 짧은 알림 한 줄(data/ui.json top.stageDown).
+// 축하 연출·카드 해금 없음. 이미 열린 카드·사진·기록·몸짓(S.col·S.unlocked)은 그대로.
+// 앱이 따로 세는 값 맞추기: 대화 횟수 S.bond(서버 v1·서버 없음에서 단계 기준)를 내려간 단계 안으로(다음 단계 기준 − 1 까지) 줄여
+// 서버 없이 바로 다시 오르지 않게. 서버 쪽 단계 셈(stage_user_msgs·stage_bonus·stage_flags)은 서버가 0부터로 돌려주므로 받은 그대로.
+// 에피소드 단계(EpStage)는 본편과 따로라 건드리지 않음. 되감기 지점(5단계)·갈래는 3·4 → 2 에서 바뀔 것이 없음
+function stageDown(from,to){
+  const at=((DATA.story||{}).countAt)||[];if(at[to]!=null)S.bond=Math.min(S.bond||0,Math.max(0,at[to]-1));
+  toast(esc(UI("top.stageDown",{name:stageName(to)})),2600);
+  save();renderBond();
+}
 // 51: 본 이야기 갈래(data/seoa_story.json route). 1·2단계 판정 플래그를 장난(tease)·다정(care·comfort·protect)으로 세고,
 // 2단계에서 판정 뒤 호감 40 이상이거나 판정에 outside 가 처음 나오면 한 번 정함(장난 > 다정 → tease, 아니면 care). 저장 story.route(정하면 그대로), 센 수 S.routeCount
 const Route={
@@ -1807,8 +1828,10 @@ function queueJudge(u,c,keep,h){
   if(B.length>judgeEvery())B.splice(0,B.length-judgeEvery());  // 최대 judgeEvery 개(판정이 실패해 남은 옛 턴은 앞에서부터 버림)
   if(keep)S.judgeKeep=Math.max(S.judgeKeep||0,keep);
   save();
-  if(B.length>=judgeEvery())return runJudge();
+  if(B.length>=judgeEvery()||judgeSoon())return runJudge();
 }
+// 69: 서버 state.judge_soon 이 true 면(이름을 물은 뒤·거절 뒤 사과를 기다리는 동안) 3턴을 모으지 않고 서아 답장마다 바로 판정. 본편에서만
+const judgeSoon=()=>!EpStage.on()&&story().judge_soon===true;
 // 90: 서버는 판정 묶음(last_user)의 줄바꿈을 메시지 경계로 셈 → 내 메시지 안의 줄바꿈은 공백 하나로(화면은 그대로)
 const oneLine=t=>String(t||"").replace(/\s*[\r\n]+\s*/g," ").trim();
 let judgeTok=0;  // 29-1: 기다림이 judgeWaitMs 를 넘겨 버린 판정은 결과가 와도 무시
@@ -1831,11 +1854,12 @@ function runJudge(){
         JLOG.push({turn:S.bond||0,n:B.length,aff0:ea0,aff1:r?r.aff:ea0,stage:EpStage.n(),flags:fl,ms:Math.round(performance.now()-t0),summary:need,episode:ep});save()})
       .catch(()=>{}).finally(()=>{if(tok===judgeTok)judgeP=null});
     return judgeP}
-  judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
+  judgeP=post("/judge",{char:"seoa",state:{...st,user_name:userName()},last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;LASTJ={at:Date.now(),ep:0,delta:j.affection_delta!=null?j.affection_delta:(+j.state.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
       Route.judged(before,st.affection,j.flags);  // 51: 갈래 세기·정하기
       if(curStage()>before)stageUp(before,curStage(),q);
+      else if(curStage()<before)stageDown(before,curStage());  // 69: 이름 거절 등으로 단계가 내려감
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
       save();renderBond();unlockShow(q);
@@ -2288,7 +2312,7 @@ const Demo=(()=>{
     all(){S=blank();Photos.clear();Cards.clear();StoryPic.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};S.judgeBuf=[];S.judgeKeep=null;const st=story();st.recent_lines=[];st.summary="";start()},
-    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;Route.clear()},
+    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{},name_state:"none",judge_soon:false,name_quiet:0});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;Route.clear()},
     album(){S.col={};delete S.colIntro;Cards.clear()}  // 26: 소개 창도 다시 뜸 · 26-1: 카드 그림도 지움
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
@@ -2301,6 +2325,13 @@ const Demo=(()=>{
     setTab("chat");openRoom("seoa");refresh();reveal()}
   function setMood(k){S.force=null;S.birthday=k==="birthday";if(k!=="birthday")S.mood=k;
     Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral");faceReset();refresh()}
+  // 69: 3단계 이름 장면 바로 — 본편을 3단계(서버 단계 값은 serverStage) + name_state "asked" + pending_event "STAGE_UP_3" + used_events.NAME_ASK = 지금 turn 으로.
+  //     다음 서아 답장이 서버의 이름 장면(STAGE_UP_3_NAMED). judge_soon 도 켜서 그 뒤 답장마다 판정
+  function nameScene(){cancel();if(Thread.cur()!=="main")Thread.go("main");End.stop();toChat();delete S.demoNext;
+    setStage(3);Route.check("demo");const st=story();
+    Object.assign(st,{stage_flags:[],pending_event:(((DATA.demo||{}).nameSceneEvent)||"STAGE_UP_3"),name_state:"asked",judge_soon:true,name_quiet:0});
+    (st.used_events||(st.used_events={})).NAME_ASK=+st.turn||0;S.judgeBuf=[];S.judgeKeep=null;
+    save();renderBond();refresh()}
   // ── 몸짓 ──
   const allMotions=()=>{const c=COL.items.filter(x=>x.source==="chat").map(x=>x.id);return [...c,...Object.keys(XS).filter(id=>!c.includes(id))]};  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외) + 아직 아무 데도 안 붙은 XSTAGE 모션(미리보기용)
   function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
@@ -2332,6 +2363,7 @@ const Demo=(()=>{
     if(!open||!P())return;
     const st=story(),cs=curStage();
     let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
+    h+=`<button type="button" data-a="userName" class="dpname"><span>${esc(T("userName"))}</span><b>${esc(userName()||T("noName"))}</b></button>`;  // 69
     h+=Scenes.html(T,B);
     // 42: 에피소드 단계(그 에피소드 안에서만). 판정 버튼 = 서버 판정 한 번처럼(켠 플래그와 같이), 단계 = 그 단계 시작 호감으로 바로
     if(EpStage.on()){const es=EpStage.st(),en=EpStage.n(),ef=DS.epFlags||[];
@@ -2343,7 +2375,7 @@ const Demo=(()=>{
         <div class="kv">${esc(T("episode.flags"))}</div><div class="row">${["care","sincere","pursue","comfort"].map(f=>B("epFlag",esc(f),{v:f,on:ef.includes(f)})).join("")}</div>`}
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 카드 팩(49): 다음 카드 팩 결과(첫 장만, 등급 또는 카드) · 천장 초기화 · 카드 팩 카드 모두 열기 · 비우기
     const PN=S.packNext||{},pItems=Gacha.pool(COL.items);
@@ -2387,6 +2419,8 @@ const Demo=(()=>{
   function onClick(e){
     const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
     if(a==="close")return setOpen(false);
+    if(a==="nameScene"){if(!userName()){setOpen(false);Onboard.openBack({onDone:()=>nameScene()});return}return nameScene()}  // 69: 이름이 없으면 입장권 뒷면부터
+    if(a==="userName"){setOpen(false);Onboard.openBack({onDone:()=>refresh()});return}  // 69: 입장권 뒷면만 열어 이름 바꾸기(다음 요청부터)
     if(a==="wake")return wakeServer();
     if(a==="opening")return opening();
     if(a==="firstMeet"){cancel();toChat();return FirstMeet.run({replay:true})}  // 31: 첫 만남 다시 보기(저장값·대화는 그대로, 끝나면 지금 대화 장소로)
@@ -2922,7 +2956,7 @@ const EpStage={
   // 서버 v1·서버 없음: 판정 대신 judgeEvery 턴마다 noServerGain 만큼(플래그 없음)
   turn(){const s=this.st();if(!s)return;s.turns=(s.turns||0)+1;save();if(s.turns%judgeEvery()===0)this.judged(this.cfg().noServerGain||0,[])},
   // /judge 에 보낼 상태: 본 이야기 상태를 바탕으로 단계·호감·플래그만 에피소드 값(본 이야기 사건·출발 일수는 빼고)
-  judgeState(){const s=this.st();return{...chatState(),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},  // 42-C: episode 신호도 같이
+  judgeState(){const s=this.st();return{...noNameFlow(chatState()),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},  // 42-C: episode 신호도 같이
   // 시연 패널: 단계 n 으로(호감 = 그 단계 기준, 플래그·신호 비움). 4단계 이상이면 자취방이 열리고, dressFrom 이상이면 자취방 옷
   // 자취방 옷(outfitByScene)을 입을 때인지: 장면에서 갈아입은 뒤(dressed) 또는 dressFrom 단계부터
   dressed(){const s=this.st(),C=this.cfg();return !s||!!s.dressed||this.n()>=(C.dressFrom||5)},
@@ -3339,6 +3373,7 @@ const SKIP_INTRO=qs.get("skipintro")==="1";
 if(!S.onboarded&&!SKIP_INTRO){Onboard.open();
   // 39: 온보딩 아래 비치는 홈(캐릭터 사진·특별 에피소드 그림)은 서아 3D 모델을 다 받은 뒤에 그림 받기 시작(첫 화면·입장권에 필요한 모델과 겹쳐 받지 않게)
   $(".app").classList.add("homehold");Stage.ready.then(()=>$(".app").classList.remove("homehold"))}
+else if(!SKIP_INTRO&&!userName())Onboard.openBack();  // 69: 이미 입장한 예전 유저(이름 없음): 입장권 뒷면만 한 번. 이름을 정해야 닫힘
 if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film.js)
 // 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
