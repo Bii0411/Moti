@@ -1,5 +1,5 @@
 {
-  "_설명": "50: 선물은 두 종류. always(언제든) = 처음부터 줄 수 있고, 받는 몸짓(motion)을 앱이 고정(서버 몸짓보다 우선, 새 카드 없음). moment(순간) = 평소엔 잠겨 있다가 서버 답장 gift_moment(또는 임시 규칙 momentFallback)로 그 선물이 열린 동안만 줄 수 있음. 순간 선물은 지금 관계 묶음(bonds)의 반응 몸짓(reactions)을 앱이 재생하고, 처음이면 컬렉션 「선물」 카드(data/collection.json source moment)를 얻음. 반응 몸짓이 data/motions.json xstage 에 없는 묶음은 열리지 않음(서버에 보내는 gift_moments 에서도 빠짐). 선물 대사는 앱이 쓰지 않음(서버가 장면에 맞게). price = 다이아(임시 값, 수익 결과로 바꿈). icon 이 없으면 e(그림 문자)를 씀. rec = 이 기분일 때 「기분에 맞음」(49 그대로). 49까지의 커피·라멘은 _보류.list, 뽑기 값은 _보류 그대로.",
+  "_설명": "50: 선물은 두 종류. always(언제든) = 처음부터 줄 수 있고, 받는 몸짓(motion)을 앱이 고정(서버 몸짓보다 우선, 새 카드 없음). moment(순간) = 평소엔 잠겨 있다가 서버 답장 gift_moment(또는 임시 규칙 momentFallback)로 그 선물이 열린 동안만 줄 수 있음. 순간 선물은 그 선물의 반응 몸짓(reaction, 선물마다 하나 — 어느 단계에서 줘도 같은 몸짓·같은 카드)을 앱이 재생하고, 처음이면 컬렉션 「선물」 카드(data/collection.json source moment)를 얻음. 50-1: 순간 선물은 관계 단계 하나에 하나(stage, 목록 순서 = 단계 순서). 열 수 있는 조건 = 본 이야기 관계 단계 ≥ stage · 반응 몸짓이 data/motions.json 에 있음 · 지금 열린 순간 없음(특별 에피소드에서는 늘 닫힘). 서버에 보내는 gift_moments 도 이것만. 선물 대사는 앱이 쓰지 않음(서버가 장면에 맞게). price = 다이아(임시 값, 수익 결과로 바꿈). icon 이 없으면 e(그림 문자)를 씀. rec = 이 기분일 때 「기분에 맞음」(49 그대로). 49까지의 커피·라멘은 _보류.list, 뽑기 값은 _보류 그대로.",
   "_repeat": "같은 언제든 선물을 직전 within 번 안에 또 주면: 받는 몸짓을 motions 중 하나로 바꾸고(번갈아), 그 턴이 든 판정의 호감 상승을 affectionScale 배로. 서버 줄에 data/ui.json gift.srvAgain",
   "repeat": {
     "within": 3,
@@ -14,49 +14,35 @@
     "turns": 3,
     "cooldownTurns": 10
   },
-  "_momentFallback": "서버가 gift_moment 를 아직 안 보낼 때의 임시 규칙. on 이면 서아 답장의 감정·지문·대사에 words(정규식) 가 있으면 gift 순간을 reason 으로 엶. 서버가 gift_moment 를 한 번이라도 보내면 꺼짐(저장값 S.momentSrv)",
+  "_momentFallback": "서버가 gift_moment 를 아직 안 보낼 때의 임시 규칙(선물별). on 이면 서아 답장의 감정·지문·대사에 words(정규식)가 있으면 gift 순간을 reason 으로 엶(단계 조건은 그대로). 서버가 gift_moment 를 한 번이라도 보내면 꺼짐(저장값 S.momentSrv). 꽃다발·우산·반지는 규칙 없음(서버로만)",
   "momentFallback": {
     "on": true,
     "rules": [
       {
+        "gift": "firstaid",
+        "words": "피(?!곤)|다쳤|다친|상처",
+        "reason": "서아가 다친 것 같아요"
+      },
+      {
         "gift": "cocktail",
-        "words": "지쳤|지친|피곤|길었어|녹초",
+        "words": "지쳤|지친|피곤|길었어|녹초|늘 마시던",
         "reason": "서아가 지쳐 보여요"
+      },
+      {
+        "gift": "towel",
+        "words": "젖|흠뻑|비에",
+        "reason": "서아가 비에 젖었어요"
       }
     ]
   },
-  "_bonds": "관계 묶음: 관계 단계(에피소드 안에서는 에피소드 단계) → 묶음. name 은 카드 이름 「선물 · 묶음」에 씀",
-  "bonds": [
-    {
-      "id": "cold",
-      "name": "차가움",
-      "stages": [
-        1,
-        2
-      ]
-    },
-    {
-      "id": "sway",
-      "name": "흔들림",
-      "stages": [
-        3,
-        4
-      ]
-    },
-    {
-      "id": "honest",
-      "name": "솔직함",
-      "stages": [
-        5,
-        6
-      ]
-    }
-  ],
   "_preview": "확인용(?giftPreview=1 일 때만): 반응 모션 파일이 오기 전, 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신해 흐름을 봄. 저장 안 함",
   "preview": {
-    "x26": "m07",
+    "x26": "m05",
     "x27": "m24",
-    "x28": "m05"
+    "x28": "m04",
+    "x29": "x19",
+    "x30": "m11",
+    "x31": "m06"
   },
   "list": [
     {
@@ -103,45 +89,45 @@
       "motion": "m24"
     },
     {
+      "id": "firstaid",
+      "kind": "moment",
+      "stage": 1,
+      "e": "🧰",
+      "name": "구급상자",
+      "price": 60,
+      "when": "서아가 다쳐서 왔을 때",
+      "reaction": "x26"
+    },
+    {
       "id": "cocktail",
       "kind": "moment",
+      "stage": 2,
       "e": "🍸",
       "name": "칵테일",
       "price": 120,
-      "when": "서아가 지쳐 보일 때",
-      "reactions": {
-        "cold": "x26",
-        "sway": "x27",
-        "honest": "x28"
-      }
+      "when": "서아가 지쳐 보이거나 자기 술 얘기를 할 때",
+      "reaction": "x27"
     },
     {
       "id": "towel",
       "kind": "moment",
+      "stage": 3,
       "e": "♨️",
       "name": "따뜻한 수건",
       "price": 80,
-      "when": "비에 젖어 왔을 때",
-      "reactions": {}
-    },
-    {
-      "id": "firstaid",
-      "kind": "moment",
-      "e": "🧰",
-      "name": "구급상자",
-      "price": 80,
-      "when": "다쳐서 왔을 때",
-      "reactions": {}
+      "when": "비에 흠뻑 젖어 왔을 때",
+      "reaction": "x28"
     },
     {
       "id": "flower",
       "kind": "moment",
+      "stage": 4,
       "icon": "icons/gift_flower.png",
       "e": "💐",
       "name": "꽃다발",
       "price": 150,
-      "when": "마음을 전하고 싶은 순간",
-      "reactions": {},
+      "when": "처음 이름을 불렀을 때, 마음을 전할 순간",
+      "reaction": "x29",
       "_보류": {
         "odds": {
           "common": 70,
@@ -157,14 +143,25 @@
       }
     },
     {
+      "id": "umbrella",
+      "kind": "moment",
+      "stage": 5,
+      "e": "☂️",
+      "name": "우산",
+      "price": 100,
+      "when": "빗속에서 떠나려는 서아를 붙잡을 때",
+      "reaction": "x30"
+    },
+    {
       "id": "ring",
       "kind": "moment",
+      "stage": 6,
       "icon": "icons/gift_ring.png",
       "e": "💍",
       "name": "반지",
       "price": 300,
-      "when": "고백 직전 이후, 결정적인 순간",
-      "reactions": {},
+      "when": "남기로 한 뒤, 결정적인 순간",
+      "reaction": "x31",
       "_보류": {
         "odds": {
           "common": 50,
