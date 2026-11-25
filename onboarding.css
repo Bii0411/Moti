@@ -128,3 +128,21 @@
 .adbtn.loading{opacity:.85}
 .adlater{font-size:14px;font-weight:700;color:var(--sub);padding:10px 16px}
 .ccard .pl.age{background:#e11d48;font-weight:900}
+
+/* 69: 입장권 뒷면(이름 정하기). 앞면·뒷면은 같은 칸에 겹쳐 두어 카드 높이가 그대로(큰 쪽에 맞음). 바꿀 때는 안쪽만 짧게 흐려짐(.swap), 3D 뒤집기·블러 없음 */
+.obfaces{display:grid}
+.obface{grid-area:1/1;min-width:0;transition:opacity .18s ease,visibility 0s}
+.obcard .obback,.obcard.back .obfront{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility 0s .18s}
+.obcard.back .obback{opacity:1;visibility:visible;pointer-events:auto}
+.obcard.swap .obface,.obcard.swap .obptx{opacity:0!important}
+.obptx{transition:opacity .18s ease}
+.obback{display:flex;flex-direction:column;justify-content:center;gap:14px;padding:2px 0 6px}
+.obbguide{font-size:16px;font-weight:800;line-height:1.45;color:#1f1a29;letter-spacing:-.2px;word-break:keep-all}
+.obname{display:flex;align-items:center;gap:10px;height:50px;padding:0 6px 0 8px;border-radius:12px;background:#fff;border:1.5px solid #cdbfdc;transition:border-color .15s}
+.obname:focus-within{border-color:var(--pri)}
+.obntag{flex:none;font-size:12px;font-weight:800;color:#5b3f8f;background:#ece4f7;border-radius:7px;padding:5px 8px;letter-spacing:.2px}
+/* 16px 아래면 아이폰 사파리가 확대함 */
+.obname input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:#1f1a29;font:inherit;font-size:16px;font-weight:700}
+.obname input::placeholder{color:#a79cb8;font-weight:500}
+/* 키보드가 올라오면 카드도 키보드 위로(--kb, onboarding.js visualViewport) */
+.obcard{bottom:calc(14px + env(safe-area-inset-bottom,0px) + var(--kb,0px))}

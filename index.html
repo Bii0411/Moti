@@ -483,6 +483,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .dp .hd .dbg{font-size:10px;font-weight:800;color:#000;background:var(--gold);border-radius:999px;padding:1px 7px}
 .dp .hd button{font-size:12px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
 .dp h4{font-size:12px;margin:12px 0 2px;color:var(--pri2)}
+/* 69: 「부르는 이름」 한 줄(누르면 입장권 뒷면) */
+.dp .dpname{display:flex;align-items:center;gap:8px;width:100%;margin:4px 0 2px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#0006;font-size:13px;text-align:left}
+.dp .dpname span{color:var(--sub);flex:none}
+.dp .dpname b{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp .dpname::after{content:"›";color:var(--sub);font-size:15px}
 .dp h4 small{color:var(--sub);font-weight:500;margin-left:4px}
 .dp .row{margin:4px 0 6px;gap:5px}
 .dp .row button{padding:5px 9px}
@@ -1708,6 +1713,8 @@ async function askServer(cid,text){
 // stage·affection 은 본 이야기 값 그대로(서버가 에피소드를 아직 몰라도 지금처럼 동작). 서버에 넣을 블록은 docs/server-sync.md
 // 50: gift_moments = 지금 열 수 있는 순간 선물 목록([{id, name, when}], 반응 몸짓이 준비된 것만)
 // 51: route = 본 이야기 갈래("tease"·"care", 아직 없으면 null)
+// 69: 유저가 정한 부르는 이름(입장권 뒷면, 저장값 S.profile.name). 없으면 ""
+const userName=()=>String((S.profile&&S.profile.name)||"");
 function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
   const o={...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location};
   if(Thread.cur()===(((DATA.rewind||{}).xmas||{}).thread||"s2"))o.episode_turns_left=End.left();  // 90: 크리스마스 자정까지 남은 내 메시지 수(서버 자정 기색)
@@ -2332,6 +2339,7 @@ const Demo=(()=>{
     if(!open||!P())return;
     const st=story(),cs=curStage();
     let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
+    h+=`<button type="button" data-a="userName" class="dpname"><span>${esc(T("userName"))}</span><b>${esc(userName()||T("noName"))}</b></button>`;  // 69
     h+=Scenes.html(T,B);
     // 42: 에피소드 단계(그 에피소드 안에서만). 판정 버튼 = 서버 판정 한 번처럼(켠 플래그와 같이), 단계 = 그 단계 시작 호감으로 바로
     if(EpStage.on()){const es=EpStage.st(),en=EpStage.n(),ef=DS.epFlags||[];
@@ -2387,6 +2395,7 @@ const Demo=(()=>{
   function onClick(e){
     const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
     if(a==="close")return setOpen(false);
+    if(a==="userName"){setOpen(false);Onboard.openBack({onDone:()=>refresh()});return}  // 69: 입장권 뒷면만 열어 이름 바꾸기(다음 요청부터)
     if(a==="wake")return wakeServer();
     if(a==="opening")return opening();
     if(a==="firstMeet"){cancel();toChat();return FirstMeet.run({replay:true})}  // 31: 첫 만남 다시 보기(저장값·대화는 그대로, 끝나면 지금 대화 장소로)
@@ -3339,6 +3348,7 @@ const SKIP_INTRO=qs.get("skipintro")==="1";
 if(!S.onboarded&&!SKIP_INTRO){Onboard.open();
   // 39: 온보딩 아래 비치는 홈(캐릭터 사진·특별 에피소드 그림)은 서아 3D 모델을 다 받은 뒤에 그림 받기 시작(첫 화면·입장권에 필요한 모델과 겹쳐 받지 않게)
   $(".app").classList.add("homehold");Stage.ready.then(()=>$(".app").classList.remove("homehold"))}
+else if(!SKIP_INTRO&&!userName())Onboard.openBack();  // 69: 이미 입장한 예전 유저(이름 없음): 입장권 뒷면만 한 번. 이름을 정해야 닫힘
 if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film.js)
 // 배경 밝기·채도(4-2B): data/look.json background. 밝기는 검은 층의 투명도(1−밝기), 채도는 회색 "채도" 섞기 층의 투명도(1−채도)
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;

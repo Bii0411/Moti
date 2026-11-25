@@ -118,7 +118,9 @@
     "bond": "{name}",
     "bondAria": "{n}단계",
     "moodToast": "서아 기분 · {mood}",
-    "moodGift": "{gift}이라면 반응이 다를 거예요"
+    "moodGift": "{gift}이라면 반응이 다를 거예요",
+    "_stageDown": "69: 판정 뒤 관계 단계가 내려갔을 때(이름 거절 등) 짧은 알림 한 줄({name} 내려간 단계 이름, data/seoa_story.json stageNames)",
+    "stageDown": "서아와의 사이가 「{name}」로 돌아갔어요."
   },
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",

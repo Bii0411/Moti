@@ -42,9 +42,12 @@ const Onboard=(()=>{
         <p class="obguide" id="obGuide"></p><div class="obwelcome" id="obWelcome"></div>
         <div class="obcard" id="obCard"><div class="obcbody">
           <div class="obchead"><b id="obCTitle"></b><small id="obCSmall"></small></div>
+          <div class="obfaces"><div class="obface obfront" id="obFront">
           <p class="obai" id="obAi"></p>
           <label class="obchk all"><input type="checkbox" data-k="all"><span class="box"></span><span class="tx" id="obAll"></span></label>
           <div class="oblist" id="obList"></div></div>
+          <form class="obface obback" id="obBack" novalidate><p class="obbguide" id="obBGuide"></p>
+            <label class="obname"><span class="obntag" id="obBLabel"></span><input id="obName" type="text" autocomplete="nickname" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"></label></form></div></div>
           <div class="obpunch locked" id="obPunch" role="button" tabindex="0"><span class="obhole"><i></i></span><span class="obptx"><b id="obPunchT"></b><small id="obPunchS"></small></span></div>
         </div>
         <div class="obscrim" id="obScrim"></div>
@@ -61,6 +64,15 @@ const Onboard=(()=>{
     q("obCard").addEventListener("click",e=>{const v=e.target.closest("[data-view]");if(v){e.preventDefault();openTerms(v.dataset.view)}});
     q("obPunch").onclick=punch;q("obPunch").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();punch()}};
     q("obScrim").onclick=q("obSClose").onclick=closeTerms;
+    // 69: 입장권 뒷면 이름칸. 한글 조합 중에는 자르지 않고(조합이 끝나면), 키보드 완료/이동 = 입장(form 제출)
+    const nm=q("obName");
+    nm.addEventListener("compositionstart",()=>{composing=true});
+    nm.addEventListener("compositionend",()=>{composing=false;nameInput()});
+    nm.addEventListener("input",e=>{if(!composing&&!e.isComposing)nameInput();else punchText()});
+    q("obBack").addEventListener("submit",e=>{e.preventDefault();nameInput();punch()});
+    // 키보드가 올라오면(아이폰은 화면 크기가 그대로라 visualViewport 로 앎) 입장권을 키보드 위로
+    if(window.visualViewport){const kb=()=>{const v=visualViewport,k=Math.max(0,Math.round(window.innerHeight-v.height-v.offsetTop));kbPx=document.activeElement===nm?k:0;root.style.setProperty("--kb",kbPx+"px")};
+      visualViewport.addEventListener("resize",kb);visualViewport.addEventListener("scroll",kb);nm.addEventListener("focus",()=>setTimeout(kb,60));nm.addEventListener("blur",()=>setTimeout(kb,60))}
     q("obG").onclick=q("obK").onclick=q("obX").onclick=demoLogin;  // 69: XSTAGE 도 시연에선 Google·카카오처럼 게스트로
     q("obGuest").onclick=()=>finish("guest");
   }
@@ -73,6 +85,7 @@ const Onboard=(()=>{
     q("obGuide").textContent=T("ticket.guide");q("obWelcome").textContent=T("ticket.welcome");
     q("obCTitle").textContent=T("ticket.title");q("obCSmall").textContent=T("ticket.small");q("obAi").textContent=T("ticket.ai");q("obAll").textContent=T("ticket.all");
     q("obList").innerHTML=(D().ticket.items||[]).map(it=>`<div class="obrow"><label class="obchk"><input type="checkbox" data-k="${E(it.id)}"${it.required?" data-req":""}><span class="box"></span><span class="tx">${E(it.text)}</span></label>${it.view?`<button type="button" class="obview" data-view="${E(it.view)}">${E(T("ticket.view"))}</button>`:""}</div>`).join("");
+    q("obBGuide").textContent=T("ticket.back.guide");q("obBLabel").textContent=T("ticket.back.label");q("obName").placeholder=T("ticket.back.placeholder");q("obName").setAttribute("aria-label",T("ticket.back.label"));
     q("obPunchS").textContent=T("ticket.punchSub");q("obSClose").textContent=T("terms.close");
     punchText();
     q("obLTitle").innerHTML=EB(T("login.title"));q("obLDesc").textContent=T("login.desc");
@@ -98,7 +111,7 @@ const Onboard=(()=>{
 
   // ── 흐름 ──
   function open(){
-    build();openFlag=true;step="first";root.classList.remove("out");root.classList.add("on");
+    build();openFlag=true;step="first";backOnly=false;onDone=null;root.classList.remove("out","backonly");root.classList.add("on");
     for(const k in M)delete M[k];mark("firstShown");
     root.querySelector("#obGo").classList.remove("loading");
     if(typeof dataReady!=="undefined")dataReady.then(fill);fill();
@@ -131,10 +144,24 @@ const Onboard=(()=>{
     root.querySelector('input[data-k="all"]').checked=boxes().every(b=>b.checked);  // 하나라도 풀면 전체 동의도 풀림
     punchText();
   }
-  function punchText(){if(!root||!filled)return;const ok=reqOk(),p=root.querySelector("#obPunch");
+  function punchText(){if(!root||!filled)return;const back=side==="back",ok=back?!!cleanName(root.querySelector("#obName").value,true):reqOk(),p=root.querySelector("#obPunch");
     p.classList.toggle("locked",!ok);p.setAttribute("aria-disabled",ok?"false":"true");
-    root.querySelector("#obPunchT").textContent=T(ok?"ticket.punchReady":"ticket.punchLocked")}
-  function resetTicket(){root.querySelectorAll("#obCard input").forEach(b=>b.checked=false);
+    root.querySelector("#obPunchT").textContent=T(back?"ticket.back.enter":ok?"ticket.punchReady":"ticket.punchLocked")}
+  // ── 69: 입장권 뒷면(이름 정하기). 앞뒤 공백 자르기 · 최대 ticket.back.maxLength 자 · 줄바꿈과 ticket.back.ban 글자는 못 넣음 ──
+  let side="front",composing=false,kbPx=0,backOnly=false,onDone=null,swapT=null;
+  const BK=()=>(D().ticket||{}).back||{};
+  function cleanName(v,final){const ban=new Set(Array.from(String(BK().ban!=null?BK().ban:"{}\"「」")));
+    let s=Array.from(String(v==null?"":v)).filter(c=>c!=="\n"&&c!=="\r"&&!ban.has(c)).join("").replace(/^\s+/,"");
+    s=Array.from(s).slice(0,Math.max(1,+BK().maxLength||8)).join("");
+    return final?s.trim():s}
+  function nameInput(){const i=root.querySelector("#obName"),c=cleanName(i.value,false);if(c!==i.value)i.value=c;punchText()}
+  // 앞면 ↔ 뒷면: 틀(제목·ADMIT ONE·점선·동그라미)은 그대로, 안쪽만 짧게 흐려졌다 바뀜(3D 뒤집기 없음). 두 면은 같은 칸에 겹쳐 있어 카드 높이가 안 바뀜
+  function setSide(to,fade){side=to;const c=root.querySelector("#obCard");clearTimeout(swapT);
+    const apply=()=>{c.classList.toggle("back",to==="back");root.querySelector("#obFront").inert=to==="back";root.querySelector("#obBack").inert=to!=="back";punchText();c.classList.remove("swap")};
+    if(!fade)return apply();
+    c.classList.add("swap");swapT=setTimeout(apply,tm("swapMs",180))}
+  function resetTicket(){root.querySelectorAll("#obCard input[type=checkbox]").forEach(b=>b.checked=false);
+    root.querySelector("#obName").value=cleanName((typeof S!=="undefined"&&S.profile&&S.profile.name)||"",true);setSide(backOnly?"back":"front",false);
     const c=root.querySelector("#obCard"),p=root.querySelector("#obPunch");c.classList.remove("leave");p.classList.remove("punched","shake");
     root.querySelector("#obWelcome").classList.remove("on");root.querySelector("#obGuide").classList.remove("off");punched=false;punchText();closeTerms()}
   function openTerms(k){const t=(D().terms||{})[k]||{};root.querySelector("#obSTitle").textContent=t.title||"";root.querySelector("#obSBody").textContent=t.body||"";
@@ -142,13 +169,21 @@ const Onboard=(()=>{
   function closeTerms(){if(!root)return;root.querySelector("#obScrim").classList.remove("on");root.querySelector("#obSheet").classList.remove("on")}
   let punched=false,leaveT=[];
   function punch(){
-    if(step!=="ticket"||punched)return;
-    const p=root.querySelector("#obPunch");
-    if(!reqOk()){p.classList.remove("shake");void p.offsetWidth;p.classList.add("shake");return}  // 필수 동의 전: 살짝 흔들리기만
+    if(step!=="ticket"||punched||root.querySelector("#obCard").classList.contains("swap"))return;
+    const p=root.querySelector("#obPunch"),shake=()=>{p.classList.remove("shake");void p.offsetWidth;p.classList.add("shake")};
+    // 69: 앞면 = 「다음」(필수 동의를 저장하고 뒷면으로), 뒷면 = 「눌러서 입장」(이름 저장 → 예전 펀치 흐름)
+    if(side==="front"){
+      if(!reqOk())return shake();  // 필수 동의 전: 살짝 흔들리기만
+      const val={};boxes().forEach(b=>val[b.dataset.k]=b.checked);
+      S.consent={...val,at:Date.now()};save();  // 선택 동의(이벤트·소식)도 저장만
+      mark("next");return setSide("back",true)}
+    const name=cleanName(root.querySelector("#obName").value,true);if(!name)return shake();
+    S.profile={...(S.profile||{}),name,nameAt:Date.now()};save();
+    const inp=root.querySelector("#obName");if(document.activeElement===inp)inp.blur();
     punched=true;mark("punch");
-    const val={};boxes().forEach(b=>val[b.dataset.k]=b.checked);
-    S.consent={...val,at:Date.now()};save();  // 선택 동의(이벤트·소식)도 저장만
     p.classList.add("punched");
+    if(backOnly){  // 이름만 정하러 연 뒷면(예전 유저·설정·시연): 구멍이 뚫리면 흐려지며 닫힘
+      Film.punch();const cb=onDone;leaveT.push(setTimeout(()=>{hide();if(cb)cb(name)},tm("backDoneMs",650)));return}
     greet();
     const G=D().greet||{};
     // 카드가 올라가며 사라짐(서아 전신이 보이게 카메라가 살짝 물러남) → 잠깐 머묾 → 3D가 어두워지며 사라짐 → 로그인(7-3)
@@ -192,7 +227,7 @@ const Onboard=(()=>{
     const cam=Stage.three().cam,a=document.querySelector(".app");
     if(a&&a.clientWidth>a.clientHeight){if(cam.view)cam.clearViewOffset();return}  // 가로 화면은 그림판 기본 카메라 그대로
     const C=D().scene3d||{},F=C.frame||{top:1.1,bottom:.5,width:.9,lift:.02},card=root.querySelector("#obCard");
-    const h0=Math.max(1,Math.min(h,card.offsetTop+(C.overlapPx!=null?C.overlapPx:48)));
+    const h0=Math.max(1,Math.min(h,card.offsetTop+kbPx+(C.overlapPx!=null?C.overlapPx:48)));  // 69: 키보드로 카드가 올라가도 서아 구도는 그대로
     const H=Stage.height(),tn=Math.tan(fov0*Math.PI/360);
     const d0=Math.max((F.top-F.bottom)*H/2/tn,(F.width||0)*H/2/(tn*w/h0)),T=(F.top+F.bottom)/2*H+d0*tn;  // T: 화면 위끝 높이(서아 자리)
     let d=d0;
@@ -224,8 +259,17 @@ const Onboard=(()=>{
   // 겹친 층 닫기(저장 없이도 씀: 시연 장면으로 바로 갈 때)
   function hide(){
     if(!root||!openFlag)return;openFlag=false;clearTimeout(loginT);loginT=null;going=false;stageOut();closeTerms();
-    if(step!=="done")step=null;
+    if(step!=="done")step=null;backOnly=false;onDone=null;root.classList.remove("backonly");
+    const inp=root.querySelector("#obName");if(inp&&document.activeElement===inp)inp.blur();
     root.classList.add("out");setTimeout(()=>{if(!openFlag){root.classList.remove("on","out");root.querySelectorAll(".obscr").forEach(s=>s.classList.remove("on","show"))}},420);
   }
-  return{T,open,hide,fill,isOpen:()=>openFlag,step:()=>step,times:()=>({...M})};
+  // 69: 입장권 뒷면만 열기(이름이 없는 예전 유저 · 설정 「부르는 이름」 · 시연). 같은 무대·디자인, 이름을 정해야 닫힘. o.onDone(name)
+  function openBack(o={}){
+    if(openFlag)return false;build();openFlag=true;backOnly=true;onDone=o.onDone||null;step="back";
+    root.classList.remove("out");root.classList.add("on","backonly");if(D().trim)scenery("obTicket");
+    const wait=new Promise(r=>setTimeout(r,tm("preloadMaxWaitMs",15000)));
+    Promise.all([typeof dataReady!=="undefined"?dataReady:null,Promise.race([typeof Stage!=="undefined"?Stage.ready:null,wait])]).then(()=>{
+      if(!openFlag||!backOnly||step!=="back")return;fill();step="ticket";resetTicket();showScr("obTicket");stageIn()});
+    return true}
+  return{T,open,openBack,hide,fill,cleanName:v=>cleanName(v,true),isOpen:()=>openFlag,step:()=>step,times:()=>({...M})};
 })();
