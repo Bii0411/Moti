@@ -1,0 +1,30 @@
+{
+  "_설명": "51 실패 엔딩 · 끝 화면 · 되감기. 원고 docs/drafts/51-갈래-되감기-원고.md 4번(에필로그)·5번(끝 화면·확인창). 원고가 아직 저장소에 없어 「[원고 대기 …]」 칸은 임시 표시(원고가 오면 이 파일만 바꾸면 됨). {gem} = 다이아 아이콘, {price} = 가격, {n} = 장 수",
+  "_item": "되감기 아이템. price = 임시 가격(다이아). firstFree = 첫 실패 때 무료로 주는 장 수(한 번만). 모자라면 다른 구매처럼 「다이아가 부족해요」 + 마이 충전으로",
+  "item": {"name": "되감기", "price": 200, "firstFree": 1},
+  "_line": "되감은 뒤 대화 맨 아래 첫 줄(지문)",
+  "line": "*…다시, 그 밤.*",
+  "_main": "본 이야기. 실패 = 서버 /judge 가 state.ending 을 failEnding(\"departed\", 5단계 남은 날 0 · pursue 없음)으로 돌려줄 때. 되감기 지점 = pointStage 에 오른 뒤 첫 서아 답장(떠난다는 장면) 다음",
+  "main": {"failEnding": "departed", "pointStage": 5},
+  "_xmas": "크리스마스 이브(s2). midnight = 에피소드 시작부터 내 메시지 수(「자정」). 그 수가 될 때까지 에피소드 단계가 failBelow 미만이면 실패. 되감기 지점 = pointStage 단계 장면(「…오늘은 빼 달라고 했어.」)이 끝난 직후. 되감으면 내 메시지 수도 그때로, 단 자정까지 남은 수가 minLeft 미만이면 minLeft 를 남김",
+  "xmas": {"thread": "s2", "midnight": 40, "midnightName": "자정", "failBelow": 4, "pointStage": 3, "minLeft": 15},
+  "_epilogue": "실패 에필로그(원고 4번). 줄기(main·s2)마다 문단 목록, 장면처럼 intervalMs 간격으로 한 문단씩",
+  "epilogue": {
+    "main": {"intervalMs": 1900, "paragraphs": ["*[원고 대기 · 4번 본 이야기 실패 에필로그]*"]},
+    "s2": {"intervalMs": 1900, "paragraphs": ["*[원고 대기 · 4번 크리스마스 실패 에필로그]*"]}
+  },
+  "_end": "끝 화면(원고 5번). 에필로그 뒤 입력창 자리에 나옴. 그 줄기는 잠김(되감기·처음부터만). rewind = 되감기 단추, rewindFree = 되감기 장이 있을 때 단추 옆 표시, rewindPrice = 장이 없을 때, firstFree = 첫 무료 장이 남아 있을 때 단추 아래 한 줄, noPoint = 되감기 지점이 없을 때(예전 저장값)",
+  "end": {
+    "main": {"title": "[원고 대기 · 5번 끝 화면 제목]", "body": "[원고 대기 · 5번 끝 화면 본문]"},
+    "s2": {"title": "[원고 대기 · 5번 끝 화면 제목]", "body": "[원고 대기 · 5번 끝 화면 본문]"},
+    "rewind": "되감기",
+    "rewindFree": "{n}장",
+    "rewindPrice": "{gem}{price}",
+    "firstFree": "첫 되감기는 선물이에요",
+    "restart": "처음부터",
+    "noPoint": "돌아갈 지점이 없어요"
+  },
+  "_restart": "「처음부터」 확인창(원고 5번). 확인하면 그 줄기만 처음으로(카드·다이아·준 선물 기록은 그대로, 크리스마스는 다시 사지 않음)",
+  "restart": {"title": "[원고 대기 · 5번 확인창 제목]", "body": "[원고 대기 · 5번 확인창 본문]", "ok": "처음부터", "cancel": "취소"},
+  "noDia": "다이아가 부족해요 · 마이에서 충전할 수 있어요"
+}
