@@ -282,6 +282,22 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .chero h2{font-size:20px;font-weight:900;margin:0 0 4px}
 .chero .tags{font-size:12px;color:var(--pri2);margin-bottom:6px}
 .chero p{font-size:13px;color:#cfc8e4;line-height:1.5;word-break:keep-all}
+/* 66: 소개 탭(소개 · 당신 · 캐릭터). 그림자·블러 없음 */
+.cptabs{display:flex;gap:6px;margin:8px 0 12px}
+.cptab{height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--sub);font-size:13px;font-weight:700}
+.cptab.on{background:var(--pri);border-color:var(--pri);color:#fff}
+.cpbody{display:flex;flex-direction:column;gap:10px}
+.cpbody[hidden]{display:none}
+.chero .cpp{font-size:14px;line-height:1.7;white-space:pre-line;color:#d9d3ea}
+.chero .cpq{font-size:15px;font-weight:700;line-height:1.6;color:var(--pri2);padding:2px 0 2px 12px;border-left:3px solid var(--pri)}
+.chero .cph{font-size:15px;font-weight:800;color:var(--text)}
+.chero .cpli{font-size:14px;line-height:1.6;color:#d9d3ea;padding-left:14px;position:relative}
+.chero .cpli::before{content:"";position:absolute;left:3px;top:.72em;width:4px;height:4px;border-radius:50%;background:var(--pri2)}
+.cpmeta{display:flex;flex-wrap:wrap;gap:6px}
+.cpmeta span{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:8px;background:#ffffff0f;color:var(--text)}
+.cpkv{background:#ffffff08;border-radius:12px;padding:10px 12px}
+.cpkv b{display:block;font-size:12px;color:var(--pri2);margin-bottom:3px}
+.chero .cpkv p{font-size:14px;line-height:1.6;color:#d9d3ea}
 #hEps h2{margin:10px 0 7px;font-size:15px}
 .ep{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .ep .tx{flex:1;min-width:0}.ep b{font-size:14px}.ep p{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.4}
@@ -2595,14 +2611,26 @@ function renderHome(){
     const qx=$("#hQx");if(qx)qx.onclick=()=>{H.q="";H.search=false;renderHome()};  // 58: X = 검색어 지우기(검색창은 그대로)
   }
 }
+// 66: 캐릭터 화면 소개(data/characters.json profile). 탭마다 문단(p)·대사(q)·소제목(h)·목록(li)·칩(meta)·이름표(kv)
+function profileHTML(pf){const T=pf.tabs||[],B=b=>{const x=b.x;
+    if(b.t==="q")return `<p class="cpq">${esc(x)}</p>`;
+    if(b.t==="h")return `<p class="cph">${esc(x)}</p>`;
+    if(b.t==="li")return `<p class="cpli">${esc(x)}</p>`;
+    if(b.t==="meta")return `<div class="cpmeta">${(x||[]).map(m=>`<span>${esc(m)}</span>`).join("")}</div>`;
+    if(b.t==="kv")return `<div class="cpkv"><b>${esc(b.k)}</b><p>${esc(x)}</p></div>`;
+    return `<p class="cpp">${esc(x)}</p>`};
+  return `<div class="cptabs" role="tablist">${T.map((t,i)=>`<button class="cptab${i?"":" on"}" role="tab" aria-selected="${!i}" data-i="${i}">${esc(t.label)}</button>`).join("")}</div>
+  ${T.map((t,i)=>`<div class="cpbody" role="tabpanel" data-i="${i}"${i?" hidden":""}>${(t.blocks||[]).map(B).join("")}</div>`).join("")}`}
 // 캐릭터 화면(23): 위 = 큰 카드 사진·이름·태그·한 줄 소개(desc), 아래 = 기본·특별 에피소드(예전 고른 카드 아래 목록 그대로)
 function renderChar(h,c){
   const bd=badgeOf(c);
   h.innerHTML=`<div class="chd"><button class="bk" id="hBack" aria-label="${esc(UI("home.back"))}">${Icon.svg("back",20)}</button></div>
   <div class="chero"><span class="pic" style="background-image:url(${c.img})">${bd?`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`:""}</span>
-  <div class="bd"><h2>${esc(c.name)}</h2><div class="tags">${(c.tags||[]).map(t=>"#"+esc(t)).join(" ")}</div><p>${esc(c.desc)}</p></div></div>
+  <div class="bd"><h2>${esc(c.name)}</h2><div class="tags">${(c.tags||[]).map(t=>"#"+esc(t)).join(" ")}</div>${c.profile?profileHTML(c.profile):`<p>${esc(c.desc)}</p>`}</div></div>
   <div id="hEps"></div>`;
   renderEps(c.id);
+  // 66: 소개 탭(소개 · 당신 · 캐릭터). 탭을 누르면 그 내용만 보임
+  h.querySelectorAll(".cptab").forEach(b=>b.onclick=()=>{const i=b.dataset.i;h.querySelectorAll(".cptab").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-selected",x===b)});h.querySelectorAll(".cpbody").forEach(x=>x.hidden=x.dataset.i!==i)});
   $("#hBack").onclick=closeChar;
 }
 $("#hSearch").onclick=openSearch;
