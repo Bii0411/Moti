@@ -2,7 +2,7 @@
   "_설명": "몸짓 이름과 감정. 이름·감정은 feat/motion-chat-v2 app.js 의 M·MX 를 옮김. 동작 자체는 motion.js(RIG.M). c01~c05 는 서아 전용, m25 는 답장을 기다릴 때 쓰는 대기 몸짓(해금 대상 아님). 34: only 가 있는 몸짓은 그 자리 전용(gift = 선물 반응, onboarding = 입장권 인사, 43: wait = 답장을 기다리는 동안) — 대화 몸짓 목록·서버에 보내는 목록·키워드에 안 나옴(시연 패널 「전부 열기」로 열어도). 52: only pack = 카드 팩 카드 전용(x32 귀여운 척 갸웃·x33 시간 날 때마다 연습한 춤·x34 고민하는 척) — 대화 몸짓 목록(motion_list)·키워드에 안 나옴.",
   "idle": "m25",
   "motions": {
-    "m01": { "name": "웃음", "emo": "기쁨", "motionVer": 2 },
+    "m01": { "name": "웃음", "emo": "기쁨", "motionVer": 3 },
     "m02": { "name": "고개 끄덕이기", "emo": "위로", "motionVer": 2 },
     "m03": { "name": "놀라기", "emo": "놀람" },
     "m04": { "name": "한숨 쉬기", "emo": "슬픔" },
@@ -78,7 +78,7 @@
     "m19": { "file": "motions/xstage_proud_persuasion.json", "from": 0.05, "to": 7, "motionVer": 2 },
     "x11": { "file": "motions/xstage_raise_hand_to_stop.json", "from": 0.05, "motionVer": 2 },
     "m05": { "file": "motions/xstage_rub_neck_one_hand.json", "from": 1.6, "to": 9.3, "motionVer": 2 },
-    "m03": { "file": "motions/xstage_shy_surprise1.json", "from": 0.05, "motionVer": 2 },
+    "m03": { "file": "motions/xstage_shy_surprise1.json", "from": 0.05, "motionVer": 3, "_": "65: 손가락 들어간 원본으로 다시 변환" },
     "x15": { "file": "motions/xstage_shy_walk.json", "from": 0.05, "inPlace": true, "repeat": 3, "motionVer": 2 },
     "x16": { "file": "motions/xstage_stealth_squat_idle_alert.json", "from": 0.05, "motionVer": 2 },
     "x17": { "file": "motions/xstage_standard_kick.json", "from": 5.65, "to": 8.85, "fadeOut": 0.75, "inPlace": true, "motionVer": 2 },
