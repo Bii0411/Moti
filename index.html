@@ -353,6 +353,7 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:left;position:relative}
 .item .e{font-size:30px}
 .gi{width:72px;height:72px;display:block;border-radius:14px;box-shadow:0 4px 14px #7c5cff44}
+.gi.ge{display:grid;place-items:center;font-size:40px;background:linear-gradient(160deg,#2a2440,#1b1728)}
 .gi.s{width:26px;height:26px;display:inline-block;vertical-align:-7px;border-radius:7px;box-shadow:none}
 .burst img{width:120px;height:120px;border-radius:24px;box-shadow:0 0 30px #a78bfa88}
 .item b{display:block;font-size:14px;margin-top:4px}
@@ -589,6 +590,8 @@ function outfitForScene(sc,cur){const inEp=x=>x.scene===sc||(x.places||[]).inclu
   const epKeys=new Set(STORIES.flatMap(x=>[x.outfit,...Object.values(x.outfitByScene||{})]).filter(Boolean));if(cur&&epKeys.has(cur)&&!fits(cur))return "ops";return cur||"ops"}
 const seenNow=(o={})=>({at:Date.now(),scene:S.scene,char:"seoa",outfit:outfitForScene(S.scene,Outfit.want()),thread:Thread.cur(),stage:curStage(),...o});
 const gBy=id=>GIFTS.find(g=>g.id===id);
+// 50: 지금 줄 수 있는 선물(언제든 선물, 또는 지금 열린 순간 선물)
+const giftable=g=>!!g&&(g.kind!=="moment"||(typeof Moment!=="undefined"&&Moment.isOpen(g.id)));
 // 캐릭터 목록은 data/characters.json(8-A). loadData 가 채운다. REC = 추천 탭 순서
 let CH=[],REC=[];
 const chBy=id=>CH.find(c=>c.id===id);
@@ -1611,8 +1614,9 @@ function countStage(){
 //       예약 턴이 묶음 중간이면 S.judgeKeep 에 두었다가 그 묶음 판정 때 적용
 const judgeEvery=()=>Math.max(1,Math.round(+DATA.config.judgeEvery||1));
 const JLOG=[];  // 확인용: 판정마다 {turn 내 메시지 수, n 넘긴 턴 수, aff0→aff1, stage, ms, summary}
-function queueJudge(u,c,keep){
-  const B=S.judgeBuf||(S.judgeBuf=[]);B.push({u,c});
+// 50: h = 같은 선물을 또 준 턴(그 턴이 든 판정의 호감 상승을 data/gifts.json repeat.affectionScale 배로)
+function queueJudge(u,c,keep,h){
+  const B=S.judgeBuf||(S.judgeBuf=[]);B.push(h?{u,c,h:1}:{u,c});
   if(B.length>judgeEvery())B.splice(0,B.length-judgeEvery());  // 최대 judgeEvery 개(판정이 실패해 남은 옛 턴은 앞에서부터 버림)
   if(keep)S.judgeKeep=Math.max(S.judgeKeep||0,keep);
   save();
@@ -1627,17 +1631,18 @@ function runJudge(){
   const recent=talkOf("seoa").slice(-24).map(m=>({r:m.r,t:turnText(m)}));
   const need=((S.judgeN||0)+1)%Math.max(1,Math.round(+DATA.config.summaryEveryJudges||1))===0;  // 요약은 판정 summaryEveryJudges(2) 번에 한 번
   const t0=performance.now(),aff0=st.affection||0;
+  const half=B.some(x=>x.h)?(+((GIFT.repeat||{}).affectionScale)||1):1,halve=d=>d>0&&half!==1?Math.round(d*half):d;  // 50: 또 준 선물
   // 42: 에피소드 단계가 있는 에피소드: 에피소드 단계·호감으로 판정을 받고, 호감 변화와 플래그만 에피소드에 더함(본 이야기 상태는 그대로. 요약만 이 줄기 것으로)
   if(EpStage.on()){const es=EpStage.judgeState(),ea0=es.affection,ep=Thread.cur();
     judgeP=post("/judge",{char:"seoa",state:es,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
       .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok||Thread.cur()!==ep)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;
-        const d=(+j.state.affection||0)-ea0,fl=(j.flags||[]).filter(f=>typeof f==="string");if(need&&j.state.summary)st.summary=j.state.summary;
+        const d=halve((+j.state.affection||0)-ea0),fl=(j.flags||[]).filter(f=>typeof f==="string");if(need&&j.state.summary)st.summary=j.state.summary;
         Fx.judged(d,fl);const r=EpStage.judged(d,fl);
         JLOG.push({turn:S.bond||0,n:B.length,aff0:ea0,aff1:r?r.aff:ea0,stage:EpStage.n(),flags:fl,ms:Math.round(performance.now()-t0),summary:need,episode:ep});save()})
       .catch(()=>{}).finally(()=>{if(tok===judgeTok)judgeP=null});
     return judgeP}
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
@@ -1852,6 +1857,7 @@ async function send(text,o){
   if(giftId&&src0!=="server"){v.line=UI("gift.fallback");v.action=null;v.motion=null}  // 49: 선물 — 서버 답이 없으면 지문 한 줄만
   const poseX=poseId&&Pose.info(poseId);
   let mid=poseX?poseX.id:pickMotion(v.motion,actionText(v),say);
+  const giftMid=o&&o.giftMid&&canPlay(o.giftMid)?o.giftMid:null;if(giftMid)mid=giftMid;  // 50: 선물 받는 몸짓은 앱이 정함(서버 몸짓보다 우선)
   if(poseX&&poseX.f&&!v.face)v.face=poseX.f;
   // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
   const keyM=Fx.key(say,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
@@ -1859,7 +1865,7 @@ async function send(text,o){
   addReply(v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
-  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,Fx.first(mid)||(keyM?"push":""));firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""));if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   Demo.render();
   afterReply(v);
   SeoaPhoto.afterReply();  // 12: 대화 중 가끔 서아 사진
@@ -1867,16 +1873,16 @@ async function send(text,o){
   const R=S.demoNext;let keep=null;
   if(R){S.demoNext=null;keep=Scenes.runReserve(R)}
   // 관계: 서버 v2 답장이면 판정으로(29: judgeEvery 턴에 한 번), 아니면(서버 v1·서버 없음) 대화 횟수로
-  if(epOn){if(serverVer()===2&&src0==="server")queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),null);else EpStage.turn()}  // 42: 에피소드 판정은 에피소드 단계에만(시연 예약·사건 없음)
+  if(epOn){if(serverVer()===2&&src0==="server")queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),null,o&&o.giftHalf);else EpStage.turn()}  // 42: 에피소드 판정은 에피소드 단계에만(시연 예약·사건 없음)
   else if(serverVer()===2&&v.src==="server"){
     const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
-    queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),keep);
+    queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),keep,o&&o.giftHalf);
   }else if(!R)countStage();
   renderBond();renderTop();perfEnd(P);
   if(prevMood!==S.mood&&!S.force&&!S.birthday)moodToast(S.mood);
 }
 // 기분 바뀜 알림(19): 「서아 기분 · {기분}」 / 「{선물}이라면 반응이 다를 거예요」(평소·맞는 선물 없음이면 첫 줄만). 문구 data/ui.json top
-function moodToast(k){const g=k!=="normal"&&GIFTS.find(x=>x.rec===k);
+function moodToast(k){const g=k!=="normal"&&GIFTS.find(x=>x.rec===k&&giftable(x));
   let l2="";if(g){l2=UI("top.moodGift",{gift:g.name});const c=g.name.charCodeAt(g.name.length-1)-0xAC00;if(c>=0&&c<11172&&c%28===0)l2=l2.split(g.name+"이라면").join(g.name+"라면")}
   toast(`<b>${esc(UI("top.moodToast",{mood:STATES[k].ko}))}</b>`+(l2?`<br><small>${esc(l2)}</small>`:""))}
 // 답장 뒤 이야기 상태 갱신: 최근 서아 응답 3개(반복 방지), 장소, 쓴 사건 비우기
@@ -1896,13 +1902,15 @@ function giftSheet(focus){
   const st=curState();
   $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
   <p class="sub">${esc(UI("gift.sub"))} · ${esc(UI("gift.moodNote",{mood:STATES[st].ko}))}</p>
-  <div class="items">${GIFTS.map(g=>{const m=g.rec===st;return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
+  <div class="items">${GIFTS.filter(giftable).map(g=>{const m=g.rec===st;return `<button class="item ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}
-    <img class="gi" src="${g.icon}" alt=""><b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`}).join("")}</div>`;
+    ${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`}).join("")}</div>`;
   $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
   openSheet("#giftSheet");
 }
 // 받침이 있으면 을, 없으면 를(49 「커피를 건넨다」·「꽃다발을 건넨다」)
+// 50: 선물 그림(icon 이 없으면 그림 문자 e)
+const giftPic=(g,c="gi")=>g.icon?`<img class="${c}" src="${g.icon}" alt="">`:`<span class="${c} ge" aria-hidden="true">${esc(g.e||"🎁")}</span>`;
 const objJosa=w=>{const c=(w||"").charCodeAt((w||"").length-1)-0xAC00;return w+(c>=0&&c<11172&&c%28!==0?"을":"를")};
 // 3D 무대 위 자막(대화방에서 선물 대사). 앨범 다시 보기는 3D 아래 칸(#rcap)
 let subT;
@@ -1910,16 +1918,22 @@ function stageSub(text){text=speechOnly(text);const b=$("#bubble");if(!text||!b)
 // 선물 건네기(49): 💎 빼기 → 내 행동 한 줄 「(○○를 건넨다)」를 보냄(서버로는 「[유저가 선물함: ○○]」) → 서아 답장·몸짓·판정은 평소 대화와 같음(send).
 // 서버 답이 없으면 예비 대사 대신 지문 한 줄(data/ui.json gift.fallback). 등급 뽑기·카드·반응 대사 없음(카드는 컬렉션 「카드 팩」)
 function give(id){
-  const g=gBy(id),st=curState();if(!g)return;
+  const g=gBy(id),st=curState();if(!g||!giftable(g))return;
   if(S.dia<g.price){toast(esc(UI("gift.noDia")));return}
   if(busy){toast(esc(UI("gift.busy")));return}
   closeSheets();setTab("chat");openRoom("seoa");
   if(busy){toast(esc(UI("gift.busy")));return}
   S.dia-=g.price;
+  // 50: 언제든 선물 = 받는 몸짓 고정(g.motion). 직전 repeat.within 번 안에 같은 걸 또 주면 몸짓을 repeat.motions 중 하나로(번갈아, 그 선물 몸짓과 다른 것), 호감 상승 절반, 서버 줄에 「· 또」
+  const R=GIFT.repeat||{},again=(S.giftLog||[]).slice(-(R.within||3)).includes(g.id);
+  let mid=g.motion||null;
+  if(again){const ms=(R.motions||[]).filter(m=>m!==g.motion);if(ms.length){mid=ms[(S.giftAgain||0)%ms.length];S.giftAgain=(S.giftAgain||0)+1}}
+  S.giftLog=[...(S.giftLog||[]),g.id].slice(-10);
+  const tags=[];if(g.rec&&g.rec===st)tags.push(UI("gift.srvMood"));if(again)tags.push(UI("gift.srvAgain"));
   if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계는 판정이 정함
   save();renderTop();
-  burst(g.icon);
-  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:UI("gift.srv",{gift:g.name}),gift:g.id});
+  burst(g.icon||g.e);
+  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again});
 }
 
 // ───────────────────────── 앨범 ─────────────────────────

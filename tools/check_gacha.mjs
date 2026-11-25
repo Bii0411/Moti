@@ -61,7 +61,16 @@ if (!pool.some(x => x.grade === "special")) {
 }
 // 49: 선물은 뽑기 없이 — 예전 값은 _보류 에만
 if (gifts.list.some(g => g.odds || g.lines)) fail("선물에 odds·lines 가 남아 있음(_보류 로)");
-if (gifts.list.some(g => !g._보류 || !g._보류.odds || !g._보류.lines)) fail("선물 _보류 에 예전 확률·대사가 없음");
+// 50: 선물 목록 = 언제든 5 + 순간 5, 커피·라멘은 _보류.list
+const allGifts = [...gifts.list, ...((gifts._보류 || {}).list || [])];
+for (const id of ["coffee", "ramen", "flower", "ring"]) { const g = allGifts.find(x => x.id === id); if (!g || !g._보류 || !g._보류.odds || !g._보류.lines) fail(`선물 ${id} _보류 에 예전 확률·대사가 없음`); }
+const always = gifts.list.filter(g => g.kind === "always"), moment = gifts.list.filter(g => g.kind === "moment");
+if (always.length !== 5 || moment.length !== 5 || always.length + moment.length !== gifts.list.length) fail(`선물 종류 수: 언제든 ${always.length} · 순간 ${moment.length}`);
+if (always.some(g => !g.motion || !(g.price > 0))) fail("언제든 선물에 motion·price 없음");
+if (moment.some(g => !g.when || !(g.price > 0) || !g.reactions)) fail("순간 선물에 when·price·reactions 없음");
+if (gifts.list.some(g => g.id === "coffee" || g.id === "ramen")) fail("커피·라멘이 목록에 남아 있음");
+for (const k of ["srvMoment", "srvMood", "srvAgain"]) if (!ui.gift[k]) fail(`ui.gift.${k} 없음`);
+console.log(`- 선물: 언제든 ${always.map(g => g.name + " " + g.price).join(", ")} / 순간 ${moment.map(g => g.name + " " + g.price).join(", ")}`);
 if (!(ui.gift && ui.gift.srv && ui.gift.srv.includes("{gift}") && ui.gift.fallback)) fail("ui.gift.srv·fallback 없음");
 for (const k of ["title", "pity", "one", "ten", "odds", "oddsTitle", "noDia", "flipAll", "new", "owned", "summaryNew", "summaryDup", "again", "done"]) if (!(ui.pack && ui.pack[k])) fail(`ui.pack.${k} 없음`);
 if (!(ui.album && ui.album.seg && ui.album.seg.pack)) fail("ui.album.seg.pack 없음");
