@@ -33,6 +33,7 @@
   "login": {
     "title": "어디에 기록할까요?",
     "desc": "",
+    "xstage": "계정으로 시작",
     "google": "Google로 시작",
     "kakao": "카카오로 시작",
     "guest": "게스트로 둘러보기",

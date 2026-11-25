@@ -110,6 +110,9 @@
 .oblogin h2{font-size:28px;font-weight:800;line-height:1.35;letter-spacing:-.3px}
 .oblogin .obdesc{font-size:14px;color:#cfc8e4;line-height:1.55;word-break:keep-all}
 .oblogin .obacts{display:flex;flex-direction:column;align-items:center;gap:10px}
+/* 69: XSTAGE 계정으로 시작(맨 위). 검은 바탕 + 글자 로고 */
+.oblogin .obbtn.x{background:#000;color:#fff;border:1px solid #3a3746}
+.oblogin .obbtn.x .xwm{font-weight:900;letter-spacing:.06em}
 .oblogin .obbtn.g{background:#fff;color:#1f1f1f}
 .oblogin .obbtn.k{background:#fee500;color:#191600}
 .obtext{font-size:14px;font-weight:700;color:var(--pri2);padding:10px 16px;-webkit-tap-highlight-color:transparent}

@@ -51,7 +51,7 @@ const Onboard=(()=>{
         <div class="obsheet" id="obSheet" role="dialog" aria-modal="true"><h3 id="obSTitle"></h3><p id="obSBody"></p><button class="obbtn" id="obSClose" type="button"></button></div>
       </section>
       <section class="obscr oblogin" id="obLogin"><div class="obhead"><h2 id="obLTitle"></h2><p class="obdesc" id="obLDesc"></p></div>
-        <div class="obacts"><button class="obbtn g" id="obG" type="button"></button><button class="obbtn k" id="obK" type="button"></button>
+        <div class="obacts"><button class="obbtn x" id="obX" type="button"></button><button class="obbtn g" id="obG" type="button"></button><button class="obbtn k" id="obK" type="button"></button>
         <button class="obtext" id="obGuest" type="button"></button><p class="obnote" id="obLNote"></p></div></section>`;
     document.querySelector(".app").appendChild(root);
     const q=id=>root.querySelector("#"+id);
@@ -61,7 +61,7 @@ const Onboard=(()=>{
     q("obCard").addEventListener("click",e=>{const v=e.target.closest("[data-view]");if(v){e.preventDefault();openTerms(v.dataset.view)}});
     q("obPunch").onclick=punch;q("obPunch").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();punch()}};
     q("obScrim").onclick=q("obSClose").onclick=closeTerms;
-    q("obG").onclick=q("obK").onclick=demoLogin;
+    q("obG").onclick=q("obK").onclick=q("obX").onclick=demoLogin;  // 69: XSTAGE 도 시연에선 Google·카카오처럼 게스트로
     q("obGuest").onclick=()=>finish("guest");
   }
   // 문구 채우기(데이터가 오면)
@@ -76,7 +76,7 @@ const Onboard=(()=>{
     q("obPunchS").textContent=T("ticket.punchSub");q("obSClose").textContent=T("terms.close");
     punchText();
     q("obLTitle").innerHTML=EB(T("login.title"));q("obLDesc").textContent=T("login.desc");
-    q("obG").textContent=T("login.google");q("obK").textContent=T("login.kakao");q("obGuest").textContent=T("login.guest");q("obLNote").textContent=T("login.note");
+    q("obX").innerHTML=`<b class="xwm">XSTAGE</b><span>${E(T("login.xstage"))}</span>`;q("obG").textContent=T("login.google");q("obK").textContent=T("login.kakao");q("obGuest").textContent=T("login.guest");q("obLNote").textContent=T("login.note");
     // 빈 문구(20단계 「없앰」)는 자리를 차지하지 않게 숨김
     ["obTag","obGuide","obCSmall","obAi","obPunchS","obLTitle","obLDesc","obLNote"].forEach(id=>{const e=q(id);e.hidden=!e.textContent.trim()});
     q("obAi").classList.toggle("box",!!trim().aiBox);  // AI 안내: 보라 상자(예전) 또는 회색 한 줄
