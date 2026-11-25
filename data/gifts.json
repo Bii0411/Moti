@@ -1,5 +1,5 @@
 {
-  "_설명": "50: 선물은 두 종류. always(언제든) = 처음부터 줄 수 있고, 받는 몸짓(motion)을 앱이 고정(서버 몸짓보다 우선, 새 카드 없음). moment(순간) = 평소엔 잠겨 있다가 서버 답장 gift_moment(또는 임시 규칙 momentFallback)로 그 선물이 열린 동안만 줄 수 있음. 순간 선물은 그 선물의 반응 몸짓(reaction, 선물마다 하나 — 어느 단계에서 줘도 같은 몸짓·같은 카드)을 앱이 재생하고, 처음이면 컬렉션 「선물」 카드(data/collection.json source moment)를 얻음. 50-1: 순간 선물은 관계 단계 하나에 하나(stage, 목록 순서 = 단계 순서). 열 수 있는 조건 = 본 이야기 관계 단계 ≥ stage · 반응 몸짓이 data/motions.json 에 있음 · 지금 열린 순간 없음(특별 에피소드에서는 늘 닫힘). 서버에 보내는 gift_moments 도 이것만. 선물 대사는 앱이 쓰지 않음(서버가 장면에 맞게). price = 다이아(임시 값, 수익 결과로 바꿈). icon 이 없으면 e(그림 문자)를 씀. rec = 이 기분일 때 「기분에 맞음」(49 그대로). 49까지의 커피·라멘은 _보류.list, 뽑기 값은 _보류 그대로.",
+  "_설명": "56: icon = 선물 창 그림(icons/gift2_*.png, 보라 유리 선 그림, 배경 투명). 우산·반지는 새 그림이 아직 없어 예전 그대로. 50: 선물은 두 종류. always(언제든) = 처음부터 줄 수 있고, 받는 몸짓(motion)을 앱이 고정(서버 몸짓보다 우선, 새 카드 없음). moment(순간) = 평소엔 잠겨 있다가 서버 답장 gift_moment(또는 임시 규칙 momentFallback)로 그 선물이 열린 동안만 줄 수 있음. 순간 선물은 그 선물의 반응 몸짓(reaction, 선물마다 하나 — 어느 단계에서 줘도 같은 몸짓·같은 카드)을 앱이 재생하고, 처음이면 컬렉션 「선물」 카드(data/collection.json source moment)를 얻음. 50-1: 순간 선물은 관계 단계 하나에 하나(stage, 목록 순서 = 단계 순서). 열 수 있는 조건 = 본 이야기 관계 단계 ≥ stage · 반응 몸짓이 data/motions.json 에 있음 · 지금 열린 순간 없음(특별 에피소드에서는 늘 닫힘). 서버에 보내는 gift_moments 도 이것만. 선물 대사는 앱이 쓰지 않음(서버가 장면에 맞게). price = 다이아(임시 값, 수익 결과로 바꿈). icon 이 없으면 e(그림 문자)를 씀. rec = 이 기분일 때 「기분에 맞음」(49 그대로). 49까지의 커피·라멘은 _보류.list, 뽑기 값은 _보류 그대로.",
   "_repeat": "같은 언제든 선물을 직전 within 번 안에 또 주면: 받는 몸짓을 motions 중 하나로 바꾸고(번갈아), 그 턴이 든 판정의 호감 상승을 affectionScale 배로. 서버 줄에 data/ui.json gift.srvAgain",
   "repeat": {
     "within": 3,
@@ -61,7 +61,7 @@
   },
   "list": [
     {
-      "id": "candy",
+      "id": "candy", "icon": "icons/gift2_candy.png",
       "kind": "always",
       "e": "🍬",
       "name": "사탕",
@@ -70,7 +70,7 @@
       "rec": "normal"
     },
     {
-      "id": "choco",
+      "id": "choco", "icon": "icons/gift2_choco.png",
       "kind": "always",
       "e": "🍫",
       "name": "초콜릿",
@@ -79,7 +79,7 @@
       "rec": "sulky"
     },
     {
-      "id": "water",
+      "id": "water", "icon": "icons/gift2_water.png",
       "kind": "always",
       "e": "🥛",
       "name": "물 한 잔",
@@ -88,7 +88,7 @@
       "rec": "tired"
     },
     {
-      "id": "bandage",
+      "id": "bandage", "icon": "icons/gift2_bandage.png",
       "kind": "always",
       "e": "🩹",
       "name": "반창고",
@@ -96,7 +96,7 @@
       "motion": "m05"
     },
     {
-      "id": "warmer",
+      "id": "warmer", "icon": "icons/gift2_warmer.png",
       "kind": "always",
       "e": "🧤",
       "name": "손난로",
@@ -104,7 +104,7 @@
       "motion": "m24"
     },
     {
-      "id": "firstaid",
+      "id": "firstaid", "icon": "icons/gift2_firstaid.png",
       "kind": "moment",
       "stage": 1,
       "e": "🧰",
@@ -114,7 +114,7 @@
       "reaction": "x26"
     },
     {
-      "id": "cocktail",
+      "id": "cocktail", "icon": "icons/gift2_cocktail.png",
       "kind": "moment",
       "stage": 2,
       "e": "🍸",
@@ -124,7 +124,7 @@
       "reaction": "x27"
     },
     {
-      "id": "towel",
+      "id": "towel", "icon": "icons/gift2_towel.png",
       "kind": "moment",
       "stage": 3,
       "e": "♨️",
@@ -137,7 +137,7 @@
       "id": "flower",
       "kind": "moment",
       "stage": 4,
-      "icon": "icons/gift_flower.png",
+      "icon": "icons/gift2_flower.png",
       "e": "💐",
       "name": "꽃다발",
       "price": 150,
