@@ -1592,7 +1592,8 @@ async function askServer(cid,text){
 // 42: /chat 에 보내는 이야기 상태. 에피소드 단계가 있는 에피소드 중이면 episode(에피소드 id)·episode_stage(1~6)·episode_stage_name·location(그 에피소드 장소 이름)을 더함.
 // stage·affection 은 본 이야기 값 그대로(서버가 에피소드를 아직 몰라도 지금처럼 동작). 서버에 넣을 블록은 docs/server-sync.md
 // 50: gift_moments = 지금 열 수 있는 순간 선물 목록([{id, name, when}], 반응 몸짓이 준비된 것만)
-function chatState(){const st=story(),gm={gift_moments:Moment.list()};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
+// 51: route = 본 이야기 갈래("tease"·"care", 아직 없으면 null)
+function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
   return{...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location}}
 // 서아가 사진을 보낸 뒤(12) 다음 요청: 대화 기록 끝(이번 내 메시지 앞)에 원고 5절의 한 줄을 서아 쪽 기록처럼 덧붙임. 화면에는 보이지 않음
 // 34-1: 사진이 다시 들어올 때 인사 한 줄보다 앞(부재중 사진)이면 기록 끝의 인사 한 줄 앞에 넣음(실제 순서대로)
@@ -1633,8 +1634,26 @@ function stageUp(from,to,q){
     const g=DATA.story&&DATA.story.unlock.stage[n];if(g)q.push(g);
     SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진
   }
+  Route.check();  // 51: 갈래 없이 3단계를 넘으면 그때 정함
   renderBond();
 }
+// 51: 본 이야기 갈래(data/seoa_story.json route). 1·2단계 판정 플래그를 장난(tease)·다정(care·comfort·protect)으로 세고,
+// 2단계에서 판정 뒤 호감 40 이상이거나 판정에 outside 가 처음 나오면 한 번 정함(장난 > 다정 → tease, 아니면 care). 저장 story.route(정하면 그대로), 센 수 S.routeCount
+const Route={
+  C:()=>(DATA.story&&DATA.story.route)||{},
+  cnt(){return S.routeCount||(S.routeCount={tease:0,care:0})},
+  // 본 이야기 판정 한 번: before = 판정 전 단계, aff = 판정 뒤 호감, flags = 판정 플래그
+  judged(before,aff,flags){const C=this.C(),st=story(),F=(flags||[]).filter(f=>typeof f==="string");if(!C.count)return null;
+    if(before<=(C.countUntil||2)){const c=this.cnt();for(const k in C.count)F.forEach(f=>{if(C.count[k].includes(f))c[k]=(c[k]||0)+1});save()}
+    const D=C.decide||{};
+    if(!st.route&&before===(D.stage||2)&&((+aff||0)>=(D.affection!=null?D.affection:40)||F.includes(D.flag||"outside")))return this.decide("judge");
+    return null},
+  decide(why){const st=story(),c=this.cnt();if(st.route)return st.route;
+    st.route=(c.tease||0)>(c.care||0)?"tease":(this.C().tie||"care");S.routeWhy=why;save();return st.route},
+  // 갈래 없이 3단계 이상이 되면(대화 횟수 단계·시연 패널) 그때 정함
+  check(){if(!story().route&&curStage()>(((this.C().decide||{}).stage)||2))this.decide("stage")},
+  clear(){delete story().route;S.routeCount={tease:0,care:0};delete S.routeWhy;save()}
+};
 // 29: v2 로 처음 열 때 저장값 옮기기(한 번만, S.v2moved). 단계 n 은 그대로 두고 호감도를 맞춤
 // 29-1: 대화 횟수의 단계 안 진행 비율(countAt[n-1]~countAt[n])을 호감도 affectionAt[n-1]~affectionAt[n] 의 같은 비율로 → 게이지 막대 길이가 같게(정수로 반올림)
 function moveToV2(){
@@ -1686,6 +1705,7 @@ function runJudge(){
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
+      Route.judged(before,st.affection,j.flags);  // 51: 갈래 세기·정하기
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
@@ -2109,14 +2129,14 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0});Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
+    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0,routeCount:null,routeWhy:null});Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
     all(){S=blank();Photos.clear();Cards.clear();StoryPic.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};S.judgeBuf=[];S.judgeKeep=null;const st=story();st.recent_lines=[];st.summary="";start()},
-    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0},
+    bond(){Object.assign(story(),{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{}});S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;Route.clear()},
     album(){S.col={};delete S.colIntro;Cards.clear()}  // 26: 소개 창도 다시 뜸 · 26-1: 카드 그림도 지움
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
@@ -2185,6 +2205,9 @@ const Demo=(()=>{
       h+=`<h4>${esc(T("sec.affection"))} <small>${esc(T("affectionNote"))}</small></h4><div class="aff"><input type="range" min="0" max="100" step="1" value="${st.affection||0}" id="dpAff"><b id="dpAffV">${st.affection||0}</b></div>`;
       const fl=st.stage_flags||[];
       h+=`<h4>${esc(T("sec.flags"))} <small>${esc(T("flagNote"))}</small></h4><div class="row">${((DATA.demo||{}).flags||[]).map(f=>B("flag",esc(f),{v:f,on:fl.includes(f)})).join("")}</div>`;
+      const rc=Route.cnt();  // 51: 갈래
+      h+=`<h4>${esc(T("route.title"))}</h4><div class="kv" id="dpRoute">${esc(T("route.info",{route:st.route||"null",tease:rc.tease||0,care:rc.care||0,why:S.routeWhy?T("route.whys."+S.routeWhy):"-"}))}</div>
+        <div class="row">${["tease","care","comfort","protect","outside"].map(f=>B("routeJudge",esc(T("route.judge",{f})),{v:f})).join("")}${B("routeClear",esc(T("route.clear")))}</div>`;
       h+=`<h4>${esc(T("sec.place"))}</h4><div class="row">${SCENES.map((x,i)=>B("place",esc(x.name),{v:i,on:S.scene===i})).join("")}</div>`;
       const ids=unlockedIds(),seen=new Set(Object.keys(S.col));
       h+=`<h4>${esc(T("sec.motions"))} <small>${esc(T("motionPlay"))}</small></h4><div class="row">${B("unlockAll",esc(T("unlockAll")))}${B("lockAll",esc(T("lockAll")))}</div>
@@ -2220,12 +2243,14 @@ const Demo=(()=>{
     if(a==="packClear"){Gacha.pool(COL.items).forEach(x=>{delete S.col[x.id]});toast(esc(T("packClear")),1600);return refresh()}
     if(a==="server"){DS.server=+v;saveDS();return refresh()}
     if(a==="reset")return reset(v);
-    if(a==="stage"){setStage(+v);return refresh()}
+    if(a==="stage"){setStage(+v);Route.check();return refresh()}
     if(a==="epStage"){EpStage.setStage(+v);if(typeof EpScene!=="undefined")EpScene.fit();return refresh()}
     if(a==="epJudge"){const fl=DS.epFlags||[];DS.epFlags=[];saveDS();toChat();EpStage.judged(+v,fl);return refresh()}
     if(a==="epFlag"){const fl=DS.epFlags||(DS.epFlags=[]),i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);saveDS();return render()}
     if(a==="epScene"){toChat();if(typeof EpScene!=="undefined")EpScene.run(EpStage.n());return refresh()}
     if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];save();startStory(e.id);return refresh()}
+    if(a==="routeJudge"){Route.judged(curStage(),story().affection||0,[v]);return refresh()}  // 51: 판정 한 번처럼 갈래만
+    if(a==="routeClear"){Route.clear();return refresh()}
     if(a==="flag"){const st=story(),fl=st.stage_flags||(st.stage_flags=[]);const i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);return refresh()}
     if(a==="place"){setScene(+v,{fade:true});return refresh()}
     if(a==="unlockAll"){allMotions().forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});return refresh()}
