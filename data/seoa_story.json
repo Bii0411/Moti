@@ -7,6 +7,10 @@
   
   "_countAt": "서버 v1·서버 없음: 대화 횟수로 단계를 올리는 기준 (기존 5단계 0·4·10·18·30을 6단계로 나눔)",
   "countAt": [0, 4, 9, 15, 22, 30],
+  "_route": "51 본 이야기 갈래. count = 1·2단계(countUntil 까지) 동안 판정 플래그를 세는 묶음(장난 tease / 다정 care·comfort·protect, 판정 한 번에 플래그 하나마다 +1). decide = 2단계에서 받은 판정 뒤 호감이 affection 이상이거나 그 판정에 flag 가 나오면 그때 한 번 정함(장난 > 다정 이면 tease, 아니면 tie). 정한 뒤로는 안 바뀜. 갈래 없이 3단계 이상이 되면(대화 횟수 단계·시연 패널) 그때 같은 규칙으로 정함. story.route 로 /chat·/judge state 에 감(없으면 null)",
+  "_placeBan": "51 장소별로 서아 몸짓에서 빼는 것(서버로 보내는 motion_list 와 앱이 고르는 몸짓 모두). 키 = locations 번호(1 = 바 '라스트 오더' 2층, 사장님 집). motions = 그 장소에서 빼는 몸짓, fromStage = 그 단계부터는 다시 넣는 몸짓(c05·m18 은 관계 6단계부터)",
+  "placeBan": {"1": {"motions": ["m20", "c04", "c03", "m12", "m22", "m23", "m21", "x17", "m16", "m19", "c05", "m18"], "fromStage": {"c05": 6, "m18": 6}}},
+  "route": {"count": {"tease": ["tease"], "care": ["care", "comfort", "protect"]}, "countUntil": 2, "decide": {"stage": 2, "affection": 40, "flag": "outside"}, "tie": "care"},
   "_locations": "location 값은 서버와 1:1. short = 무빙 카드 아래 띠에 쓰는 짧은 이름(38, 없으면 name). temp=true 는 전용 배경이 없어 기존 이미지로 임시 대체(41단계부터 쓰는 곳 없음). 15단계: 바 1층 전용 배경(bg_seoa_bar.jpg) 들어옴. episode=true 는 특별 에피소드 전용 장소(5 드라큘라의 성, 6 크리스마스 거리, 7 서아의 자취방) — 서버 장소 목록에는 없음. 30단계: pano = 360도 배경 그림(가로:세로 2:1, 수평선이 그림 세로 한가운데). 있으면 평평한 img 대신 3D 장면 안의 구에 입혀 배경으로 쓰고(img 는 불러오는 동안·실패 때 그대로 보임), 없으면 지금처럼 img. panoYaw = 그림 가운데가 서아 바로 뒤에 오는 것을 0으로, 구를 돌리는 각도(도, + = 위에서 볼 때 시계 반대 방향). panoBright = 그림 밝기 곱(1 = 그대로, 배경 어둡게 data/look.json background 다음에 곱함). 41단계: 8곳 모두 pano. 바 2층·자취방의 img 는 그 360도 그림 가운데를 1600×900 으로 자른 것",
   "locations": [
     { "name": "바 '라스트 오더' 1층", "short": "바 1층", "img": "bg_seoa_bar.jpg", "pano": "pano_seoa_bar.webp", "panoYaw": 0, "panoBright": 1 },
