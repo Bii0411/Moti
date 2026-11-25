@@ -394,6 +394,12 @@ nav button.on{color:#fff;font-weight:700}nav button.on b svg{stroke-width:2.1}
 .endbox .row{display:flex;gap:8px}.endbox button{flex:1;padding:11px 8px;border-radius:12px;font-weight:800;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .endbox .rw{background:var(--gold);color:#1a1424}.endbox .rw:disabled{opacity:.45}.endbox .rw small{font-weight:700;font-size:12px;opacity:.9;display:inline-flex;align-items:center;gap:2px}
 .endbox .rs{background:#241f33;color:var(--text)}.endbox .free{font-size:12px;color:var(--gold);margin-top:8px}
+.endbox .note{font-size:11.5px;color:var(--sub);margin-top:8px;word-break:keep-all}
+/* 54 엔딩 기록(마이) */
+.endrec ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.endrec li{border:1px solid var(--line);border-radius:12px;padding:9px 12px;display:flex;flex-direction:column;gap:2px;opacity:.38}
+.endrec li b{font-size:14px}.endrec li small{font-size:11.5px;color:var(--sub)}
+.endrec li.on{opacity:1;border-color:#c9a24d;background:linear-gradient(135deg,#2a2236,#1b1726)}.endrec li.on b{color:var(--gold)}
 .rwc .row{display:flex;gap:8px}.rwc .row .cta{flex:1;width:auto}.rwc .cta.no{background:#241f33}
 /* 50: 순간 선물이 열리면 ＋ 버튼이 금빛(포토카드 SECRET 금색) + 작은 점 */
 .fnbtn{position:relative}
@@ -587,9 +593,10 @@ async function checkVersion(){let v=null;
 async function loadData(){
   await checkVersion();
   const get=p=>fetch(p+(APP_V?"?v="+encodeURIComponent(APP_V):""),{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw,en]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json"),get("data/endings.json")]);
   if(pk&&pk.price)DATA.pack=pk;  // 49 카드 팩
   DATA.rewind=rw||{};  // 51 실패 엔딩 · 되감기
+  DATA.endings=en||{};  // 54 엔딩 기록 · 성공 엔딩
   DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items){COL=col;COL.held=COL.items.filter(x=>x.hold);COL.items=COL.items.filter(x=>!x.hold)}  // 44: 보류 칸(hold)은 앱 어디에도 안 나오고 세지 않음(저장값 S.col 은 그대로)
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
@@ -1564,6 +1571,7 @@ function renderLog(){
 // 43: 답장을 기다리는 줄 — 처음엔 chat.typing, 기다린 지 chat.typingLongMs 가 지나면 chat.typingLong(Wait). 서버가 깨기 전 첫 답장은 예전처럼 config.waitText
 function typingText(){return waiting&&!serverAwake&&DATA.config.waitText||UI(Wait.long()?"chat.typingLong":"chat.typing")}
 
+let LASTJ=null;  // 54-C: 마지막 /judge 결과(시연 패널)
 let busy=false,waiting=false,sampleFn=undefined;  // waiting: 서아 답장을 서버에서 기다리는 중
 async function getSample(){
   if(sampleFn!==undefined)return sampleFn;
@@ -1753,19 +1761,21 @@ function runJudge(){
     judgeP=post("/judge",{char:"seoa",state:es,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
       .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok||Thread.cur()!==ep)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;
         const d=halve((+j.state.affection||0)-ea0),fl=(j.flags||[]).filter(f=>typeof f==="string");if(need&&j.state.summary)st.summary=j.state.summary;
+        LASTJ={at:Date.now(),ep:1,delta:j.affection_delta!=null?j.affection_delta:d,flags:fl,reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};  // 54-C 시연 패널 판정 표시
         Fx.judged(d,fl);const r=EpStage.judged(d,fl);
         JLOG.push({turn:S.bond||0,n:B.length,aff0:ea0,aff1:r?r.aff:ea0,stage:EpStage.n(),flags:fl,ms:Math.round(performance.now()-t0),summary:need,episode:ep});save()})
       .catch(()=>{}).finally(()=>{if(tok===judgeTok)judgeP=null});
     return judgeP}
   judgeP=post("/judge",{char:"seoa",state:st,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
-    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
+    .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;LASTJ={at:Date.now(),ep:0,delta:j.affection_delta!=null?j.affection_delta:(+j.state.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,j.flags||[]);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need});
       Route.judged(before,st.affection,j.flags);  // 51: 갈래 세기·정하기
       if(curStage()>before)stageUp(before,curStage(),q);
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)(j.flags||[]).forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
       save();renderBond();unlockShow(q);
-      if(st.ending&&st.ending===((DATA.rewind||{}).main||{}).failEnding)End.fail("main")})  // 51: 서버가 「떠남」 엔딩을 알림 → 본 이야기 실패
+      if(st.ending&&st.ending===((DATA.rewind||{}).main||{}).failEnding)End.fail("main");
+      Ending.check(st)})  // 54: 서버가 「남은 밤」(stayed)을 알림 → 성공 엔딩 한 번  // 51: 서버가 「떠남」 엔딩을 알림 → 본 이야기 실패
     .catch(()=>{}).finally(()=>{if(tok===judgeTok)judgeP=null});  // 29-1: 버린 판정이 새 판정을 지우지 않게
   return judgeP;
 }
@@ -2219,6 +2229,18 @@ const Demo=(()=>{
   function preview(mid){toChat();const g=groupOf(mid);unlockFx(mid,g&&g.text||"","view")}
   // ── 그리기 ──
   const B=(a,label,o={})=>`<button data-a="${a}"${o.v!=null?` data-v="${esc(o.v)}"`:""} class="${o.on?"on":""} ${o.cls||""}"${o.title?` title="${esc(o.title)}"`:""}>${label}</button>`;
+  // 54-C: 마지막 판정(서버 /judge). 값이 없는 줄은 숨김
+  function judgeHtml(){const j=LASTJ;if(!j)return "";const J=(DATA.demo||{}).judge||{},L=[],t=(k,v)=>{let s=J[k]||k+" {v}";return s.split("{v}").join(v)};
+    const has=v=>v!=null&&!(Array.isArray(v)&&!v.length)&&v!=="";
+    if(has(j.delta))L.push(t("delta",(j.delta>0?"+":"")+j.delta));if(has(j.flags))L.push(t("flags",j.flags.join(", ")));
+    if(has(j.reason))L.push(t("reason",j.reason));if(has(j.changes))L.push(t("changes",typeof j.changes==="string"?j.changes:JSON.stringify(j.changes)));
+    const p=j.progress||{};
+    if(has(p.talk_bonus))L.push(t("talkBonus",p.talk_bonus));
+    if(has(p.stage_bonus))L.push(t("stageBonus",p.stage_bonus+(p.stage_bonus_max!=null?" / "+p.stage_bonus_max:"")));
+    if(has(p.stage_user_msgs))L.push(t("stageMsgs",p.stage_user_msgs));
+    if(has(p.min_msgs))L.push(t("minMsgs",p.min_msgs+(p.min_msgs_left!=null?" · "+(J.left||"남은")+" "+p.min_msgs_left:"")));
+    else if(has(p.min_msgs_left))L.push(t("minLeft",p.min_msgs_left));
+    return `<h4>${esc(J.title||"마지막 판정")} <small>${esc(j.ep?(J.ep||"에피소드"):(J.main||"본 이야기"))}</small></h4>`+L.map(x=>`<div class="kv">${esc(x)}</div>`).join("")}
   function lastHtml(){
     if(!last)return `<div class="kv">${esc(T("lastNone"))}</div>`;
     const r=last.raw,src=last.src==="server"?T("lastSrc.server")+" · "+T("serverModes."+last.mode):last.src==="timeout"?T("lastSrc.timeout",{ms:r?r.wait:""}):last.src==="error"?T("lastSrc.error"):T("lastSrc.local");
@@ -2262,6 +2284,7 @@ const Demo=(()=>{
       h+=`<h4>${esc(T("sec.serverMode"))} <small>${esc(T("serverNow",{name:T("serverModes."+serverMode())}))}</small></h4>
         <div class="row">${[1,2,0].map(n=>B("server",esc(T("serverModes."+n)),{v:n,on:serverMode()===n})).join("")}</div>${q!=null?`<div class="kv">${esc(T("serverQueryWins"))}</div>`:""}`;
       h+=`<h4>${esc(T("sec.lastReply"))}</h4>${lastHtml()}`;
+      h+=judgeHtml();  // 54-C: 마지막 /judge 결과와 progress
       h+=`<h4>${esc(T("sec.reset"))}</h4><div class="row">${["seoa","chat","bond","album"].map(k=>B("reset",esc(T("resets."+k)),{v:k})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.stage"))}</h4><div class="row">${[1,2,3,4,5,6].map(n=>B("stage",`${n} ${esc(stageName(n))}`,{v:n,on:cs===n})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.affection"))} <small>${esc(T("affectionNote"))}</small></h4><div class="aff"><input type="range" min="0" max="100" step="1" value="${st.affection||0}" id="dpAff"><b id="dpAffV">${st.affection||0}</b></div>`;
@@ -2270,7 +2293,8 @@ const Demo=(()=>{
       const rc=Route.cnt();  // 51: 갈래
       h+=`<h4>${esc(T("route.title"))}</h4><div class="kv" id="dpRoute">${esc(T("route.info",{route:st.route||"null",tease:rc.tease||0,care:rc.care||0,why:S.routeWhy?T("route.whys."+S.routeWhy):"-"}))}</div>
         <div class="row">${["tease","care","comfort","protect","outside"].map(f=>B("routeJudge",esc(T("route.judge",{f})),{v:f})).join("")}${B("routeClear",esc(T("route.clear")))}</div>`;
-      h+=`<h4>${esc(T("fail.title"))}</h4><div class="kv">${esc(End.info())}</div><div class="row">${B("failMain",esc(T("fail.main")))}${B("failXmas",esc(T("fail.xmas")))}${B("rwTicket",esc(T("fail.ticket")))}</div>`;
+      h+=`<h4>${esc(T("fail.title"))}</h4><div class="kv">${esc(End.info())}</div><div class="row">${B("failMain",esc(T("fail.main")))}${B("failXmas",esc(T("fail.xmas")))}${B("rwTicket",esc(T("fail.ticket")))}</div>
+        <div class="row">${B("stayWin",esc(T("fail.stayTease")),{v:"tease"})}${B("stayWin",esc(T("fail.stayCare")),{v:"care"})}${B("xmasWin",esc(T("fail.xmasWin")))}${B("endingsClear",esc(T("fail.endingsClear")))}</div>`;
       h+=`<h4>${esc(T("sec.place"))}</h4><div class="row">${SCENES.map((x,i)=>B("place",esc(x.name),{v:i,on:S.scene===i})).join("")}</div>`;
       const ids=unlockedIds(),seen=new Set(Object.keys(S.col));
       h+=`<h4>${esc(T("sec.motions"))} <small>${esc(T("motionPlay"))}</small></h4><div class="row">${B("unlockAll",esc(T("unlockAll")))}${B("lockAll",esc(T("lockAll")))}</div>
@@ -2317,6 +2341,11 @@ const Demo=(()=>{
     if(a==="failMain"){cancel();End.demo("main");return refresh()}  // 51: 본 이야기 실패 바로 보기
     if(a==="failXmas"){cancel();End.demo("s2");return refresh()}  // 51: 크리스마스 실패 바로 보기
     if(a==="rwTicket"){S.rwTickets=(S.rwTickets||0)+1;save();return refresh()}
+    // 54: 본편 성공(장난·다정) — 서버 없이 6단계·갈래·state.ending="stayed" 로 두고 성공 엔딩. 크리스마스 성공 — 6단계 장면
+    if(a==="stayWin"){cancel();if(Thread.cur()!=="main")Thread.go("main");if(S.rw&&S.rw.main)delete S.rw.main.end;End.stop();toChat();if(curStage()<6)setStage(6);const st=story();st.route=v;st.ending=((DATA.endings||{}).success||{}).signal||"stayed";save();renderBond();Ending.start(v,true);return refresh()}
+    if(a==="xmasWin"){cancel();const k=((DATA.rewind||{}).xmas||{}).thread||"s2";S.stories[k]=1;if(Thread.cur()!==k){const fresh=Thread.go(k);const e=STORIES.find(x=>x.id===k);if(fresh&&e)setScene(e.scene)}
+      if(S.rw&&S.rw[k])delete S.rw[k].end;toChat();EpScene.stop();EpStage.setStage(6);EpScene.run(6);return refresh()}
+    if(a==="endingsClear"){S.endings={};delete S.stay;save();End.render();toast(esc(T("fail.endingsCleared")),1600);return refresh()}
     if(a==="flag"){const st=story(),fl=st.stage_flags||(st.stage_flags=[]);const i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);return refresh()}
     if(a==="place"){setScene(+v,{fade:true});return refresh()}
     if(a==="unlockAll"){allMotions().forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});return refresh()}
@@ -2581,6 +2610,7 @@ function renderMy(){
   const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
   const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
   $("#my").innerHTML=`${relHTML()}
+  ${Ending.html()}
   <div class="card plus"><div class="mph"><span class="wm">moti <span>PLUS</span></span>${S.plus?`<small class="on">${esc(UI("my.plusOn"))}</small>`:`<span class="pp"><b>${esc(UI("my.plusPrice"))}</b> ${esc(UI("my.plusPer"))}</span>`}</div>
     <ul class="perks">${perks}</ul>
     <button class="cta" id="plusBtn">${esc(S.plus?UI("my.plusStop"):UI("my.plusStart"))}</button><p class="fine">${esc(UI("my.demoNote"))}</p></div>
@@ -2722,6 +2752,7 @@ function openRoom(cid){
   $("#inp").placeholder=(DATA.config.inputPlaceholder||"{name}에게 말 걸기").replace("{name}",c.name).replace(/\([^)]*\)/g,m=>[...m.replace(/ /g,"\u00a0")].join("\u2060"));  // 띄어쓰기는 붙는 빈칸, 글자 사이는 단어 잇개(U+2060, 「·」 뒤에서도 안 끊기게)
   placeStage();renderLog();renderUnread();
   if(cid==="seoa")End.resume();  // 51: 끊긴 에필로그 이어 가기
+  if(cid==="seoa")Ending.resume();  // 54: 끊긴 성공 에필로그 이어 가기 · 아직 안 닫은 성공 끝 화면
   if(cid==="seoa"&&!End.locked())Greet.enter();  // 34: 다시 들어올 때 인사(부재중 사진을 넣기 전에 마지막 대화 시각을 봄)
   if(cid==="seoa"&&!S.introDone&&DATA.intro&&!FirstMeet.isOn()){if(FirstMeet.take())FirstMeet.run({then:runIntro});else runIntro()}  // 31: 기본 에피소드 처음 시작이면 첫 만남 연출 → 오프닝
   if(cid==="seoa"&&View.held()&&Stage.walk.busy())View.hold(View.held());  // 42-1: 걷는 중에 다른 탭에 다녀오면 확대 다시
@@ -2854,6 +2885,7 @@ const EpScene=(()=>{
     }
     running=false;busy=false;ep.play=null;(ep.seen||(ep.seen=[])).includes(n)||ep.seen.push(n);save();renderLog();
     End.sceneDone(n);  // 51: 크리스마스 3단계 장면 뒤 되감기 지점 · 미뤄 둔 「자정」 실패
+    Ending.scene(n);  // 54: 크리스마스 6단계 장면(「…메리 크리스마스, 사장님.」) → 엔딩 기록
     const nx=queue.shift();if(nx)run(nx)}
   // 47: 장면 뒤 카드(42-C e01 크리스마스 이브)는 뺌. 장면이 끝나면 따로 보상 없이 자유 대화
   // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
@@ -2911,14 +2943,16 @@ const End=(()=>{
       if(S.room==="seoa"&&curTab==="chat"&&!Cam.isOpen()){const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
       setTimeout(step,r.end.k>=P.length?400:gap)};
     setTimeout(step,500)}
-  function stop(){tok++;if(playing){playing=false;busy=false}}
+  function stop(){tok++;if(playing){playing=false;busy=false}if(typeof Ending!=="undefined")Ending.stop()}
   // 대화방에 다시 들어왔을 때 끊긴 에필로그 이어 가기
   function resume(){const k=th(),r=S.rw&&S.rw[k];if(r&&r.end&&!playing&&r.end.k<(epiOf(k).paragraphs||[]).length)play(k);else render()}
   const T=(key,v)=>{let s=key.split(".").reduce((o,x)=>o!=null?o[x]:undefined,C());if(typeof s!=="string")s="";for(const n in v||{})s=s.split("{"+n+"}").join(v[n]);return s};
   // 끝 화면(입력창 자리)
   function render(){const bar=$("#room .bar"),box=$("#endBox");if(!bar||!box)return;const k=th(),r=S.rw&&S.rw[k],on=S.room==="seoa"&&!!(r&&r.end);
+    if(!on&&Ending.render(bar,box))return;  // 54: 성공 끝 화면(대화창 잠그지 않음, 「계속 대화하기」로 닫힘)
     bar.style.display=on?"none":"";if(!on){box.hidden=true;box.innerHTML="";return}
     const done=!playing&&r.end.k>=(epiOf(k).paragraphs||[]).length;box.hidden=!done;if(!done){box.innerHTML="";return}
+    Ending.fail(k);  // 54: 실패 에필로그가 끝나 끝 화면이 나오면 엔딩 기록
     const I=C().item||{},n=S.rwTickets||0,can=!!r.point;
     const tag=n>0?esc(T("end.rewindFree",{n})):esc(T("end.rewindPrice",{price:I.price||0})).split("{gem}").join(Icon.gem(13));
     box.innerHTML=`<h3>${esc(T("end."+k+".title")||T("end.main.title"))}</h3><p>${esc(T("end."+k+".body")||T("end.main.body"))}</p>
@@ -2969,6 +3003,52 @@ const End=(()=>{
   function info(){const r=S.rw||{},f=k=>{const x=r[k]||{};return `${k}: ${x.point?"지점 ✓":"지점 -"}${x.end?" · 실패":""}${x.wait?" · 5단계 답장 기다림":""}`},es=Thread.ep()&&EpStage.st();
     return `${f("main")} / ${f(X().thread||"s2")} · 되감기 ${S.rwTickets||0}장${es?` · ${X().midnightName||"자정"}까지 ${left()}`:""}`}
   return{locked,stageUp,replied,sceneDone,checkXmas,fail,play,stop,resume,render,rewind,restart,demo,info,left,migrate,isPlaying:()=>playing};
+})();
+// 54: 엔딩 기록 · 본편 성공 엔딩 「남은 밤」 (data/endings.json, 원고 docs/drafts/조연-성공엔딩-원고.md 4·5번)
+// 기록 S.endings = {엔딩 id: 처음 본 시각}. 되감기·처음부터로도 지우지 않음(이야기 저장값 S.story 와 따로)
+// 성공: 서버 /judge 가 state.ending = success.signal("stayed")을 보내면 한 번. S.stay = {route, k(보인 문단 수), closed}. 있으면 다시 띄우지 않음
+const Ending=(()=>{
+  const C=()=>DATA.endings||{},SC=()=>C().success||{};
+  const got=()=>S.endings||(S.endings={});
+  const T=(p,v)=>{let s=p.split(".").reduce((o,x)=>o!=null?o[x]:undefined,C());if(typeof s!=="string")s="";for(const n in v||{})s=s.split("{"+n+"}").join(v[n]);return s};
+  function mark(id,quiet){if(!id||got()[id]||!(C().list||[]).some(x=>x.id===id))return false;got()[id]=Date.now();save();
+    if(!quiet)toast(esc(T("ui.toast")),2200);if(curTab==="my")renderMy();return true}
+  const fail=k=>mark(((C().when||{}).fail||{})[k]);
+  function scene(n){const th=Thread.cur();((C().when||{}).scene||[]).forEach(w=>{if(w.thread===th&&w.stage===n)mark(w.ending)})}
+  // 예전 저장값: 이미 끝난 실패·이미 본 크리스마스 6단계 장면은 알림 없이 기록
+  function migrate(){const F=(C().when||{}).fail||{};for(const k in (S.rw||{}))if(S.rw[k]&&S.rw[k].end&&F[k])mark(F[k],true);
+    ((C().when||{}).scene||[]).forEach(w=>{const e=((S.threads||{})[w.thread]||{}).ep;if(e&&(e.seen||[]).includes(w.stage))mark(w.ending,true)})}
+  // 성공 엔딩
+  let tok=0,playing=false;
+  const epi=()=>((SC().epilogue||{})[(S.stay||{}).route])||{paragraphs:[]};
+  const done=()=>!!S.stay&&!playing&&S.stay.k>=(epi().paragraphs||[]).length;
+  function check(st){if(Thread.cur()!=="main"||!st||st.ending!==(SC().signal||"stayed")||S.stay)return;start(st.route)}
+  function start(route,force){if(S.stay&&!force)return;stop();
+    S.stay={route:route==="tease"||route==="care"?route:(SC().tie||"care"),k:0,closed:false,at:Date.now()};save();
+    if(Thread.cur()==="main"&&S.room==="seoa")play()}
+  function play(){const s=S.stay;if(!s||s.closed)return;const E=epi(),P=E.paragraphs||[],gap=E.intervalMs||1900,my=++tok;
+    if(s.k===0&&E.place!=null&&S.scene!==E.place)setScene(E.place,{fade:true});
+    playing=true;busy=true;renderLog();End.render();
+    const step=()=>{if(my!==tok||Thread.cur()!=="main")return;
+      if(s.k>=P.length){playing=false;busy=false;save();renderLog();mark(E.ending);End.render();return}
+      const k=s.k,t=P[s.k++];addMsg("c",t,{intro:true},"seoa");save();
+      if(S.room==="seoa"&&curTab==="chat"&&!Cam.isOpen()){const c=(E.cues||[]).find(x=>x.at===k)||{};if(c.motion)Stage.play(c.motion);if(c.face){Stage.setFace(c.face);faceReset()}const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
+      setTimeout(step,s.k>=P.length?400:gap)};
+    setTimeout(step,500)}
+  function stop(){tok++;if(playing){playing=false;busy=false}}
+  function resume(){const s=S.stay;if(!s||s.closed||Thread.cur()!=="main"||playing)return;if(!done())play();else End.render()}
+  // 끝 화면(입력창 자리). 그렸으면 true. 「계속 대화하기」 → 닫힘(closed), 입력창이 돌아오고 대화는 그대로
+  function render(bar,box){const s=S.stay;if(!s||s.closed||Thread.cur()!=="main"||S.room!=="seoa")return false;
+    if(!done()){bar.style.display="";box.hidden=true;box.innerHTML="";return true}
+    bar.style.display="none";box.hidden=false;
+    box.innerHTML=`<h3>${esc(T("success.end.title"))}</h3><p>${esc(T("success.end.body"))}</p><div class="row"><button class="rw" data-e="stay">${esc(T("success.end.cta"))}</button></div><div class="note">${esc(T("success.end.note"))}</div>`;
+    box.querySelector("[data-e=stay]").onclick=()=>{s.closed=Date.now();save();End.render();renderLog()};return true}
+  // 마이 화면 칸
+  function html(){const L=C().list||[];if(!L.length)return "";const g=got(),n=L.filter(x=>g[x.id]).length;
+    return `<div class="card endrec"><div class="mch"><b>${esc(T("ui.title"))}</b><span class="bal">${esc(T("ui.count",{n,total:L.length}))}</span></div>
+      <ul>${L.map(x=>`<li class="${g[x.id]?"on":""}"><b>${esc(x.name)}</b><small>${esc(x.desc||"")}</small></li>`).join("")}</ul>
+      ${n<L.length?`<p class="alnote" style="margin:8px 0 0">${esc(T("ui.hint"))}</p>`:""}</div>`}
+  return{mark,fail,scene,migrate,check,start,stop,resume,render,html,isPlaying:()=>playing}
 })();
 // 서아 인트로: 처음 들어갈 때만. OPENING 문단을 메시지로 하나씩, 정해진 문단에서 몸짓 재생 (m07 → m01 → m11)
 let introEnd=0;  // 43: 오프닝 문단이 다 나오는 때(답장 기다리는 몸짓을 막음)
@@ -3169,7 +3249,7 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();Ending.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로

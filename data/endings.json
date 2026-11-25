@@ -1,0 +1,40 @@
+{
+  "_설명": "54 엔딩 기록 · 본편 성공 엔딩 「남은 밤」. 원고 docs/drafts/조연-성공엔딩-원고.md 4번(성공 엔딩·끝 화면)·5번(엔딩 기록). 대사는 다른 장면 원고처럼 「」 대신 \"…\" 로 씀(앱이 큰따옴표 대사를 말풍선으로 나눔)",
+  "_list": "엔딩 기록 칸(원고 5번 차례). 본 엔딩은 밝게, 못 본 엔딩은 제목만 흐리게. desc = 이름 아래 작은 줄",
+  "list": [
+    {"id": "stayTease", "name": "남은 밤 · 카운터 안쪽", "desc": "본편 · 장난 갈래 성공"},
+    {"id": "stayCare", "name": "남은 밤 · 옥상의 비", "desc": "본편 · 다정 갈래 성공"},
+    {"id": "departed", "name": "떠난 밤", "desc": "본편 실패"},
+    {"id": "xmasWin", "name": "메리 크리스마스, 사장님", "desc": "크리스마스 성공"},
+    {"id": "xmasLose", "name": "혼자 돌아간 밤", "desc": "크리스마스 실패"}
+  ],
+  "_when": "앱이 알 수 있는 엔딩. fail = 실패 줄기(data/rewind.json) → 엔딩 id(실패 에필로그가 끝나 끝 화면이 나올 때 기록). scene = 에피소드 장면이 끝나면 기록(크리스마스 6단계 「…메리 크리스마스, 사장님.」 장면). 되감기로 되돌려도 기록은 지우지 않음",
+  "when": {
+    "fail": {"main": "departed", "s2": "xmasLose"},
+    "scene": [{"thread": "s2", "stage": 6, "ending": "xmasWin"}]
+  },
+  "_ui": "마이 화면 「엔딩 기록」 칸과 알림. count = 본 수/전체",
+  "ui": {"title": "엔딩 기록", "count": "{n} / {total}", "toast": "엔딩 기록에 남았어요", "hint": "다른 밤이 궁금하면 「처음부터」"},
+  "_success": "본편 성공 엔딩(원고 4번). signal = 서버 /judge 가 state.ending 에 이 값을 보내면 한 번(앱은 다시 띄우지 않음). 갈래(state.route)마다 에필로그 → 끝 화면. place = 에필로그 시작 장소(data/seoa_story.json locations 번호), cues = 문단별 몸짓·표정. ending = 엔딩 기록 id. 실패와 달리 대화창은 잠그지 않음",
+  "success": {
+    "signal": "stayed",
+    "tie": "care",
+    "epilogue": {
+      "tease": {"ending": "stayTease", "place": 0, "intervalMs": 1900, "paragraphs": [
+        "*그날 밤, 창가 자리가 비어 있다.*",
+        "*서아는 카운터 안쪽, 당신 옆에 서 있다. 셔츠 소매를 걷고, 서툴게 잔을 닦는다.*",
+        "\"…오늘부터 여기 설 거야.\"",
+        "*잔을 하나 당신 앞에 내려놓는다. 늘 마시던 그 술.*",
+        "\"술값은, 생각해 볼게. 사장님.\""
+      ], "cues": [{"at": 0, "face": "soft"}, {"at": 1, "motion": "c01", "face": "soft"}, {"at": 2, "face": "shy"}, {"at": 3, "motion": "m09", "face": "soft"}, {"at": 4, "motion": "m20", "face": "fun"}]},
+      "care": {"ending": "stayCare", "place": 4, "intervalMs": 1900, "paragraphs": [
+        "*비가 다시 내리기 시작한다. 옥상 난간, 서아가 우산을 접는다.*",
+        "\"이 도시 비, 싫었는데.\"",
+        "*젖는 걸 그대로 두고, 당신 쪽으로 한 걸음.*",
+        "\"…이제 '다녀왔어'라고 말할 데가 생겼네.\"",
+        "*칼라에서 손을 뗀 채로, 웃는다.*"
+      ], "cues": [{"at": 0, "face": "soft"}, {"at": 1, "face": "neutral"}, {"at": 2, "motion": "m12", "face": "soft"}, {"at": 3, "face": "shy"}, {"at": 4, "motion": "m01", "face": "joy"}]}
+    },
+    "end": {"title": "서아가 남았어요", "body": "이제부터는 둘만의 일상이에요.", "cta": "계속 대화하기", "note": "엔딩 기록에 남았어요 · 다른 밤이 궁금하면 「처음부터」"}
+  }
+}
