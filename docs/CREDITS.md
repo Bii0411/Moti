@@ -29,6 +29,9 @@
 | `motions/xstage_glancing_nervously.json` (m06 허둥대기) | `index.html`(대화 몸짓, 시연 패널, 무빙 카드) | XSTAGE 「[standard] Shy _Glancing around nervously」. 라이선스 범위 **확인 필요** | 원본 `standard_Shy _Glancing_around_nervously.fbx`(2026-11-25 받음, 이름에 띄어쓰기 그대로)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps, 5.07초). 원본 배우가 옆을 보고 있어 90° 돌림(`turn`), 등·목·머리를 덜 숙이게(`damp`). FBX는 저장소에 없음 |
 | `motions/xstage_think_chin.json` (x24 턱 괴고 생각하기) | `index.html`(답장을 기다릴 때, 시연 패널) | XSTAGE 「[standard] Standing_Think_Chin」. 라이선스 범위 **확인 필요** | 원본 `standard_Standing_Think_Chin.fbx`(2026-11-25 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps, 10초). FBX는 저장소에 없음 |
 | `motions/xstage_take_selfie.json` (x25 셀카 자세 · m14 셀카 찍기) | `index.html`·`seoaphoto.js`(서아가 보내는 셀카의 자세, 선물 반응 g07 「같이 셀카 찍기」, 시연 패널) | XSTAGE 「[standard] Take Selfie」. 라이선스 범위 **확인 필요** | 원본 `standard_Take_Selfie.fbx`(2026-11-25 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개, 30fps, 16.3초). FBX는 저장소에 없음 |
+| `motions/xstage_cute_fluffy_tilt.json` (x32 귀여운 척 갸웃) | `index.html`·`cards.js`(카드 팩 SECRET g13, 시연 패널) | XSTAGE 「[standard] Cute Fluffy Tilt」. 라이선스 범위 **확인 필요** | 원본 `[standard]_Cute_Fluffy_Tilt.fbx`(2026-11-25 받음, `_src/` 에 이름 그대로)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps, 7.07초). FBX는 저장소에 없음 |
+| `motions/xstage_catch_catch.json` (x33 시간 날 때마다 연습한 춤) | `index.html`·`cards.js`(카드 팩 SECRET g14, 시연 패널) | XSTAGE 「[standard] Catch Catch」. 라이선스 범위 **확인 필요** | 원본 `[standard]_Catch_Catch.fbx`(2026-11-25 받음, `_src/` 에 이름 그대로)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps, 21.92초). FBX는 저장소에 없음 |
+| `motions/xstage_cute_thinking.json` (x34 고민하는 척) | `index.html`·`cards.js`(카드 팩 SECRET g15, 시연 패널) | XSTAGE 「[standard] Cute Thinking」. 라이선스 범위 **확인 필요** | 원본 `[standard]Cute_Thinking.fbx`(2026-11-25 받음, `_src/` 에 이름 그대로)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps, 7.13초). FBX는 저장소에 없음 |
 | `motion.js` m01~m25, c01~c05 | 전체 | 직접 만든 코드 몸짓 | 외부 자산 아님 |
 
 ## 그림

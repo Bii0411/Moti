@@ -18,7 +18,8 @@ const push = (id, from) => {
   if (ban.has(id) || seen.has(id)) return;
   seen.add(id);
   let grade;
-  if (seoaOnly.has(id)) grade = R.seoaOnly.grade;
+  if ((R.byId || {})[id]) grade = R.byId[id];  // 52: 몸짓 하나만 규칙에서 빼고 정한 등급(m13 손 흔들기 = 일반)
+  else if (seoaOnly.has(id)) grade = R.seoaOnly.grade;
   else if (from.stage) grade = R.stage[from.stage];
   else grade = R[from.sec];
   chat.push({ id, name: (motions[id] || {}).name || id, source: "chat", grade, from });

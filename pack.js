@@ -86,7 +86,7 @@ const Pack=(()=>{
   const $f=s=>el.querySelector(s);
   // 한 장씩: 가운데 큰 카드(뒷면)
   function dealOne(){const c=fx.res[fx.i],box=$f(".pkone");
-    box.innerHTML=card(c,fx.i);Cards.hydrate(box);
+    box.innerHTML=card(c,fx.i)+(c.item.line?`<p class="pkln">${esc(c.item.line)}</p>`:"");Cards.hydrate(box);  // 52: 카드 아래 한 줄(뒤집힌 뒤 보임)
     const cd=box.firstElementChild;cd.classList.add("deal");
     $f(".pkhint").textContent=T("tapFlip");
     $f(".pkcount").textContent=fx.n>1?T("count",{i:fx.i+1,n:fx.res.length}):"";
@@ -106,7 +106,8 @@ const Pack=(()=>{
   // 결과 묶음: 10장 = 5열 두 줄(이미 뒤집은 카드는 앞면), 1장 = 큰 카드 그대로
   function grid(){const g=$f(".pkgrid");g.innerHTML=fx.res.map(card).join("");Cards.hydrate(g);
     g.querySelectorAll(".pkcard").forEach(cd=>{if(fx.flipped.has(+cd.dataset.i))cd.classList.add("flip","show","now")});
-    g.hidden=false;$f(".pkone").innerHTML="";el.classList.add("gridon");fx.phase="grid";$f(".pkcount").textContent="";return g}
+    g.hidden=false;$f(".pkone").innerHTML="";el.classList.add("gridon");fx.phase="grid";$f(".pkcount").textContent="";
+    Cards.fitNames(g);return g}  // 52: 보인 뒤에 이름 맞추기(숨긴 채로는 폭을 못 잼)
   function flipAll(){if(fx.phase!=="one")return;const g=grid();$f(".pkacts").innerHTML="";$f(".pkhint").textContent="";
     const rest=[...g.querySelectorAll(".pkcard")].filter(cd=>!fx.flipped.has(+cd.dataset.i));
     rest.forEach((cd,k)=>later(()=>flip(cd,+cd.dataset.i),120+k*FX("auto")));

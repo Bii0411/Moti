@@ -39,7 +39,38 @@ for (const s of ["flag", "event"]) for (const k in story.unlock[s]) story.unlock
 if (chat.length !== want.size || chat.some(x => !want.has(x.id))) fail("대화 몸짓이 unlock(ban 제외)과 다름");
 if (chat.some(x => (story.ban || []).includes(x.id))) fail("ban 몸짓이 들어 있음");
 // 49: 예전 선물 카드 g01~g12 = 카드 팩 10장(g01~g10) + 보류 2장(g11·g12, source gift 그대로)
-if (packAll.length + oldGift.length !== 12) fail("카드 팩 + 보류 선물 카드가 12장이 아님");
+const oldPack = packAll.filter(x => /^g(0\d|10)$/.test(x.id));
+if (oldPack.length + oldGift.length !== 12) fail("예전 선물 카드(카드 팩 g01~g10 + 보류 g11·g12)가 12장이 아님");
+// 52: 카드 팩 새 카드 — SECRET 세 장 + 시작화면 인사 한 장(이름·한 줄은 지시문 그대로)
+const motions = JSON.parse(readFileSync("data/motions.json", "utf8"));
+const NEW52 = [
+  ["g13", "귀여운 척 갸웃", "special", "x32", "웅?"],
+  ["g14", "시간 날 때마다 연습한 춤", "special", "x33", "너한테만 보여 주는 거야"],
+  ["g15", "고민하는 척", "special", "x34", "뭐~ 마실까! 아, 너무 신났나"],
+  ["g16", "처음 건넨 인사", "rare", "x23", "안녕? 잘 부탁해."],
+];
+const maxOld = Math.max(...col.items.filter(x => !NEW52.some(n => n[0] === x.id)).map(x => x.no || 0), ...(col.retiredNo || []));
+NEW52.forEach(([id, name, grade, m, line], i) => {
+  const x = col.items.find(x => x.id === id);
+  if (!x) return fail(`52: ${id} ${name} 없음`);
+  if (x.name !== name || x.grade !== grade || x.source !== "pack" || x.hold || (x.play || {}).m !== m || x.line !== line) fail(`52: ${id} 값이 다름(이름·등급·source·몸짓·한 줄)`);
+  if (x.no !== maxOld + 1 + i) fail(`52: ${id} 번호 ${x.no} ≠ ${maxOld + 1 + i}(이어서)`);
+  const mm = motions.motions[m];
+  if (!mm) fail(`52: 몸짓 ${m} 없음`);
+  else if (m !== "x23" && mm.only !== "pack") fail(`52: ${m} 이 카드 팩 전용(only pack)이 아님`);
+  if (!motions.xstage[m]) fail(`52: ${m} 모션 파일 연결(xstage) 없음`);
+  else if (m !== "x23") { const f = JSON.parse(readFileSync(motions.xstage[m].file, "utf8")); if (!f.fingers || Object.keys(f.fingers.tracks).length + Object.keys(f.fingers.hold).length < 30) fail(`52: ${m} 손가락 없음`); if (!motions.xstage[m].inPlace) fail(`52: ${m} 제자리(inPlace) 아님`) }
+});
+if (motions.motions.x23.only !== "onboarding") fail("52: x23 이 시작화면 인사(only onboarding)가 아님");
+// 카드 팩 전용 몸짓은 대화 해금·목록에 없음(앱 unlockedIds 가 only 를 뺌)
+for (const [m, v] of Object.entries(motions.motions)) if (v.only === "pack" && want.has(m)) fail(`52: 카드 팩 전용 ${m} 이 대화 해금에 있음`);
+// 춤은 전신 구도(m23 과 같은 frameById)
+if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById.m23)) fail("52: 춤 x33 이 전신 구도가 아님");
+// 52: 24 손 흔들기(m13) 일반, m16 응원하기는 대화 몸짓 목록에서 빠짐(ban) · 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로
+if ((col.gradeRule.byId || {}).m13 !== "common" || col.items.find(x => x.id === "m13").grade !== "common") fail("52: m13 손 흔들기가 일반이 아님");
+if (!(story.ban || []).includes("m16")) fail("52: m16 응원하기가 ban 에 없음(대화 몸짓 목록에 나옴)");
+if (col.items.find(x => x.id === "g08").play.m !== "m16") fail("52: g08 이 m16 이 아님");
+console.log(`- 52 새 카드: ${NEW52.map(n => `${n[0]} ${n[1]}(${KO[n[2]]})`).join(", ")} · m13 ${KO[col.items.find(x => x.id === "m13").grade]} · m16 ban`);
 if (oldGift.some(x => !x.hold)) fail("보류가 아닌 source gift 칸이 남아 있음(카드 팩으로 바꿔야 함)");
 if (packAll.some(x => x.hold)) console.log("  (참고) 보류인 카드 팩 칸: " + packAll.filter(x => x.hold).map(x => x.id).join("·"));
 if (pool.some(x => !x.play || !x.play.m)) fail("재생 설정(play.m)이 없는 카드 팩 칸");
@@ -64,6 +95,12 @@ if (Math.abs(sum - 100) > 1e-9) fail(`실제 확률 합 ${sum}`);
 const cardSum = pool.reduce((s, x) => s + G.cardPct(x, o, col.items), 0);
 if (Math.abs(cardSum - 100) > 1e-9) fail(`카드별 확률 합 ${cardSum}`);
 for (const g of G.ORDER) if (o[g] > 0 && !pool.some(x => x.grade === g)) fail(`${KO[g]} 확률이 있는데 카드가 없음`);
+// 52: 특별 카드가 있으면 특별은 그대로 나옴(fit 이 레어에 더하지 않음, 확률 보기 줄에 특별)
+if (pool.some(x => x.grade === "special")) {
+  if (G.fit("special", col.items) !== "special" || o.special !== (P.odds.special || 0) || o.rare !== (P.odds.rare || 0)) fail("특별 카드가 있는데 특별 %가 레어에 더해짐");
+  if (!G.grades(col.items).includes("special")) fail("확률 보기 줄에 특별이 없음");
+  console.log(`- 특별 카드 ${pool.filter(x => x.grade === "special").length}장 → 특별 ${o.special}% 그대로(카드 한 장 ${+(o.special / pool.filter(x => x.grade === "special").length).toFixed(4)}%)`);
+}
 // 47: 특별 카드가 모두 보류면 특별 → 레어
 if (!pool.some(x => x.grade === "special")) {
   if (G.fit("special", col.items) !== "rare") fail("특별이 레어로 내려가지 않음");

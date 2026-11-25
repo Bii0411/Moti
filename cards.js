@@ -139,7 +139,11 @@ const Cards=(()=>{
   // 49 카드 팩: 뒷면 한 장(번호 없이 「Seoa」 이름만 — 팩 그림·뽑기 연출의 뒷면)
   const backCell=(ch,no)=>`<div class="mc back" aria-hidden="true"><span class="pc">${backName(ch||"seoa")}${no?`<i class="pcno">${no}</i>`:""}</span></div>`;
   // 그림이 아직 주소로 안 꺼내진 카드: 꺼내는 대로 넣음
-  function hydrate(root){root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
+  // 52: 아래 띠 이름이 넘치면 잘지 않고 글자만 줄임(이름은 그대로). 가장 작은 글자 data/collection.json card.photocard.nameFitMinPx
+  function fitName(e){if(!e)return;e.style.fontSize="";const cw=e.clientWidth,sw=e.scrollWidth;if(!cw||sw<=cw+.5)return;
+    const fs=parseFloat(getComputedStyle(e).fontSize)||10,min=((C().photocard||{}).nameFitMinPx)||6;e.style.fontSize=Math.max(min,Math.floor(fs*cw/sw*96)/100)+"px"}  // 0.96 = 글자 폭 반올림으로 1px 넘치는 것 막기
+  const fitNames=root=>root&&root.querySelectorAll(".pcnm").forEach(fitName);
+  function hydrate(root){fitNames(root);root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
     url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=b.querySelector(".mcsil");if(sv)sv.remove()})})}
   subs.push(k=>{const r=document.getElementById("album");if(!r||!k)return;const id=k.slice(k.indexOf(":")+1),b=r.querySelector(`.mc.got[data-f="${id}"]`);if(!b)return;
     const im=b.querySelector(".mcimg"),a=S.col[id];if(im&&!im.hidden&&a){url(a.char,id).then(u=>{if(u&&im.isConnected)im.src=u});return}  // 43: 다시 만든 그림은 보이는 칸에 바로 바꿔 넣음
@@ -197,8 +201,8 @@ const Cards=(()=>{
     const my=++vTok,mo=motionOf(id),key=a.outfit||C().defaultOutfit||"ops",sc=SCENES[a.scene]||SCENES[0];
     // 38: 목록 칸과 같은 포토카드(테두리·등급 표·아래 띠·번호). 아래 글은 처음 봤을 때 대사만(이름·단계·날짜는 띠 안)
     $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade;$v(".pctag").textContent=tagOf(x.grade);$v(".cvfx").innerHTML=fx(x.grade);
-    $v(".pcnm").textContent=x.name;$v(".pcsub").textContent=bandLine(a);$v(".pcno").textContent=no2(x);
-    const ln=speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;
+    $v(".pcnm").textContent=x.name;$v(".pcsub").textContent=bandLine(a);$v(".pcno").textContent=no2(x);fitName($v(".pcnm"));
+    const ln=x.line||speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;  // 52: 칸에 적힌 한 줄(data/collection.json line, 카드 팩 SECRET 등)이 먼저
     $v('[data-cv="prev"]').disabled=vi<=0;$v('[data-cv="next"]').disabled=vi>=vIds.length-1;
     $v(".cvplace").style.backgroundImage=`url(${sc.img})`;
     // 그림이 아직 없을 때만(만드는 중) 흐린 실루엣
@@ -265,7 +269,8 @@ const Cards=(()=>{
     const nf=CW*d(P.name,.085),sf=CW*d(P.small,.055),nof=CW*d(P.no,.1),bt=Y+CH-BH,lx=X+B,blockH=nf*1.2+sf*1.35,top=bt+(BH-blockH)/2;
     g.font=font(800,nof);g.textBaseline="middle";const nt=no2(x),nw=g.measureText(nt).width;g.fillStyle=gc.ink||"#4b4560";g.fillText(nt,X+CW-B-nw,bt+BH/2);
     const tw2=CW-2*B-nw-CW*.04;g.textBaseline="alphabetic";
-    g.font=font(800,nf);g.fillStyle=gc.ink||"#4b4560";g.fillText(fit(g,x.name,tw2),lx,top+nf*.98);
+    g.font=font(800,nf);const nw2=g.measureText(x.name).width;if(nw2>tw2)g.font=font(800,Math.max(nf*.55,nf*tw2/nw2));  // 52: 긴 이름은 글자만 줄임
+    g.fillStyle=gc.ink||"#4b4560";g.fillText(fit(g,x.name,tw2),lx,top+nf*.98);
     g.font=font(600,sf);g.fillStyle=gc.sub||gc.ink||"#8a8398";g.fillText(fit(g,bandLine(a),tw2),lx,top+nf*1.2+sf*1.08);
     g.restore();
     // 카드 바깥 오른쪽 아래 moti 로고
@@ -281,5 +286,5 @@ const Cards=(()=>{
     PhotoUI.saveFile(f);toast(esc(T("saved")),1800)}
 
   return{running:()=>running,init,has,url,urlNow,blob,put,remove,clear,capture,fill,refresh,stale,verOf,make,motionOf,frameOf,onChange:f=>subs.push(f),perf,queue:()=>queue.map(q=>q.id),vars,cell,backCell,
-    grid,hydrate,open,close,isOpen:()=>vOn,shareImage,state:()=>({vOn,id:vIds[vi],K:!!K,outfit:Stage.outfitNow(),playing:Stage.recentMotion(0)})};
+    grid,hydrate,fitNames,open,close,isOpen:()=>vOn,shareImage,state:()=>({vOn,id:vIds[vi],K:!!K,outfit:Stage.outfitNow(),playing:Stage.recentMotion(0)})};
 })();

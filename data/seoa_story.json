@@ -22,7 +22,7 @@
     { "name": "크리스마스 거리", "img": "bg_seoa_xmas.jpg", "pano": "pano_seoa_xmas.webp", "panoYaw": 0, "panoBright": 1, "episode": true },
     { "name": "서아의 자취방", "img": "bg_seoa_xmas_room.jpg", "pano": "pano_seoa_xmas_room.webp", "panoYaw": -45, "panoBright": 1.25, "episode": true }
   ],
-  "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓(44: m23 바디웨이브 댄스는 옥상 춤 보류로 넣음, 47: m15 다정하게 인사하기 보류로 넣음 — 모션 데이터·컬렉션 칸(hold)은 그대로)",
+  "_ban": "서아에게 맞지 않아 서아 몸짓 목록에서 빼는 몸짓(44: m23 바디웨이브 댄스는 옥상 춤 보류로 넣음, 47: m15 다정하게 인사하기 보류로 넣음 — 모션 데이터·컬렉션 칸(hold)은 그대로) 52: m16 응원하기 = 서아 성격과 안 맞아 대화 몸짓 목록에서 뺌(44 전부터 ban 에 있었음 — 그대로). 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로",
   "ban": ["m14", "m15", "m16", "m22", "m23"],
   "_lead": "단계가 오르면 그 단계 몸짓을 모두 열되, 해금 연출(3D 확대·토스트·앨범 기록)은 lead(대표 몸짓) 하나만. 나머지는 조용히 열어 두고 대화에서 처음 재생될 때 firstSeenText 를 잠깐 띄우며 앨범에 기록한다. 판정 플래그·사건 몸짓은 열릴 때 바로 연출하되 한 번에 여럿이면 하나만, 나머지는 같은 방식으로 둔다.",
   "_firstSeenText": "26: 새 몸짓 작은 알림 문구는 data/ui.json album.firstSeen 으로 옮김",
