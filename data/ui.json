@@ -349,7 +349,11 @@
     "am": "오전",
     "pm": "오후",
     "yesterday": "어제 {time}",
-    "date": "{m}월 {d}일 {time}"
+    "date": "{m}월 {d}일 {time}",
+    "_banner": "68: 앱 안 알림 배너(서아 대화방이 아닌 화면에서 부재중 셀카가 왔을 때). 첫째 줄 bannerName, 둘째 줄 banner → 잠시 뒤 서아가 보낸 문구. demoNow = 시연 패널 버튼",
+    "bannerName": "서아",
+    "banner": "사진을 보냈습니다.",
+    "demoNow": "10분 지난 뒤 셀카 받기"
   },
   "outfit": {
     "_outfit": "의상(14단계, 원고 docs/drafts/14-의상-원고.md). firstPrivate = 처음 흰 옷으로 바뀔 때 서아 한마디",
