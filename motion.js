@@ -9,7 +9,7 @@ const env=(t,d,a=.35,b=.4)=>sm(min(t/a,(d-t)/b,1));
 const pulse=(t,c,w)=>sm(1-abs(t-c)/w);
 const L=(P,b,x,y,z)=>{if(x)P.r(b,"x",x);if(y)P.r(b,"y",y);if(z)P.r(b,"z",z)};
 const M={
- m01:{d:1.6,f(t,e,P){const b=abs(osc(t,2.5))*e;L(P,"Spine01",-.06*b);L(P,"Head",-.1*b,0,.12*e);L(P,"LeftShoulder",0,0,.1*b);L(P,"RightShoulder",0,0,-.1*b);P.m(0,.012*b,0)}},
+ m01:{d:1.6,/* 65: 어깨 들썩임 .1 → .035(팔이 덜 흔들리게) */f(t,e,P){const b=abs(osc(t,2.5))*e;L(P,"Spine01",-.06*b);L(P,"Head",-.1*b,0,.12*e);L(P,"LeftShoulder",0,0,.035*b);L(P,"RightShoulder",0,0,-.035*b);P.m(0,.012*b,0)}},
  m02:{d:1.6,f(t,e,P){const n=max(0,osc(t,1.5,-PI/2))*e;L(P,"neck",.08*n);L(P,"Head",.26*n)}},
  m03:{d:1.4,f(t,e,P){const k=sm(min(t/.15,(1.4-t)/.5,1));L(P,"Spine",-.16*k);L(P,"Head",-.14*k);L(P,"LeftArm",-.35*k,0,.45*k);L(P,"RightArm",-.35*k,0,-.45*k);L(P,"LeftForeArm",-1*k);L(P,"RightForeArm",-1*k);P.m(0,.03*pulse(t,.15,.2),0)}},
  m04:{d:2.2,f(t,e,P){L(P,"Spine01",.16*e);L(P,"Head",.3*e);L(P,"LeftShoulder",0,0,-.08*e);L(P,"RightShoulder",0,0,.08*e);P.m(0,-.01*e,0)}},
