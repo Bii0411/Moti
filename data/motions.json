@@ -19,7 +19,7 @@
     "m15": { "name": "다정하게 인사하기", "emo": "설렘", "motionVer": 2 },
     "m16": { "name": "응원하기", "emo": "위로", "motionVer": 2 },
     "m17": { "name": "무심하게 공감하기", "emo": "냉담", "motionVer": 2 },
-    "m18": { "name": "감싸 안기", "emo": "설렘", "motionVer": 2 },
+    "m18": { "name": "감싸 안기", "emo": "설렘", "motionVer": 3 },
     "m19": { "name": "자신감 있게 설득하기", "emo": "자신감" },
     "m20": { "name": "도발하기", "emo": "장난", "motionVer": 3 },
     "m21": { "name": "도도하게 내려다보기", "emo": "자신감", "motionVer": 3 },
