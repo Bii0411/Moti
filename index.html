@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0454">
+<meta name="moti-version" content="20261126-0500">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -529,11 +529,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0454">
-<link rel="stylesheet" href="photos.css?v=20261126-0454">
-<link rel="stylesheet" href="cards.css?v=20261126-0454">
-<link rel="stylesheet" href="pose.css?v=20261126-0454">
-<link rel="stylesheet" href="pack.css?v=20261126-0454">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0500">
+<link rel="stylesheet" href="photos.css?v=20261126-0500">
+<link rel="stylesheet" href="cards.css?v=20261126-0500">
+<link rel="stylesheet" href="pose.css?v=20261126-0500">
+<link rel="stylesheet" href="pack.css?v=20261126-0500">
 </head>
 <body>
 <div class="app">
@@ -611,19 +611,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0454"></script>
-<script src="motion.js?v=20261126-0454"></script>
-<script src="gacha.js?v=20261126-0454"></script>
-<script src="look.js?v=20261126-0454"></script>
-<script src="alive.js?v=20261126-0454"></script>
-<script src="film.js?v=20261126-0454"></script>
-<script src="photos.js?v=20261126-0454"></script>
-<script src="seoaphoto.js?v=20261126-0454"></script>
-<script src="cards.js?v=20261126-0454"></script>
-<script src="pose.js?v=20261126-0454"></script>
-<script src="pack.js?v=20261126-0454"></script>
-<script src="storypic.js?v=20261126-0454"></script>
-<script src="onboarding.js?v=20261126-0454"></script>
+<script src="icons.js?v=20261126-0500"></script>
+<script src="motion.js?v=20261126-0500"></script>
+<script src="gacha.js?v=20261126-0500"></script>
+<script src="look.js?v=20261126-0500"></script>
+<script src="alive.js?v=20261126-0500"></script>
+<script src="film.js?v=20261126-0500"></script>
+<script src="photos.js?v=20261126-0500"></script>
+<script src="seoaphoto.js?v=20261126-0500"></script>
+<script src="cards.js?v=20261126-0500"></script>
+<script src="pose.js?v=20261126-0500"></script>
+<script src="pack.js?v=20261126-0500"></script>
+<script src="storypic.js?v=20261126-0500"></script>
+<script src="onboarding.js?v=20261126-0500"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -693,9 +693,10 @@ const FACE={
   angry:{Fcl_ALL_Angry:.8},
   sulky:{Fcl_BRW_Sorrow:.35,Fcl_MTH_Sorrow:.3,Fcl_MTH_Small:.2},    // 예전 {Fcl_BRW_Angry:.8,Fcl_EYE_Angry:.35,Fcl_MTH_Small:.5}
   surprised:{Fcl_ALL_Surprised:1},
-  shy:{Fcl_BRW_Sorrow:.45,Fcl_MTH_Fun:.35,Fcl_EYE_Fun:.2}          // 예전 {Fcl_EYE_Joy:.55,Fcl_BRW_Sorrow:.55,Fcl_MTH_Small:.6}
+  shy:{Fcl_BRW_Sorrow:.45,Fcl_MTH_Fun:.35,Fcl_EYE_Fun:.2},         // 예전 {Fcl_EYE_Joy:.55,Fcl_BRW_Sorrow:.55,Fcl_MTH_Small:.6}
+  giggle:{Fcl_EYE_Joy:.55,Fcl_MTH_Fun:.4,Fcl_BRW_Fun:.3}         // 70: 반달 눈웃음(무빙 카드 「입 가리고 웃기」). shy 는 눈썹이 올라가 위를 치켜보는 얼굴이 됨
 };
-const FACEKO={neutral:"무표정",joy:"활짝 웃음",fun:"웃음",soft:"살짝 미소",sorrow:"슬픔",angry:"화남",sulky:"뾰로통",surprised:"놀람",shy:"수줍음"};
+const FACEKO={neutral:"무표정",joy:"활짝 웃음",fun:"웃음",soft:"살짝 미소",sorrow:"슬픔",angry:"화남",sulky:"뾰로통",surprised:"놀람",shy:"수줍음",giggle:"눈웃음"};
 
 const STATES={normal:{ko:"평소",e:"😐"},tired:{ko:"지침",e:"😮‍💨"},sulky:{ko:"삐짐",e:"😤"},birthday:{ko:"생일",e:"🎂"}};
 const SORDER=["normal","tired","sulky","birthday"];

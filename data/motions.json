@@ -84,7 +84,7 @@
     "x17": { "file": "motions/xstage_standard_kick.json", "from": 5.65, "to": 8.85, "fadeOut": 0.75, "inPlace": true, "motionVer": 2 },
     "x18": { "file": "motions/xstage_checking_watch.json", "from": 1.75, "to": 8.4, "skip": [4.43, 7.1], "fadeIn": 0.6, "fadeOut": 0.9, "inPlace": true },
     "m13": { "file": "motions/xstage_wave_and_laugh.json", "from": 3.3, "to": 5.4, "fadeIn": 0.5, "fadeOut": 0.5, "inPlace": true, "motionVer": 2 },
-    "x19": { "file": "motions/xstage_shy_short_laugh.json", "from": 1.6, "to": 4.5, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 95, "motionVer": 2 },
+    "x19": { "file": "motions/xstage_shy_short_laugh.json", "from": 1.6, "to": 4.5, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 95, "motionVer": 3 },
     "x20": { "file": "motions/xstage_wave_hand.json", "from": 0.1, "to": 2.6, "fadeIn": 0.3, "fadeOut": 0.5 },
     "x21": { "file": "motions/xstage_run_look_back.json", "from": 0.05, "inPlace": true, "motionVer": 2 },
     "x22": { "file": "motions/xstage_walk.json", "from": 2.067, "to": 3.233, "inPlace": true, "fadeIn": 0.3, "fadeOut": 0.5 },
