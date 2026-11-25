@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-0529">
+<meta name="moti-version" content="20261126-0533">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-0529">
-<link rel="stylesheet" href="photos.css?v=20261126-0529">
-<link rel="stylesheet" href="cards.css?v=20261126-0529">
-<link rel="stylesheet" href="pose.css?v=20261126-0529">
-<link rel="stylesheet" href="pack.css?v=20261126-0529">
+<link rel="stylesheet" href="onboarding.css?v=20261126-0533">
+<link rel="stylesheet" href="photos.css?v=20261126-0533">
+<link rel="stylesheet" href="cards.css?v=20261126-0533">
+<link rel="stylesheet" href="pose.css?v=20261126-0533">
+<link rel="stylesheet" href="pack.css?v=20261126-0533">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-0529"></script>
-<script src="motion.js?v=20261126-0529"></script>
-<script src="gacha.js?v=20261126-0529"></script>
-<script src="look.js?v=20261126-0529"></script>
-<script src="alive.js?v=20261126-0529"></script>
-<script src="film.js?v=20261126-0529"></script>
-<script src="photos.js?v=20261126-0529"></script>
-<script src="seoaphoto.js?v=20261126-0529"></script>
-<script src="cards.js?v=20261126-0529"></script>
-<script src="pose.js?v=20261126-0529"></script>
-<script src="pack.js?v=20261126-0529"></script>
-<script src="storypic.js?v=20261126-0529"></script>
-<script src="onboarding.js?v=20261126-0529"></script>
+<script src="icons.js?v=20261126-0533"></script>
+<script src="motion.js?v=20261126-0533"></script>
+<script src="gacha.js?v=20261126-0533"></script>
+<script src="look.js?v=20261126-0533"></script>
+<script src="alive.js?v=20261126-0533"></script>
+<script src="film.js?v=20261126-0533"></script>
+<script src="photos.js?v=20261126-0533"></script>
+<script src="seoaphoto.js?v=20261126-0533"></script>
+<script src="cards.js?v=20261126-0533"></script>
+<script src="pose.js?v=20261126-0533"></script>
+<script src="pack.js?v=20261126-0533"></script>
+<script src="storypic.js?v=20261126-0533"></script>
+<script src="onboarding.js?v=20261126-0533"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1112,8 +1112,9 @@ const Stage=(()=>{
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
-    if(mid===IDLE&&!o.tag&&!o.name){c.classList.remove("on");return}
-    c.innerHTML=`▶ ${esc(o.name||MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on");
+    if(mid===IDLE&&!o.tag&&!o.name||((DATA.config||{}).stage||{}).motionCap===false)c.classList.remove("on");  // 71: 「▶ 몸짓 이름」 표시는 data/config.json stage.motionCap(false = 안 보임)
+    else{c.innerHTML=`▶ ${esc(o.name||MNAME[mid]||mid)}${o.tag?` <span class="new">${o.tag}</span>`:""}`;c.classList.add("on")}
+    if(mid===IDLE&&!o.tag&&!o.name)return;
     if((mid!==IDLE||o.name)&&typeof View!=="undefined"){const d=View.motion(mid,cur.sp,o.fx||(o.big?"big":""));if(d)cur.start+=d/1000}  // 17-C: 커지기 시작하고 d ms 뒤 몸짓 시작
     // 50-2·50-3: xstage frame = 평소 구도일 때 이 몸짓 동안만 쓰는 카메라 구도(data/config.json camera 이름). x30 우산은 서아가 제자리에서 반 걸음 내딛는 동안 카메라가 frameMs 에 걸쳐 살짝 다가가
     // 그대로 머물다가, 몸짓이 끝나면 frameBackMs 동안 평소 구도로 천천히 돌아옴. 「동작 줄이기」면 카메라를 움직이지 않음
