@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261125-2335">
+<meta name="moti-version" content="20261125-2338">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -238,7 +238,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hsearch{display:none;flex:0 1 auto;min-width:34px;max-width:170px;height:32px;align-items:center;gap:6px;padding:0 11px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--sub);font-size:12px;-webkit-tap-highlight-color:transparent}
 .hsearch span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hsearch.on{color:var(--text);border-color:var(--pri2)}
-.app.inhome .hsearch{display:flex}
+.app.inhome .hsearch{display:none}  /* 58: 위 검색 버튼 없앰 — 홈에 검색창이 처음부터 보임 */
 .app.inhome .hnote{flex:1 1 0}
 .hq{display:flex;align-items:center;gap:8px;height:42px;padding:0 6px 0 12px;margin:2px 0 14px;background:var(--card);border:1px solid var(--pri2);border-radius:21px;color:var(--sub)}
 .hq input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;-webkit-appearance:none;appearance:none}
@@ -494,11 +494,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261125-2335">
-<link rel="stylesheet" href="photos.css?v=20261125-2335">
-<link rel="stylesheet" href="cards.css?v=20261125-2335">
-<link rel="stylesheet" href="pose.css?v=20261125-2335">
-<link rel="stylesheet" href="pack.css?v=20261125-2335">
+<link rel="stylesheet" href="onboarding.css?v=20261125-2338">
+<link rel="stylesheet" href="photos.css?v=20261125-2338">
+<link rel="stylesheet" href="cards.css?v=20261125-2338">
+<link rel="stylesheet" href="pose.css?v=20261125-2338">
+<link rel="stylesheet" href="pack.css?v=20261125-2338">
 </head>
 <body>
 <div class="app">
@@ -576,19 +576,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261125-2335"></script>
-<script src="motion.js?v=20261125-2335"></script>
-<script src="gacha.js?v=20261125-2335"></script>
-<script src="look.js?v=20261125-2335"></script>
-<script src="alive.js?v=20261125-2335"></script>
-<script src="film.js?v=20261125-2335"></script>
-<script src="photos.js?v=20261125-2335"></script>
-<script src="seoaphoto.js?v=20261125-2335"></script>
-<script src="cards.js?v=20261125-2335"></script>
-<script src="pose.js?v=20261125-2335"></script>
-<script src="pack.js?v=20261125-2335"></script>
-<script src="storypic.js?v=20261125-2335"></script>
-<script src="onboarding.js?v=20261125-2335"></script>
+<script src="icons.js?v=20261125-2338"></script>
+<script src="motion.js?v=20261125-2338"></script>
+<script src="gacha.js?v=20261125-2338"></script>
+<script src="look.js?v=20261125-2338"></script>
+<script src="alive.js?v=20261125-2338"></script>
+<script src="film.js?v=20261125-2338"></script>
+<script src="photos.js?v=20261125-2338"></script>
+<script src="seoaphoto.js?v=20261125-2338"></script>
+<script src="cards.js?v=20261125-2338"></script>
+<script src="pose.js?v=20261125-2338"></script>
+<script src="pack.js?v=20261125-2338"></script>
+<script src="storypic.js?v=20261125-2338"></script>
+<script src="onboarding.js?v=20261125-2338"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2552,8 +2552,8 @@ function renderHome(){
   if(H.view&&chBy(H.view))return renderChar(h,chBy(H.view));
   H.view=null;
   const q=!!norm(H.q),sp=specialRow(),chips=((DATA.ui||{}).home||{}).tagChips;  // 칩 목록은 배열이라 UI() 대신 바로 읽음
-  const searching=H.search||q;
-  h.innerHTML=`${searching?`<div class="hq"><span class="ic">${Icon.svg("search",16)}</span><input id="hQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(UI("home.search"))}" value="${esc(H.q)}"><button class="x" id="hQx" aria-label="${esc(UI("home.close"))}">${Icon.svg("close",16)}</button></div>`:""}
+  const searching=true;  // 58: 검색창은 홈에 늘 보임(예전엔 위 버튼을 눌러야 열림)
+  h.innerHTML=`${searching?`<div class="hq"><span class="ic">${Icon.svg("search",16)}</span><input id="hQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="${esc(UI("home.search"))}" value="${esc(H.q)}">${q?`<button class="x" id="hQx" aria-label="${esc(UI("home.close"))}">${Icon.svg("close",16)}</button>`:""}</div>`:""}
   ${!q&&sp.length?`<section class="hsec"><h2>${esc(UI("home.specialRow"))}</h2><div class="hrow hsp">${sp.map(st=>{const c=chBy(st.char||"seoa");return `<button class="spc" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})">${st.new?`<span class="nw">${esc(UI("home.newTag"))}</span>`:""}</span><span class="tx"><b>${esc(st.name)}</b><small>${esc(c?c.name:"")}</small>${spPrice(st)}</span></button>`}).join("")}</div></section>`:""}
   <section class="hsec"><div class="hh"><h2>${esc(UI("home.find"))}</h2><button class="hsort" id="hSort" aria-label="${esc(UI("home.sortLabel"))}">${Icon.svg("sort",14)}<span>${esc(UI("home.sorts."+H.sort))}</span></button></div>
   <div class="hchips">${[""].concat(Array.isArray(chips)?chips:[]).map(t=>`<button class="hchip${H.tag===t?" on":""}" data-t="${esc(t)}">${esc(t?"#"+t:UI("home.all"))}</button>`).join("")}</div>
@@ -2567,7 +2567,7 @@ function renderHome(){
     // 글자를 칠 때마다 아래 목록만 다시 그림(입력창은 그대로). 검색어가 생기거나 없어질 때만 홈 전체(특별 에피소드 줄 숨김/보임)
     qi.oninput=()=>{const was=!!norm(H.q);H.q=qi.value;renderSearchBtn();if(was!==!!norm(H.q)){renderHome();const n=$("#hQ");n.focus();n.setSelectionRange(n.value.length,n.value.length)}else renderGrid()};
     qi.onkeydown=e=>{if(e.key==="Enter")qi.blur()};
-    $("#hQx").onclick=()=>{H.q="";H.search=false;renderHome()};
+    const qx=$("#hQx");if(qx)qx.onclick=()=>{H.q="";H.search=false;renderHome()};  // 58: X = 검색어 지우기(검색창은 그대로)
   }
 }
 // 캐릭터 화면(23): 위 = 큰 카드 사진·이름·태그·한 줄 소개(desc), 아래 = 기본·특별 에피소드(예전 고른 카드 아래 목록 그대로)
