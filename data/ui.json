@@ -190,7 +190,7 @@
     "_me": "70: 마이 탭 맨 위 「내 정보」 칸과 이름 바꾸기 시트(me). nameChangeDia = 두 번째 변경부터 드는 다이아, firstChangeFree = 첫 변경 무료. paidNote·paid 의 {n} = nameChangeDia. noName = 이름이 없을 때 칸에 보이는 글자. showEndings = 엔딩 기록 칸(54)을 마이 탭에 보일지(기록은 늘 저장)",
     "me": {
       "title": "내 정보",
-      "nameLabel": "서아가 부르는 이름",
+      "nameLabel": "캐릭터가 부르는 이름",
       "noName": "-",
       "edit": "변경",
       "sheetTitle": "이름 바꾸기",
@@ -233,11 +233,11 @@
       },
       {
         "icon": "history",
-        "text": "서아가 예전 대화까지 기억해요"
+        "text": "캐릭터가 예전 대화까지 기억해요"
       },
       {
         "icon": "message",
-        "text": "서아가 먼저 말을 걸어요"
+        "text": "캐릭터가 먼저 말을 걸어요"
       },
       {
         "icon": "diamond",
