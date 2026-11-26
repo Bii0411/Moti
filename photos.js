@@ -177,7 +177,10 @@ const Cam=(()=>{
     if(on)return;if(!root)build();
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
-    info=o&&o.pose?o.pose:null;  // 78: 직전 대화 몸짓을 이어받지 않음 — 포즈를 고르지 않았으면 기본 자세paused=false;held=null;Stage.camLoop(info);if(o&&o.pose&&o.pose.f)Stage.setFace(o.pose.f);
+    const okPose=x=>!!x&&(typeof Pose==="undefined"||!!Pose.info(x.ref||x.id));  // 78-1: 쓸 수 없는 포즈(일반 몸짓·안 가진 포즈 카드)는 받지 않음
+    if(o&&o.pose&&!okPose(o.pose))o={...o,pose:null};
+    info=o&&o.pose?o.pose:null;  // 78: 직전 대화 몸짓을 이어받지 않음 — 포즈를 고르지 않았으면 기본 자세
+    paused=false;held=null;Stage.camLoop(info);if(o&&o.pose&&o.pose.f)Stage.setFace(o.pose.f);
     const [pa,pb]=pLim();yaw=C().startYawDeg||0;zoom=clamp(C().startZoom||0,0,1);pitch=clamp(C().startPitchDeg!=null?C().startPitchDeg:0,pa,pb);ptrs.clear();pinch=drag=null;
     const sc=SCENES[S.scene]||SCENES[0];fr.style.backgroundImage=`url(${sc.img})`;Shot.loadImg(sc.img);
     const d=$("#bgdim"),cd=root.querySelector("#camDim");if(d){cd.className=d.className;cd.style.cssText=d.style.cssText}
@@ -196,7 +199,8 @@ const Cam=(()=>{
     if(unlockQ.length&&!unlockBusy)setTimeout(unlockNext,h&&h.mid?Stage.dur(h.mid)*1000+700:600);
   }
   // 48: 촬영 중에 포즈를 바꿈(멈춤을 풀고 처음부터 반복)
-  function setPose(x){if(!on||!x)return;info=x;paused=false;Stage.camLoop(null);Stage.camLoop(info);if(x.f)Stage.setFace(x.f);render()}
+  function setPose(x){if(!on||!x)return;if(typeof Pose!=="undefined"&&!Pose.info(x.ref||x.id))return;  // 78-1: 쓸 수 있는 포즈만
+   info=x;paused=false;Stage.camLoop(null);Stage.camLoop(info);if(x.f)Stage.setFace(x.f);render()}
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
   // 셔터 소리: 짧은 잡음 두 덩어리(찰-칵). 아이폰은 누른 그 순간(같은 작업) 안에서 소리 장치를 깨워야 해서 셔터 처리 맨 앞에서 부름
   let ac=null;

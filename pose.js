@@ -21,7 +21,8 @@ const Pose=(()=>{
   //   이미 가졌으면 아무 일 없음(중복 없음). 알림·연출은 등급 카드 알림 그대로(notifyNew). 돌려주는 값 = 새로 얻은 카드 수
   function cardEvent(name){let n=0;COL.items.filter(x=>x.only===name&&!S.col[x.id]).forEach(x=>{S.col[x.id]=seenNow({line:"",event:name});n++;save();Cards.capture(x.id);notifyNew(x);if(curTab==="album")renderAlbum(x.id)});return n}
   // 카드 id → 촬영 화면이 반복할 몸짓. 선물 카드(g01…)는 그 카드의 재생 설정(Cards.motionOf)
-  function info(id){const it=colBy(id);if(!it)return null;const m=Cards.motionOf(id)||{};
+  function info(id){const it=colBy(id);if(!usable(it))return null;  // 78-1: 지금 쓸 수 있는 촬영 전용 포즈만(무료 포즈, 또는 가진 포즈 카드)
+   const m=Cards.motionOf(id)||{};
     return{id:m.m||id,sp:m.sp||1,name:it.name,ref:id,f:m.f||null,pose:true}}
   function sheet(where){
     from=where==="cam"?"cam":"chat";
@@ -41,12 +42,14 @@ const Pose=(()=>{
     if(from==="cam"&&Cam.isOpen()){Cam.setPose(x);return}
     ask(id)}
   // A: 대화에서 부탁. 답장 처리(index.html send)가 take() 로 꺼내 그 몸짓을 꼭 재생하고, 답장에 pose 표시를 남김
-  function ask(id){const it=colBy(id);if(!it||busy)return;
+  function ask(id){const it=colBy(id);if(!it||busy)return;if(!usable(it))return toast(esc(T("locked")));  // 78-1
     if(curTab!=="chat"||(S.room||"seoa")!=="seoa")return;
     pending=id;send(T("ask",{name:it.name}))}
   function take(){const p=pending;pending=null;return p}
   // 답장 아래 「이 포즈로 찍기」(index.html renderLog 가 그림)
   const shootBtn=id=>`<button class="poseshoot" data-pose="${esc(id)}">${icon("camera")}<span>${esc(T("shoot"))}</span></button>`;
-  function init(){grantFree();const L=$("#log");if(L)L.addEventListener("click",e=>{const b=e.target.closest("[data-pose]");if(!b)return;const x=info(b.dataset.pose);if(x)Cam.open({pose:x})})}
+  function init(){grantFree();const L=$("#log");if(L)L.addEventListener("click",e=>{const b=e.target.closest("[data-pose]");if(!b)return;
+    // 78-1: 예전 대화에 남은 「이 포즈로 찍기」도 지금 권한을 다시 확인(무료 포즈 · 가진 포즈 카드만). 안 되면 안내만, 카메라를 열지 않음
+    const x=info(b.dataset.pose);if(!x)return toast(esc(T("locked")));Cam.open({pose:x})})}
   return{sheet,info,take,shootBtn,init,grantFree,cardEvent,poses,lists,usable};
 })();
