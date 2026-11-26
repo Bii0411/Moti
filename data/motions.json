@@ -72,7 +72,17 @@
     "x27": { "name": "칵테일", "emo": "기쁨", "only": "gift" },
     "x28": { "name": "따뜻한 수건", "emo": "수줍음", "only": "gift" },
     "x29": { "name": "바 여분 열쇠", "emo": "수줍음", "only": "gift" },
-    "x30": { "name": "우산", "emo": "장난", "only": "gift" }
+    "x30": { "name": "우산", "emo": "장난", "only": "gift" },
+    "x40": { "name": "손가락으로 가리키기", "emo": "장난", "only": "preview" },
+    "x41": { "name": "어이없어 양손 들기", "emo": "황당함", "only": "preview" },
+    "x42": { "name": "옆을 바라보기", "emo": "평온", "only": "preview" },
+    "x43": { "name": "머리 가볍게 만지기", "emo": "평온", "only": "preview" },
+    "x44": { "name": "장난스럽게 물러서기", "emo": "장난", "only": "preview" },
+    "x45": { "name": "팔꿈치로 툭 치기", "emo": "장난", "only": "preview" },
+    "x46": { "name": "고개 갸웃하며 손 올리기", "emo": "궁금함", "only": "preview" },
+    "x47": { "name": "질투하기", "emo": "질투", "only": "preview" },
+    "x48": { "name": "부끄러워 얼굴 가리기", "emo": "수줍음", "only": "preview" },
+    "x49": { "name": "수줍게 웃기", "emo": "수줍음", "only": "preview" }
   },
   "_xstageReserve": "따로 둔 XSTAGE 모션(액션 계열). 감정 태그 없음, 사이트에서 불러오지도 재생하지도 않음(몸짓 고르기·시연 패널에 안 나옴). 쓰려면 motions 에 이름·감정을 넣고 xstage 로 옮긴다. 파일은 motions/ 에 그대로 있음",
   "xstageReserve": {
@@ -136,7 +146,17 @@
     "x27": { "file": "motions/xstage_shake_head_up_down.json", "from": 3.0, "to": 8.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 7, "inPlace": true },
     "x28": { "file": "motions/xstage_shy_touching_hands.json", "from": 0.1, "to": 3.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 78, "inPlace": true },
     "x29": { "file": "motions/xstage_shy_avoiding_eye_contact.json", "from": 2.0, "to": 6.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 93, "inPlace": true },
-    "x30": { "file": "motions/xstage_gift_umbrella.json", "from": 0, "to": 3.4, "fadeIn": 0.3, "fadeOut": 0.5, "inPlace": true, "face": "fun", "faceEmo": "장난", "faceAt": 1.0, "frame": "umbrellaIn", "frameMs": 800, "frameBackMs": 1600, "motionVer": 2 }
+    "x30": { "file": "motions/xstage_gift_umbrella.json", "from": 0, "to": 3.4, "fadeIn": 0.3, "fadeOut": 0.5, "inPlace": true, "face": "fun", "faceEmo": "장난", "faceAt": 1.0, "frame": "umbrellaIn", "frameMs": 800, "frameBackMs": 1600, "motionVer": 2 },
+    "x40": { "file": "motions/xstage_point_finger_up_down.json", "from": 5.3, "to": 10.9, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 7, "inPlace": true },
+    "x41": { "file": "motions/xstage_ridiculous_raise_hands.json", "from": 1.8, "to": 6.4, "skip": [3.3, 4.8], "skipBlend": 0.3, "fadeIn": 0.4, "fadeOut": 0.6, "turn": 2, "inPlace": true },
+    "x42": { "file": "motions/xstage_standing_look_side.json", "from": 0.9, "to": 6.0, "skip": [2.3, 4.6], "skipBlend": 0.3, "fadeIn": 0.4, "fadeOut": 0.6, "inPlace": true },
+    "x43": { "file": "motions/xstage_adjusting_hair_head.json", "from": 6.2, "to": 10.6, "fadeIn": 0.5, "fadeOut": 0.6, "turn": 5, "inPlace": true },
+    "x44": { "file": "motions/xstage_backstep_tease.json", "from": 3.0, "to": 6.6, "fadeIn": 0.4, "fadeOut": 1.0, "turn": 20 },
+    "x45": { "file": "motions/xstage_elbow_nudge.json", "from": 0.7, "to": 5.3, "fadeIn": 0.4, "fadeOut": 0.6, "turn": 30, "inPlace": true },
+    "x46": { "file": "motions/xstage_head_tilt_raised_hand.json", "from": 1.2, "to": 6.0, "skip": [2.6, 4.6], "skipBlend": 0.3, "fadeIn": 0.4, "fadeOut": 0.6, "inPlace": true },
+    "x47": { "file": "motions/xstage_cute_jealousy2.json", "from": 1.4, "to": 4.6, "fadeIn": 0.4, "fadeOut": 0.6, "inPlace": true },
+    "x48": { "file": "motions/xstage_lovely_embarrassing2.json", "from": 0.9, "to": 4.6, "fadeIn": 0.4, "fadeOut": 0.7, "inPlace": true },
+    "x49": { "file": "motions/xstage_shy_short_laugh.json", "from": 1.6, "to": 4.5, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 95 }
   },
   "_hands": "53: 기본 손. 모션에 손가락 데이터(fingers)가 없을 때(손가락 없는 XSTAGE 모션·motion.js 의 코드 몸짓·대기 동작·표정만 있는 상태) 손가락에 거는 모양. relaxed = 손가락 뼈마다 기본 자세(쫙 편 손) 대비 지역 회전 [x,y,z,w] — XSTAGE 걷기(x22) 원본 손가락에서 뽑은 편하게 늘어뜨린 손(마디마다 조금씩 굽고 엄지는 안쪽). amount = 그 회전을 몇 배로(0 = 쫙 편 손, 1 = relaxed 그대로, 1보다 크면 더 쥔 손), thumb = 엄지만 따로(없으면 amount). byMotion = 손 모양이 뜻을 가진 몸짓만 예외. 손가락 데이터가 있는 모션은 이 값을 쓰지 않고 원본 손가락(처음·끝 섞기 동안 이 손과 섞임). blendSec = 몸짓이 바뀔 때 손 모양이 따라가는 시간(초). 기본 손이 바뀌어 다르게 보이게 된 몸짓은 motionVer 를 올려 카드 그림을 다시 만듦(코드 몸짓은 motions 의 motionVer, cards.js verOf)",
   "hands": {
