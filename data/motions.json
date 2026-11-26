@@ -71,7 +71,7 @@
     "x26": { "name": "구급상자", "emo": "당황", "only": "gift" },
     "x27": { "name": "칵테일", "emo": "기쁨", "only": "gift" },
     "x28": { "name": "따뜻한 수건", "emo": "수줍음", "only": "gift" },
-    "x29": { "name": "꽃다발", "emo": "수줍음", "only": "gift" },
+    "x29": { "name": "바 여분 열쇠", "emo": "수줍음", "only": "gift" },
     "x30": { "name": "우산", "emo": "장난", "only": "gift" }
   },
   "_xstageReserve": "따로 둔 XSTAGE 모션(액션 계열). 감정 태그 없음, 사이트에서 불러오지도 재생하지도 않음(몸짓 고르기·시연 패널에 안 나옴). 쓰려면 motions 에 이름·감정을 넣고 xstage 로 옮긴다. 파일은 motions/ 에 그대로 있음",
