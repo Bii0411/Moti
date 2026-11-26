@@ -913,7 +913,7 @@ const Stage=(()=>{
   function xsRest(wait){if(restOn)return;restOn=true;const P=(DATA.config&&DATA.config.preload)||{};
     const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:P.idleTimeoutMs||3000}):setTimeout(f,P.gapMs||300);
     const next=ids=>{const id=ids.shift();if(!id)return;idle(()=>xsLoad(id).then(()=>next(ids)))};
-    const go=()=>{if(wait&&wait())return setTimeout(go,P.busyCheckMs||1000);next(Object.keys(XS).filter(id=>!xsCache[id]))};
+    const go=()=>{if(wait&&wait())return setTimeout(go,P.busyCheckMs||1000);next(Object.keys(XS).filter(id=>!xsCache[id]&&(DEBUG||((DATA.motions.motions||{})[id]||{}).only!=="preview")))};  // 84-1: 검수 전용(only preview) 파일은 ?debug=1 일 때만 미리 받음(일반 사용자 기기에 안 받음)
     ready.then(()=>xsQ).then(()=>setTimeout(go,P.restDelayMs!=null?P.restDelayMs:1500))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
