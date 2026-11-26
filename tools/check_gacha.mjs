@@ -25,7 +25,7 @@ console.log(`- 도감 칸: 대화 ${chat.length} + 연출 ${col.items.filter(x =
   // 50-1: 순간 선물마다 카드 한 장, 카드 몸짓 = 선물 reaction, 묶음(bonds) 없음
   if (GJ.bonds) fail("gifts.json 에 bonds 가 남아 있음(50-1 에서 없앰)");
   if (gl.some(g => g.reactions)) fail("선물에 reactions(묶음별)가 남아 있음 — reaction 하나로");
-  for (const x of momentC) { const g = gl.find(g => g.id === x.gift); if (!g || g.kind !== "moment") fail(`${x.id}: 순간 선물 ${x.gift} 없음`); else if (g.reaction !== (x.play || {}).m) fail(`${x.id}: 반응 몸짓이 gifts.json reaction 과 다름`); if (x.bond) fail(`${x.id}: bond 가 남아 있음`); if (x.grade !== "rare") fail(`${x.id}: 등급이 레어가 아님`) }
+  for (const x of momentC) { const g = gl.find(g => g.id === x.gift); if (!g || g.kind !== "moment") fail(`${x.id}: 순간 선물 ${x.gift} 없음`); else if (g.reaction !== (x.play || {}).m) fail(`${x.id}: 반응 몸짓이 gifts.json reaction 과 다름`); if (x.bond) fail(`${x.id}: bond 가 남아 있음`); if (x.grade !== (x.id === "gm06" ? "special" : "rare")) fail(`${x.id}: 등급이 ${x.id === "gm06" ? "특별(SECRET, 87-1)" : "레어"}가 아님`) }
   for (const g of mg) if (momentC.filter(x => x.gift === g.id).length !== 1) fail(`순간 선물 ${g.id} 카드가 한 장이 아님`);
   if (momentC.some((x, i) => x.name !== (gl.find(g => g.id === x.gift) || {}).name || x.no !== 46 + i)) fail("순간 카드 이름·번호(46~)가 선물 순서와 다름");
   for (const r of ((GJ.momentFallback || {}).rules || [])) if (!mg.some(g => g.id === r.gift)) fail(`임시 규칙 ${r.gift}: 순간 선물이 아님`);
@@ -231,7 +231,8 @@ run("1장·10장 섞어 · 천장 켬", Array.from({ length: N }, () => rnd() < 
   const dur = x.to - x.from - (x.skip ? x.skip[1] - x.skip[0] : 0); if (!(dur > 5 && dur < 10)) fail(`86-1: x31 재생 길이 ${dur}`);
   const GJ = JSON.parse(readFileSync("data/gifts.json", "utf8")), ring = GJ.list.find(g => g.id === "ring") || {};
   if (ring.reaction !== "x31" || ring.price !== 300 || ring.stage !== 6 || ring.kind !== "moment" || ring.icon !== "icons/gift2_ring.png") fail("86-1: 반지 선물 값(반응·가격·단계·종류·그림)이 바뀜");
-  const gm = col.items.find(i => i.id === "gm06") || {}; if (gm.no !== 51 || gm.grade !== "rare" || gm.gift !== "ring" || gm.source !== "moment" || (gm.play || {}).m !== "x31") fail("86-1: gm06 번호·등급·선물·몸짓이 다름");
+  const gm = col.items.find(i => i.id === "gm06") || {}; if (gm.no !== 51 || gm.grade !== "special" || gm.gift !== "ring" || gm.source !== "moment" || (gm.play || {}).m !== "x31") fail("86-1·87-1: gm06 번호·등급(SECRET = special)·선물·몸짓이 다름");
+  if (G.pool(col.items).some(i => i.id === "gm06")) fail("87-1: gm06(순간 선물 카드)이 히든 카드 뽑기 칸에 들어감");
   const others = col.items.filter(i => i.id !== "gm06" && ((i.play || {}).m === "x31" || i.id === "x31")); if (others.length) fail(`86-1: x31 을 쓰는 다른 카드 ${others.map(i => i.id)}`);
   const where = { "data/seoa_story.json": 0, "data/motion_keywords.json": 0, "data/together.json": 0, "data/pack.json": 0, "data/photos.json": 0, "data/seoa_photo.json": 0, "data/config.json": 0, "data/emotion_face.json": 0 };
   for (const p in where) if (/"x31"/.test(readFileSync(p, "utf8"))) fail(`86-1: ${p} 에 x31 이 있음`);
@@ -239,7 +240,7 @@ run("1장·10장 섞어 · 천장 켬", Array.from({ length: N }, () => rnd() < 
   const mf = (motions.motionFace || {}).x31 || {}; if (!mf.gift || !Array.isArray(mf.seq) || mf.seq.length < 3) fail("86-1: x31 표정 흐름 없음");
   const GF = ["x31", "x26", "x30"];  // 86-2: 구급상자 x26·우산 x30 도 선물 반응 표정 흐름
   if (Object.entries(motions.motionFace || {}).some(([k, v]) => !GF.includes(k) && v.gift)) fail("86-1·86-2: x31·x26·x30 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
-  console.log(`- 86-1 반지 반응 x31: ${x.from}~${x.to}초(건너뜀 ${x.skip}) = ${dur.toFixed(2)}초 · 표정 ${mf.seq.map(s => s.at + s.f).join("→")} · gm06 51번 레어`); }
+  console.log(`- 86-1 반지 반응 x31: ${x.from}~${x.to}초(건너뜀 ${x.skip}) = ${dur.toFixed(2)}초 · 표정 ${mf.seq.map(s => s.at + s.f).join("→")} · gm06 51번 SECRET(special, 87-1)`); }
 // 시연 지정: 첫 장만 그것으로
 {
   const a = G.draw(10, o, P.pity, P.pity.count, col.items, rnd, { item: pool[pool.length - 1].id });
