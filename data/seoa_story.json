@@ -74,5 +74,25 @@
     "x15": "늘 먼저 다가오던 그녀가, 한 걸음 망설이는 날.",
     "x09": "돌아서려는 당신을, 그녀가 먼저 붙잡는다면.",
     "x16": "바 문이 거칠게 열리는 밤, 그녀의 눈빛이 바뀐다."
+  },
+  "_photoAsk": "83 서아의 사진 촬영 제안(서버 S5 photo_ask). ids = 받는 제안 id, pose = 받는 포즈(촬영 전용 p01 손가락 하트), stage = 그 id 가 나오는 본편 단계. faces = 갈래별 기본 표정(face = 제안할 때, camera_face = 제안 버튼으로 연 촬영 화면) — 서버 값이 allowed 안에 있으면 서버 값. react = 제안 촬영에서 사진을 한 장 이상 저장하고 대화방에 돌아왔을 때 서아 말(이벤트마다 한 번, 원고 = 83 지시문)",
+  "photoAsk": {
+    "ids": ["photo_3", "photo_6"],
+    "pose": "p01",
+    "stage": { "photo_3": 3, "photo_6": 6 },
+    "faces": {
+      "photo_3_tease": { "face": "smirk", "camera_face": "wink" },
+      "photo_3_care": { "face": "soft", "camera_face": "shy" },
+      "photo_6": { "face": "joy", "camera_face": "soft" }
+    },
+    "allowed": {
+      "photo_3": { "face": ["smirk", "soft"], "camera_face": ["wink", "shy"] },
+      "photo_6": { "face": ["joy"], "camera_face": ["soft"] }
+    },
+    "react": {
+      "photo_3_tease": "잘 간직해. 두 번은 안 해 줄지도 모르니까.",
+      "photo_3_care": "…나중에 나한테도 보여 줘.",
+      "photo_6": "잘 나왔어? 우리 다음에도 찍자."
+    }
   }
 }
