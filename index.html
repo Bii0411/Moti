@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-2134">
+<meta name="moti-version" content="20261126-2318">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -570,12 +570,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-2134">
-<link rel="stylesheet" href="photos.css?v=20261126-2134">
-<link rel="stylesheet" href="cards.css?v=20261126-2134">
-<link rel="stylesheet" href="pose.css?v=20261126-2134">
-<link rel="stylesheet" href="pack.css?v=20261126-2134">
-<link rel="stylesheet" href="together.css?v=20261126-2134">
+<link rel="stylesheet" href="onboarding.css?v=20261126-2318">
+<link rel="stylesheet" href="photos.css?v=20261126-2318">
+<link rel="stylesheet" href="cards.css?v=20261126-2318">
+<link rel="stylesheet" href="pose.css?v=20261126-2318">
+<link rel="stylesheet" href="pack.css?v=20261126-2318">
+<link rel="stylesheet" href="together.css?v=20261126-2318">
 </head>
 <body>
 <div class="app">
@@ -656,21 +656,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-2134"></script>
-<script src="motion.js?v=20261126-2134"></script>
-<script src="gacha.js?v=20261126-2134"></script>
-<script src="look.js?v=20261126-2134"></script>
-<script src="alive.js?v=20261126-2134"></script>
-<script src="film.js?v=20261126-2134"></script>
-<script src="photos.js?v=20261126-2134"></script>
-<script src="seoaphoto.js?v=20261126-2134"></script>
-<script src="cards.js?v=20261126-2134"></script>
-<script src="pose.js?v=20261126-2134"></script>
-<script src="photoask.js?v=20261126-2134"></script>
-<script src="together.js?v=20261126-2134"></script>
-<script src="pack.js?v=20261126-2134"></script>
-<script src="storypic.js?v=20261126-2134"></script>
-<script src="onboarding.js?v=20261126-2134"></script>
+<script src="icons.js?v=20261126-2318"></script>
+<script src="motion.js?v=20261126-2318"></script>
+<script src="gacha.js?v=20261126-2318"></script>
+<script src="look.js?v=20261126-2318"></script>
+<script src="alive.js?v=20261126-2318"></script>
+<script src="film.js?v=20261126-2318"></script>
+<script src="photos.js?v=20261126-2318"></script>
+<script src="seoaphoto.js?v=20261126-2318"></script>
+<script src="cards.js?v=20261126-2318"></script>
+<script src="pose.js?v=20261126-2318"></script>
+<script src="photoask.js?v=20261126-2318"></script>
+<script src="together.js?v=20261126-2318"></script>
+<script src="pack.js?v=20261126-2318"></script>
+<script src="storypic.js?v=20261126-2318"></script>
+<script src="onboarding.js?v=20261126-2318"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -708,7 +708,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0,loopFrom:x.loopFrom!=null?+x.loopFrom:null}}  // 78: loopFrom
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0,loopFrom:x.loopFrom!=null?+x.loopFrom:null,hipScale:x.hipScale!=null?Math.max(0,Math.min(1,+x.hipScale)):1,back:!!x.back}}  // 84-2 D-7: hipScale·back(x44)  // 78: loopFrom
   // 50: ?giftPreview=1(확인용) — 순간 선물 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신함(data/gifts.json preview). ver 0.5 = 진짜 모션이 오면 카드 그림을 다시 만들게
   if(qs.get("giftPreview")==="1")for(const id in GIFT.preview||{}){const src=GIFT.preview[id];if(id[0]==="_"||XS[id]||RIG.M[id])continue;
     if(XS[src])XS[id]={...XS[src],ver:.5};else if(RIG.M[src])RIG.M[id]=RIG.M[src];MNAME[id]=(MNAME[src]||src)+" (미리보기)"}
@@ -904,8 +904,10 @@ const Stage=(()=>{
     requestAnimationFrame(frame);
   }
   // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
+  // 84-2 F-2: 같은 파일을 쓰는 몸짓(x19·x49 · x22·x38 · m14·x25)은 파일을 한 번만 받고 한 번만 풀어 같이 씀(xsUrl). 구간 값(to 등)은 몸짓마다 따로
+  const xsUrl={};
   function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
-    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new WeakMap();if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
+    return xsWait[id]||(xsWait[id]=(xsUrl[x.url]||(xsUrl[x.url]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new WeakMap();return d}).catch(()=>{delete xsUrl[x.url];return null}))).then(d=>{if(!d){delete xsWait[id];return null}if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}))}
   // 39: 미리 받기 줄. xsQueue = 차례로 받기(앞 것이 끝나야 다음). xsRest = 나머지 모션을 쉬는 틈에 하나씩(한 번만 시작).
   // 대화 화면이 뜬 뒤 부름. wait() 가 참이면(첫 만남 연출 중 등) 기다렸다가. 시간 값 data/config.json preload
   let xsQ=Promise.resolve(),restOn=false;
@@ -917,7 +919,7 @@ const Stage=(()=>{
     ready.then(()=>xsQ).then(()=>setTimeout(go,P.restDelayMs!=null?P.restDelayMs:1500))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
-  const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
+  const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.back?2:1)*(x.repeat||1)};  // 84-2: back = 구간을 끝까지 재생한 뒤 거꾸로 처음까지(물러섰다 같은 발 디딤으로 제자리로)
   // 45-1 손가락: x·y·z 정수(scale 배)만 담겨 있어 w 를 되살려 Float32Array 로 한 번 풀어 둠(d.fq). hold = 내내 같은 자세(한 프레임)
   function xsFq(d){if(d.fq)return d.fq;const F=d.fingers,s=F.scale||100,fq={};
     const un=(a,o,i)=>{const x=a[i*3]/s,y=a[i*3+1]/s,z=a[i*3+2]/s;o[i*4]=x;o[i*4+1]=y;o[i*4+2]=z;o[i*4+3]=Math.sqrt(Math.max(0,1-x*x-y*y-z*z))};
@@ -969,7 +971,7 @@ const Stage=(()=>{
   // 34: win.turn = 모션 전체를 세로축으로 돌리는 각도(도, + = 위에서 볼 때 시계 반대). 원본 배우가 옆을 보고 찍힌 모션(입 가리고 웃기)을 정면으로
   // 43: skipBlend = 건너뛰기(skip) 이음매 앞 몇 초 동안 건너뛴 뒤 자세와 섞음(이음매에서 툭 튀지 않게). damp = 뼈마다 모션을 따르는 몫(0~1, 나머지는 기본 자세. 고개를 너무 숙이는 모션 등)
   function xsApply(d,mt,win){
-    const cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1);let tt=win.from+(win.repeat>1?mt%cyc:mt),t2=0,kb=0;
+    const cyc0=xsCyc(win,d.duration),cyc=win.back?cyc0*2:cyc0,dur=cyc*(win.repeat||1);let lm=win.repeat>1?mt%cyc:mt;if(win.back&&lm>cyc0)lm=cyc-lm;let tt=win.from+lm,t2=0,kb=0;  // 84-2: back = 끝에서 거꾸로
     if(win.skip){const SL=win.skip[1]-win.skip[0],sb=win.skipBlend||0;if(tt>=win.skip[0])tt+=SL;else if(sb>0&&tt>win.skip[0]-sb){const k=(tt-win.skip[0]+sb)/sb;kb=k*k*(3-2*k);t2=tt+SL}}
     const a=xsAlign(d),N=d.frames,f=tt*d.fps,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
     const f2=t2*d.fps,i2=Math.min(N-1,Math.floor(f2)),j2=Math.min(N-1,i2+1),u2=f2-i2;
@@ -990,7 +992,7 @@ const Stage=(()=>{
     if(win.damp)for(const k in xsTW)delete xsTW[k];
     if(d.fingers)xsFingers(d,a,tt,t2,kb,tn,w);
     const h=d.hip,h1=k=>h[i*3+k]+(h[j*3+k]-h[i*3+k])*u,ip=k=>(kb?h1(k)+(h[i2*3+k]+(h[j2*3+k]-h[i2*3+k])*u2-h1(k))*kb:h1(k))*a.hipH*w;
-    if(!win.inPlace){const hx=ip(0),hz=ip(2),c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);
+    if(!win.inPlace){const hs=win.hipScale!=null?win.hipScale:1,hx=ip(0)*hs,hz=ip(2)*hs,c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);  // 84-2 D-7: hipScale = 앞뒤·좌우 골반 이동을 이 몫만(그 몸짓만, 기본 1)
   }
   // 카메라 구도 (data/config.json camera): normal 상반신 · motion 허벅지 중간 · full 전신(춤)
   // 구도 = 모델(키 1.72m로 맞춤)에서 보여 줄 위·아래 높이(top·bottom)와 최소 너비(width), 카메라를 눈높이보다 올리는 값(lift).
@@ -1049,7 +1051,8 @@ const Stage=(()=>{
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(walk)walkTick(now,id,mt);  // 42: 걷기 = 돌기 각도(cur.win.turn)와 옮긴 거리
     if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur&&cur.win?{...XS[id],...cur.win}:cur&&cur.fo!=null?{...XS[id],fadeOut:cur.fo}:cur&&cur.loop&&XS[id].loopFrom!=null?{...XS[id],fadeOut:1e-4,...(cur.lf?{fadeIn:1e-4}:{})}:XS[id]);  // 78: loopFrom 이 있는 몸짓을 반복할 때는 끝에서 기본 자세로 돌아가지 않음
-    if(isXs&&XS[id].face&&cur&&!cur.faced&&mt>=XS[id].faceAt){cur.faced=true;if(!locked)setFace(XS[id].face,XS[id].faceEmo)}  // 50-2: 몸짓 중 이 순간부터 표정을 바꿔 끝까지(x30 우산 「씩」). data/motions.json xstage face·faceEmo·faceAt
+    if(isXs&&XS[id].face&&cur&&!cur.faced&&mt>=XS[id].faceAt){cur.faced=true;if(!locked)setFace(XS[id].face,XS[id].faceEmo)}
+    if(cur&&cur.fs&&id===cur.id&&(!isXs||xsCache[id]))while(cur.fi<cur.fs.length&&mt>=(+cur.fs[cur.fi].at||0)){const s=cur.fs[cur.fi++];if(!locked&&!solo&&FACE[s.f])setFace(s.f,cur.fsEmo)}  // 84-2 A: 파일을 받아 실제 재생이 시작된 뒤 그 몸짓 시각에 맞춰 표정을 바꿈(함께하기·촬영 잠금 중엔 안 바꿈)  // 50-2: 몸짓 중 이 순간부터 표정을 바꿔 끝까지(x30 우산 「씩」). data/motions.json xstage face·faceEmo·faceAt
     if(walk){md.root.position.x+=walk.x;md.root.position.z+=walk.z}
     if(blend)blendStep(now);
     keepPre();
@@ -1087,7 +1090,8 @@ const Stage=(()=>{
       if(Math.random()<(tk.closeChance!=null?tk.closeChance:.15))mAmp*=.2;   // 가끔 거의 다문 순간(말 사이 쉼)
       mNext=t+1/(hz[0]+Math.random()*(hz[1]-hz[0]))}
     let busy=0;for(const k in tgt)if(/^Fcl_(ALL|MTH)_/.test(k)&&vis.indexOf(k)<0)busy=Math.max(busy,tgt[k]||0);
-    const damp=1-Math.min(1,busy)*(tk.emotionDamp!=null?tk.emotionDamp:.5);
+    const ed=cur&&cur.fs&&cur.td!=null?cur.td:(tk.emotionDamp!=null?tk.emotionDamp:.5);  // 84-2 A: 웃음 표정 흐름 중엔 입 움직임을 더 작게 섞어 웃는 입이 대사 입 모양에 묻히지 않게(motionFace talkDamp)
+    const damp=1-Math.min(1,busy)*ed;
     const ks=1-Math.exp(-dt/(tk.blendSec||.04)),kc=1-Math.exp(-dt/(tk.closeSec||.12));
     for(const n of vis){const goal=on&&n===mPick?mAmp*damp:0;const c=mw[n]||0;mw[n]=c+(goal-c)*(on?ks:kc);tgt[n]=Math.max(tgt[n]||0,mw[n])}
   }
@@ -1148,7 +1152,8 @@ const Stage=(()=>{
     MotionCue.clear();  // 91 C: 새 몸짓이 받아들여지면(위에서 막힌 호출은 여기까지 안 옴) 이전 강조는 바로 끝. 새 몸짓이 강조 대상이면 실제 시작 때 다시
     blendFromPre(o.blendMs!=null?o.blendMs:blendOnce);blendOnce=null;  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게). 43: blendOnce = 다음 한 번만 섞는 시간(답장을 기다리던 몸짓에서 넘어갈 때)
     const sp0=o.speed>0?o.speed:1;
-    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null,wait:!!o.wait};  // 43: wait = 답장을 기다리는 몸짓(촬영 화면·카드 그림이 이어받지 않음)
+    cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null,wait:!!o.wait};
+    if(Array.isArray(o.faceSeq)&&o.faceSeq.length){cur.fs=o.faceSeq.slice().sort((a,b)=>(+a.at||0)-(+b.at||0));cur.fi=0;cur.fsEmo=o.faceEmo||"";cur.td=o.talkDamp!=null?+o.talkDamp:null}  // 84-2 A: 몸짓 시각(초)에 맞춘 표정 흐름(data/motions.json motionFace seq). 몸짓이 바뀌거나 끝나면 cur 와 함께 사라짐  // 43: wait = 답장을 기다리는 몸짓(촬영 화면·카드 그림이 이어받지 않음)
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
     if(o.cue&&!o.fx&&!o.big&&!o.wait&&!o.quiet&&mid!==IDLE)cur.cue=true;  // 91: 일반 답장 몸짓 = 실제로 재생이 시작될 때 무대 테두리 강조 한 번(MotionCue). 확대·다가가기 연출이 있으면 그것만
     if(o.quiet)return;
@@ -1366,7 +1371,7 @@ const Stage=(()=>{
   return{seek:t=>{if(cur){cur.start=performance.now()/1000-t/(cur.sp||1);cur.hold=t}},  // 78: 지금 몸짓의 t초에 멈춤(시연·확인용)
     solo:on=>{solo=!!on;if(solo)talkUntil=0},gaze:m=>{gazeMode=m==="steady"||m==="away"?m:null},gazeMode:()=>gazeMode,lentTo:()=>borrowed?owner:null,  // 84 함께하기
     toRest:ms=>{if(!md)return;blendFromPre(ms);cur=null;blendOnce=null},clearLast:()=>{lastEnd=null},  // 84: 지금 몸짓을 섞으며 끝내고 기본 자세로 · 끝난 몸짓 기록 지우기(촬영·카드 그림이 이어받지 않게)
-    keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace:(k,e,f)=>{if(solo&&f!=="solo")return;setFace(k,e,f)},talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+    keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,faceHold:()=>!!(cur&&cur.id!==IDLE&&!cur.wait&&!cur.loop&&cur.hold==null),faceSeqNow:()=>cur&&cur.fs?{id:cur.id,next:cur.fi,of:cur.fs.length}:null,faceKey:()=>faceKey,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace:(k,e,f)=>{if(solo&&f!=="solo")return;setFace(k,e,f)},talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -1667,8 +1672,8 @@ const MotionCue=(()=>{let el=null,anim=null,tm=0;
   function tick(){if((anim||(el&&el.classList.contains("on")))&&!ok())clear()}
   return{fire,clear,tick,isOn:()=>!!(anim||(el&&el.classList.contains("on")))};
 })();
-function react(r,tag,sub,kind,cue){Stage.play(r.m,{tag,fx:Fx.pick(kind,r.m),cue:!!cue});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
-let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
+function react(r,tag,sub,kind,cue){Stage.play(r.m,{tag,fx:Fx.pick(kind,r.m),cue:!!cue,faceSeq:r.fs||null,faceEmo:r.e,talkDamp:r.td});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
+let faceRT;function faceReset(){clearTimeout(faceRT);const t0=performance.now(),go=()=>{if(Stage.faceHold()&&performance.now()-t0<20000){faceRT=setTimeout(go,500);return}Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral")};faceRT=setTimeout(go,7000)}  // 84-2 A-3: 7초가 됐을 때 답장 몸짓이 아직 재생 중이면(파일을 늦게 받은 웃음 등) 끝날 때까지 기다렸다 기본 표정(최대 20초 더)
 
 // ───────────────────────── 대화 ─────────────────────────
 // *별표* = 나레이션(지문), 나머지 = 대사. 따옴표만 있으면 따옴표 안이 대사.
@@ -1867,7 +1872,8 @@ function unlockedIds(){
   {const X=DATA.story.extraMotions||{};(X.always||[]).forEach(id=>set.add(id));((X.placeOnly||{})[S.scene]||[]).forEach(id=>set.add(id))}  // 55: 해금 없이 쓰는 몸짓(어디서나 · 그 장소에서만)
   // 25: 판정·사건 묶음에 나중에 더한 몸짓(protect 의 x16 등)은 그 묶음의 몸짓 하나라도 이미 열렸으면 같이 열림(예전 저장값)
   for(const sec of ["flag","event"])for(const k in U[sec]||{}){const M=U[sec][k].motions||[];if(M.some(id=>(S.unlocked||[]).includes(id)))M.forEach(id=>set.add(id))}
-  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
+  const mute=((DATA.story.stageMute||{})[curStage()])||[];  // 84-2 B-2: 그 단계에서만 빼는 몸짓(5 위기·엇갈림의 장난·질투·설렘 신규 몸짓)
+  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&!mute.includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
 }
 
 // ───────────────────────── 관계 6단계 · 판정 · 해금 ─────────────────────────
@@ -2093,9 +2099,20 @@ function unlockFx(mid,text,kind){
   toast(`${esc(text)}<br><b>「${esc(MNAME[mid]||mid)}」</b><br><small>${esc(UI("album.unlockSaved"))}</small>`,3600);
 }
 const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
+// 84-2 A-3·C-4: 몸짓에 어울리는 표정(data/motions.json motionFace). face = 서버 감정·지문으로 정한 표정.
+//   그 표정이 weak(기본 motionFaceWeak = 무표정)이거나 없으면 몸짓의 표정으로(seq 가 있으면 몸짓 시각에 맞춘 흐름, 첫 표정부터),
+//   clash 에 든 표정(슬픔·화남 등 웃음과 부딪치는 감정)이면 그 몸짓을 쓰지 않음(drop), 그 밖에는 null(서버 표정 그대로)
+function motionFit(mid,face){const D=DATA.motions||{},x=mid&&(D.motionFace||{})[mid];if(!x)return null;
+  if(face&&(x.clash||[]).includes(face))return{drop:true};
+  const weak=x.weak||D.motionFaceWeak||["neutral"];if(face&&FACE[face]&&!weak.includes(face))return null;
+  const fs=Array.isArray(x.seq)?x.seq.filter(s=>s&&FACE[s.f]):[];
+  const f=fs.length?fs[0].f:FACE[x.face]?x.face:null;if(!f)return null;
+  return{f,fs:fs.length?fs:null,td:x.talkDamp!=null?+x.talkDamp:null}}
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
 // 반복 방지: 최근 recentLimit 번 안에 나온 몸짓은 고르지 않음 (data/motion_keywords.json)
-const recentMotions=()=>Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3);
+// 84-2 C-5: same = 같은 원본·구간을 쓰는 몸짓 묶음(x19 초콜릿 선물 반응 = x49 수줍게 웃기). 묶음 안 하나가 최근에 나왔으면 나머지도 최근으로 봄
+const sameOf=id=>{const L=(DATA.keywords.same||[]).find(g=>g.includes(id));return L||[id]};
+const recentMotions=()=>{const r=Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3),o=new Set(r);r.forEach(id=>sameOf(id).forEach(x=>o.add(x)));return [...o]};
 const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id)&&placeOkMotion(id))};  // 51: 장소별 ban
 function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
 // 답장의 지문: v2 action + 예전 형식의 *…* 부분
@@ -2250,13 +2267,16 @@ async function send(text,o){
   {const mvs=[].concat(((DATA.story||{}).extraMotions||{}).move||[]),mv=mvs.find(id=>canPlay(id)&&placeOkMotion(id));if(moved&&mv&&!poseX&&!giftMid)mid=mv}  // 76: 목록 중 지금 쓸 수 있는 첫 몸짓(크리스마스 x37, 그 밖 x38 제자리 걷기)  // 55: 이번 답장에서 장소가 바뀌었으면(어디 가자 → 걸어감) 걸으며 목선 강조
   // 50-2: 선물 — 그림이 1초 떠올랐다 사라진 뒤 답장·반응 몸짓(서버 답이 그보다 빨리 와도)
   if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
+  // 84-2 A-3: 답장 몸짓에 맞춘 표정(선물 반응·포즈 부탁·사진 제안의 정해진 표정은 그대로). 웃음과 부딪치는 감정이면 그 몸짓을 빼고 표정만(결정적 순간은 몸짓 유지)
+  let mfit=null;if(mid&&!giftMid&&!poseX&&!pAsk){mfit=motionFit(mid,v.face);if(mfit&&mfit.drop){mfit=null;if(!keyM){MOTION_LOG.push({drop:mid,face:v.face});mid=null}}}
+  if(mfit)v.face=mfit.f;
   const srvOk=src0==="server";  // 80: 실제 서버 정상 답장(특별 에피소드에서 아래가 v.src 를 바꾸기 전 출처). 서버 v2 를 쓰다 못 받은 답장은 bad(판정 recent 에서 뺌)
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{}),...(v.fb&&!o&&!poseId&&(DATA.config.fallbackReply||{}).retry?{fb:1,retry:text}:{}),...(!srvOk&&serverVer()===2&&!noServer()?{bad:1}:{})};  // 91: 예비 지문 + 다시 보낼 내 말
   PhotoAsk.offer(pAsk,msg);  // 83: 보여 준 제안을 대화 기록과 같은 save 에(msg.pa = 말풍선 아래 「서아 사진 찍어주기」)
   addReply(v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
-  if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
-  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""),srvOk&&Thread.cur()==="main"&&!giftMid&&!poseX);  // 91: 본편 정상 서버 답장의 일반 몸짓만 테두리 강조(예비 지문·선물 반응·포즈 부탁·에피소드 제외)
+  if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},mid});
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""),srvOk&&Thread.cur()==="main"&&!giftMid&&!poseX);  // 91: 본편 정상 서버 답장의 일반 몸짓만 테두리 강조(예비 지문·선물 반응·포즈 부탁·에피소드 제외)
 if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   // 50-C: 순간 선물 — 지금 묶음의 반응 카드를 처음이면 얻음(같은 카드를 이미 가졌으면 반응만)
   if(o&&o.moment&&giftMid){const gc=Moment.cardOf(gBy(o.moment));if(gc&&!S.col[gc.id]){const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
@@ -2519,18 +2539,23 @@ const Demo=(()=>{
   const allMotions=()=>{const c=COL.items.filter(x=>x.source==="chat").map(x=>x.id);return [...c,...Object.keys(XS).filter(id=>!c.includes(id)&&!pvOnly(id))]};  // 84-1: 검수 전용(only preview)은 아래 「신규 모션 검수」에서만
   // 84-1 신규 모션 검수: only "preview" 몸짓. 재생은 quiet(최근 몸짓·이름 칩·확대·모션 강조·도감·카드·해금에 안 들어감), 함께하기 구도는 Together.preview
   const pvOnly=id=>((DATA.motions.motions||{})[id]||{}).only==="preview";
-  const pvIds=()=>Object.keys(DATA.motions.motions||{}).filter(id=>pvOnly(id)&&canPlay(id));
+  // 84-2 A-5: 검수 목록 = data/motions.json preview 에 적힌 몸짓(서비스 사용 권한 only 와 따로 — only 를 풀어도 계속 검수 가능, m01 포함)
+  const pvIds=()=>Object.keys((DATA.motions||{}).preview||{}).filter(id=>id[0]!=="_"&&canPlay(id));
   const pvFace={},pvLast={};
+  // 표정 고르기: "auto" = 그 몸짓의 추천 표정(motionFace, m01 은 몸짓 시각에 맞춘 웃음 흐름) · "" = 표정 그대로(몸짓만) · 그 밖 = 그 표정
+  const pvAuto=id=>!!((DATA.motions||{}).motionFace||{})[id];
+  const pvCur=id=>pvFace[id]!=null?pvFace[id]:pvAuto(id)?"auto":"";
   function pvHtml(){const P=(DATA.motions||{}).preview||{};
-    return `<h4>${esc(T("preview.title"))} <small>${esc(T("preview.note"))}</small></h4><div class="mlist">${pvIds().map(id=>{const fs=(P[id]||{}).faces||[],cf=pvFace[id]||"",d=Stage.xsLoaded().includes(id)||!XS[id]||XS[id].to!=null?T("preview.dur",{s:Stage.dur(id).toFixed(1)}):T("preview.durWait");
+    return `<h4>${esc(T("preview.title"))} <small>${esc(T("preview.note"))}</small></h4><div class="mlist">${pvIds().map(id=>{const fs=(P[id]||{}).faces||[],cf=pvCur(id),d=Stage.xsLoaded().includes(id)||!XS[id]||XS[id].to!=null?T("preview.dur",{s:Stage.dur(id).toFixed(1)}):T("preview.durWait");
       return `<div class="pvrow"><div class="pvh"><b>${id} ${esc(MNAME[id]||id)}</b><small>${esc(d)}${pvLast[id]!=null?" · "+esc(T("preview.last",{s:pvLast[id].toFixed(1)})):""}</small></div>
-        <div class="row">${["",...fs.filter(f=>FACE[f])].map(f=>B("pvFace",esc(f?(FACEKO[f]||f):T("preview.noFace")),{v:id+":"+f,on:cf===f})).join("")}</div>
+        <div class="row">${[...(pvAuto(id)?["auto"]:[]),...fs.filter(f=>FACE[f]),""].map(f=>B("pvFace",esc(f==="auto"?T("preview.auto"):f?(FACEKO[f]||f):T("preview.noFace")),{v:id+":"+f,on:cf===f})).join("")}</div>
         <div class="row">${B("pvChat",esc(T("preview.chat")),{v:id})}${B("pvTogether",esc(T("preview.together")),{v:id})}</div></div>`}).join("")}</div>`}
   // 실제 재생 길이: 재생이 시작된 순간(파일을 다 받은 뒤)부터 그 몸짓이 끝날 때까지 잼
   function pvMeasure(id){const t0=performance.now();let st=null;const go=()=>{const p=Stage.playing();if(p===id&&st==null)st=performance.now();
     if(st!=null&&p!==id){pvLast[id]=(performance.now()-st)/1000;if(open)render();return}if(performance.now()-t0<30000)setTimeout(go,50)};go()}
-  async function pvChat(id){cancel();toChat();setOpen(false);const f=pvFace[id]||"";await Stage.xs(id);if(f&&FACE[f])Stage.setFace(f);Stage.play(id,{quiet:true});pvMeasure(id)}
-  function pvTogether(id){const f=pvFace[id]||"";setOpen(false);
+  async function pvChat(id){cancel();toChat();setOpen(false);const f=pvCur(id),fit=f==="auto"?motionFit(id,null):null;await Stage.xs(id);
+    if(fit){Stage.setFace(fit.f);Stage.play(id,{quiet:true,faceSeq:fit.fs,talkDamp:fit.td})}else{if(f&&FACE[f])Stage.setFace(f);Stage.play(id,{quiet:true})}pvMeasure(id)}
+  function pvTogether(id){let f=pvCur(id);if(f==="auto"){const x=((DATA.motions||{}).motionFace||{})[id]||{};f=x.together||x.face||""}setOpen(false);
     if(Together.isOn()){if(Together.preview(id,f))pvMeasure(id);return}
     cancel();toChat();setTimeout(()=>{if(Together.enter())setTimeout(()=>{if(Together.preview(id,f))pvMeasure(id)},500)},350)}  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외) + 아직 아무 데도 안 붙은 XSTAGE 모션(미리보기용)
   function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
@@ -2563,7 +2588,7 @@ const Demo=(()=>{
     PhotoAsk.offer(x,msg);addReply(d.dialogue||"",msg,"seoa");react({m:IDLE,f:x.face,t:d.dialogue||"",e:d.emotion||""},"",false,"");PhotoAsk.after(x);
     renderBond();refresh()}
   function toChat(){setTab("chat");if(S.room!=="seoa")openRoom("seoa");const i=$("#inp");if(document.activeElement===i)i.blur();reveal()}
-  function playMotion(mid){toChat();Stage.play(mid,{fx:Fx.pick("view",mid)})}
+  function playMotion(mid){toChat();const fit=motionFit(mid,null);if(fit)Stage.setFace(fit.f);Stage.play(mid,{fx:Fx.pick("view",mid),...(fit?{faceSeq:fit.fs,talkDamp:fit.td}:{})})}  // 84-2 A-5: 추천 표정이 있는 몸짓(m01 웃음 등)은 그 표정과 같이
   function preview(mid){toChat();const g=groupOf(mid);unlockFx(mid,g&&g.text||"","view")}
   // ── 그리기 ──
   const B=(a,label,o={})=>`<button data-a="${a}"${o.v!=null?` data-v="${esc(o.v)}"`:""} class="${o.on?"on":""} ${o.cls||""}"${o.title?` title="${esc(o.title)}"`:""}>${label}</button>`;
@@ -3555,11 +3580,12 @@ const Night=(()=>{
     const sc=v.location?SCENES.findIndex(x=>x.name===v.location):-1;
     if(sc>=0&&sc!==S.scene){const pf=setScene(sc,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[sc].name}),null,"seoa");await pf;if(!alive())return false}
     let face=emoFace(v.emotion);{const wf=wordFace(actionText(v));if(wf)face=wf}
-    const emo=v.emotion||(DATA.motions.faceEmotion||{})[face]||"",mid=pickMotion(v.motion,actionText(v),"");
+    const emo=v.emotion||(DATA.motions.faceEmotion||{})[face]||"";let mid=pickMotion(v.motion,actionText(v),"");
+    let mfit=motionFit(mid,face);if(mfit&&mfit.drop){mfit=null;mid=null}if(mfit)face=mfit.f;  // 84-2 A-3
     addReply(v.line,{...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{})},"seoa");
     const st=story(),last=talkOf("seoa").slice(-1)[0];n.reply=turnText(last);n.ph="judge";
     st.recent_lines=[...(st.recent_lines||[]),n.reply].slice(-3);if(v.location)st.location=v.location;save();
-    if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:face,t:v.line,e:emo},mid});else{react({m:mid||IDLE,f:face,t:v.line,e:emo},"",false,Fx.first(mid));firstSeen(mid)}
+    if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},mid});else{react({m:mid||IDLE,f:face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},"",false,Fx.first(mid));firstSeen(mid)}
     Demo.render();return true}
   // 자동 「[다음 밤]」 /judge(첫마디 바로 뒤). last_user 「[다음 밤]」 · last_reply 첫마디 · need_summary false · reply_ok []. 판정 횟수(요약 주기)에 안 셈
   function judgeOnce(n){const st=story(),tk=++judgeTok,g=GEN,aff0=st.affection||0,t0=performance.now();
