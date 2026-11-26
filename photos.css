@@ -101,6 +101,13 @@
 .mini.on .minibox{transform:none}
 .minibox h3{font-size:15px;font-weight:800;margin:0 36px 12px 2px}
 .minix{position:absolute;right:8px;top:8px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:var(--sub)}
+/* 87-1: 긴 작은 창(확률 보기, Mini.open opt.scroll). 화면(뷰포트)에 맞춰 고정하고 창 높이는 보이는 화면의 약 85%(dvh — 사파리 주소창이 늘고 줄 때도 맞음, 안 되는 브라우저는 vh).
+   제목·✕ 는 위에 그대로, 본문(.minibd)만 세로로 넘김. 끝에 닿아도 뒤 화면으로 넘어가지 않게 overscroll contain */
+.mini.scroll{position:fixed;top:0;bottom:0;left:50%;width:100%;max-width:440px;transform:translateX(-50%);
+  padding:max(16px,calc(env(safe-area-inset-top,0px) + 8px)) 16px max(16px,calc(env(safe-area-inset-bottom,0px) + 8px));overscroll-behavior:contain}
+.mini.scroll .minibox{display:flex;flex-direction:column;max-height:min(85vh,100%);max-height:min(85dvh,100%);padding-bottom:0;overflow:hidden}
+.mini.scroll .minibox h3{flex:none}
+.minibd{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;margin:0 -14px;padding:0 14px 14px}
 .mopts{display:flex;flex-direction:column;gap:8px}
 .mopts button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:48px;padding:0 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:700;text-align:left}
 .mopts button b{flex:none;font-size:13px;color:var(--pri2);white-space:nowrap}
