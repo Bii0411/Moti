@@ -1127,6 +1127,7 @@ const Stage=(()=>{
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(walk&&!o.walk)return;  // 42: 걸어 나가고 들어오는 동안(화면 밖에 있는 동안 포함)은 다른 몸짓(시계 보기·인사·답장 몸짓)을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
+    MotionCue.clear();  // 91 C: 새 몸짓이 받아들여지면(위에서 막힌 호출은 여기까지 안 옴) 이전 강조는 바로 끝. 새 몸짓이 강조 대상이면 실제 시작 때 다시
     blendFromPre(o.blendMs!=null?o.blendMs:blendOnce);blendOnce=null;  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게). 43: blendOnce = 다음 한 번만 섞는 시간(답장을 기다리던 몸짓에서 넘어갈 때)
     const sp0=o.speed>0?o.speed:1;
     cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null,wait:!!o.wait};  // 43: wait = 답장을 기다리는 몸짓(촬영 화면·카드 그림이 이어받지 않음)
@@ -1628,7 +1629,7 @@ function renderTop(){$("#dia").textContent=S.dia;
 //   대화방(서아·본편)·촬영 화면 밖에서만. 탭 이동·대화방 나가기·촬영 화면·밤 넘기기·초기화 때 남은 강조는 바로 지움(tick 이 매 프레임 확인)
 const MotionCue=(()=>{let el=null,anim=null,tm=0;
   const C=()=>((DATA.config||{}).stage||{}).motionCue||{};
-  const ok=()=>C().on!==false&&curTab==="chat"&&(S.room||"seoa")==="seoa"&&Thread.cur()==="main"&&!(typeof Cam!=="undefined"&&Cam.isOpen())&&!(typeof Night!=="undefined"&&Night.isOn());
+  const ok=()=>C().on!==false&&curTab==="chat"&&S.room==="seoa"&&Thread.cur()==="main"&&!(typeof Cam!=="undefined"&&Cam.isOpen())&&!(typeof Night!=="undefined"&&Night.isOn());
   function node(){if(el&&el.isConnected)return el;const st=$("#stage");if(!st)return null;el=document.createElement("i");el.className="mcue";el.setAttribute("aria-hidden","true");st.appendChild(el);return el}
   function clear(){clearTimeout(tm);if(anim){try{anim.cancel()}catch(e){}anim=null}if(el){el.style.opacity="0";el.classList.remove("on")}}
   function fire(){if(!ok())return;const e=node();if(!e)return;clear();const c=C();
@@ -3068,7 +3069,8 @@ function renderList(){
   $("#dmList").querySelectorAll("button[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
   Swipe.bind();
 }
-function showList(){Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
+function showList(){MotionCue.clear();  // 91 C: 대화방을 나가 목록으로 가면 남은 강조를 바로 지움
+  Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
 function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
