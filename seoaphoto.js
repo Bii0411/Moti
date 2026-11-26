@@ -1,6 +1,7 @@
 // moti 서아가 먼저 보내는 사진(12단계). 원고·값 data/seoa_photo.json, 화면 문구 data/ui.json seoaPhoto
 // SeoaPhoto : 사진 만들기(열린 몸짓의 한 순간 + 장소, 셀카·풍경) → 대화 기록의 사진 말풍선 + 사진 저장소(종류 received)
 //             68: 보내는 때는 「부재중 셀카」 하나. 서아 대화방을 떠난 지 10분(data away.minutes)이 지나면 한 장(떠난 한 번에 한 장, 이야기 줄기마다 따로).
+//             81: 한 장을 보낸(예약한) 뒤에는 유저가 다시 실제 대화를 하기 전까지 더 보내지 않음(S.sp.can, 줄기마다).
 //             대화방이 아닌 화면이면 앱 안 알림 배너. 단계 사진·대화 중 가끔 사진은 끔(stageUp·afterReply 는 아무것도 안 함). 시연 패널 「10분 지난 뒤 셀카 받기」
 // 45-B: 셀카는 셀카 모션(x25)의 한 순간 + 폰을 든 손에 붙인 카메라(data kinds.selfie.hand·types). 모션을 못 받으면 32-B 팔 뻗기 셀카(armTypes)
 // 사진과 함께 오는 말은 원고에서만 고른다(대화 AI 가 만들지 않음). 서아 혼자, blur·filter 효과 없음.
@@ -15,6 +16,7 @@ const SeoaPhoto=(()=>{
   // 저장값 S.sp: got = 받은 단계 사진 {단계: 사진 id}, pend = 보낼 차례(대화방에서 조건이 맞으면 보냄), since = 마지막 사진 뒤 서아 답장 수,
   // shot = 대화 중 사진의 마지막 종류(번갈아), last = 묶음별 마지막 메시지 번호, away = 마지막 오랜만 메시지 번호, note = 다음 서버 요청에 덧붙일 한 줄
   // 68: leave = 줄기별 떠남 {at 떠난 시각, done 이번 떠남에 이미 받음, demo 시연(단계 상관없음)}, awayLast = 바로 앞 부재중 문구 번호
+  // 81: can = 줄기별 부재중 셀카를 보낼 수 있는지 {줄기: bool}(talked·arrive·initCan 참고)
   //     pend 의 부재중 사진에는 th(줄기)가 붙음 → 그 줄기에 있을 때만 그림을 만듦. 예전 저장값의 단계·대화 중 사진 차례는 버림
   const st=()=>{const s=S.sp||(S.sp={});s.got=s.got||{};s.pend=(s.pend||[]).filter(p=>p.type==="away");s.last=s.last||{};s.leave=s.leave||{};if(s.since==null)s.since=0;return s};
   const thKey=()=>typeof Thread!=="undefined"?Thread.cur():"main";
@@ -152,12 +154,14 @@ const SeoaPhoto=(()=>{
       sending=false;silent=false;
       if(away)fill(meta.id);
       else addMsg("ph",x.msg,{pid:meta.id,...(x.type==="stage"?{stage:x.stage,sn:stageGot()}:{})},"seoa");
-    }catch(e){console.error("서아 사진을 만들지 못함",e);if(away){for(const m of chatOf("seoa"))if(m.pid===x.pid)delete m.wait;save();silent=false}}  // 32-1: 못 만들면 자리를 거둠(말풍선·시각만)
+    }catch(e){console.error("서아 사진을 만들지 못함",e);if(away){for(const m of msgsOf(x.pid))delete m.wait;save();silent=false}}  // 32-1: 못 만들면 자리를 거둠(말풍선·시각만)
     finally{if(fps&&fps.on)fps.stop();sending=false;if(!silent)renderLog();silent=false}
   }
   // 32-1: 자리만 잡아 둔 오랜만 사진 말풍선에 그림을 조용히 채움(기록을 다시 그리지 않음 → 스크롤·자리 그대로)
-  function fill(pid){const p=Photos.list().find(x=>x.id===pid);let m=null;for(const k in S.chats)for(const x of S.chats[k])if(x.pid===pid)m=x;
-    if(m&&m.wait){delete m.wait;save()}
+  // 81: 사진 말풍선은 그 사진을 예약한 줄기의 기록에 있음(만드는 사이 줄기를 바꿨으면 S.threads 쪽) → 다른 줄기 기록에 넣지 않고 그 자리만 찾음
+  function msgsOf(pid){const out=[],seen=new Set(),scan=L=>{if(!L||seen.has(L))return;seen.add(L);for(const x of L)if(x.pid===pid)out.push(x)};
+    for(const k in S.chats)scan(S.chats[k]);for(const k in (S.threads||{}))scan(S.threads[k].chat);return out}
+  function fill(pid){const p=Photos.list().find(x=>x.id===pid);let ch=false;for(const m of msgsOf(pid))if(m.wait){delete m.wait;ch=true}if(ch)save();
     const b=p&&document.querySelector(`#log .phmsg[data-ph="${CSS.escape(pid)}"]`);if(!b)return;
     b.classList.remove("wait");b.innerHTML=`<img src="${Photos.thumbUrl(p)}" alt="">`}
   // 32: 대화 기록의 그 시각 자리에 끼워 넣음(addMsg 는 맨 끝에 붙임). 대화방에 있으면 읽은 것으로
@@ -196,12 +200,29 @@ const SeoaPhoto=(()=>{
   // 끝난 줄기: 실패해 잠김(End) · 그 줄기의 장면 엔딩을 받음(크리스마스 6단계 = xmasWin, data/endings.json when.scene)
   function ended(k){if(typeof End!=="undefined"&&End.locked(k))return true;const got=S.endings||{};
     return ((((DATA.endings||{}).when||{}).scene)||[]).some(w=>w.thread===k&&got[w.ending])}
-  function markLeave(k){const s=st();s.leave[k]={at:Date.now()};save()}
-  // 지금 줄기에서 이번 떠남의 셀카를 받을 때인지
+  // 81: can = 줄기별 부재중 셀카를 보낼 수 있는지 {줄기: true|false}. 실제 대화(talked: send() 가 내 말을 기록한 때)에서만 true,
+  //     셀카를 예약(arrive)하는 순간 false → 다음 실제 대화 전까지 떠남 타이머도 시작하지 않음. 입장·이동·새로고침·인사·선물·포즈·밤 넘기기·되감기로는 안 바뀜
+  const realTalk=m=>!!m&&m.r==="u"&&!m.gift&&!m.srv&&!m.poseAsk;  // 선물(gift·srv)·포즈 부탁(poseAsk) 줄은 실제 대화가 아님
+  const chatTh=k=>k===thKey()?(S.chats.seoa||[]):(((S.threads||{})[k]||{}).chat||[]);
+  // 예전 저장값(can 이 없는 줄기): 마지막 실제 대화 뒤에 부재중 사진·예약 사진·이번 떠남에 받음(leave.done)이 있으면 false. 실제 대화가 없으면 false
+  function initCan(k){const s=st(),L=chatTh(k);let u=-1;for(let i=L.length-1;i>=0;i--)if(realTalk(L[i])){u=i;break}
+    if(u<0)return false;const ut=L[u].at||0;
+    if(L.some((m,i)=>m.r==="ph"&&m.away&&(i>u||(m.at||0)>=ut)))return false;
+    if(s.pend.some(p=>p.type==="away"&&(p.th||"main")===k))return false;
+    if(s.leave[k]&&s.leave[k].done)return false;
+    return true}
+  function canOf(k){const s=st(),c=s.can||(s.can={});if(c[k]==null){c[k]=initCan(k);save()}return c[k]}
+  function setCan(k,v){const s=st();(s.can||(s.can={}))[k]=v;save()}
+  // send(): 입력 제한·밤 넘기기 관문을 지나 내 말이 기록된 때(선물·포즈 부탁·밤 넘기기 요청은 부르지 않음)
+  function talked(){setCan(thKey(),true)}
+  // 81: 떠난 시각은 이미 세는 중이면 덮어쓰지 않음(백그라운드·pagehide 가 겹쳐 불러도). 보낼 수 없는 줄기면 세지 않음
+  function markLeave(k){const s=st();if(s.leave[k]||!canOf(k))return;s.leave[k]={at:Date.now()};save()}
+  // 지금 줄기에서 이번 떠남의 셀카를 받을 때인지(시연 demo 는 단계·can 상관없음)
   function due(){const k=thKey(),L=st().leave[k];
-    return !!(L&&!L.done&&Date.now()-L.at>=gapMs()&&(L.demo||stageNow()>=(AW().minStage||2))&&!ended(k))}
+    return !!(L&&!L.done&&Date.now()-L.at>=gapMs()&&(L.demo||(canOf(k)&&stageNow()>=(AW().minStage||2)))&&!ended(k))}
   // 받은 시각(떠난 시각 + minutes 분) 자리에 말풍선·시각과 사진 자리를 넣고, 그림은 대화방에서 만듦(fill). 앱이 꺼져 있었어도 그 시각
-  function arrive(){const s=st(),k=thKey(),L=s.leave[k];
+  // 81: 예약하는 순간 이 줄기는 보낼 수 없음(그림을 만드는 중·실패해도 다음 실제 대화 전까지 다시 예약 안 함)
+  function arrive(){const s=st(),k=thKey(),L=s.leave[k];setCan(k,false);
     const x=resolve({type:"away",at:L.at+gapMs(),th:k});L.done=true;if(!x){save();return null}
     x.pid=Photos.newId();s.pend.unshift(x);insertMsg({r:"ph",t:x.msg,at:x.at,pid:x.pid,away:1,wait:1},"seoa");save();return x}
   // 대화방에 들어올 때(openRoom) · 대화방에서 앱이 다시 앞으로 올 때: 받을 때면 넣고, 이번 떠남은 끝(다시 떠나야 다음 한 장)
@@ -234,6 +255,8 @@ const SeoaPhoto=(()=>{
   function now(){const s=st(),k=thKey();if(inRoom())setTab("home");wasIn=false;
     s.leave[k]={at:Date.now()-(AW().demoMinutes||11)*60e3,demo:1};save();setTimeout(tick,300)}
   // 시연 장면으로 들어갈 때: 이 장면 단계보다 위의 단계 사진 기록을 지움(예전 값), 기다리던 사진은 버림
+  // 81: 그 줄기의 처음부터(되감기 처음부터·시연 에피소드 처음부터·서아 초기화): 보낼 수 있음·떠난 시각·예약 사진·서버 한 줄을 지움(can 은 빈 기록으로 다시 정함 → false)
+  function resetThread(k){const s=st();if(s.can)delete s.can[k];delete s.leave[k];s.pend=s.pend.filter(p=>(p.th||"main")!==k);if(s.notes)delete s.notes[k];save()}
   function sceneReset(stage){const s=st();for(const k in s.got)if(+k>stage)delete s.got[k];s.pend=[];s.since=0;s.note=null;s.notes={};sending=false;save()}
 
   // ── 서버에 알리는 한 줄(5절) ──
@@ -254,7 +277,8 @@ const SeoaPhoto=(()=>{
     PhotoUI.view(id,Photos.list().filter(x=>x.kind==="received").map(x=>x.id))}
   function init(){const L=document.getElementById("log");if(L)L.addEventListener("click",onLogClick);
     Photos.onChange(()=>{if(inRoom()&&!quiet)renderLog()});
+    for(const k of new Set(["main",thKey(),...Object.keys(S.threads||{})]))canOf(k);  // 81: 예전 저장값의 줄기별 처음 상태를 한 번 정해 저장
     wasIn=inRoom();inTh=thKey();setInterval(tick,AW().checkMs||1000);document.addEventListener("visibilitychange",onVis);window.addEventListener("pagehide",()=>{if(inRoom())markLeave(thKey())})}
 
-  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,note,noteDone,bubble,sendingHtml,timeLabel,tick,isSending:()=>sending,awayPending:()=>st().pend.some(p=>p.type==="away"),kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
+  return{init,make,deliver,stageUp,enter,afterReply,now,sceneReset,talked,resetThread,note,noteDone,bubble,sendingHtml,timeLabel,tick,isSending:()=>sending,awayPending:()=>st().pend.some(p=>p.type==="away"),kick,perf,stageTotal,state:()=>JSON.parse(JSON.stringify(st()))};
 })();
