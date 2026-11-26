@@ -1503,7 +1503,8 @@ const Fx={
     if(kind){this.log.push({turn:f.turn,kind,fx,mid:mid||null});if(this.log.length>80)this.log.shift();save()}
     return fx},
   // 처음 보는 대화 몸짓이면 등급에 맞는 종류(레어·시크릿 = zoom, 일반 = push), 아니면 ""
-  first(mid){const it=mid&&colBy(mid);if(!it||it.source!=="chat"||S.col[mid])return "";return it.grade==="common"?"push":"zoom"},
+  first(mid){const it=mid&&colBy(mid);if(!it||it.source!=="chat"||it.only||S.col[mid])return "";  // 78-1: 이벤트 전용 카드는 첫 획득 확대 연출 없음
+   return it.grade==="common"?"push":"zoom"},
   clearZoom(){const f=this.st();f.zoomAt=null;f.keyAt=null;save()},  // 시연 장면 이동: 확대·결정적 순간 쿨다운 모두 비움
   // ── 결정적 순간(17-1B): 화면 확대 없이 카메라만 다가감. 화면에 글자로 알리지 않음(이유는 시연 패널에만) ──
   // 신호: 괄호 행동이 닿음 · 처음 이름/마음 표현(각 한 번) · 다시 만남(reunionHours 뒤 첫 답장) · 감정이 강하게 바뀜(답장에 감정 값이 있을 때) · 판정(서버 v2, 다음 답장)
@@ -1926,7 +1927,7 @@ function unlockShow(groups){
 const isSoon=mid=>!S.col[mid]&&(colBy(mid)||{}).source==="chat"&&unlockedIds().includes(mid);
 // 대화에서 그 몸짓이 처음 재생됐을 때(1단계 기본 몸짓 포함): 평소처럼 재생 + 등급 알림 + 그때 대사로 도감 기록
 function firstSeen(mid){
-  const it=mid&&colBy(mid);if(!it||it.source!=="chat"||S.col[mid])return;
+  const it=mid&&colBy(mid);if(!it||it.source!=="chat"||it.only||S.col[mid])return;  // 78-1: only 가 있는 이벤트 전용 카드(p01 photoAsk·x17 firstMeet)는 정해진 연출에서만
   const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
   S.col[mid]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(mid);
   notifyNew(it);
