@@ -1,5 +1,9 @@
 {
-  "_설명": "명장면 수집(몸짓 도감, 9단계). 44: hold true = 보류 칸(목록·진행 줄 「모은 카드 n / total」·마이·카드 크게 보기에 안 나오고 세지 않음, 번호 no 는 그대로 지킴, 이미 모은 저장값도 지우지 않고 숨김만). m23 바디웨이브 댄스 = 옥상 춤 보류. 47: m15 다정하게 인사하기·g11 손가락 하트·g12 품에 안겨 오기도 보류(선물 특별 등급이 모두 보류라 선물에서 특별이 뜨면 레어로 처리 — gacha.js fit). tools/build_collection.mjs 가 다시 만들어도 hold 칸은 남음. 한 칸 = 몸짓 하나(id, name, source chat|pack|gift, grade common|rare|special). 한 몸짓은 한 곳(대화 또는 선물)에서만 얻는다. 같은 몸짓은 몇 번 얻어도 한 칸. 대화 몸짓 칸은 tools/build_collection.mjs 가 data/seoa_story.json unlock 에서 만들고 gradeRule 로 grade 를 계산해 적는다(ban 제외). 선물 몸짓 g01~g12 는 원고 docs/drafts/9-선물-앨범-원고.md 1절 그대로, play = 임시 재생(몸짓 m, 표정 f, 속도 speed). 모션 파일이 오면 play 와 name 만 바꾼다. 31: only 가 있는 칸은 단계 해금이 아니라 정해진 연출에서만 얻는다(x17 「첫 만남」 = 첫 만남 연출 data/config.json firstMeet, 시크릿, 그림은 x17 돌려차기 멈춘 순간·작전복·네온 골목). build_collection 이 그대로 둔다. 38: no = 카드 번호(카드마다 고유, 01부터 화면에는 두 자리). 한 번 정한 번호는 바꾸지 않고 새 칸은 지금 가장 큰 번호 다음을 받는다(tools/build_collection.mjs 가 지킴). 42: e01 「크리스마스 이브」(45번)는 47에서 뺌(번호 45 는 retiredNo, 이미 가진 저장값 S.col.e01 은 지우지 않고 무시). 49: 선물로 얻던 카드 g01~g10 은 컬렉션 「카드 팩」 카드(source pack, 번호·등급·몸짓·그림 방식 그대로, 뽑기 값은 data/pack.json). 보류 g11·g12 는 source gift 그대로(보류를 풀 때 pack 으로 바꾸면 팩 특별 등급이 다시 나옴). 50: source moment = 순간 선물 반응 카드(컬렉션 「선물」 탭). 50-1: 선물마다 한 장(이름 = 선물 이름, gift = 선물 id, stage = 그 선물의 관계 단계, play.m = data/gifts.json reaction). 반응 몸짓이 data/motions.json 에 없으면 앱에서 숨김(보류처럼 안 세짐) — 모션 파일이 오면 motions.json 에 넣기만 하면 나타남. 50 의 gm01~gm03(칵테일 · 차가움/흔들림/솔직함)은 50-1 에서 지움(정식으로 얻을 수 없던 카드, 앱이 저장값에서도 지움 — S.v 5). 52: 카드 팩 카드 g13 귀여운 척 갸웃·g14 시간 날 때마다 연습한 춤·g15 고민하는 척(SECRET, 몸짓 x32~x34 = 카드 팩 전용 only pack), g16 처음 건넨 인사(레어, 시작화면 인사 x23 두 손 흔들기). line = 카드 아래 한 줄. 특별 카드가 팩에 생겨 gacha.fit 이 특별을 레어에 더하지 않음(특별 1% 그대로). gradeRule.byId: m13 손 흔들기(24번) = 일반. 78: pose true = 촬영 전용 포즈 카드(p01~p14, 몸짓도 p01~p14 · data/motions.json only \"pose\"). 카메라·＋ 기능판 「포즈」 목록은 이 카드만. free true = 기본 무료 포즈(p01 손가락 하트): 촬영 화면·포즈 목록에서는 처음부터 쓸 수 있지만 컬렉션 카드는 따로 — source chat(「대화」 탭)·RARE·only \"photoAsk\" = 서아가 대화 중 먼저 사진을 찍어 달라고 부탁하는 이야기 이벤트(추후)가 Pose.cardEvent(\"photoAsk\") 를 부르면 그때 얻음(카메라를 열거나 그 포즈로 찍는 것만으로는 안 얻음, 카드 팩에 안 나옴). 나머지는 source pack(카드 팩에서만). 카드에 「포즈」 표시(data/ui.json album.card.pose)",
+  "_설명": "명장면 수집(몸짓 도감, 9단계). 44: hold true = 보류 칸(목록·진행 줄 「모은 카드 n / total」·마이·카드 크게 보기에 안 나오고 세지 않음, 번호 no 는 그대로 지킴, 이미 모은 저장값도 지우지 않고 숨김만). m23 바디웨이브 댄스 = 옥상 춤 보류. 47: m15 다정하게 인사하기·g11 손가락 하트·g12 품에 안겨 오기도 보류(선물 특별 등급이 모두 보류라 선물에서 특별이 뜨면 레어로 처리 — gacha.js fit). tools/build_collection.mjs 가 다시 만들어도 hold 칸은 남음. 한 칸 = 몸짓 하나(id, name, source chat|pack|gift, grade common|rare|special). 한 몸짓은 한 곳(대화 또는 선물)에서만 얻는다. 같은 몸짓은 몇 번 얻어도 한 칸. 대화 몸짓 칸은 tools/build_collection.mjs 가 data/seoa_story.json unlock 에서 만들고 gradeRule 로 grade 를 계산해 적는다(ban 제외). 선물 몸짓 g01~g12 는 원고 docs/drafts/9-선물-앨범-원고.md 1절 그대로, play = 임시 재생(몸짓 m, 표정 f, 속도 speed). 모션 파일이 오면 play 와 name 만 바꾼다. 31: only 가 있는 칸은 단계 해금이 아니라 정해진 연출에서만 얻는다(x17 「첫 만남」 = 첫 만남 연출 data/config.json firstMeet, 시크릿, 그림은 x17 돌려차기 멈춘 순간·작전복·네온 골목). build_collection 이 그대로 둔다. 38: no = 카드 번호(카드마다 고유, 01부터 화면에는 두 자리). 한 번 정한 번호는 바꾸지 않고 새 칸은 지금 가장 큰 번호 다음을 받는다(tools/build_collection.mjs 가 지킴). 42: e01 「크리스마스 이브」(45번)는 47에서 뺌(번호 45 는 retiredNo, 이미 가진 저장값 S.col.e01 은 지우지 않고 무시). 49: 선물로 얻던 카드 g01~g10 은 컬렉션 「카드 팩」 카드(source pack, 번호·등급·몸짓·그림 방식 그대로, 뽑기 값은 data/pack.json). 보류 g11·g12 는 source gift 그대로(보류를 풀 때 pack 으로 바꾸면 팩 특별 등급이 다시 나옴). 50: source moment = 순간 선물 반응 카드(컬렉션 「선물」 탭). 50-1: 선물마다 한 장(이름 = 선물 이름, gift = 선물 id, stage = 그 선물의 관계 단계, play.m = data/gifts.json reaction). 반응 몸짓이 data/motions.json 에 없으면 앱에서 숨김(보류처럼 안 세짐) — 모션 파일이 오면 motions.json 에 넣기만 하면 나타남. 50 의 gm01~gm03(칵테일 · 차가움/흔들림/솔직함)은 50-1 에서 지움(정식으로 얻을 수 없던 카드, 앱이 저장값에서도 지움 — S.v 5). 52: 카드 팩 카드 g13 귀여운 척 갸웃·g14 시간 날 때마다 연습한 춤·g15 고민하는 척(SECRET, 몸짓 x32~x34 = 카드 팩 전용 only pack), g16 처음 건넨 인사(레어, 시작화면 인사 x23 두 손 흔들기). line = 카드 아래 한 줄. 84-2: g17 팔꿈치로 툭 치기(레어, 몸짓 x45 = 카드 팩 전용 only pack, 연인 함께하기 「모션」 탭 허용 목록 data/together.json free.packMotions). 대화 카드 x40~x43·x46~x48(70~76번, x49 는 noCard) 특별 카드가 팩에 생겨 gacha.fit 이 특별을 레어에 더하지 않음(특별 1% 그대로). gradeRule.byId: m13 손 흔들기(24번) = 일반. 78: pose true = 촬영 전용 포즈 카드(p01~p14, 몸짓도 p01~p14 · data/motions.json only \"pose\"). 카메라·＋ 기능판 「포즈」 목록은 이 카드만. free true = 기본 무료 포즈(p01 손가락 하트): 촬영 화면·포즈 목록에서는 처음부터 쓸 수 있지만 컬렉션 카드는 따로 — source chat(「대화」 탭)·RARE·only \"photoAsk\" = 서아가 대화 중 먼저 사진을 찍어 달라고 부탁하는 이야기 이벤트(추후)가 Pose.cardEvent(\"photoAsk\") 를 부르면 그때 얻음(카메라를 열거나 그 포즈로 찍는 것만으로는 안 얻음, 카드 팩에 안 나옴). 나머지는 source pack(카드 팩에서만). 카드에 「포즈」 표시(data/ui.json album.card.pose)",
+  "_noCard": "84-2 E-2: 대화 몸짓이지만 카드 칸을 만들지 않는 몸짓(tools/build_collection.mjs 가 건너뜀). x49 수줍게 웃기 = 카드 팩 g02 「입 가리고 웃기」(x19 초콜릿 선물 반응)와 같은 모션 파일·구간이라 대화에서 처음 봐도 카드를 주지 않음(대화·함께하기 감정 표현으로만)",
+  "noCard": [
+    "x49"
+  ],
   "gradeRule": {
     "_설명": "대화 몸짓 등급 규칙: 1~2단계 일반, 3~4단계 희귀, 5~6단계 특별, 서아 전용 c01~c05 는 단계와 상관없이 특별, flag·event 몸짓은 희귀",
     "stage": {
@@ -237,6 +241,14 @@
       "stage": 1
     },
     {
+      "id": "x42",
+      "no": 70,
+      "name": "옆을 바라보기",
+      "source": "chat",
+      "grade": "common",
+      "stage": 1
+    },
+    {
       "id": "m09",
       "no": 14,
       "name": "툭 건네주기",
@@ -250,6 +262,22 @@
       "name": "팔꿈치 괴고 몸 숙이기",
       "source": "chat",
       "grade": "special",
+      "stage": 2
+    },
+    {
+      "id": "x41",
+      "no": 71,
+      "name": "어이없어 양손 들기",
+      "source": "chat",
+      "grade": "common",
+      "stage": 2
+    },
+    {
+      "id": "x46",
+      "no": 72,
+      "name": "고개 갸웃하며 손 올리기",
+      "source": "chat",
+      "grade": "common",
       "stage": 2
     },
     {
@@ -293,6 +321,14 @@
       "stage": 3
     },
     {
+      "id": "x43",
+      "no": 73,
+      "name": "머리 가볍게 만지기",
+      "source": "chat",
+      "grade": "rare",
+      "stage": 3
+    },
+    {
       "id": "c05",
       "no": 21,
       "name": "이마 맞대기",
@@ -304,6 +340,30 @@
       "id": "x09",
       "no": 22,
       "name": "붙잡기",
+      "source": "chat",
+      "grade": "rare",
+      "stage": 4
+    },
+    {
+      "id": "x40",
+      "no": 74,
+      "name": "손가락으로 가리키기",
+      "source": "chat",
+      "grade": "rare",
+      "stage": 4
+    },
+    {
+      "id": "x47",
+      "no": 75,
+      "name": "질투하기",
+      "source": "chat",
+      "grade": "rare",
+      "stage": 4
+    },
+    {
+      "id": "x48",
+      "no": 76,
+      "name": "부끄러워 얼굴 가리기",
       "source": "chat",
       "grade": "rare",
       "stage": 4
@@ -688,6 +748,19 @@
       }
     },
     {
+      "id": "g17",
+      "no": 77,
+      "name": "팔꿈치로 툭 치기",
+      "source": "pack",
+      "grade": "rare",
+      "line": "왜 그렇게 심각해?",
+      "play": {
+        "m": "x45",
+        "f": "fun",
+        "speed": 1
+      }
+    },
+    {
       "id": "p02",
       "no": 57,
       "name": "볼 옆 하트",
@@ -910,11 +983,17 @@
     "face": "soft",
     "faceById": {
       "x17": "neutral",
-      "m01": "joy"
+      "m01": "joy",
+      "x40": "smirk",
+      "x41": "flustered",
+      "x46": "surprised",
+      "x47": "pout",
+      "x48": "shy"
     },
     "momentById": {
       "x17": 34,
       "m01": 25,
+      "g17": 50,
       "m07": 35,
       "c02": 18,
       "m06": 55,

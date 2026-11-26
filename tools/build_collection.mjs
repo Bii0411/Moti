@@ -11,11 +11,13 @@ const col = JSON.parse(readFileSync("data/collection.json", "utf8"));
 const R = col.gradeRule;
 const ban = new Set(story.ban || []);
 const seoaOnly = new Set(R.seoaOnly.ids);
+// 84-2 E-2: noCard = 대화 몸짓이지만 카드를 만들지 않는 몸짓(x49 수줍게 웃기 = 카드 팩 g02 「입 가리고 웃기」·x19 와 같은 모션이라 같은 카드를 무료로 또 얻지 않게)
+const noCard = new Set(col.noCard || []);
 
 const chat = [];
 const seen = new Set();
 const push = (id, from) => {
-  if (ban.has(id) || seen.has(id)) return;
+  if (ban.has(id) || seen.has(id) || noCard.has(id)) return;
   seen.add(id);
   let grade;
   if ((R.byId || {})[id]) grade = R.byId[id];  // 52: 몸짓 하나만 규칙에서 빼고 정한 등급(m13 손 흔들기 = 일반)

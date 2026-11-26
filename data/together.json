@@ -111,9 +111,9 @@
       }
     }
   },
-  "_free": "연인 자유 모션(D). 모션 탭 = 가진 무빙 카드 중 아래를 모두 만족하는 것: 서아 카드 · 대화 카드(source chat) 또는 packMotions 에 있는 카드팩 몸짓 · 모션 id 가 실제 재생 가능 · 지금 장소·이야기 줄기에서 허용(placeOkMotion) · 전용 몸짓 아님(data/motions.json only, 단 packMotions 는 허용 목록이라 통과) · data/seoa_story.json ban·extraMotions.move(걷기)·episodeOnly 아님 · exclude 아님. 선물·순간 선물·포즈·셀카·온보딩·프롤로그·답장 대기·걷기 카드는 빠짐. 카드의 표정·속도(Cards.motionOf) 그대로 재생",
+  "_free": "연인 자유 모션(D). 84-2: packMotions 에 x45 팔꿈치로 툭 치기(카드 팩 g17) 추가 — 카드를 가진 사람만. 모션 탭 = 가진 무빙 카드 중 아래를 모두 만족하는 것: 서아 카드 · 대화 카드(source chat) 또는 packMotions 에 있는 카드팩 몸짓 · 모션 id 가 실제 재생 가능 · 지금 장소·이야기 줄기에서 허용(placeOkMotion) · 전용 몸짓 아님(data/motions.json only, 단 packMotions 는 허용 목록이라 통과) · data/seoa_story.json ban·extraMotions.move(걷기)·episodeOnly 아님 · exclude 아님. 선물·순간 선물·포즈·셀카·온보딩·프롤로그·답장 대기·걷기 카드는 빠짐. 카드의 표정·속도(Cards.motionOf) 그대로 재생",
   "free": {
-    "packMotions": ["x32", "x34"],
+    "packMotions": ["x32", "x34", "x45"],
     "_exclude": "x17 첫 만남(프롤로그 전용) · x33 카드팩 춤(이번 자유 모션에서 뺌) · m23 옥상 춤(서사 이벤트)",
     "exclude": ["x17", "x33", "m23"]
   }

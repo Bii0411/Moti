@@ -36,6 +36,7 @@ const want = new Set();
 for (const k in story.unlock.stage) story.unlock.stage[k].motions.forEach(x => want.add(x));
 for (const s of ["flag", "event"]) for (const k in story.unlock[s]) story.unlock[s][k].motions.forEach(x => want.add(x));
 (story.ban || []).forEach(x => want.delete(x));
+(col.noCard || []).forEach(x => want.delete(x));  // 84-2: x49 = 카드 없음(g02 와 같은 모션)
 if (chat.length !== want.size || chat.some(x => !want.has(x.id))) fail("대화 몸짓이 unlock(ban 제외)과 다름");
 if (chat.some(x => (story.ban || []).includes(x.id))) fail("ban 몸짓이 들어 있음");
 // 49: 예전 선물 카드 g01~g12 = 카드 팩 10장(g01~g10) + 보류 2장(g11·g12, source gift 그대로)
@@ -49,7 +50,8 @@ const NEW52 = [
   ["g15", "고민하는 척", "special", "x34", "뭐~ 마실까! 아, 너무 신났나"],
   ["g16", "처음 건넨 인사", "rare", "x23", "안녕? 잘 부탁해."],
 ];
-const maxOld = Math.max(...col.items.filter(x => !x.pose && !NEW52.some(n => n[0] === x.id)).map(x => x.no || 0), ...(col.retiredNo || []));  // 78: 뒤에 붙은 포즈 카드는 빼고
+const NEW842 = ["x42", "x41", "x46", "x43", "x40", "x47", "x48", "g17"];  // 84-2 에 70~77번으로 붙은 카드
+const maxOld = Math.max(...col.items.filter(x => !x.pose && !NEW52.some(n => n[0] === x.id) && !NEW842.includes(x.id)).map(x => x.no || 0), ...(col.retiredNo || []));  // 78: 뒤에 붙은 포즈 카드는 빼고
 NEW52.forEach(([id, name, grade, m, line], i) => {
   const x = col.items.find(x => x.id === id);
   if (!x) return fail(`52: ${id} ${name} 없음`);
@@ -62,6 +64,22 @@ NEW52.forEach(([id, name, grade, m, line], i) => {
   else if (m !== "x23") { const f = JSON.parse(readFileSync(motions.xstage[m].file, "utf8")); if (!f.fingers || Object.keys(f.fingers.tracks).length + Object.keys(f.fingers.hold).length < 30) fail(`52: ${m} 손가락 없음`); if (!motions.xstage[m].inPlace) fail(`52: ${m} 제자리(inPlace) 아님`) }
 });
 if (motions.motions.x23.only !== "onboarding") fail("52: x23 이 시작화면 인사(only onboarding)가 아님");
+// 84-2: 신규 대화 카드 7장(70~76) + 카드 팩 g17 팔꿈치로 툭 치기(77, 레어, x45 카드 팩 전용) · x49 카드 없음
+{
+  const maxPre = Math.max(...col.items.filter(x => !NEW842.includes(x.id)).map(x => x.no || 0));
+  NEW842.forEach((id, i) => { const x = col.items.find(y => y.id === id); if (!x) return fail(`84-2: ${id} 카드 없음`); if (x.no !== maxPre + 1 + i) fail(`84-2: ${id} 번호 ${x.no} ≠ ${maxPre + 1 + i}`) });
+  const g17 = col.items.find(x => x.id === "g17") || {};
+  if (g17.name !== "팔꿈치로 툭 치기" || g17.source !== "pack" || g17.grade !== "rare" || (g17.play || {}).m !== "x45" || (g17.play || {}).f !== "fun" || g17.line !== "왜 그렇게 심각해?") fail("84-2: g17 값이 다름");
+  if ((motions.motions.x45 || {}).only !== "pack") fail("84-2: x45 가 카드 팩 전용(only pack)이 아님");
+  if (col.items.some(x => x.id === "x49" || (x.source === "chat" && (x.play || {}).m === "x49"))) fail("84-2: x49 카드가 있음");
+  const g02 = col.items.find(x => x.id === "g02") || {}; if ((g02.play || {}).m !== "x19") fail("84-2: g02 가 x19 가 아님");
+  const grades = { x42: "common", x41: "common", x46: "common", x43: "rare", x40: "rare", x47: "rare", x48: "rare" };
+  for (const id in grades) { const x = col.items.find(y => y.id === id) || {}; if (x.grade !== grades[id] || x.source !== "chat") fail(`84-2: ${id} 등급·source 다름`) }
+  const tg = JSON.parse(readFileSync("data/together.json", "utf8")); const pm = (tg.free || {}).packMotions || [];
+  if (!["x32", "x34", "x45"].every(m => pm.includes(m)) || pm.includes("x33") || !(tg.free.exclude || []).includes("x33")) fail("84-2: 자유 모션 카드 팩 허용 목록(x32·x34·x45, x33 제외)이 다름");
+  const acts = JSON.stringify(tg.actions) + JSON.stringify(tg.auto); if (/"x45"/.test(acts)) fail("84-2: x45 가 교감·자동 후보에 있음");
+  console.log(`- 84-2 카드: 대화 ${NEW842.slice(0, 7).join("·")}(${maxPre + 1}~${maxPre + 7}) · 카드 팩 g17 x45(${maxPre + 8}, 레어) · x49 카드 없음`);
+}
 // 카드 팩 전용 몸짓은 대화 해금·목록에 없음(앱 unlockedIds 가 only 를 뺌)
 for (const [m, v] of Object.entries(motions.motions)) if (v.only === "pack" && want.has(m)) fail(`52: 카드 팩 전용 ${m} 이 대화 해금에 있음`);
 // 춤은 전신 구도(m23 과 같은 frameById)
