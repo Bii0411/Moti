@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-1605">
+<meta name="moti-version" content="20261126-1613">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-1605">
-<link rel="stylesheet" href="photos.css?v=20261126-1605">
-<link rel="stylesheet" href="cards.css?v=20261126-1605">
-<link rel="stylesheet" href="pose.css?v=20261126-1605">
-<link rel="stylesheet" href="pack.css?v=20261126-1605">
+<link rel="stylesheet" href="onboarding.css?v=20261126-1613">
+<link rel="stylesheet" href="photos.css?v=20261126-1613">
+<link rel="stylesheet" href="cards.css?v=20261126-1613">
+<link rel="stylesheet" href="pose.css?v=20261126-1613">
+<link rel="stylesheet" href="pack.css?v=20261126-1613">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-1605"></script>
-<script src="motion.js?v=20261126-1605"></script>
-<script src="gacha.js?v=20261126-1605"></script>
-<script src="look.js?v=20261126-1605"></script>
-<script src="alive.js?v=20261126-1605"></script>
-<script src="film.js?v=20261126-1605"></script>
-<script src="photos.js?v=20261126-1605"></script>
-<script src="seoaphoto.js?v=20261126-1605"></script>
-<script src="cards.js?v=20261126-1605"></script>
-<script src="pose.js?v=20261126-1605"></script>
-<script src="pack.js?v=20261126-1605"></script>
-<script src="storypic.js?v=20261126-1605"></script>
-<script src="onboarding.js?v=20261126-1605"></script>
+<script src="icons.js?v=20261126-1613"></script>
+<script src="motion.js?v=20261126-1613"></script>
+<script src="gacha.js?v=20261126-1613"></script>
+<script src="look.js?v=20261126-1613"></script>
+<script src="alive.js?v=20261126-1613"></script>
+<script src="film.js?v=20261126-1613"></script>
+<script src="photos.js?v=20261126-1613"></script>
+<script src="seoaphoto.js?v=20261126-1613"></script>
+<script src="cards.js?v=20261126-1613"></script>
+<script src="pose.js?v=20261126-1613"></script>
+<script src="pack.js?v=20261126-1613"></script>
+<script src="storypic.js?v=20261126-1613"></script>
+<script src="onboarding.js?v=20261126-1613"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2417,6 +2417,7 @@ const Demo=(()=>{
     h+=`<h4>${esc(T("packNext"))} <small>${esc(T("packLeft",{n:Pack.left()}))}</small></h4>
       <div class="row">${B("packNext",esc(T("none")),{v:"",on:!S.packNext})}${Gacha.ORDER.map(g=>B("packNext",esc(gradeKo(g)),{v:"grade:"+g,on:PN.grade===g})).join("")}</div>
       <div class="row">${pItems.map(x=>B("packNext",esc(x.id+" "+x.name),{v:"item:"+x.id,on:PN.item===x.id})).join("")}</div>
+      <div class="row">${B("photoAsk",esc(T("photoAsk")))}</div>
       <div class="row">${B("packPityReset",esc(T("packPityReset")))}${B("packOpenAll",esc(T("packOpenAll")))}${B("packClear",esc(T("packClear")))}</div>`;
     // 연출(17-1): 다음 답장을 결정적 순간으로 · 확대 쿨다운 비우기 · 남은 쿨다운과 마지막 결정적 순간의 이유(화면에는 안 보임)
     const F=Fx.st(),kl=F.last;
@@ -2469,6 +2470,7 @@ const Demo=(()=>{
     if(a==="zoomClear"){const F=Fx.st();F.zoomAt=null;F.keyAt=null;save();toast(esc(T("zoomCleared")),1600);return refresh()}
     if(a==="packNext"){const [k,x]=(v||"").split(":");S.packNext=k==="grade"?{grade:x}:k==="item"?{item:x}:null;return refresh()}
     if(a==="packPityReset"){S.packPity=null;toast(esc(T("packPityReset")),1600);return refresh()}
+    if(a==="photoAsk"){const n=Pose.cardEvent("photoAsk");if(!n)toast(esc(T("photoAskDone")),1600);return refresh()}  // 78 추가: 서아가 사진을 부탁하는 이벤트(추후) 대신 카드 얻기
     if(a==="packOpenAll"){Gacha.pool(COL.items).forEach(x=>{if(!S.col[x.id])S.col[x.id]=seenNow({line:"",pack:1})});Cards.fill();toast(esc(T("packOpenAll")),1600);return refresh()}
     // 11: 명장면 모두 열기(앨범 시연용). 대사 없이 기록
     if(a==="colOpenAll"){COL.items.forEach(x=>{if(!S.col[x.id])S.col[x.id]=seenNow({line:""})});

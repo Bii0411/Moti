@@ -155,6 +155,8 @@
   "packNext": "다음 카드 팩 결과(첫 장)",
   "packPityReset": "천장 초기화",
   "packOpenAll": "카드 팩 카드 모두 열기",
+  "photoAsk": "사진 부탁 이벤트(손가락 하트 카드)",
+  "photoAskDone": "이미 가진 카드예요",
   "packClear": "카드 팩 카드 비우기",
   "packLeft": "천장까지 {n}장",
   "_보류49": {

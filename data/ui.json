@@ -306,6 +306,7 @@
     "chip": "{name} · 부탁한 포즈",
     "camBtn": "포즈",
     "locked": "카드팩에서 획득할 수 있어요.",
+    "freeSub": "기본 포즈",
     "ariaPick": "{name} 포즈 부탁하기"
   },
   "photoFull": {
