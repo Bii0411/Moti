@@ -10,7 +10,7 @@
   "freeStage": 6,
   "_camera": "함께하기 전용 구도(모델 키 1.72m 기준 비율). frame top·bottom = 보여 줄 위·아래 높이(머리 위 여백 ~ 무릎 근처), width = 최소 너비, lift = 카메라를 가운데보다 올리는 몫. fov = 함께하기 동안 카메라 화각(끝나면 원래 값). focus = 가까이 다가가기 때 이 높이(가슴·얼굴 쪽)를 중심으로 다가감. rootFollow = 몸짓이 서아를 앞뒤로 옮길 때(다가가기 m12) 카메라가 따라 물러나는 몫(1 = 완전히, 0 = 안 따라감 → 몸짓 이동과 카메라 다가감이 겹쳐 너무 가까워지지 않게). topRatio = 화면에서 위 3D 칸 높이 몫",
   "camera": {
-    "frame": { "top": 1.07, "bottom": 0.27, "width": 0.52, "lift": 0.02 },
+    "frame": { "top": 1.05, "bottom": 0.31, "width": 0.5, "lift": 0.02 },
     "fov": 30,
     "focus": 0.8,
     "rootFollow": 0.7
@@ -38,7 +38,7 @@
       "6": ["soft", "joy"]
     }
   },
-  "_actions": "행동별·단계별 연출. icon = 버튼 아이콘 이름(together.js). by[단계] = 그 단계 연출. steps = 행동 시작 기준 at(ms)에 할 일: f 표정 · gaze(\"away\" 시선을 옆으로 · \"camera\" 흔들림 없이 나를 봄 · null 평소 시선, 수줍음 표정·시선 피하기 몸짓이면 저절로 피함) · pick 몸짓 후보 [{m 몸짓, f 표정}](지금 장소에서 쓸 수 있는 것 중 직전 것 제외 무작위, 하나도 없으면 첫 후보의 표정만 faceOnlyMs) · cam \"in\" 카메라가 camIn 몫만큼 camInMs 동안 다가감(행동이 끝나면 camBackMs 동안 돌아옴, 「동작 줄이기」면 움직이지 않음). ms = 행동 최소 길이(몸짓이 있으면 실제 재생 시작부터 몸짓 길이가 끝날 때까지와 비교해 긴 쪽)",
+  "_actions": "행동별·단계별 연출. icon = 버튼 아이콘 이름(together.js). by[단계] = 그 단계 연출. steps = 행동 시작 기준 at(ms)에 할 일(joy 는 눈을 감는 웃음이라 눈 맞추기·바라보기에서는 짧은 웃음 박자로만 쓰고 soft 로 돌아옴): f 표정 · gaze(\"away\" 시선을 옆으로 · \"camera\" 흔들림 없이 나를 봄 · null 평소 시선, 수줍음 표정·시선 피하기 몸짓이면 저절로 피함) · pick 몸짓 후보 [{m 몸짓, f 표정}](지금 장소에서 쓸 수 있는 것 중 직전 것 제외 무작위, 하나도 없으면 첫 후보의 표정만 faceOnlyMs) · cam \"in\" 카메라가 camIn 몫만큼 camInMs 동안 다가감(행동이 끝나면 camBackMs 동안 돌아옴, 「동작 줄이기」면 움직이지 않음). ms = 행동 최소 길이(몸짓이 있으면 실제 재생 시작부터 몸짓 길이가 끝날 때까지와 비교해 긴 쪽)",
   "actions": {
     "still": {
       "icon": "still",
@@ -63,7 +63,7 @@
       "by": {
         "3": { "ms": 3800, "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1100, "f": "soft", "gaze": "camera" }, { "at": 1600, "f": "shy", "gaze": null }] },
         "4": { "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1000, "f": "soft", "gaze": "camera" }, { "at": 1400, "gaze": null, "pick": [{ "m": "c02", "f": "shy" }] }] },
-        "6": { "ms": 4200, "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1000, "f": "soft", "gaze": "camera" }, { "at": 1700, "f": "joy", "gaze": "camera" }] }
+        "6": { "ms": 4200, "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1000, "f": "soft", "gaze": "camera" }, { "at": 1800, "f": "joy", "gaze": "camera" }, { "at": 2700, "f": "soft", "gaze": "camera" }] }
       }
     },
     "eye": {
@@ -71,7 +71,7 @@
       "by": {
         "3": { "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 1000, "gaze": null, "pick": [{ "m": "m05", "f": "shy" }] }] },
         "4": { "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 2000, "gaze": null, "pick": [{ "m": "m05", "f": "flustered" }, { "m": "m05", "f": "shy" }] }] },
-        "6": { "ms": 3600, "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 1400, "f": "joy", "gaze": "camera" }, { "at": 3000, "f": "soft", "gaze": "camera" }] }
+        "6": { "ms": 3600, "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 1500, "f": "joy", "gaze": "camera" }, { "at": 2300, "f": "soft", "gaze": "camera" }] }
       }
     },
     "hand": {

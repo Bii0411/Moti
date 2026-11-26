@@ -34,5 +34,7 @@
 .tga.tgwait,.tgscroll .mc.tgwait{opacity:.45}
 .tgscroll .mc.tgon .pc{box-shadow:0 0 0 2px #8b5cf6aa}
 .tgempty{margin:22px 8px;text-align:center;color:var(--sub);font-size:13px;line-height:1.6}
+/* ＋ 기능판: 본편은 포즈 칸 대신 함께하기 칸(.fni 의 display:flex 가 hidden 을 덮지 않게) */
+#fnPanel .fni[hidden]{display:none}
 /* 함께하기 중에는 뒤 화면 알림 배너가 가리지 않게(토스트는 그대로 위) */
 .app.tgon .hnote{visibility:hidden}
