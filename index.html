@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-2051">
+<meta name="moti-version" content="20261126-2134">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -539,6 +539,13 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .dp .mrow .pl i{font-style:normal;color:var(--sub);font-size:10px;margin-left:4px}
 .dp .mrow .pl.open i{color:#86efac}
 .dp .mrow .pv{flex:none;font-size:11px;border:1px solid var(--line);border-radius:8px;padding:5px 7px;color:var(--gold)}
+/* 84-1 신규 모션 검수(?debug=1): 몸짓마다 이름·길이 한 줄 + 표정 후보 + 구도 버튼 */
+.dp .pvrow{display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.dp .pvrow .pvh{display:flex;gap:6px;align-items:baseline}
+.dp .pvrow .pvh b{flex:1;min-width:0;font-size:12px}
+.dp .pvrow .pvh small{color:var(--sub);font-size:10px}
+.dp .pvrow .row{margin:4px 0 0}
+.dp .pvrow .row button{font-size:11px;padding:4px 8px}
 .dp .keys{margin-top:12px;font-size:10px;color:var(--sub);line-height:1.5}
 /* 장 제목: 장면에 들어갈 때 대화 화면 가운데 2초 (투명도·크기 전환만) */
 .chapter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);z-index:32;background:#0d0b16e6;border:1px solid #f5c66b66;color:var(--gold);padding:14px 24px;border-radius:16px;font-size:20px;font-weight:800;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;white-space:nowrap}
@@ -563,12 +570,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-2051">
-<link rel="stylesheet" href="photos.css?v=20261126-2051">
-<link rel="stylesheet" href="cards.css?v=20261126-2051">
-<link rel="stylesheet" href="pose.css?v=20261126-2051">
-<link rel="stylesheet" href="pack.css?v=20261126-2051">
-<link rel="stylesheet" href="together.css?v=20261126-2051">
+<link rel="stylesheet" href="onboarding.css?v=20261126-2134">
+<link rel="stylesheet" href="photos.css?v=20261126-2134">
+<link rel="stylesheet" href="cards.css?v=20261126-2134">
+<link rel="stylesheet" href="pose.css?v=20261126-2134">
+<link rel="stylesheet" href="pack.css?v=20261126-2134">
+<link rel="stylesheet" href="together.css?v=20261126-2134">
 </head>
 <body>
 <div class="app">
@@ -649,21 +656,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-2051"></script>
-<script src="motion.js?v=20261126-2051"></script>
-<script src="gacha.js?v=20261126-2051"></script>
-<script src="look.js?v=20261126-2051"></script>
-<script src="alive.js?v=20261126-2051"></script>
-<script src="film.js?v=20261126-2051"></script>
-<script src="photos.js?v=20261126-2051"></script>
-<script src="seoaphoto.js?v=20261126-2051"></script>
-<script src="cards.js?v=20261126-2051"></script>
-<script src="pose.js?v=20261126-2051"></script>
-<script src="photoask.js?v=20261126-2051"></script>
-<script src="together.js?v=20261126-2051"></script>
-<script src="pack.js?v=20261126-2051"></script>
-<script src="storypic.js?v=20261126-2051"></script>
-<script src="onboarding.js?v=20261126-2051"></script>
+<script src="icons.js?v=20261126-2134"></script>
+<script src="motion.js?v=20261126-2134"></script>
+<script src="gacha.js?v=20261126-2134"></script>
+<script src="look.js?v=20261126-2134"></script>
+<script src="alive.js?v=20261126-2134"></script>
+<script src="film.js?v=20261126-2134"></script>
+<script src="photos.js?v=20261126-2134"></script>
+<script src="seoaphoto.js?v=20261126-2134"></script>
+<script src="cards.js?v=20261126-2134"></script>
+<script src="pose.js?v=20261126-2134"></script>
+<script src="photoask.js?v=20261126-2134"></script>
+<script src="together.js?v=20261126-2134"></script>
+<script src="pack.js?v=20261126-2134"></script>
+<script src="storypic.js?v=20261126-2134"></script>
+<script src="onboarding.js?v=20261126-2134"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -906,7 +913,7 @@ const Stage=(()=>{
   function xsRest(wait){if(restOn)return;restOn=true;const P=(DATA.config&&DATA.config.preload)||{};
     const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:P.idleTimeoutMs||3000}):setTimeout(f,P.gapMs||300);
     const next=ids=>{const id=ids.shift();if(!id)return;idle(()=>xsLoad(id).then(()=>next(ids)))};
-    const go=()=>{if(wait&&wait())return setTimeout(go,P.busyCheckMs||1000);next(Object.keys(XS).filter(id=>!xsCache[id]))};
+    const go=()=>{if(wait&&wait())return setTimeout(go,P.busyCheckMs||1000);next(Object.keys(XS).filter(id=>!xsCache[id]&&(DEBUG||((DATA.motions.motions||{})[id]||{}).only!=="preview")))};  // 84-1: 검수 전용(only preview) 파일은 ?debug=1 일 때만 미리 받음(일반 사용자 기기에 안 받음)
     ready.then(()=>xsQ).then(()=>setTimeout(go,P.restDelayMs!=null?P.restDelayMs:1500))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
@@ -2509,7 +2516,23 @@ const Demo=(()=>{
     (st.used_events||(st.used_events={})).NAME_ASK=+st.turn||0;S.judgeBuf=[];S.judgeKeep=null;
     save();renderBond();refresh()}
   // ── 몸짓 ──
-  const allMotions=()=>{const c=COL.items.filter(x=>x.source==="chat").map(x=>x.id);return [...c,...Object.keys(XS).filter(id=>!c.includes(id))]};  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외) + 아직 아무 데도 안 붙은 XSTAGE 모션(미리보기용)
+  const allMotions=()=>{const c=COL.items.filter(x=>x.source==="chat").map(x=>x.id);return [...c,...Object.keys(XS).filter(id=>!c.includes(id)&&!pvOnly(id))]};  // 84-1: 검수 전용(only preview)은 아래 「신규 모션 검수」에서만
+  // 84-1 신규 모션 검수: only "preview" 몸짓. 재생은 quiet(최근 몸짓·이름 칩·확대·모션 강조·도감·카드·해금에 안 들어감), 함께하기 구도는 Together.preview
+  const pvOnly=id=>((DATA.motions.motions||{})[id]||{}).only==="preview";
+  const pvIds=()=>Object.keys(DATA.motions.motions||{}).filter(id=>pvOnly(id)&&canPlay(id));
+  const pvFace={},pvLast={};
+  function pvHtml(){const P=(DATA.motions||{}).preview||{};
+    return `<h4>${esc(T("preview.title"))} <small>${esc(T("preview.note"))}</small></h4><div class="mlist">${pvIds().map(id=>{const fs=(P[id]||{}).faces||[],cf=pvFace[id]||"",d=Stage.xsLoaded().includes(id)||!XS[id]||XS[id].to!=null?T("preview.dur",{s:Stage.dur(id).toFixed(1)}):T("preview.durWait");
+      return `<div class="pvrow"><div class="pvh"><b>${id} ${esc(MNAME[id]||id)}</b><small>${esc(d)}${pvLast[id]!=null?" · "+esc(T("preview.last",{s:pvLast[id].toFixed(1)})):""}</small></div>
+        <div class="row">${["",...fs.filter(f=>FACE[f])].map(f=>B("pvFace",esc(f?(FACEKO[f]||f):T("preview.noFace")),{v:id+":"+f,on:cf===f})).join("")}</div>
+        <div class="row">${B("pvChat",esc(T("preview.chat")),{v:id})}${B("pvTogether",esc(T("preview.together")),{v:id})}</div></div>`}).join("")}</div>`}
+  // 실제 재생 길이: 재생이 시작된 순간(파일을 다 받은 뒤)부터 그 몸짓이 끝날 때까지 잼
+  function pvMeasure(id){const t0=performance.now();let st=null;const go=()=>{const p=Stage.playing();if(p===id&&st==null)st=performance.now();
+    if(st!=null&&p!==id){pvLast[id]=(performance.now()-st)/1000;if(open)render();return}if(performance.now()-t0<30000)setTimeout(go,50)};go()}
+  async function pvChat(id){cancel();toChat();setOpen(false);const f=pvFace[id]||"";await Stage.xs(id);if(f&&FACE[f])Stage.setFace(f);Stage.play(id,{quiet:true});pvMeasure(id)}
+  function pvTogether(id){const f=pvFace[id]||"";setOpen(false);
+    if(Together.isOn()){if(Together.preview(id,f))pvMeasure(id);return}
+    cancel();toChat();setTimeout(()=>{if(Together.enter())setTimeout(()=>{if(Together.preview(id,f))pvMeasure(id)},500)},350)}  // 대화 몸짓 = 도감의 대화 칸(unlock 전부, ban 제외) + 아직 아무 데도 안 붙은 XSTAGE 모션(미리보기용)
   function groupOf(mid){const u=U();for(const sec of ["stage","flag","event"])for(const k in u[sec]||{}){const g=u[sec][k];if((g.motions||[]).includes(mid))return g}return null}
   // 80: 서버 S4 시연. 본편으로 가서 단계를 맞추고(clearS4 로 앞 위기·밤 넘기기·장면 예약을 비움) 서버가 돌려줄 state 처럼 둔 뒤, 판정을 받은 것처럼 S4.judged 를 그대로 부름
   //     crisis = 5단계 위기 직전(다음 답장 CRISIS, 그 직전이 되감기 지점) · rift = 위기 직전 지점을 만든 뒤 엇갈림이 된 판정 · night = 2단계 첫 밤 마무리
@@ -2616,6 +2639,7 @@ const Demo=(()=>{
       const ids=unlockedIds(),seen=new Set(Object.keys(S.col));
       h+=`<h4>${esc(T("sec.motions"))} <small>${esc(T("motionPlay"))}</small></h4><div class="row">${B("unlockAll",esc(T("unlockAll")))}${B("lockAll",esc(T("lockAll")))}</div>
         <div class="mlist">${allMotions().map(id=>{const o=ids.includes(id);return `<div class="mrow"><button data-a="play" data-v="${id}" class="pl ${o?"open":""}">${id} ${esc(MNAME[id]||id)}<i>${esc(o?T("motionOpen"):T("motionLocked"))}${seen.has(id)?" · "+esc(T("motionSeen")):""}</i></button>${B("preview",esc(T("motionPreview")),{v:id,cls:"pv",title:T("motionPreviewTitle")})}</div>`}).join("")}</div>`;
+      h+=pvHtml();  // 84-1
       h+=`<div class="keys">${esc(T("keysNote"))}</div>`;
     }
     P().innerHTML=h;
@@ -2678,6 +2702,9 @@ const Demo=(()=>{
     if(a==="lockAll"){S.unlocked=[];setStage(1);return refresh()}
     if(a==="play")return playMotion(v);
     if(a==="preview")return preview(v);
+    if(a==="pvFace"){const i=(v||"").indexOf(":");pvFace[v.slice(0,i)]=v.slice(i+1);return render()}  // 84-1 신규 모션 검수
+    if(a==="pvChat")return pvChat(v);
+    if(a==="pvTogether")return pvTogether(v);
     Scenes.click(a,v);
   }
   function init(){
