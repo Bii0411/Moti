@@ -73,16 +73,16 @@
     "x28": { "name": "따뜻한 수건", "emo": "수줍음", "only": "gift" },
     "x29": { "name": "바 여분 열쇠", "emo": "수줍음", "only": "gift" },
     "x30": { "name": "우산", "emo": "장난", "only": "gift" },
-    "x40": { "name": "손가락으로 가리키기", "emo": "장난", "only": "preview" },
-    "x41": { "name": "어이없어 양손 들기", "emo": "황당함", "only": "preview" },
-    "x42": { "name": "옆을 바라보기", "emo": "평온", "only": "preview" },
-    "x43": { "name": "머리 가볍게 만지기", "emo": "평온", "only": "preview" },
+    "x40": { "name": "손가락으로 가리키기", "emo": "장난" },
+    "x41": { "name": "어이없어 양손 들기", "emo": "당황" },
+    "x42": { "name": "옆을 바라보기", "emo": "평온" },
+    "x43": { "name": "머리 가볍게 만지기", "emo": "평온" },
     "x44": { "name": "장난스럽게 물러서기", "emo": "장난", "only": "preview" },
     "x45": { "name": "팔꿈치로 툭 치기", "emo": "장난", "only": "preview" },
-    "x46": { "name": "고개 갸웃하며 손 올리기", "emo": "궁금함", "only": "preview" },
-    "x47": { "name": "질투하기", "emo": "질투", "only": "preview" },
-    "x48": { "name": "부끄러워 얼굴 가리기", "emo": "수줍음", "only": "preview" },
-    "x49": { "name": "수줍게 웃기", "emo": "수줍음", "only": "preview" }
+    "x46": { "name": "고개 갸웃하며 손 올리기", "emo": "놀람" },
+    "x47": { "name": "질투하기", "emo": "질투" },
+    "x48": { "name": "부끄러워 얼굴 가리기", "emo": "수줍음" },
+    "x49": { "name": "수줍게 웃기", "emo": "수줍음" }
   },
   "_xstageReserve": "따로 둔 XSTAGE 모션(액션 계열). 감정 태그 없음, 사이트에서 불러오지도 재생하지도 않음(몸짓 고르기·시연 패널에 안 나옴). 쓰려면 motions 에 이름·감정을 넣고 xstage 로 옮긴다. 파일은 motions/ 에 그대로 있음",
   "xstageReserve": {
@@ -162,7 +162,16 @@
   "_motionFace": "84-2 A-3·C-4: 몸짓에 어울리는 표정. 일반 대화 답장에서 서버 감정·지문으로 정한 표정이 weak(없으면 motionFaceWeak) 안에 있으면(평온이라 몸짓 뜻이 안 전해질 때) face 로 바꿈. seq = 몸짓 재생 시각(초, 파일을 받아 실제로 시작한 때부터)에 맞춘 표정 흐름(첫 표정부터 시작, 몸짓이 바뀌거나 끝나면 멈춤). clash = 그 몸짓과 부딪치는 표정(웃음 몸짓에 슬픔·화남 등) → 몸짓을 빼고 표정만. talkDamp = 표정 흐름 동안 대사 입 움직임을 섞는 정도(0~1, 클수록 입 모양을 작게, 기본 data/look.json talk.emotionDamp). together = 시연 패널 함께하기 구도에서 「추천」으로 쓸 표정. 선물 반응·포즈 부탁·사진 제안·서사 장면의 정해진 표정은 바꾸지 않음",
   "motionFaceWeak": ["neutral"],
   "motionFace": {
-    "m01": { "face": "joy", "together": "fun", "weak": ["neutral", "soft", "smirk", "wink"], "clash": ["sorrow", "angry", "glare", "tired", "sulky", "bored", "serious", "pout"], "seq": [{ "at": 0, "f": "soft" }, { "at": 0.3, "f": "joy" }, { "at": 2.0, "f": "fun" }, { "at": 3.4, "f": "soft" }], "talkDamp": 0.85, "_": "0~0.3 미소 → 0.3~2.0 어깨를 들썩이는 큰 웃음(joy, 눈을 감고 활짝) → 2.0~3.4 살짝 숙였다 돌아오며 밝은 웃음(fun, 눈 뜸) → 3.4 잦아들며 미소(soft)" }
+    "m01": { "face": "joy", "together": "fun", "weak": ["neutral", "soft", "smirk", "wink"], "clash": ["sorrow", "angry", "glare", "tired", "sulky", "bored", "serious", "pout"], "seq": [{ "at": 0, "f": "soft" }, { "at": 0.3, "f": "joy" }, { "at": 2.0, "f": "fun" }, { "at": 3.4, "f": "soft" }], "talkDamp": 0.85, "_": "0~0.3 미소 → 0.3~2.0 어깨를 들썩이는 큰 웃음(joy, 눈을 감고 활짝) → 2.0~3.4 살짝 숙였다 돌아오며 밝은 웃음(fun, 눈 뜸) → 3.4 잦아들며 미소(soft)" },
+    "x40": { "face": "smirk", "weak": ["neutral", "soft"], "_": "84-2 C-4: 손가락으로 가리키기 = 피식 도발(장난이면 서버 표정 wink 그대로)" },
+    "x41": { "face": "flustered", "_": "어이없음 — 서버 감정 당황(flustered)이 보통, 평온이면 당황" },
+    "x43": { "face": "soft" },
+    "x46": { "face": "surprised", "_": "「응?」 궁금함 — 서버 감정 놀람(surprised)" },
+    "x47": { "face": "pout", "weak": ["neutral", "soft"], "_": "질투 = 삐죽" },
+    "x48": { "face": "shy", "weak": ["neutral", "soft"] },
+    "x49": { "face": "shy", "_": "m01(큰 웃음)과 달리 조용히 수줍게 웃음" },
+    "x44": { "face": "fun" },
+    "x45": { "face": "fun" }
   },
   "_preview": "84-1 시연 패널 「신규 모션 검수」(?debug=1 일 때만): only \"preview\" 몸짓을 하나씩 대화 구도·함께하기 구도에서 재생. faces = 같이 볼 표정 후보(index.html FACE 이름, 원고의 감정 후보에서 고름). 재생은 기록·해금·카드·관계를 바꾸지 않음(quiet)",
   "preview": {

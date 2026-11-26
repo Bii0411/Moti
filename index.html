@@ -1870,7 +1870,8 @@ function unlockedIds(){
   {const X=DATA.story.extraMotions||{};(X.always||[]).forEach(id=>set.add(id));((X.placeOnly||{})[S.scene]||[]).forEach(id=>set.add(id))}  // 55: 해금 없이 쓰는 몸짓(어디서나 · 그 장소에서만)
   // 25: 판정·사건 묶음에 나중에 더한 몸짓(protect 의 x16 등)은 그 묶음의 몸짓 하나라도 이미 열렸으면 같이 열림(예전 저장값)
   for(const sec of ["flag","event"])for(const k in U[sec]||{}){const M=U[sec][k].motions||[];if(M.some(id=>(S.unlocked||[]).includes(id)))M.forEach(id=>set.add(id))}
-  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
+  const mute=((DATA.story.stageMute||{})[curStage()])||[];  // 84-2 B-2: 그 단계에서만 빼는 몸짓(5 위기·엇갈림의 장난·질투·설렘 신규 몸짓)
+  return [...set].filter(id=>!(DATA.story.ban||[]).includes(id)&&!mute.includes(id)&&canPlay(id)&&!(DATA.motions.motions[id]||{}).only);  // 34: only(선물·입장권 전용 몸짓)는 대화에 안 나옴(시연 패널 「전부 열기」로도)
 }
 
 // ───────────────────────── 관계 6단계 · 판정 · 해금 ─────────────────────────
@@ -2107,7 +2108,9 @@ function motionFit(mid,face){const D=DATA.motions||{},x=mid&&(D.motionFace||{})[
   return{f,fs:fs.length?fs:null,td:x.talkDamp!=null?+x.talkDamp:null}}
 const canPlay=id=>!!(RIG.M[id]||XS[id]);
 // 반복 방지: 최근 recentLimit 번 안에 나온 몸짓은 고르지 않음 (data/motion_keywords.json)
-const recentMotions=()=>Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3);
+// 84-2 C-5: same = 같은 원본·구간을 쓰는 몸짓 묶음(x19 초콜릿 선물 반응 = x49 수줍게 웃기). 묶음 안 하나가 최근에 나왔으면 나머지도 최근으로 봄
+const sameOf=id=>{const L=(DATA.keywords.same||[]).find(g=>g.includes(id));return L||[id]};
+const recentMotions=()=>{const r=Stage.recent(DATA.keywords.recentLimit!=null?DATA.keywords.recentLimit:3),o=new Set(r);r.forEach(id=>sameOf(id).forEach(x=>o.add(x)));return [...o]};
 const pickable=()=>{const rec=recentMotions();return unlockedIds().filter(id=>!rec.includes(id)&&canPlay(id)&&placeOkMotion(id))};  // 51: 장소별 ban
 function motionList(){return pickable().map(id=>({id,name:MNAME[id]||id,emo:mEmo(id)}))}
 // 답장의 지문: v2 action + 예전 형식의 *…* 부분
