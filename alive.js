@@ -8,7 +8,7 @@ const Alive=(()=>{
   const AX={x:new V(1,0,0),y:new V(0,1,0),z:new V(0,0,1)};
   let md=null,cfg=null,restW={},restL={},hair=[],scale=1,last=0;
   // 상태: 숨·흔들림 위상, 시선(지금 값·목표), 잠깐 흔들리는 시선, 피하는 쪽
-  const st={sway:0,swayT:7,eyeY:0,eyeP:0,headY:0,headP:0,jitY:0,jitP:0,jitUntil:0,jitNext:2,avSide:1,wasAvert:false,headW:1};
+  const st={sway:0,swayT:7,eyeY:0,eyeP:0,eyeW:1,headY:0,headP:0,jitY:0,jitP:0,jitUntil:0,jitNext:2,avSide:1,wasAvert:false,headW:1};
   const rad=(v,d)=>(v!=null?v:d)*DEG;
   // 기본 자세 기준 회전(D)을 뼈에 더한다: local ← local · (W⁻¹ · D · W). motion.js 와 같은 방식이라 몸짓 위에 그대로 얹힌다
   function addRot(b,D){const w=restW[b.name];if(!w)return;tmpQ2.copy(w).invert().multiply(D).multiply(w);b.quaternion.multiply(tmpQ2)}
@@ -81,7 +81,9 @@ const Alive=(()=>{
     const hf=g.headFollow!=null?g.headFollow:.3;
     const cl=(x,m)=>Math.max(-m,Math.min(m,x));
     const thy=cl(ty*hf,rad(g.headMaxDeg,12))*hw,thp=cl(tp*hf,rad(g.headMaxDeg,12)*.6)*hw;
-    const tey=cl(ty-thy,rad(g.eyeMaxYawDeg,12)),tep=cl(tp-thp,rad(g.eyeMaxPitchDeg,8));
+    // 79: 몸짓이 고개를 돌리거나 숙이면(F 각도가 eyeReduceDeg 를 넘으면) 눈도 카메라를 쫓지 않고 고개가 향한 쪽을 봄(눈만 치켜뜨거나 옆으로 몰리지 않게)
+    const er=g.eyeReduceDeg;let ew=er?1-sm((dev-er[0]*DEG)/((er[1]-er[0])*DEG)):1;st.eyeW+=(ew-st.eyeW)*(1-Math.exp(-dt*4));ew=st.eyeW;
+    const tey=cl(ty-thy,rad(g.eyeMaxYawDeg,12))*ew,tep=cl(tp-thp,rad(g.eyeMaxPitchDeg,8))*ew;
     const ke=1-Math.exp(-dt*(g.eyeSpeed||16)),kh=1-Math.exp(-dt*(g.headSpeed||3));
     st.eyeY+=(tey-st.eyeY)*ke;st.eyeP+=(tep-st.eyeP)*ke;st.headY+=(thy-st.headY)*kh;st.headP+=(thp-st.headP)*kh;
     addRot(H,rotQ("y",st.headY).multiply(rotQ("x",st.headP)));
