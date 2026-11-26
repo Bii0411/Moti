@@ -202,7 +202,8 @@ const Cards=(()=>{
   async function show(){const id=vIds[vi],x=colBy(id),a=S.col[id];if(!x||!a)return close();
     const my=++vTok,mo=motionOf(id),key=a.outfit||C().defaultOutfit||"ops",sc=SCENES[a.scene]||SCENES[0];
     // 38: 목록 칸과 같은 포토카드(테두리·등급 표·아래 띠·번호). 아래 글은 처음 봤을 때 대사만(이름·단계·날짜는 띠 안)
-    $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade+(x.pose?" pose":"");$v(".pctag").textContent=tagOf(x.grade);{const pp=$v(".cvframe>.pc");let pb=pp.querySelector(".pcpose");if(x.pose&&!pb){pb=document.createElement("span");pb.className="pcpose";pp.appendChild(pb)}if(pb){pb.textContent=T("pose");pb.hidden=!x.pose}}  // 78$v(".cvfx").innerHTML=fx(x.grade);
+    $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade+(x.pose?" pose":"");$v(".pctag").textContent=tagOf(x.grade);{const pp=$v(".cvframe>.pc");let pb=pp.querySelector(".pcpose");if(x.pose&&!pb){pb=document.createElement("span");pb.className="pcpose";pp.appendChild(pb)}if(pb){pb.textContent=T("pose");pb.hidden=!x.pose}}  // 78
+    $v(".cvfx").innerHTML=fx(x.grade);
     $v(".pcnm").textContent=x.name;$v(".pcsub").textContent=bandLine(a);$v(".pcno").textContent=no2(x);fitName($v(".pcnm"));
     const ln=x.line||speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;  // 52: 칸에 적힌 한 줄(data/collection.json line, 카드 팩 SECRET 등)이 먼저
     $v('[data-cv="prev"]').disabled=vi<=0;$v('[data-cv="next"]').disabled=vi>=vIds.length-1;
