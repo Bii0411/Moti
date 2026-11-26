@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-1527">
+<meta name="moti-version" content="20261126-1605">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-1527">
-<link rel="stylesheet" href="photos.css?v=20261126-1527">
-<link rel="stylesheet" href="cards.css?v=20261126-1527">
-<link rel="stylesheet" href="pose.css?v=20261126-1527">
-<link rel="stylesheet" href="pack.css?v=20261126-1527">
+<link rel="stylesheet" href="onboarding.css?v=20261126-1605">
+<link rel="stylesheet" href="photos.css?v=20261126-1605">
+<link rel="stylesheet" href="cards.css?v=20261126-1605">
+<link rel="stylesheet" href="pose.css?v=20261126-1605">
+<link rel="stylesheet" href="pack.css?v=20261126-1605">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-1527"></script>
-<script src="motion.js?v=20261126-1527"></script>
-<script src="gacha.js?v=20261126-1527"></script>
-<script src="look.js?v=20261126-1527"></script>
-<script src="alive.js?v=20261126-1527"></script>
-<script src="film.js?v=20261126-1527"></script>
-<script src="photos.js?v=20261126-1527"></script>
-<script src="seoaphoto.js?v=20261126-1527"></script>
-<script src="cards.js?v=20261126-1527"></script>
-<script src="pose.js?v=20261126-1527"></script>
-<script src="pack.js?v=20261126-1527"></script>
-<script src="storypic.js?v=20261126-1527"></script>
-<script src="onboarding.js?v=20261126-1527"></script>
+<script src="icons.js?v=20261126-1605"></script>
+<script src="motion.js?v=20261126-1605"></script>
+<script src="gacha.js?v=20261126-1605"></script>
+<script src="look.js?v=20261126-1605"></script>
+<script src="alive.js?v=20261126-1605"></script>
+<script src="film.js?v=20261126-1605"></script>
+<script src="photos.js?v=20261126-1605"></script>
+<script src="seoaphoto.js?v=20261126-1605"></script>
+<script src="cards.js?v=20261126-1605"></script>
+<script src="pose.js?v=20261126-1605"></script>
+<script src="pack.js?v=20261126-1605"></script>
+<script src="storypic.js?v=20261126-1605"></script>
+<script src="onboarding.js?v=20261126-1605"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -680,7 +680,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0}}
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0,loopFrom:x.loopFrom!=null?+x.loopFrom:null}}  // 78: loopFrom
   // 50: ?giftPreview=1(확인용) — 순간 선물 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신함(data/gifts.json preview). ver 0.5 = 진짜 모션이 오면 카드 그림을 다시 만들게
   if(qs.get("giftPreview")==="1")for(const id in GIFT.preview||{}){const src=GIFT.preview[id];if(id[0]==="_"||XS[id]||RIG.M[id])continue;
     if(XS[src])XS[id]={...XS[src],ver:.5};else if(RIG.M[src])RIG.M[id]=RIG.M[src];MNAME[id]=(MNAME[src]||src)+" (미리보기)"}
@@ -1010,7 +1010,7 @@ const Stage=(()=>{
     if(cur&&!XS[cur.id]&&!RIG.M[cur.id])cur=null;  // 42: 모르는 몸짓 id(예전 cards.js 캐시가 카드 id 를 몸짓으로 넘김 등)면 멈춤 — 매 프레임 오류로 무대가 멈추지 않게
     if(cur){if(cur.hold!=null)cur.start=t-cur.hold/(cur.sp||1);
       mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?(cur.win?xsCyc({...XS[cur.id],...cur.win},xsCache[cur.id]?xsCache[cur.id].duration:null)*(cur.win.repeat||XS[cur.id].repeat||1):xsDur(cur.id)):RIG.M[cur.id].d;  // 42: cur.win = 이번 재생만 바꾼 구간 값(걷기)
-      if(mt<dur)id=cur.id;else if(cur.loop){cur.start=t;mt=0;id=cur.id}
+      if(mt<dur)id=cur.id;else if(cur.loop){const lf=XS[cur.id]&&XS[cur.id].loopFrom!=null&&!cur.win?Math.max(0,XS[cur.id].loopFrom-XS[cur.id].from):0;cur.start=t-lf/(cur.sp||1);mt=lf;id=cur.id;if(lf)cur.lf=true}  // 78: loopFrom = 반복은 그 시각부터(자세 잡기는 처음 한 번)
       else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now,wait:cur.wait};cur=null;$("#cap").classList.remove("on")}}
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
@@ -1018,7 +1018,7 @@ const Stage=(()=>{
     handTick(t,id);  // 53: 기본 손(편한 손). 손가락 데이터가 있는 모션은 아래 xsApply 가 덮어씀
     md.root.position.set(p.off[0],p.off[1],p.off[2]);
     if(walk)walkTick(now,id,mt);  // 42: 걷기 = 돌기 각도(cur.win.turn)와 옮긴 거리
-    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur&&cur.win?{...XS[id],...cur.win}:cur&&cur.fo!=null?{...XS[id],fadeOut:cur.fo}:XS[id]);
+    if(isXs&&xsCache[id])xsApply(xsCache[id],mt,cur&&cur.win?{...XS[id],...cur.win}:cur&&cur.fo!=null?{...XS[id],fadeOut:cur.fo}:cur&&cur.loop&&XS[id].loopFrom!=null?{...XS[id],fadeOut:1e-4,...(cur.lf?{fadeIn:1e-4}:{})}:XS[id]);  // 78: loopFrom 이 있는 몸짓을 반복할 때는 끝에서 기본 자세로 돌아가지 않음
     if(isXs&&XS[id].face&&cur&&!cur.faced&&mt>=XS[id].faceAt){cur.faced=true;if(!locked)setFace(XS[id].face,XS[id].faceEmo)}  // 50-2: 몸짓 중 이 순간부터 표정을 바꿔 끝까지(x30 우산 「씩」). data/motions.json xstage face·faceEmo·faceAt
     if(walk){md.root.position.x+=walk.x;md.root.position.z+=walk.z}
     if(blend)blendStep(now);
@@ -1162,7 +1162,8 @@ const Stage=(()=>{
     if(cur&&cur.id!==IDLE&&!cur.wait)return p(cur);
     if(lastEnd&&lastEnd.id!==IDLE&&!lastEnd.wait&&performance.now()-lastEnd.at<=ms)return p(lastEnd);return null}
   // x 몸짓을 반복(지금 그 몸짓이 재생 중이면 그 자리에서 이어서). null 이면 기본 자세
-  function camLoop(x){if(!x){cur=null;return}if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
+  function camLoop(x){if(!x){cur=null;return}if(XS[x.id]&&!xsCache[x.id])xsLoad(x.id).then(()=>{if(cur&&cur.id===x.id&&cur.hold==null)cur.start=performance.now()/1000});  // 78: 아직 안 불러온 모션(촬영 전용 포즈)도 바로 불러오고, 다 받으면 처음부터
+    if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
     cur={id:x.id,start:performance.now()/1000,sp:x.sp||1,name:x.name,ref:x.ref,loop:true}}
   // 촬영 화면이 돌 중심(바닥 x·z): k 0 = 몸(뿌리) ~ 1 = 머리 뼈. 가까이 볼수록 얼굴이 가운데 오게
   function center(k){if(!md)return{x:0,z:0};const r=md.root.position,hb=md.bones.Head;if(!hb||!k)return{x:r.x,z:r.z};
@@ -1323,7 +1324,8 @@ const Stage=(()=>{
     return()=>{for(const [b,s] of back){b.scale.copy(s);b.updateMatrixWorld(true)}}}
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
-  return{keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+  return{seek:t=>{if(cur){cur.start=performance.now()/1000-t/(cur.sp||1);cur.hold=t}},  // 78: 지금 몸짓의 t초에 멈춤(시연·확인용)
+    keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -2268,7 +2270,7 @@ const SEGS=["all","chat","gift","pack"];  // 49: 「선물」 → 「카드 팩�
 const SEG_SRC={gift:"moment"};
 // 38-1: 칸 순서 = 카드 번호(no) 순서(전체·대화·선물 모두, 잠긴 칸도 제 번호 자리). 크게 보기의 이전·다음도 이 순서. 번호가 없는 칸은 맨 뒤(적힌 순서대로)
 function colList(seg){const N=o=>o.x.no>0?o.x.no:Infinity;
-  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===(SEG_SRC[seg]||seg))
+  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===(SEG_SRC[seg]||seg)||(seg==="pack"&&o.x.source==="free"))  // 78: 무료 포즈 카드도 「카드 팩」 탭에
     .sort((a,b)=>(N(a)-N(b))||a.i-b.i).map(o=>o.x)}
 function renderAlbum(fresh){
   if(!SEGS.includes(albumSeg))albumSeg="all";

@@ -172,12 +172,12 @@ const Cam=(()=>{
     const L=Photos.list().find(m=>m.kind!=="received"),lb=root.querySelector("#camLast");
     if(!flying){lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L)}
     root.querySelector("#camFull").classList.toggle("on",Photos.full())}
-  // o.pose: 48 포즈에서 고른 몸짓({id,sp,name,ref,f,pose}). 없으면 예전처럼 열기 직전 recentMs 안의 몸짓
+  // o.pose: 48 포즈에서 고른 몸짓({id,sp,name,ref,f,pose}). 78: 없으면 기본 자세(예전: 열기 직전 recentMs 안의 대화 몸짓)
   function open(o){
     if(on)return;if(!root)build();
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
-    info=o&&o.pose?o.pose:Stage.recentMotion(C().recentMs!=null?C().recentMs:1000);paused=false;held=null;Stage.camLoop(info);if(o&&o.pose&&o.pose.f)Stage.setFace(o.pose.f);
+    info=o&&o.pose?o.pose:null;  // 78: 직전 대화 몸짓을 이어받지 않음 — 포즈를 고르지 않았으면 기본 자세paused=false;held=null;Stage.camLoop(info);if(o&&o.pose&&o.pose.f)Stage.setFace(o.pose.f);
     const [pa,pb]=pLim();yaw=C().startYawDeg||0;zoom=clamp(C().startZoom||0,0,1);pitch=clamp(C().startPitchDeg!=null?C().startPitchDeg:0,pa,pb);ptrs.clear();pinch=drag=null;
     const sc=SCENES[S.scene]||SCENES[0];fr.style.backgroundImage=`url(${sc.img})`;Shot.loadImg(sc.img);
     const d=$("#bgdim"),cd=root.querySelector("#camDim");if(d){cd.className=d.className;cd.style.cssText=d.style.cssText}

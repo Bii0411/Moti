@@ -49,7 +49,7 @@ const NEW52 = [
   ["g15", "고민하는 척", "special", "x34", "뭐~ 마실까! 아, 너무 신났나"],
   ["g16", "처음 건넨 인사", "rare", "x23", "안녕? 잘 부탁해."],
 ];
-const maxOld = Math.max(...col.items.filter(x => !NEW52.some(n => n[0] === x.id)).map(x => x.no || 0), ...(col.retiredNo || []));
+const maxOld = Math.max(...col.items.filter(x => !x.pose && !NEW52.some(n => n[0] === x.id)).map(x => x.no || 0), ...(col.retiredNo || []));  // 78: 뒤에 붙은 포즈 카드는 빼고
 NEW52.forEach(([id, name, grade, m, line], i) => {
   const x = col.items.find(x => x.id === id);
   if (!x) return fail(`52: ${id} ${name} 없음`);
@@ -151,6 +151,21 @@ if (JSON.stringify(ui).includes("가챠")) fail("화면 문구에 「가챠」")
 let seed = 20261125;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
+// 78: 촬영 전용 포즈 카드(pose) — 무료 1장(source free, 팩에 안 나옴) + 카드 팩 카드. 몸짓은 only "pose"(대화·해금에 안 나옴), 번호는 52 카드(g16) 다음부터 이어서
+{ const poseC = col.items.filter(x => x.pose), freeC = poseC.filter(x => x.free), packC = poseC.filter(x => !x.free);
+  const mj = JSON.parse(readFileSync("data/motions.json", "utf8")), { existsSync } = require("node:fs");
+  if (freeC.length !== 1 || freeC[0].source !== "free" || freeC[0].name !== "손가락 하트") fail("78: 무료 포즈가 손가락 하트 한 장이 아님");
+  if (poseC.some(x => pool.includes(x) === !!x.free)) fail("78: 무료 포즈가 팩에 있거나 팩 포즈가 팩에 없음");
+  if (packC.some(x => x.source !== "pack" || x.hold)) fail("78: 팩 포즈 source·hold 가 다름");
+  const g16 = (col.items.find(x => x.id === "g16") || {}).no || 0;
+  const inUnlock = m => [story.unlock.stage, story.unlock.flag, story.unlock.event].some(sec => Object.values(sec || {}).some(s => (s.motions || []).includes(m)));
+  poseC.forEach((x, i) => { if (x.no !== g16 + 1 + i) fail(`78: ${x.id} 번호 ${x.no} ≠ ${g16 + 1 + i}`);
+    const m = (x.play || {}).m, mm = mj.motions[m];
+    if (!mm || mm.only !== "pose") fail(`78: ${x.id} 몸짓 ${m} 이 only pose 가 아님`);
+    if (!mj.xstage[m] || !existsSync(mj.xstage[m].file)) fail(`78: ${x.id} 모션 파일 없음`);
+    if (inUnlock(m)) fail(`78: ${m} 이 해금 목록에 있음`); });
+  const by = g => packC.filter(x => x.grade === g).map(x => x.name).join(", ");
+  console.log(`- 78 포즈 카드 ${poseC.length}장: 무료 ${freeC.map(x => x.name)} · 팩 일반(DAILY) ${packC.filter(x => x.grade === "common").length}장 · 레어 ${by("rare")} · 특별(SECRET) ${by("special")}`); }
 console.log(`\n## 뽑기 시뮬레이션\n`);
 console.log("| 방식 | 장 수 | 결과(%) " + G.ORDER.map(k => KO[k]).join("/") + " | 가장 긴 연속 일반 | 천장 발동 | 10장 뽑기에 레어 없음 |\n|---|---|---|---|---|---|");
 const run = (label, plan, pityOn) => {

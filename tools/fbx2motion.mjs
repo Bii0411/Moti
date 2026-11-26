@@ -6,6 +6,7 @@
 //   크기 줄이기: 손에 대해 기준 자세에서 FDROP° 넘게 벗어나지 않는 손가락 뼈는 뺌(앱에서 기본 손 그대로), 내내 FHOLD° 안에서만 변하면 한 프레임만(hold),
 //   나머지는 FFPS 로 솎음(tracks). 값은 사원수 x·y·z 만 FSCALE 배 정수(w 는 0 이상으로 맞춰 두어 앱이 √(1−x²−y²−z²) 로 되살림).
 //   원본에 손가락 뼈가 없으면 fingers 를 넣지 않음(지금처럼 기본 손)
+// 78: 한 장짜리 포즈 FBX(Body pose: 키 2개 = T자 → 포즈, 길이 1/120초)는 끝 키를 뽑아 같은 프레임 두 장(fps 0.2 = 5초)으로 씀 → 앱에서 from 0 ~ to 5 로 자세를 잡고 유지
 import fs from "fs";
 globalThis.self = globalThis;
 globalThis.document = { createElementNS: () => ({ style: {}, addEventListener() {}, removeEventListener() {}, setAttribute() {} }) };
@@ -67,7 +68,7 @@ const fraw = {}; for (const n of ffound) fraw[n] = [];  // 손가락: 프레임�
 const fdev = {}; for (const n of ffound) fdev[n] = 0;   // 손에 대해 기준 자세에서 벗어난 가장 큰 각도
 const hip = []; let hip0 = null, f0max = 0;
 for (let f = 0; f < frames; f++) {
-  mixer.setTime(Math.min(f / FPS, clip.duration - 1e-4));
+  mixer.setTime(frames === 1 ? clip.duration * 0.99999 : Math.min(f / FPS, clip.duration - 1e-4));  // 78: 한 장짜리 포즈는 끝 키(반복 재생이라 끝 시각 그대로는 처음으로 돌아감)
   g.updateMatrixWorld(true);
   for (const n of found) {
     const q = wq(n).multiply(restQ[n]);  // 기준 자세 대비 세계 회전
@@ -103,6 +104,7 @@ const used = k => !!(fingers.tracks[k] || fingers.hold[k]);
 for (const k in fdir) if (used(k) || used(k.replace(/\d$/, d => +d + 1))) fingers.dir[k] = fdir[k];
 const json = { name: clip.name, src: inp.split("/").pop(), fps: FPS, frames, duration: clip.duration, dir, tracks, hip, found, anims: g.animations.length };
 if (fstat.hold.length || fstat.track.length) { json.fingers = fingers; json.fingers.frames = Math.ceil(frames / step) + ((frames - 1) % step ? 1 : 0); }
+if (frames === 1) { for (const k in tracks) tracks[k] = tracks[k].concat(tracks[k]); json.hip = hip.concat(hip); json.frames = 2; json.fps = 0.2; json.duration = 5; json._78 = "한 장짜리 포즈(원본 FBX 키 2개: T자 → 포즈)를 끝 키로 뽑아 같은 프레임 두 장(fps 0.2 = 5초)으로. 손가락은 hold(고정)"; }  // 78
 fs.writeFileSync(out, JSON.stringify(json));
 // 크기 비교(보고서용): 몸만 / 손가락을 몸처럼 그대로(30fps·소수점 3자리·30개 모두) / 이번 방식
 const bodyOnly = JSON.stringify({ ...json, fingers: undefined }).length;

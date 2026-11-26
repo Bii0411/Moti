@@ -35,6 +35,8 @@
 /* 왼쪽 위 등급 표: 영문 작은 대문자, 자간 넓게 */
 .pctag{position:absolute;z-index:4;left:calc((var(--pcB) + .035)*100cqw);top:calc((var(--pcB) + .035)*100cqw);font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));font-weight:800;line-height:1;
   letter-spacing:var(--pcTrack);text-transform:uppercase;padding:.4em calc(.6em - var(--pcTrack)) .4em .6em;border-radius:999px;background:var(--tbg);color:var(--tink);white-space:nowrap}
+/* 78: 포즈 카드 표시(오른쪽 위, 등급 표와 같은 크기의 보라 알약) */
+.pcpose{position:absolute;z-index:4;right:calc((var(--pcB) + .035)*100cqw);top:calc((var(--pcB) + .035)*100cqw);font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));font-weight:800;line-height:1;padding:.4em .7em;border-radius:999px;background:rgba(124,92,255,.88);color:#fff;white-space:nowrap}
 /* 아래 띠: 이름 / 작은 줄(단계 · 장소 · MM.DD) · 오른쪽 번호 */
 .pcbd{position:relative;z-index:1;flex:none;height:calc(var(--pcBand)*100cqw);display:flex;align-items:center;gap:4cqw}
 .pctx{flex:1;min-width:0;display:flex;flex-direction:column}
