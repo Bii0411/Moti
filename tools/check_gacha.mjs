@@ -84,10 +84,9 @@ if (motions.motions.x23.only !== "onboarding") fail("52: x23 이 시작화면 �
 for (const [m, v] of Object.entries(motions.motions)) if (v.only === "pack" && want.has(m)) fail(`52: 카드 팩 전용 ${m} 이 대화 해금에 있음`);
 // 춤은 전신 구도(m23 과 같은 frameById)
 if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById.m23)) fail("52: 춤 x33 이 전신 구도가 아님");
-// 50-2: 순간 선물 반응 몸짓 — 반지(x31) 말고 모두 모션 파일이 있고(손가락 포함) 선물 전용. 반지는 잠금 그대로
+// 50-2: 순간 선물 반응 몸짓 — 모두 모션 파일이 있고(손가락 포함) 선물 전용. 86-1: 반지(x31)도 열림
 { const GJ = JSON.parse(readFileSync("data/gifts.json", "utf8")), mg = GJ.list.filter(g => g.kind === "moment"), ready = [];
   for (const g of mg) { const m = g.reaction, x = motions.xstage[m], mm = motions.motions[m];
-    if (g.id === "ring") { if (x) fail("50-2: 반지 반응(x31)이 열려 있음"); continue; }
     if (!x || !mm) { fail(`50-2: ${g.name} 반응 ${m} 모션 없음`); continue; }
     if (mm.only !== "gift") fail(`50-2: ${m} 이 선물 전용(only gift)이 아님`);
     const f = JSON.parse(readFileSync(x.file, "utf8")); if (!f.fingers) fail(`50-2: ${m} 손가락 없음`);
@@ -106,7 +105,7 @@ if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById
   if (((col.card.photocard || {}).packNamePx) !== 9 || ((col.card.photocard || {}).packNameLines) !== 2) fail("50-3: 10장 결과 이름이 9px 두 줄(packNamePx·packNameLines)이 아님");
   if (!(motions.xstage.x26 || {}).tiltMax) fail("50-3: x26 숙임 제한(tiltMax) 없음");
   { const f = JSON.parse(readFileSync(u.file, "utf8")), h = f.hip, mv = Math.max(...h.filter((_, i) => i % 3 !== 1).map(Math.abs)); if (mv > 0.001 || !u.inPlace) fail(`50-3: x30 골반이 앞뒤·좌우로 움직임(${mv})`); }
-  console.log(`- 50-2 순간 선물 반응 모션: ${ready.join("·")} 준비됨, 반지 잠금 · 임시 규칙 ${rules.split(",").length}개 · m06 ${m06.from}~${m06.to}초 · 춤 ${d.from}~${d.to}초`); }
+  console.log(`- 50-2 순간 선물 반응 모션: ${ready.join("·")} 준비됨, 임시 규칙 ${rules.split(",").length}개 · m06 ${m06.from}~${m06.to}초 · 춤 ${d.from}~${d.to}초`); }
 // 52: 24 손 흔들기(m13) 일반, m16 응원하기는 대화 몸짓 목록에서 빠짐(ban) · 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로
 if ((col.gradeRule.byId || {}).m13 !== "common" || col.items.find(x => x.id === "m13").grade !== "common") fail("52: m13 손 흔들기가 일반이 아님");
 if (!(story.ban || []).includes("m16")) fail("52: m16 응원하기가 ban 에 없음(대화 몸짓 목록에 나옴)");
@@ -222,6 +221,21 @@ run("1장·10장 섞어 · 천장 켬", Array.from({ length: N }, () => rnd() < 
   console.log(`- 천장 3장 남았을 때 10장 = ${t3.cards.map(c => c.grade[0] + (c.forced ? "!" : "")).join("")} → 다음 남은 장 ${t3.left}`);
   if (t3.cards[2].grade !== "rare") fail("남은 천장이 10장 뽑기 안에서 이어지지 않음");
 }
+// 86-1: 반지 반응 x31 = Receive candy 1, 선물 전용·반지 선물·gm06 카드만. 일반 대화·키워드·함께하기·카드 팩·포즈에 없음
+{ const x = motions.xstage.x31 || {}, mm = motions.motions.x31 || {}, f = x.file ? JSON.parse(readFileSync(x.file, "utf8")) : {};
+  if (!String(f.src || "").includes("Receive candy 1")) fail(`86-1: x31 원본이 Receive candy 1 이 아님(${f.src})`);
+  if (mm.only !== "gift") fail("86-1: x31 이 선물 전용이 아님");
+  const dur = x.to - x.from - (x.skip ? x.skip[1] - x.skip[0] : 0); if (!(dur > 5 && dur < 10)) fail(`86-1: x31 재생 길이 ${dur}`);
+  const GJ = JSON.parse(readFileSync("data/gifts.json", "utf8")), ring = GJ.list.find(g => g.id === "ring") || {};
+  if (ring.reaction !== "x31" || ring.price !== 300 || ring.stage !== 6 || ring.kind !== "moment" || ring.icon !== "icons/gift2_ring.png") fail("86-1: 반지 선물 값(반응·가격·단계·종류·그림)이 바뀜");
+  const gm = col.items.find(i => i.id === "gm06") || {}; if (gm.no !== 51 || gm.grade !== "rare" || gm.gift !== "ring" || gm.source !== "moment" || (gm.play || {}).m !== "x31") fail("86-1: gm06 번호·등급·선물·몸짓이 다름");
+  const others = col.items.filter(i => i.id !== "gm06" && ((i.play || {}).m === "x31" || i.id === "x31")); if (others.length) fail(`86-1: x31 을 쓰는 다른 카드 ${others.map(i => i.id)}`);
+  const where = { "data/seoa_story.json": 0, "data/motion_keywords.json": 0, "data/together.json": 0, "data/pack.json": 0, "data/photos.json": 0, "data/seoa_photo.json": 0, "data/config.json": 0, "data/emotion_face.json": 0 };
+  for (const p in where) if (/"x31"/.test(readFileSync(p, "utf8"))) fail(`86-1: ${p} 에 x31 이 있음`);
+  if (GJ.list.some(g => g.id !== "ring" && (g.motion === "x31" || g.reaction === "x31"))) fail("86-1: 반지가 아닌 선물이 x31 을 씀");
+  const mf = (motions.motionFace || {}).x31 || {}; if (!mf.gift || !Array.isArray(mf.seq) || mf.seq.length < 3) fail("86-1: x31 표정 흐름 없음");
+  if (Object.entries(motions.motionFace || {}).some(([k, v]) => k !== "x31" && v.gift)) fail("86-1: x31 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
+  console.log(`- 86-1 반지 반응 x31: ${x.from}~${x.to}초(건너뜀 ${x.skip}) = ${dur.toFixed(2)}초 · 표정 ${mf.seq.map(s => s.at + s.f).join("→")} · gm06 51번 레어`); }
 // 시연 지정: 첫 장만 그것으로
 {
   const a = G.draw(10, o, P.pity, P.pity.count, col.items, rnd, { item: pool[pool.length - 1].id });

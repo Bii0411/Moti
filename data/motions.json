@@ -73,6 +73,7 @@
     "x28": { "name": "따뜻한 수건", "emo": "수줍음", "only": "gift" },
     "x29": { "name": "바 여분 열쇠", "emo": "수줍음", "only": "gift" },
     "x30": { "name": "우산", "emo": "장난", "only": "gift" },
+    "x31": { "name": "반지", "emo": "기쁨", "only": "gift" },
     "x40": { "name": "손가락으로 가리키기", "emo": "장난" },
     "x41": { "name": "어이없어 양손 들기", "emo": "당황" },
     "x42": { "name": "옆을 바라보기", "emo": "평온" },
@@ -147,6 +148,7 @@
     "x28": { "file": "motions/xstage_shy_touching_hands.json", "from": 0.1, "to": 3.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 78, "inPlace": true },
     "x29": { "file": "motions/xstage_shy_avoiding_eye_contact.json", "from": 2.0, "to": 6.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 93, "inPlace": true },
     "x30": { "file": "motions/xstage_gift_umbrella.json", "from": 0, "to": 3.4, "fadeIn": 0.3, "fadeOut": 0.5, "inPlace": true, "face": "fun", "faceEmo": "장난", "faceAt": 1.0, "frame": "umbrellaIn", "frameMs": 800, "frameBackMs": 1600, "motionVer": 2 },
+    "x31": { "file": "motions/xstage_receive_candy_ring.json", "from": 0.7, "to": 9.25, "skip": [1.75, 2.4], "skipBlend": 0.3, "fadeIn": 0.3, "fadeOut": 0.9, "inPlace": true, "motionVer": 1, "_": "86-1: 반지 반응 = XSTAGE 「[standard] Lovely - Receive candy 1」(원본 14.2초, 정면, 사탕 받기). 0.75초 두 손을 턱 앞으로 모아 놀람 → (1.75~2.4초 그대로 멈춘 구간 건너뜀) → 2.75초 허리를 숙여 두 손을 앞으로 내밀어 받음(왼손으로 쥠) → 4.75초 몸을 세우고 가슴 앞에 든 선물을 내려다봄 → 6.25~9.2초 선물을 가슴에 안고 몸을 왼쪽으로 흔들었다 돌아옴 → 끝 섞기 0.9초로 손을 내림. 원본 9.3초 뒤(오른쪽으로 한 번 더 흔들고 손을 내림)는 뺌. 골반이 조금 밀려 inPlace. 재생 약 7.9초. 파일은 tools/xs_arms_out.mjs 로 원본 2.5~3.1초에 걸쳐 두 팔을 어깨 축으로 9°(팔꿈치 5°) 벌린 것(원본 배우는 두 손을 거의 맞붙여 쥐어, 서아 몸에서는 아래팔이 가슴 앞에서 X 자로 겹침. x31 파일만 고침)" },
     "m01": { "file": "motions/xstage_natural_laugh.json", "from": 0.1, "to": 4.4, "fadeIn": 0.4, "fadeOut": 0.7, "inPlace": true, "motionVer": 5, "_": "84-1: 코드 웃음 → XSTAGE AI 생성 웃음(뒤로 젖힘 보정본). 0.2~2.0초 어깨를 들썩이며 웃고 2.2~3.2초 살짝 앞으로 숙였다가 3.6초부터 잦아듦" },
     "x40": { "file": "motions/xstage_point_finger_up_down.json", "from": 5.3, "to": 10.9, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 7, "inPlace": true },
     "x41": { "file": "motions/xstage_ridiculous_raise_hands.json", "from": 1.8, "to": 6.4, "skip": [3.3, 4.8], "skipBlend": 0.3, "fadeIn": 0.4, "fadeOut": 0.6, "turn": 2, "inPlace": true },
@@ -171,7 +173,8 @@
     "x48": { "face": "shy", "weak": ["neutral", "soft"] },
     "x49": { "face": "shy", "_": "m01(큰 웃음)과 달리 조용히 수줍게 웃음" },
     "x44": { "face": "fun" },
-    "x45": { "face": "fun" }
+    "x45": { "face": "fun" },
+    "x31": { "face": "surprised", "gift": true, "always": true, "seq": [{ "at": 0, "f": "surprised" }, { "at": 1.5, "f": "soft" }, { "at": 3.4, "f": "shy" }, { "at": 5.0, "f": "fun" }, { "at": 7.2, "f": "soft" }], "talkDamp": 0.7, "_": "86-1 반지 반응(선물 반응 중 이 몸짓만 표정 흐름을 씀: gift). 몸짓 시각 기준: 0~1.5 두 손을 턱 앞에 모으며 놀람 → 1.5 숙여 받으며 살짝 미소 → 3.4 몸을 세워 반지를 내려다보며 수줍음 → 5.0 안고 흔들며 웃음(눈 뜬 웃음) → 7.2 손을 내리며 살짝 미소. always = 서버 표정과 상관없이 이 흐름" }
   },
   "_preview": "84-1 시연 패널 「신규 모션 검수」(?debug=1 일 때만): only \"preview\" 몸짓을 하나씩 대화 구도·함께하기 구도에서 재생. faces = 같이 볼 표정 후보(index.html FACE 이름, 원고의 감정 후보에서 고름). 재생은 기록·해금·카드·관계를 바꾸지 않음(quiet)",
   "preview": {
@@ -185,7 +188,8 @@
     "x46": { "faces": ["surprised", "soft"] },
     "x47": { "faces": ["pout", "sulky"] },
     "x48": { "faces": ["shy", "joy"] },
-    "x49": { "faces": ["shy", "fun"] }
+    "x49": { "faces": ["shy", "fun"] },
+    "x31": { "faces": ["shy", "joy"] }
   },
   "_hands": "53: 기본 손. 모션에 손가락 데이터(fingers)가 없을 때(손가락 없는 XSTAGE 모션·motion.js 의 코드 몸짓·대기 동작·표정만 있는 상태) 손가락에 거는 모양. relaxed = 손가락 뼈마다 기본 자세(쫙 편 손) 대비 지역 회전 [x,y,z,w] — XSTAGE 걷기(x22) 원본 손가락에서 뽑은 편하게 늘어뜨린 손(마디마다 조금씩 굽고 엄지는 안쪽). amount = 그 회전을 몇 배로(0 = 쫙 편 손, 1 = relaxed 그대로, 1보다 크면 더 쥔 손), thumb = 엄지만 따로(없으면 amount). byMotion = 손 모양이 뜻을 가진 몸짓만 예외. 손가락 데이터가 있는 모션은 이 값을 쓰지 않고 원본 손가락(처음·끝 섞기 동안 이 손과 섞임). blendSec = 몸짓이 바뀔 때 손 모양이 따라가는 시간(초). 기본 손이 바뀌어 다르게 보이게 된 몸짓은 motionVer 를 올려 카드 그림을 다시 만듦(코드 몸짓은 motions 의 motionVer, cards.js verOf)",
   "hands": {
