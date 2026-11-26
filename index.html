@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-1856">
+<meta name="moti-version" content="20261126-1923">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -35,6 +35,8 @@ header h1 small{font-size:12px;color:var(--sub);font-weight:500;margin-left:6px}
 .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 /* 배경 어둡게(4-2B): 배경 이미지와 3D 사이에 반투명 층. 필터 대신(아이폰 사파리 부담 줄이기). 값은 data/look.json background, ?bg=raw 면 끔 */
 .stage{isolation:isolate}
+/* 91: 모션 강조 테두리(안쪽, 무대 둥근 모서리 따라). 그림자 블러 없이 선 하나(inset 0 0 0) · 투명도만 바뀜 · 누르기 통과 */
+.stage .mcue{position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 var(--mcw,1.5px) var(--mcc,#C4A7FF);opacity:0;pointer-events:none;z-index:6}
 .bgdim{position:absolute;inset:0;pointer-events:none;background:rgba(0,0,0,var(--bgDark,.2))}
 .bgdim::after{content:"";position:absolute;inset:0;background:#808080;mix-blend-mode:saturation;opacity:var(--bgDesat,.1)}
 .bgdim.raw{display:none}
@@ -561,11 +563,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-1856">
-<link rel="stylesheet" href="photos.css?v=20261126-1856">
-<link rel="stylesheet" href="cards.css?v=20261126-1856">
-<link rel="stylesheet" href="pose.css?v=20261126-1856">
-<link rel="stylesheet" href="pack.css?v=20261126-1856">
+<link rel="stylesheet" href="onboarding.css?v=20261126-1923">
+<link rel="stylesheet" href="photos.css?v=20261126-1923">
+<link rel="stylesheet" href="cards.css?v=20261126-1923">
+<link rel="stylesheet" href="pose.css?v=20261126-1923">
+<link rel="stylesheet" href="pack.css?v=20261126-1923">
 </head>
 <body>
 <div class="app">
@@ -645,20 +647,20 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-1856"></script>
-<script src="motion.js?v=20261126-1856"></script>
-<script src="gacha.js?v=20261126-1856"></script>
-<script src="look.js?v=20261126-1856"></script>
-<script src="alive.js?v=20261126-1856"></script>
-<script src="film.js?v=20261126-1856"></script>
-<script src="photos.js?v=20261126-1856"></script>
-<script src="seoaphoto.js?v=20261126-1856"></script>
-<script src="cards.js?v=20261126-1856"></script>
-<script src="pose.js?v=20261126-1856"></script>
-<script src="photoask.js?v=20261126-1856"></script>
-<script src="pack.js?v=20261126-1856"></script>
-<script src="storypic.js?v=20261126-1856"></script>
-<script src="onboarding.js?v=20261126-1856"></script>
+<script src="icons.js?v=20261126-1923"></script>
+<script src="motion.js?v=20261126-1923"></script>
+<script src="gacha.js?v=20261126-1923"></script>
+<script src="look.js?v=20261126-1923"></script>
+<script src="alive.js?v=20261126-1923"></script>
+<script src="film.js?v=20261126-1923"></script>
+<script src="photos.js?v=20261126-1923"></script>
+<script src="seoaphoto.js?v=20261126-1923"></script>
+<script src="cards.js?v=20261126-1923"></script>
+<script src="pose.js?v=20261126-1923"></script>
+<script src="photoask.js?v=20261126-1923"></script>
+<script src="pack.js?v=20261126-1923"></script>
+<script src="storypic.js?v=20261126-1923"></script>
+<script src="onboarding.js?v=20261126-1923"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1027,6 +1029,8 @@ const Stage=(()=>{
       mt=Math.max(0,(t-cur.start)*(cur.sp||1));const dur=XS[cur.id]?(cur.win?xsCyc({...XS[cur.id],...cur.win},xsCache[cur.id]?xsCache[cur.id].duration:null)*(cur.win.repeat||XS[cur.id].repeat||1):xsDur(cur.id)):RIG.M[cur.id].d;  // 42: cur.win = 이번 재생만 바꾼 구간 값(걷기)
       if(mt<dur)id=cur.id;else if(cur.loop){const lf=XS[cur.id]&&XS[cur.id].loopFrom!=null&&!cur.win?Math.max(0,XS[cur.id].loopFrom-XS[cur.id].from):0;cur.start=t-lf/(cur.sp||1);mt=lf;id=cur.id;if(lf)cur.lf=true}  // 78: loopFrom = 반복은 그 시각부터(자세 잡기는 처음 한 번)
       else{lastEnd={id:cur.id,sp:cur.sp,name:cur.name,ref:cur.ref,at:now,wait:cur.wait};cur=null;$("#cap").classList.remove("on")}}
+    if(cur&&cur.cue&&!cur.cued&&t>=cur.start&&(!XS[cur.id]||xsCache[cur.id])){cur.cued=true;MotionCue.fire()}  // 91: 파일을 다 받고 실제 재생이 시작된 순간(반복 재생은 처음 한 번만)
+    MotionCue.tick();
     const isXs=id&&XS[id];
     const p=RIG.pose(md.rest,isXs?null:id,mt,t);
     for(const b in p.local){const qq=p.local[b];if(md.bones[b])md.bones[b].quaternion.set(qq[0],qq[1],qq[2],qq[3])}
@@ -1129,10 +1133,12 @@ const Stage=(()=>{
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
     if(walk&&!o.walk)return;  // 42: 걸어 나가고 들어오는 동안(화면 밖에 있는 동안 포함)은 다른 몸짓(시계 보기·인사·답장 몸짓)을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
+    MotionCue.clear();  // 91 C: 새 몸짓이 받아들여지면(위에서 막힌 호출은 여기까지 안 옴) 이전 강조는 바로 끝. 새 몸짓이 강조 대상이면 실제 시작 때 다시
     blendFromPre(o.blendMs!=null?o.blendMs:blendOnce);blendOnce=null;  // 25: 지금 자세(대기 몸짓 중간 등)에서 새 몸짓으로 섞으며 넘어감(툭 튀지 않게). 43: blendOnce = 다음 한 번만 섞는 시간(답장을 기다리던 몸짓에서 넘어갈 때)
     const sp0=o.speed>0?o.speed:1;
     cur={id:mid,start:performance.now()/1000-(o.at>0?o.at/sp0:0),sp:sp0,name:o.name||null,ref:o.ref||null,fo:o.fadeOut!=null?o.fadeOut:null,win:o.win||null,wait:!!o.wait};  // 43: wait = 답장을 기다리는 몸짓(촬영 화면·카드 그림이 이어받지 않음)
     if(XS[mid]&&!xsCache[mid]){const c0=cur;xsLoad(mid).then(()=>{if(cur===c0)cur.start=performance.now()/1000})}  // 파일이 아직이면 받는 대로 처음부터
+    if(o.cue&&!o.fx&&!o.big&&!o.wait&&!o.quiet&&mid!==IDLE)cur.cue=true;  // 91: 일반 답장 몸짓 = 실제로 재생이 시작될 때 무대 테두리 강조 한 번(MotionCue). 확대·다가가기 연출이 있으면 그것만
     if(o.quiet)return;
     if(mid!==IDLE){lastMid=mid;recent.push(mid);if(recent.length>10)recent.shift()}
     const c=$("#cap");
@@ -1625,7 +1631,23 @@ function renderTop(){$("#dia").textContent=S.dia;
   const k=curState(),t=$("#moodTag"),M=((DATA.config||{}).moodTag||{})[k];
   if(k==="normal"||!M){t.hidden=true;return}
   t.hidden=false;t.textContent=STATES[k].ko;t.style.color=M.text||M.color;t.style.background=`linear-gradient(${M.bg},${M.bg}),#000a`}
-function react(r,tag,sub,kind){Stage.play(r.m,{tag,fx:Fx.pick(kind,r.m)});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
+// 91: 대화 중 일반 답장 몸짓이 시작될 때 3D 무대 안쪽 테두리를 은은하게 한 번 강조(값 data/config.json stage.motionCue). 투명도만 바뀌는 덧칠 한 장, 누르기 통과
+//   대화방(서아·본편)·촬영 화면 밖에서만. 탭 이동·대화방 나가기·촬영 화면·밤 넘기기·초기화 때 남은 강조는 바로 지움(tick 이 매 프레임 확인)
+const MotionCue=(()=>{let el=null,anim=null,tm=0;
+  const C=()=>((DATA.config||{}).stage||{}).motionCue||{};
+  const ok=()=>C().on!==false&&curTab==="chat"&&S.room==="seoa"&&Thread.cur()==="main"&&!(typeof Cam!=="undefined"&&Cam.isOpen())&&!(typeof Night!=="undefined"&&Night.isOn());
+  function node(){if(el&&el.isConnected)return el;const st=$("#stage");if(!st)return null;el=document.createElement("i");el.className="mcue";el.setAttribute("aria-hidden","true");st.appendChild(el);return el}
+  function clear(){clearTimeout(tm);if(anim){try{anim.cancel()}catch(e){}anim=null}if(el){el.style.opacity="0";el.classList.remove("on")}}
+  function fire(){if(!ok())return;const e=node();if(!e)return;clear();const c=C();
+    e.style.setProperty("--mcw",(c.widthPx!=null?c.widthPx:1.5)+"px");e.style.setProperty("--mcc",c.color||"#C4A7FF");e.classList.add("on");
+    const still=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(still||!e.animate){e.style.opacity=String(c.reducedOpacity!=null?c.reducedOpacity:.4);tm=setTimeout(clear,c.reducedMs||500);return}
+    const a=c.inMs!=null?c.inMs:180,h=c.holdMs!=null?c.holdMs:350,o=c.outMs!=null?c.outMs:650,T=a+h+o,mx=c.opacity!=null?c.opacity:.8;
+    anim=e.animate([{opacity:0},{opacity:mx,offset:a/T},{opacity:mx,offset:(a+h)/T},{opacity:0}],{duration:T,easing:"ease-out",fill:"none"});anim.onfinish=()=>{anim=null;e.classList.remove("on")}}
+  function tick(){if((anim||(el&&el.classList.contains("on")))&&!ok())clear()}
+  return{fire,clear,tick,isOn:()=>!!(anim||(el&&el.classList.contains("on")))};
+})();
+function react(r,tag,sub,kind,cue){Stage.play(r.m,{tag,fx:Fx.pick(kind,r.m),cue:!!cue});Stage.setFace(r.f,r.e);say(r.t,0,sub);faceReset()}
 let faceRT;function faceReset(){clearTimeout(faceRT);faceRT=setTimeout(()=>Stage.setFace(curState()==="sulky"?"sulky":curState()==="tired"?"sorrow":"neutral"),7000)}
 
 // ───────────────────────── 대화 ─────────────────────────
@@ -2214,7 +2236,8 @@ async function send(text,o){
   addReply(v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
-  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""));if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+  else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""),srvOk&&Thread.cur()==="main"&&!giftMid&&!poseX);  // 91: 본편 정상 서버 답장의 일반 몸짓만 테두리 강조(예비 지문·선물 반응·포즈 부탁·에피소드 제외)
+if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   // 50-C: 순간 선물 — 지금 묶음의 반응 카드를 처음이면 얻음(같은 카드를 이미 가졌으면 반응만)
   if(o&&o.moment&&giftMid){const gc=Moment.cardOf(gBy(o.moment));if(gc&&!S.col[gc.id]){const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
     S.col[gc.id]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(gc.id);notifyNew(gc);if(curTab==="album")renderAlbum(gc.id)}}
@@ -2972,7 +2995,8 @@ let curTab="chat";
 function placeStage(){const st=$("#stage");$("#stageSlot").appendChild(st);
   const vis=curTab==="chat"&&S.room==="seoa";st.style.display=vis?"":"none";
   Stage.pano.hold(!vis||FirstMeet.isOn()||FirstMeet.armed());if(vis)Stage.xsRest(()=>FirstMeet.isOn());}  // 39: 무대가 보일 때 360도 그림을 받고, 나머지 모션은 대화 화면이 뜬 뒤 쉬는 틈에(첫 만남 연출이 끝난 뒤)
-function setTab(t){if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){MotionCue.clear();  // 91: 화면 이동 때 남은 모션 강조를 바로 지움
+  if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat")showList();  // 46: 「대화」 탭은 언제나 대화 목록부터(다른 탭에 다녀와도). 대화방으로 바로 가는 곳(홈 에피소드 카드·알림)은 이 뒤에 openRoom
   placeStage();
@@ -3070,7 +3094,8 @@ function renderList(){
   $("#dmList").querySelectorAll("button[data-c]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.c));
   Swipe.bind();
 }
-function showList(){Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
+function showList(){MotionCue.clear();  // 91 C: 대화방을 나가 목록으로 가면 남은 강조를 바로 지움
+  Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
 function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
@@ -3083,6 +3108,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
   openSheet("#adultSheet");
 }
 function openRoom(cid){
+  MotionCue.clear();  // 91: 대화방을 열거나 바꿀 때 남은 모션 강조를 바로 지움
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
   S.room=cid;S.read[cid]=chatOf(cid).length;save();Moment.glow();
