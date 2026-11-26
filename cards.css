@@ -59,6 +59,7 @@
 /* ── 카드 확대 ── */
 .cv{position:absolute;inset:0;z-index:22;pointer-events:none;--cvFade:1;touch-action:none}
 .cv.on{pointer-events:auto}
+.cv.out{pointer-events:auto}  /* 87-1: 닫히는 동안에도 뒤로 터치가 새지 않게(cards.js close) */
 .cvbg{position:absolute;inset:0;background:#07060c;opacity:0;transition:opacity .24s}
 .cv.on .cvbg{opacity:calc(.94 * var(--cvFade))}
 .cvx{position:absolute;right:10px;top:8px;width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#fff;opacity:0;transition:opacity .2s}

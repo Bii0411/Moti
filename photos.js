@@ -258,9 +258,16 @@ const Cam=(()=>{
 // 사진 칸 늘리기 결제 방식·선물 확률 보기에 같이 씀. #mini(index.html). 바깥·✕ 누르면 닫힘. 열고 닫힘은 opacity·transform 만
 const Mini=(()=>{
   const el=()=>document.getElementById("mini");
-  function open(title,body,bind){const m=el();if(!m)return;
-    m.innerHTML=`<div class="minibox" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><button class="minix" data-mini="x" aria-label="${esc(UI("photo.ariaClose"))}">${Icon.svg("close",20)}</button>${body}</div>`;
-    m.onclick=e=>{if(e.target===m||e.target.closest('[data-mini="x"]'))close()};
+  // 87-1: opt.scroll = 긴 내용(확률 보기). 제목·✕ 는 위에 두고 본문(.minibd)만 세로로 넘김, 창 높이는 화면의 약 85%(photos.css .mini.scroll).
+  //   바깥은 손가락을 끌어도 뒤가 움직이지 않고, 바깥 닫기는 누르기 시작한 곳도 바깥일 때만(본문을 넘기다 바깥에서 손을 떼도 안 닫힘). 다른 작은 창은 그대로
+  let down=null,tm=null;
+  function open(title,body,bind,opt){const m=el();if(!m)return;const sc=!!(opt&&opt.scroll);
+    m.innerHTML=`<div class="minibox" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><button class="minix" data-mini="x" aria-label="${esc(UI("photo.ariaClose"))}">${Icon.svg("close",20)}</button>${sc?`<div class="minibd">${body}</div>`:body}</div>`;
+    m.classList.toggle("scroll",sc);down=null;
+    m.onpointerdown=sc?e=>{down=e.target===m}:null;
+    m.onclick=e=>{if(e.target.closest('[data-mini="x"]'))return close();if(e.target===m&&(!sc||down!==false))close()};
+    if(tm){m.removeEventListener("touchmove",tm);tm=null}
+    if(sc){tm=e=>{if(!e.target.closest(".minibd"))e.preventDefault()};m.addEventListener("touchmove",tm,{passive:false})}
     if(bind)bind(m);void m.offsetWidth;m.classList.add("on")}
   function close(){const m=el();if(m)m.classList.remove("on")}
   return{open,close,isOpen:()=>!!(el()&&el().classList.contains("on"))};

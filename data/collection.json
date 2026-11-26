@@ -1031,6 +1031,8 @@
     "view": {
       "zoomMs": 300,
       "closeMs": 240,
+      "_closeGuardMs": "87-1: 닫은 뒤 이 시간(ms, closeMs 보다 짧으면 closeMs) 동안 크게 보기 창이 터치를 받아 둠 — 닫은 손가락의 click 이 뒤 카드·아래 탭에 떨어지지 않게",
+      "closeGuardMs": 400,
       "swipePx": 70
     },
     "share": {

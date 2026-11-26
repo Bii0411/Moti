@@ -155,7 +155,7 @@ const Cards=(()=>{
   // ── 카드 확대(26-1B) ──
   // 카드가 가운데로 커지고(transform 만) 카드 안에서 3D 서아가 그 몸짓을 그때 의상·장소로 반복. 대화방 3D 그림판을 빌려 씀(Stage.borrow, 모델을 두 번 불러오지 않음)
   // 그 의상 모델을 아직 안 불러왔으면 카드 그림 + 짧은 불러오기 표시. 아래: 이름·처음 봤을 때 대사·「단계 · 날짜」, 이전/공유/다음. 바깥 누르기·아래로 밀기 = 닫기
-  let vEl=null,vIds=[],vi=0,vTok=0,vOn=false,K=null,shareF=null,box=null,ptr=null,vFs=false;  // 86-2 vFs = 표정 흐름 카드를 봤음
+  let vEl=null,vIds=[],vi=0,vTok=0,vOn=false,K=null,shareF=null,box=null,ptr=null,vFs=false,outT=0;  // 87-1 outT = 닫히는 동안 터치를 받아 두는 시간  // 86-2 vFs = 표정 흐름 카드를 봤음
   const V=()=>C().view||{};
   const $v=s=>vEl.querySelector(s);
   function build(){if(vEl)return;vEl=document.createElement("div");vEl.className="cv";vEl.id="cardView";vEl.setAttribute("role","dialog");vEl.setAttribute("aria-modal","true");vEl.setAttribute("aria-hidden","true");
@@ -165,7 +165,7 @@ const Cards=(()=>{
       <div class="cvbar"><button data-cv="prev">${Icon.svg("back",18)}<span></span></button><button data-cv="share" class="cvsh"><span></span></button><button data-cv="next"><span></span>${Icon.svg("back",18)}</button></div>`;
     document.querySelector(".app").appendChild(vEl);
     $v('[data-cv="prev"] span').textContent=T("prev");$v('[data-cv="next"] span').textContent=T("next");$v('[data-cv="share"] span').textContent=T("share");$v(".cvload").textContent=T("loading");
-    vEl.addEventListener("click",e=>{const b=e.target.closest("[data-cv]");if(!b)return;const k=b.dataset.cv;if(k==="close")close();else if(k==="share")share();else go(k==="next"?1:-1)});
+    vEl.addEventListener("click",e=>{if(!vOn){e.preventDefault();e.stopPropagation();return}const b=e.target.closest("[data-cv]");if(!b)return;const k=b.dataset.cv;if(k==="close")close();else if(k==="share")share();else go(k==="next"?1:-1)});
     // 바깥 누르기·아래로 밀기(카드가 손가락을 따라 내려옴)·옆으로 밀기(이전/다음)
     vEl.addEventListener("pointerdown",e=>{if(!vOn||e.target.closest("button"))return;ptr={x:e.clientX,y:e.clientY,dy:0,dx:0,id:e.pointerId,on:!!e.target.closest(".cvcard,.cvinfo")}});
     vEl.addEventListener("pointermove",e=>{if(!ptr||e.pointerId!==ptr.id)return;ptr.dx=e.clientX-ptr.x;ptr.dy=e.clientY-ptr.y;
@@ -191,6 +191,7 @@ const Cards=(()=>{
   function open(id,ids){if(typeof Together!=="undefined")Together.close();  // 84: 렌더러를 둘이 같이 쓰지 않게
     build();vIds=ids&&ids.length?ids.slice():[id];vi=vIds.indexOf(id);if(vi<0){vIds.unshift(id);vi=0}
     layout();const c=$v(".cvcard"),ms=V().zoomMs||300,tf=fromTf(cellOf(id));
+    clearTimeout(outT);vEl.classList.remove("out");
     vOn=true;vEl.setAttribute("aria-hidden","false");document.querySelector(".app").classList.add("cvon");  // 38: 뒤 목록 카드 빛은 멈춤
     c.style.transition="none";c.style.transformOrigin="0 0";c.style.transform=tf||"translateY(24px) scale(.92)";vEl.classList.add("on");void c.offsetWidth;
     c.style.transition=`transform ${ms}ms cubic-bezier(.2,.8,.2,1),opacity 0s`;c.style.transform="";
@@ -227,10 +228,13 @@ const Cards=(()=>{
   function close(){if(!vOn)return;vOn=false;vTok++;K=null;ptr=null;
     const id=vIds[vi],c=$v(".cvcard"),ms=V().closeMs||240,tf=fromTf(cellOf(id));
     Stage.camLoop(null);Stage.shadow(false);Stage.lock(false);Stage.release();
-    if(vFs){vFs=false;const st=typeof curState==="function"?curState():"";Stage.setFace(st==="sulky"?"sulky":st==="tired"?"sorrow":"neutral")}  // 86-2: 표정 흐름 카드(gm01·gm05)를 보고 닫으면 흐름의 마지막 표정이 남지 않게 대화 기본 표정으로if(typeof Outfit!=="undefined")Outfit.sync();
+    if(vFs){vFs=false;const st=typeof curState==="function"?curState():"";Stage.setFace(st==="sulky"?"sulky":st==="tired"?"sorrow":"neutral")}  // 86-2: 표정 흐름 카드(gm01·gm05)를 보고 닫으면 흐름의 마지막 표정이 남지 않게 대화 기본 표정으로
+    if(typeof Outfit!=="undefined")Outfit.sync();  // 87-1: 86-2 C 에서 위 주석 줄에 붙어 꺼져 있던 의상 되돌리기를 되살림
     if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace((SCENES[S.scene]||SCENES[0]).name);
     $v(".cvimg").classList.remove("off");  // 닫히는 동안은 카드 그림(그림판은 대화 무대로 돌아감)
     c.style.transition=`transform ${ms}ms cubic-bezier(.4,0,.2,1),opacity ${Math.round(ms/2)}ms linear ${Math.round(ms/2)}ms`;c.style.transform=tf||"translateY(40px) scale(.9)";
+    // 87-1: 닫히는 동안(closeMs, 최소 closeGuardMs)도 이 창이 터치를 받아 둠 — 바깥 누르기·아래로 밀기로 닫은 그 손가락의 click 이 뒤 카드·아래 탭에 떨어지지 않게
+    vEl.classList.add("out");clearTimeout(outT);outT=setTimeout(()=>vEl.classList.remove("out"),Math.max(ms,V().closeGuardMs||400));
     vEl.classList.remove("on");vEl.setAttribute("aria-hidden","true");document.querySelector(".app").classList.remove("cvon");shareF=null}
   viewOn=()=>vOn;
 

@@ -33,7 +33,7 @@ const Pack=(()=>{
       <h4>${esc(T("oddsCards",{n:L.length}))}</h4>
       <table class="otab pkol"><tbody>${L.map(x=>`<tr><td><i>${String(x.no||0).padStart(2,"0")}</i> ${esc(x.name)}</td><td>${esc(gk(x.grade))}</td><td>${pct(Gacha.cardPct(x,o,COL.items))}</td></tr>`).join("")}</tbody></table>
       <p class="onote">${esc(T("oddsNote",{n:p.pity.count,min:gk(p.pity.min||"rare"),refund:p.refund||0}))}</p></div>`;
-    Mini.open(T("oddsTitle"),body)}
+    Mini.open(T("oddsTitle"),body,null,{scroll:true})}  // 87-1: 제목·✕ 고정, 본문만 넘김
 
   // ── 뽑기 ──
   // 본 이야기의 그때 장소·옷(에피소드 중이면 본 이야기에 두고 온 장소, 26·27 세트 규칙)
