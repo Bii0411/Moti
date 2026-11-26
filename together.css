@@ -1,0 +1,40 @@
+/* 84 함께하기: 몰입형 전체 화면. 위(약 60%) = 서아 3D(빌린 그림판) + 360도 장소, 아래(약 40%) = 행동 버튼(3열, 이 칸만 세로 스크롤).
+   moti 기본 체계: 어두운 바탕 · 보라 포인트 · 둥근 모서리 · 반투명 칸. 블러·발광·그라데이션 장식 없음(그림자는 버튼 글자 가독성용 한 겹만) */
+.tg{position:absolute;inset:0;z-index:19;background:var(--bg);display:none;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:contain}
+.tg.on{display:flex}
+.tgtop{position:relative;flex:0 0 60%;min-height:0;overflow:hidden;border-radius:0 0 22px 22px;background:#140a24 center 40%/cover no-repeat;isolation:isolate;touch-action:none}
+.tgbg{position:absolute;inset:0;background:center 40%/cover no-repeat}
+.tgdim{position:absolute;inset:0;pointer-events:none;background:rgba(0,0,0,var(--bgDark,.2))}
+.tgdim::after{content:"";position:absolute;inset:0;background:#808080;mix-blend-mode:saturation;opacity:var(--bgDesat,.1)}
+.tgdim.raw{display:none}
+.tggl{position:absolute;inset:0}
+.tggl canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+.tgback{position:absolute;z-index:3;left:10px;top:calc(10px + env(safe-area-inset-top,0px));width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--text);background:rgba(14,12,22,.55);border:1px solid rgba(255,255,255,.1);-webkit-tap-highlight-color:transparent}
+.tgback:active{background:rgba(14,12,22,.8)}
+.tgchip{position:absolute;z-index:3;right:12px;top:calc(14px + env(safe-area-inset-top,0px));display:inline-flex;align-items:center;gap:6px;max-width:55%;padding:6px 11px 6px 8px;border-radius:999px;background:rgba(14,12,22,.55);border:1px solid rgba(255,255,255,.1)}
+.tgchip b{font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tgbot{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px 14px 0}
+.tgtabs{flex:none;display:flex;gap:6px;padding:3px;margin-bottom:10px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.tgtabs[hidden]{display:none}
+.tgtabs button{flex:1;height:34px;border-radius:11px;font-size:13px;font-weight:700;color:var(--sub);-webkit-tap-highlight-color:transparent}
+.tgtabs button.on{background:#2a2240;color:var(--text)}
+.tgscroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.tgscroll .mcards{margin-top:0}
+.tggrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+/* 행동 버튼: 아이콘 + 짧은 이름. 누르면 살짝 눌림, 하는 중엔 테두리만 보라(쿨다운 숫자·막대 없음) */
+.tga{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;min-height:86px;padding:12px 4px 10px;border-radius:18px;background:var(--card);border:1px solid var(--line);color:#d9d2ee;transition:transform .1s,opacity .2s,border-color .2s;-webkit-tap-highlight-color:transparent}
+.tga:active{transform:scale(.96)}
+.tgi{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:#221d31}
+.tgi svg{display:block}
+.tga b{font-size:12.5px;font-weight:600;color:#cfc8e4;line-height:1.25;text-align:center;word-break:keep-all;overflow-wrap:anywhere}
+.tgld{position:absolute;left:0;right:0;bottom:4px;font-size:10px;color:var(--sub);text-align:center;line-height:1}
+.tgld:empty{display:none}
+.tga.tgon{border-color:#8b5cf6aa}
+.tga.tgon .tgi{color:var(--pri2)}
+.tga.tgwait,.tgscroll .mc.tgwait{opacity:.45}
+.tgscroll .mc.tgon .pc{box-shadow:0 0 0 2px #8b5cf6aa}
+.tgempty{margin:22px 8px;text-align:center;color:var(--sub);font-size:13px;line-height:1.6}
+/* ＋ 기능판: 본편은 포즈 칸 대신 함께하기 칸(.fni 의 display:flex 가 hidden 을 덮지 않게) */
+#fnPanel .fni[hidden]{display:none}
+/* 함께하기 중에는 뒤 화면 알림 배너가 가리지 않게(토스트는 그대로 위) */
+.app.tgon .hnote{visibility:hidden}

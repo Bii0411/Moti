@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-1957">
+<meta name="moti-version" content="20261126-2051">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -563,11 +563,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-1957">
-<link rel="stylesheet" href="photos.css?v=20261126-1957">
-<link rel="stylesheet" href="cards.css?v=20261126-1957">
-<link rel="stylesheet" href="pose.css?v=20261126-1957">
-<link rel="stylesheet" href="pack.css?v=20261126-1957">
+<link rel="stylesheet" href="onboarding.css?v=20261126-2051">
+<link rel="stylesheet" href="photos.css?v=20261126-2051">
+<link rel="stylesheet" href="cards.css?v=20261126-2051">
+<link rel="stylesheet" href="pose.css?v=20261126-2051">
+<link rel="stylesheet" href="pack.css?v=20261126-2051">
+<link rel="stylesheet" href="together.css?v=20261126-2051">
 </head>
 <body>
 <div class="app">
@@ -609,6 +610,7 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
         <button class="fni" data-fn="camera"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 8h2.8l1.6-2.5h6.2L16.7 8h2.8a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9.5A1.5 1.5 0 0 1 4.5 8z"/><circle cx="12" cy="13.3" r="3.4"/></svg></span><b></b></button>
         <button class="fni" data-fn="photo"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.2"/><circle cx="9" cy="10" r="1.7"/><path d="M20.5 15.5l-4.6-4.6-9.4 8.6"/></svg></span><b></b></button>
         <button class="fni" data-fn="pose"><span class="tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="11.5" height="15.5" rx="2"/><circle cx="9.75" cy="10.3" r="1.9"/><path d="M6.6 17.2c.6-1.9 1.8-2.8 3.15-2.8s2.55.9 3.15 2.8"/><path d="M18.6 3.2l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z"/></svg></span><b></b></button>
+        <button class="fni" data-fn="together" hidden><span class="tile"></span><b></b></button>
       </div></div>
       </div>
     </section>
@@ -647,20 +649,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-1957"></script>
-<script src="motion.js?v=20261126-1957"></script>
-<script src="gacha.js?v=20261126-1957"></script>
-<script src="look.js?v=20261126-1957"></script>
-<script src="alive.js?v=20261126-1957"></script>
-<script src="film.js?v=20261126-1957"></script>
-<script src="photos.js?v=20261126-1957"></script>
-<script src="seoaphoto.js?v=20261126-1957"></script>
-<script src="cards.js?v=20261126-1957"></script>
-<script src="pose.js?v=20261126-1957"></script>
-<script src="photoask.js?v=20261126-1957"></script>
-<script src="pack.js?v=20261126-1957"></script>
-<script src="storypic.js?v=20261126-1957"></script>
-<script src="onboarding.js?v=20261126-1957"></script>
+<script src="icons.js?v=20261126-2051"></script>
+<script src="motion.js?v=20261126-2051"></script>
+<script src="gacha.js?v=20261126-2051"></script>
+<script src="look.js?v=20261126-2051"></script>
+<script src="alive.js?v=20261126-2051"></script>
+<script src="film.js?v=20261126-2051"></script>
+<script src="photos.js?v=20261126-2051"></script>
+<script src="seoaphoto.js?v=20261126-2051"></script>
+<script src="cards.js?v=20261126-2051"></script>
+<script src="pose.js?v=20261126-2051"></script>
+<script src="photoask.js?v=20261126-2051"></script>
+<script src="together.js?v=20261126-2051"></script>
+<script src="pack.js?v=20261126-2051"></script>
+<script src="storypic.js?v=20261126-2051"></script>
+<script src="onboarding.js?v=20261126-2051"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -686,10 +689,11 @@ async function checkVersion(){let v=null;
 async function loadData(){
   await checkVersion();
   const get=p=>fetch(p+(APP_V?"?v="+encodeURIComponent(APP_V):""),{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw,en]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json"),get("data/endings.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw,en,tg]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json"),get("data/endings.json"),get("data/together.json")]);
   if(pk&&pk.price)DATA.pack=pk;  // 49 카드 팩
   DATA.rewind=rw||{};  // 51 실패 엔딩 · 되감기
   DATA.endings=en||{};  // 54 엔딩 기록 · 성공 엔딩
+  DATA.together=tg||{};  // 84 함께하기
   DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items){COL=col;COL.held=COL.items.filter(x=>x.hold);COL.items=COL.items.filter(x=>!x.hold)}  // 44: 보류 칸(hold)은 앱 어디에도 안 나오고 세지 않음(저장값 S.col 은 그대로)
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
@@ -1043,7 +1047,7 @@ const Stage=(()=>{
     if(blend)blendStep(now);
     keepPre();
     if(shadowM&&shadowM.parent){const hb=md.bones.Hips;const hp=hb?hb.getWorldPosition(shV):md.root.position;shadowM.position.set(hp.x,.004,hp.z)}
-    if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:avert(id)});
+    if(aliveOn)Alive.update(now,{cam,mid:id,big:typeof View!=="undefined"&&View.isBig(),avert:gazeMode==="away"?true:gazeMode==="steady"?false:avert(id),steady:gazeMode==="steady"});  // 84: 함께하기 시선(눈 위·아래·좌우 한계와 고개 따라가기는 그대로)
     face(t);
     if(w&&h)R.render(scene,cam);  // 3D 칸이 안 보일 때(홈·마이, 온보딩 첫 화면)는 그리지 않음
   }
@@ -1131,6 +1135,7 @@ const Stage=(()=>{
   function walkPlace(where){if(where==="off"){cur=null;walk={phase:"off",x:outX(),z:0,u:0,t0:performance.now(),res:null}}else{const f=walk&&walk.res;walk=null;if(cur&&cur.win)cur=null;if(f)f()}}
   function play(mid,o={}){
     if(locked&&!o.force)return;  // 포토부스(11) 중에는 바깥(답장·해금 연출)의 몸짓을 받지 않음
+    if(solo&&!o.solo)return;  // 84: 함께하기 중에는 함께하기가 보낸 몸짓만(답장·해금·자동 몸짓 등 바깥 예약이 덮어쓰지 않게)
     if(walk&&!o.walk)return;  // 42: 걸어 나가고 들어오는 동안(화면 밖에 있는 동안 포함)은 다른 몸짓(시계 보기·인사·답장 몸짓)을 받지 않음
     if(!RIG.M[mid]&&!XS[mid])return;
     MotionCue.clear();  // 91 C: 새 몸짓이 받아들여지면(위에서 막힌 호출은 여기까지 안 옴) 이전 강조는 바로 끝. 새 몸짓이 강조 대상이면 실제 시작 때 다시
@@ -1156,7 +1161,7 @@ const Stage=(()=>{
   let xfT=null,xfOn=false;
   // k: FACE 표정 이름, 또는 {Fcl_…: 값} 직접. emo: 서버가 준 감정 글자(시선 피하기 판단용, 없으면 지움)
   function setFace(k,emo,force){if(locked&&!force)return;faceT={...(k&&typeof k==="object"?k:FACE[k]||{})};faceKey=typeof k==="string"?k:null;faceEmo=emo||""}
-  function talk(ms){if(locked)return;talkUntil=performance.now()+ms}
+  function talk(ms){if(locked||solo)return;talkUntil=performance.now()+ms}  // 84: 함께하기 중엔 대사 입 움직임 없음
   // 대사 글자 수 → 입 움직이는 시간 (글자당 msPerChar, 최대 maxMs. 띄어쓰기는 세지 않음)
   function talkFor(text){const tk=talkCfg(),n=String(text||"").replace(/\s+/g,"").length;if(n)talk(Math.min(tk.maxMs||4000,n*(tk.msPerChar||70)))}
   const dur=mid=>XS[mid]?xsDur(mid):RIG.M[mid]?RIG.M[mid].d:2;
@@ -1166,9 +1171,12 @@ const Stage=(()=>{
   // 32-A: 빌릴 때 카메라 aspect·fov·그림판 크기(픽셀 비율 포함)를 저장 → release 에서 그 값으로 되돌린 뒤 지금 대화 무대 크기로 다시 맞춤(fit).
   //   확대(View) 중이면 확대가 끝날 때 한 번 더 맞춤. 이미 빌려준 상태에서 또 빌리면 처음 저장값을 그대로 둠
   let lent=null,refitT=null;
-  function borrow(el,frame,tick,o){if(!borrowed)lent={aspect:cam.aspect,fov:cam.fov,size:R.getSize(new THREE.Vector2()),pr:R.getPixelRatio()};
-    el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0);borrowed=true;panoShow(o&&o.pano!=null?o.pano:-1,0)}
-  function release(){const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
+  // 84: 빌린 쪽 이름(owner)과 「다른 곳이 빌리려 하면 먼저 돌려주기」(o.yield). 함께하기가 빌린 동안 촬영·카드 확대·온보딩 등이 빌리면 함께하기를 먼저 닫고(그림판을 돌려받고) 빌려줌
+  let owner=null,yieldFn=null;
+  function borrow(el,frame,tick,o){if(borrowed&&yieldFn&&!(o&&o.owner&&o.owner===owner)){const f=yieldFn;yieldFn=null;f()}
+    if(!borrowed)lent={aspect:cam.aspect,fov:cam.fov,size:R.getSize(new THREE.Vector2()),pr:R.getPixelRatio()};
+    el.appendChild(R.domElement);extraTick=tick||null;if(frame)frameTo(frame,0);borrowed=true;owner=o&&o.owner||"other";yieldFn=o&&o.yield||null;panoShow(o&&o.pano!=null?o.pano:-1,0)}
+  function release(){owner=null;yieldFn=null;const dim=$("#bgdim");if(dim)dim.after(R.domElement);else $("#stage").prepend(R.domElement);extraTick=null;
     scene.fog.near=1000;scene.fog.far=1001;frameTo("normal",0);cur=null;borrowed=false;panoShow(panoMain,0);
     if(lent){cam.fov=lent.fov;cam.aspect=lent.aspect;if(R.getPixelRatio()!==lent.pr)R.setPixelRatio(lent.pr);R.setSize(lent.size.x,lent.size.y,false);lent=null}
     fit();clearTimeout(refitT);const left=typeof View!=="undefined"&&View.moving?View.moving():0;if(left>0)refitT=setTimeout(fit,left+40)}
@@ -1201,6 +1209,9 @@ const Stage=(()=>{
   // ── 포토부스(11) ──
   // lock: 포토부스가 서아를 쓰는 동안 바깥의 몸짓·표정·입을 막음(서아는 말하지 않음). 눈 깜빡임도 끔(찍는 순간 눈 감지 않게)
   let locked=false,noBlink=false,blend=null,blendOnce=null;
+  // 84 함께하기: solo = 함께하기가 무대를 쓰는 동안 바깥의 몸짓·표정·입을 막음(눈 깜빡임·숨쉬기·시선은 그대로 — lock 과 다름).
+  //   gazeMode = 함께하기 동안만 쓰는 시선(null 평소 · "steady" 카메라를 흔들림 없이 봄 · "away" 시선을 옆으로). 끝나면 null
+  let solo=false,gazeMode=null;
   function lock(on){locked=!!on;noBlink=!!on;if(on){talkUntil=0;blinkT=-1}}
   // 몸짓 mid 를 mt 초(몸짓 시간) 순간에서 멈춤. o.blendMs 동안 지금 자세에서 부드럽게 넘어감(0 이면 바로)
   function freeze(mid,mt,o={}){
@@ -1346,7 +1357,9 @@ const Stage=(()=>{
   // 26-2: keep(k) 마지막으로 연 카드 의상 · use(k,+1/-1) 카드 그림을 만드는 동안 붙잡기 · prune() 쓰지 않는 의상 내려놓기 · memory() 확인용
   const memory=()=>({models:listModels(),geometries:R.info.memory.geometries,textures:R.info.memory.textures,heapMB:performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null});
   return{seek:t=>{if(cur){cur.start=performance.now()/1000-t/(cur.sp||1);cur.hold=t}},  // 78: 지금 몸짓의 t초에 멈춤(시연·확인용)
-    keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace,talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
+    solo:on=>{solo=!!on;if(solo)talkUntil=0},gaze:m=>{gazeMode=m==="steady"||m==="away"?m:null},gazeMode:()=>gazeMode,lentTo:()=>borrowed?owner:null,  // 84 함께하기
+    toRest:ms=>{if(!md)return;blendFromPre(ms);cur=null;blendOnce=null},clearLast:()=>{lastEnd=null},  // 84: 지금 몸짓을 섞으며 끝내고 기본 자세로 · 끝난 몸짓 기록 지우기(촬영·카드 그림이 이어받지 않게)
+    keep:k=>{cardKeep=k||null},use:(k,d)=>{pins[k]=Math.max(0,(pins[k]||0)+d);if(d<0&&!pins[k])prune()},prune:()=>prune(),memory,listModels:()=>listModels(),outfit:k=>setOutfit(k),model:k=>loadOutfit(k),outfitNow:()=>outfitNow,outfitLoaded:k=>outfitDone.has(k),xs:id=>xsLoad(id),xsRest,xsLoaded:()=>Object.keys(xsCache),follow:()=>folY,followOff:on=>{folOff=!!on},init,ready,aimAt,reach,tiltHead,eyeY,handPose,hideBones,readyMs:()=>readyMs,borrow,release,fit,isLent:()=>borrowed,fog,recentMotion,camLoop,pano:{show:(i,ms)=>{panoMain=i;if(!borrowed)panoShow(i,ms)},view:i=>{if(borrowed)panoShow(i,0)},done:i=>{if(panoPin[i]>0)panoPin[i]--;panoPrune()},count:()=>Object.keys(panoTex).length,list:()=>Object.keys(panoMesh).map(Number),use:panoUse,ready:panoReady,has:i=>!!panoOf(i),load:i=>panoLoad(i),hold:on=>{panoHold=!!on;if(!panoHold&&!borrowed&&panoWant>=0)panoMeshOf(panoWant)}},hold,shadow,center,lock,freeze,faceNow,bg,still,blending:()=>!!blend,three:()=>({R,scene,cam}),isPlaying:()=>!!cur,playing:()=>cur?cur.id:null,playingWait:()=>!!(cur&&cur.wait),blendNext:ms=>{blendOnce=ms>0?ms:null},play,walk:{out:walkOut,in:walkIn,place:walkPlace,busy:()=>!!walk,phase:()=>walk?walk.phase:null,info:()=>walk?{phase:walk.phase,x:walk.x,z:walk.z,turn:cur&&cur.win?cur.win.turn:null,half:viewHalf()}:null},setFace:(k,e,f)=>{if(solo&&f!=="solo")return;setFace(k,e,f)},talk,talkFor,alive:()=>aliveInfo,mouth:()=>({...mw}),frameTo,dur,height,last:()=>lastMid,recent:n=>recent.slice(-n),lookInfo:()=>lookInfo,renderInfo:()=>({calls:R.info.render.calls,triangles:R.info.render.triangles})};
 })();
 
 // ───────────────────────── 몸짓 재생 중 3D 확대 ─────────────────────────
@@ -2436,6 +2449,7 @@ const Demo=(()=>{
   const reveal=()=>{if(window.innerWidth<800&&open)setOpen(false)};
   // 진행 중인 답장·판정·인트로·해금 연출을 멈춤
   function cancel(){
+    Together.close();  // 84: 시연 동작·초기화 전에 함께하기 끝
     GEN++;busy=false;waiting=false;judgeP=null;unlockQ=[];unlockBusy=false;
     introT.forEach(clearTimeout);introT=[];clearTimeout(sceneBackT);closeSheets();Cards.close();Pack.close();Cam.close();PhotoUI.closeView();Fn.set(false);
     ["#toast","#firstChip","#bubble","#gradeFx"].forEach(s=>$(s).classList.remove("on"));
@@ -2564,7 +2578,7 @@ const Demo=(()=>{
         <div class="kv">${esc(T("episode.flags"))}</div><div class="row">${["care","sincere","pursue","comfort"].map(f=>B("epFlag",esc(f),{v:f,on:ef.includes(f)})).join("")}</div>`}
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("photoAskSo",esc(T("photoAskDemo.soBtn")))}${B("photoAskLover",esc(T("photoAskDemo.loverBtn")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("photoAskSo",esc(T("photoAskDemo.soBtn")))}${B("photoAskLover",esc(T("photoAskDemo.loverBtn")))}${B("together",esc(T("together")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 카드 팩(49): 다음 카드 팩 결과(첫 장만, 등급 또는 카드) · 천장 초기화 · 카드 팩 카드 모두 열기 · 비우기
     const PN=S.packNext||{},pItems=Gacha.pool(COL.items);
@@ -2646,6 +2660,7 @@ const Demo=(()=>{
     if(a==="crisisNow"){s4Demo("crisis");return refresh()}  // 80: 위기 바로
     if(a==="photoAskSo"){setOpen(false);return photoAskDemo("so")}  // 83
     if(a==="photoAskLover"){setOpen(false);return photoAskDemo("lover")}
+    if(a==="together"){cancel();toChat();setOpen(false);setTimeout(()=>Together.enter(),350);return}  // 84: 함께하기 열기(실제 진입 조건 그대로 — 잠긴 단계면 안내만)
     if(a==="riftNow"){s4Demo("rift");return refresh()}  // 80: 엇갈림 바로(위기 직전 지점 먼저)
     if(a==="nightNow"){s4Demo("night");return refresh()}  // 80: 2단계 첫 밤 마무리 바로
     // 80: 「본편 실패」(예전 떠난 밤) 시연 버튼은 숨김(본편 실패 엔딩을 새 진행에서 안 씀)
@@ -2996,6 +3011,7 @@ function placeStage(){const st=$("#stage");$("#stageSlot").appendChild(st);
   const vis=curTab==="chat"&&S.room==="seoa";st.style.display=vis?"":"none";
   Stage.pano.hold(!vis||FirstMeet.isOn()||FirstMeet.armed());if(vis)Stage.xsRest(()=>FirstMeet.isOn());}  // 39: 무대가 보일 때 360도 그림을 받고, 나머지 모션은 대화 화면이 뜬 뒤 쉬는 틈에(첫 만남 연출이 끝난 뒤)
 function setTab(t){MotionCue.clear();  // 91: 화면 이동 때 남은 모션 강조를 바로 지움
+  Together.close();  // 84: 앱 안 탭 이동 = 함께하기 끝
   if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat")showList();  // 46: 「대화」 탭은 언제나 대화 목록부터(다른 탭에 다녀와도). 대화방으로 바로 가는 곳(홈 에피소드 카드·알림)은 이 뒤에 openRoom
@@ -3095,6 +3111,7 @@ function renderList(){
   Swipe.bind();
 }
 function showList(){MotionCue.clear();  // 91 C: 대화방을 나가 목록으로 가면 남은 강조를 바로 지움
+  Together.close();  // 84: 대화방 목록으로
   Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
 function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
@@ -3109,6 +3126,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
 }
 function openRoom(cid){
   MotionCue.clear();  // 91: 대화방을 열거나 바꿀 때 남은 모션 강조를 바로 지움
+  Together.close();  // 84: 다른 대화방·에피소드로
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
   S.room=cid;S.read[cid]=chatOf(cid).length;save();Moment.glow();
@@ -3149,7 +3167,7 @@ const Thread={
   // 42: 줄기에 따로 붙은 값(에피소드 단계 ep)은 그대로 두고 덮어씀. 판정 묶음(judgeBuf·judgeN)도 줄기마다 따로(본 이야기 턴이 에피소드 판정에 섞이지 않게)
   save(){const k=this.cur(),st=story(),T=S.threads||(S.threads={});T[k]={...(T[k]||{}),chat:S.chats.seoa||[],read:S.read.seoa||0,sid:(S.sid||{}).seoa||null,scene:S.scene||0,lines:st.recent_lines||[],summary:st.summary||"",jb:S.judgeBuf||[],jn:S.judgeN||0}},
   // 다른 줄기로. 처음 들어가는 줄기면 true
-  go(to){if(to===this.cur())return false;introT.forEach(clearTimeout);introT=[];busy=false;if(typeof EpScene!=="undefined")EpScene.stop();if(typeof End!=="undefined")End.stop();if(typeof Night!=="undefined")Night.stop();  // 80: 진행 중인 밤 넘기기는 멈추고(진행 자리는 본편에 남김) 본편으로 돌아오면 이어 감
+  go(to){if(to===this.cur())return false;Together.close();/* 84 */introT.forEach(clearTimeout);introT=[];busy=false;if(typeof EpScene!=="undefined")EpScene.stop();if(typeof End!=="undefined")End.stop();if(typeof Night!=="undefined")Night.stop();  // 80: 진행 중인 밤 넘기기는 멈추고(진행 자리는 본편에 남김) 본편으로 돌아오면 이어 감
     this.save();const t0=(S.threads||{})[to],t=t0&&t0.chat?t0:null,st=story();S.thread=to;
     S.judgeBuf=t&&t.jb||[];S.judgeN=t&&t.jn||0;S.judgeKeep=null;judgeTok++;judgeP=null;  // 42: 판정 묶음은 줄기마다. 다른 줄기에서 하던 판정은 버림
     if(t){S.chats.seoa=t.chat;S.read.seoa=t.read;S.sid=S.sid||{};if(t.sid)S.sid.seoa=t.sid;else delete S.sid.seoa;st.recent_lines=t.lines||[];st.summary=t.summary||"";const e0=STORIES.find(x=>x.id===to);setScene(e0?((e0.places||[]).includes(t.scene)?t.scene:e0.scene):t.scene)}  // 16-3: 에피소드는 항상 그 에피소드 장소
@@ -3365,7 +3383,7 @@ const End=(()=>{
     if((S.rwTickets||0)>0)S.rwTickets--;else{if(S.dia<price){toast(esc(C().noDia||UI("gift.noDia")));Pack.toCharge();return}S.dia-=price}
     S.rwUsed=(S.rwUsed||0)+1;restore(k,p);r.end=null;r.wait=false;save();renderTop();
     addMsg("c",C().line||"",{intro:true,rewind:1},"seoa");renderBond();renderLog();Demo.render()}
-  function restore(k,p){stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();Fn.set(false);closeSheets();
+  function restore(k,p){Together.close();/* 84: 되감기 */stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();Fn.set(false);closeSheets();
     S.chats.seoa=cp(p.chat);S.read.seoa=S.chats.seoa.length+1;S.judgeBuf=cp(p.jb||[]);S.judgeN=p.jn||0;S.judgeKeep=null;
     if(k==="main"){S.story=cp(p.story);S.bond=p.bond||0;if(p.route){S.routeCount=cp(p.route.c);S.routeWhy=p.route.why}S.night=cp(p.night||null);Night.stop()}  // 80: state 통째(섞지 않음) · 밤 넘기기 진행도 그 시점
     else{const st=story();st.recent_lines=cp(p.lines||[]);st.summary=p.summary||"";
@@ -3376,7 +3394,7 @@ const End=(()=>{
   function confirmRestart(){const el=$("#rwConfirm");
     el.innerHTML=`<h2>${esc(T("restart.title"))}</h2><p>${esc(T("restart.body"))}</p><div class="row"><button class="cta no" id="rwNo">${esc(T("restart.cancel"))}</button><button class="cta" id="rwOk">${esc(T("restart.ok"))}</button></div>`;
     openSheet("#rwConfirm");$("#rwNo").onclick=closeSheets;$("#rwOk").onclick=()=>{closeSheets();restart()}}
-  function restart(){const k=th();stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();
+  function restart(){const k=th();Together.close();/* 84: 처음부터 */stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();
     delete R()[k];SeoaPhoto.resetThread(k);  // 81: 그 줄기의 부재중 셀카 상태도 처음으로
     if(k==="main")PhotoAsk.reset();  // 83: 본편 사진 제안 상태도 처음으로(카드·앨범 사진은 그대로)
     if(k==="main"){S.night=null;Night.stop();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;S.story={};S.bond=0;S.routeCount=null;delete S.routeWhy;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;S.demoNext=null;
@@ -3751,11 +3769,12 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.datase
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;
   function set(v){on=!!v;const p=$("#fnPanel"),b=$("#fnBtn");if(!p)return;p.classList.toggle("on",on);p.setAttribute("aria-hidden",on?"false":"true");
-    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");Moment.glow();PhotoAsk.lockUI();b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
+    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");Moment.glow();PhotoAsk.lockUI();Together.fnUI();  /* 84: 본편이면 포즈 칸 대신 함께하기(단계 자물쇠는 사진 권한과 따로) */b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
     if(on){const i=$("#inp");if(document.activeElement===i)i.blur();const L=$("#log");setTimeout(()=>{L.scrollTop=L.scrollHeight},240)}}
-  function run(k){set(false);if(k==="gift")giftGuide();else if(k==="camera")Cam.open();else if(k==="pose"){const g=PhotoAsk.gate();if(!g.ok)return toast(esc(g.msg));Pose.sheet("chat")}else if(k==="photo")PhotoUI.sheet()}
+  function run(k){set(false);if(k==="gift")giftGuide();else if(k==="camera")Cam.open();else if(k==="pose"){const g=PhotoAsk.gate();if(!g.ok)return toast(esc(g.msg));Pose.sheet("chat")}else if(k==="photo")PhotoUI.sheet();else if(k==="together")Together.enter()}  // 84
   return{set,toggle:()=>set(!on),run,isOn:()=>on}})();
 $("#fnBtn").onclick=()=>Fn.toggle();
+{const t=document.querySelector('#fnPanel [data-fn="together"] .tile');if(t)t.innerHTML=Together.icon("together",26)}  // 84: 함께하기 칸 아이콘(together.js)
 document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.onclick=()=>Fn.run(b.dataset.fn));
 $("#inp").addEventListener("pointerdown",()=>Fn.set(false));
 $("#backBtn").onclick=showList;

@@ -1,4 +1,4 @@
 {
   "_설명": "51 배포 버전. node tools/version.mjs 가 index.html 과 같이 바꿈(손으로 바꾸지 않음). 앱 화면(index.html meta moti-version)과 다르면 한 번 새로고침",
-  "v": "20261126-1957"
+  "v": "20261126-2051"
 }

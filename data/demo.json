@@ -191,5 +191,7 @@
     "photo_3_tease": { "scene": 1, "action": "서아가 입꼬리를 올리며 당신을 빤히 바라본다.", "dialogue": "사장님, 이런 모습 아무한테나 안 보여 주는데. 사진 한 장 찍어 둘래?", "emotion": "도발", "photo_ask": { "id": "photo_3", "route": "tease", "pose": "p01", "face": "smirk", "camera_face": "wink" } },
     "photo_3_care": { "scene": 4, "action": "서아가 밤하늘을 바라보다 조금 머뭇거리며 당신에게 고개를 돌린다.", "dialogue": "…오늘은 좀 기억해 두고 싶어서. 사진 한 장만 찍어 줄래?", "emotion": "설렘", "photo_ask": { "id": "photo_3", "route": "care", "pose": "p01", "face": "soft", "camera_face": "shy" } },
     "photo_6": { "action": "서아가 당신의 어깨에 가볍게 기대며 미소를 짓는다.", "dialogue": "우리 사진 좀 더 남겨 두자. 앞으로 같이 있을 날도 많잖아.", "emotion": "기쁨", "photo_ask": { "id": "photo_6", "route": "care", "pose": "p01", "face": "joy", "camera_face": "soft" } }
-  }
+  },
+  "_together": "84 시연 「함께하기 열기」: 서아 본편 대화방으로 가서 ＋ 함께하기와 같은 진입 확인을 거쳐 엶(단계 버튼으로 단계를 먼저 정함)",
+  "together": "함께하기 열기"
 }

@@ -178,6 +178,7 @@ const Cam=(()=>{
     if(on)return;
     if(typeof PhotoAsk!=="undefined"){const g=PhotoAsk.gate(o);if(!g.ok){toast(esc(g.msg));return}PhotoAsk.begin(g.ses)}
     if(!root)build();
+    if(typeof Together!=="undefined")Together.close();  // 84: 함께하기가 그림판을 빌린 채면 먼저 끝냄(렌더러를 둘이 같이 쓰지 않게)
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
     const okPose=x=>!!x&&(typeof Pose==="undefined"||!!Pose.info(x.ref||x.id));  // 78-1: 쓸 수 없는 포즈(일반 몸짓·안 가진 포즈 카드)는 받지 않음
