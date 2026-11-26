@@ -83,7 +83,9 @@ const Alive=(()=>{
     const thy=cl(ty*hf,rad(g.headMaxDeg,12))*hw,thp=cl(tp*hf,rad(g.headMaxDeg,12)*.6)*hw;
     // 79: 몸짓이 고개를 돌리거나 숙이면(F 각도가 eyeReduceDeg 를 넘으면) 눈도 카메라를 쫓지 않고 고개가 향한 쪽을 봄(눈만 치켜뜨거나 옆으로 몰리지 않게)
     const er=g.eyeReduceDeg;let ew=er?1-sm((dev-er[0]*DEG)/((er[1]-er[0])*DEG)):1;st.eyeW+=(ew-st.eyeW)*(1-Math.exp(-dt*4));ew=st.eyeW;
-    const tey=cl(ty-thy,rad(g.eyeMaxYawDeg,12))*ew,tep=cl(tp-thp,rad(g.eyeMaxPitchDeg,8))*ew;
+    // 80: 눈은 위로 eyeMaxUpDeg(기본 1°)까지만 — 위로 굴리면 치켜뜬 얼굴이 됨. 아래로는 예전처럼 eyeMaxPitchDeg
+    const tep=Math.max(-rad(g.eyeMaxUpDeg!=null?g.eyeMaxUpDeg:1,1),Math.min(rad(g.eyeMaxPitchDeg,8),tp-thp))*ew;
+    const tey=cl(ty-thy,rad(g.eyeMaxYawDeg,12))*ew;
     const ke=1-Math.exp(-dt*(g.eyeSpeed||16)),kh=1-Math.exp(-dt*(g.headSpeed||3));
     st.eyeY+=(tey-st.eyeY)*ke;st.eyeP+=(tep-st.eyeP)*ke;st.headY+=(thy-st.headY)*kh;st.headP+=(thp-st.headP)*kh;
     addRot(H,rotQ("y",st.headY).multiply(rotQ("x",st.headP)));
