@@ -34,7 +34,8 @@ const Cards=(()=>{
   // ── 처음 본 순간 ──
   // 칸 id → 그릴 몸짓·표정·속도. 카드 팩 칸(g01…, 49 전에는 선물)은 임시 재생 설정 play, 대화 칸은 그 몸짓 그대로
   function motionOf(id){const it=colBy(id)||{},p=it.play||{},F=C().faceById||{};
-    if(it.source==="gift"||it.source==="pack"||p.m)return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1};  // 42: 몸짓 칸이 아닌 연출 카드(e01 크리스마스 이브)도 play
+    if(it.source==="gift"||it.source==="pack"||p.m){const sq=p.faceSeq&&((((DATA.motions||{}).motionFace||{})[p.m]||{}).seq);  // 86-2: play.faceSeq = 크게 보기에서 그 몸짓의 표정 흐름(data/motions.json motionFace seq)을 반복마다. 그림은 f 그대로
+      return{m:p.m,f:p.f||"soft",sp:p.speed>0?p.speed:1,...(Array.isArray(sq)&&sq.length?{fs:sq}:{})}}  // 42: 몸짓 칸이 아닌 연출 카드(e01 크리스마스 이브)도 play
     const fs=((((DATA.onboarding||{}).film||{}).shots)||[]).find(s=>s.id===id);
     return{m:id,f:F[id]||(fs&&fs.face)||C().face||"soft",sp:1}}
   const frameOf=m=>({...(C().frame||{top:1.08,bottom:.34,width:.56,lift:.03,center:.3}),...((C().frameById||{})[m]||{})});
@@ -154,7 +155,7 @@ const Cards=(()=>{
   // ── 카드 확대(26-1B) ──
   // 카드가 가운데로 커지고(transform 만) 카드 안에서 3D 서아가 그 몸짓을 그때 의상·장소로 반복. 대화방 3D 그림판을 빌려 씀(Stage.borrow, 모델을 두 번 불러오지 않음)
   // 그 의상 모델을 아직 안 불러왔으면 카드 그림 + 짧은 불러오기 표시. 아래: 이름·처음 봤을 때 대사·「단계 · 날짜」, 이전/공유/다음. 바깥 누르기·아래로 밀기 = 닫기
-  let vEl=null,vIds=[],vi=0,vTok=0,vOn=false,K=null,shareF=null,box=null,ptr=null;
+  let vEl=null,vIds=[],vi=0,vTok=0,vOn=false,K=null,shareF=null,box=null,ptr=null,vFs=false;  // 86-2 vFs = 표정 흐름 카드를 봤음
   const V=()=>C().view||{};
   const $v=s=>vEl.querySelector(s);
   function build(){if(vEl)return;vEl=document.createElement("div");vEl.className="cv";vEl.id="cardView";vEl.setAttribute("role","dialog");vEl.setAttribute("aria-modal","true");vEl.setAttribute("aria-hidden","true");
@@ -198,7 +199,7 @@ const Cards=(()=>{
     Stage.lock(true);Stage.shadow(true,(((DATA.config||{}).camera||{}).photo||{}).shadow||{});Stage.borrow($v(".cvgl"),null,tick);
     show()}
   function tick(now,w,h){if(!vOn||!K||!w||!h)return;const cam=Stage.three().cam;if(cam.view)cam.clearViewOffset();
-    const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),cy=(K.top+K.bottom)/2*H,d=Math.max((K.top-K.bottom)*H/2/tn,K.width*H/2/(tn*(w/h))),o=Stage.center(K.center||0);
+    const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),cy=(K.top+K.bottom)/2*H,d=Math.max((K.top-K.bottom)*H/2/tn,K.width*H/2/(tn*(w/h))),o=K.fixed?{x:0,z:0}:Stage.center(K.center||0);  // 86-2: frameById fixed = 카메라가 서아를 따라가지 않음(x30 이 다가오는 게 보이게)
     cam.position.set(o.x,cy+(K.lift||0)*H,o.z+d);cam.lookAt(o.x,cy,o.z)}
   async function show(){const id=vIds[vi],x=colBy(id),a=S.col[id];if(!x||!a)return close();
     const my=++vTok,mo=motionOf(id),key=a.outfit||C().defaultOutfit||"ops",sc=SCENES[a.scene]||SCENES[0];
@@ -219,13 +220,14 @@ const Cards=(()=>{
     try{await Stage.ready;await Stage.model(key);await Stage.xs(mo.m)}catch(e){ld.classList.remove("on");return}
     for(let i=0;i<60&&Stage.outfitNow()!==key&&my===vTok;i++)await new Promise(r=>requestAnimationFrame(r));
     if(my!==vTok||!vOn)return;
-    K=frameOf(mo.m);Stage.camLoop({id:mo.m,sp:mo.sp,name:null,ref:null});Stage.setFace(mo.f,"",true);cin.classList.remove("noimg");
+    K=frameOf(mo.m);if(mo.fs)vFs=true;Stage.camLoop({id:mo.m,sp:mo.sp,name:null,ref:null,...(mo.fs?{fs:mo.fs}:{})});Stage.setFace(mo.fs?mo.fs[0].f:mo.f,"",true);cin.classList.remove("noimg");
     // 다음 그림부터 3D 가 보이게(카드 그림을 걷음)
     requestAnimationFrame(()=>requestAnimationFrame(()=>{if(my===vTok){im.classList.add("off");ld.classList.remove("on")}}))}
   function go(k){const n=vi+k;if(!vOn||n<0||n>=vIds.length)return;vi=n;show()}
   function close(){if(!vOn)return;vOn=false;vTok++;K=null;ptr=null;
     const id=vIds[vi],c=$v(".cvcard"),ms=V().closeMs||240,tf=fromTf(cellOf(id));
-    Stage.camLoop(null);Stage.shadow(false);Stage.lock(false);Stage.release();if(typeof Outfit!=="undefined")Outfit.sync();
+    Stage.camLoop(null);Stage.shadow(false);Stage.lock(false);Stage.release();
+    if(vFs){vFs=false;const st=typeof curState==="function"?curState():"";Stage.setFace(st==="sulky"?"sulky":st==="tired"?"sorrow":"neutral")}  // 86-2: 표정 흐름 카드(gm01·gm05)를 보고 닫으면 흐름의 마지막 표정이 남지 않게 대화 기본 표정으로if(typeof Outfit!=="undefined")Outfit.sync();
     if(typeof Look!=="undefined"&&Look.setPlace)Look.setPlace((SCENES[S.scene]||SCENES[0]).name);
     $v(".cvimg").classList.remove("off");  // 닫히는 동안은 카드 그림(그림판은 대화 무대로 돌아감)
     c.style.transition=`transform ${ms}ms cubic-bezier(.4,0,.2,1),opacity ${Math.round(ms/2)}ms linear ${Math.round(ms/2)}ms`;c.style.transform=tf||"translateY(40px) scale(.9)";

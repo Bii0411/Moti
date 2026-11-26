@@ -93,18 +93,21 @@ if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById
     if (!(x.to > x.from) || x.to > f.duration + .01) fail(`50-2: ${m} 구간 ${x.from}~${x.to} 이 파일 길이 ${f.duration.toFixed(2)} 밖`);
     if (!(x.fadeIn >= .2 && x.fadeIn <= .3) && m !== "x30") fail(`50-2: ${m} fadeIn 이 0.2~0.3 이 아님`);
     ready.push(g.name); }
-  const want = { x26: [1, 4, "Glancing"], x27: [3, 8, "Shake_Head"], x28: [0.1, 3, "Touching"], x29: [2, 6, "Avoiding"] };
+  const want = { x26: [1, 4.5, "Glancing"], x27: [3, 8, "Shake_Head"], x28: [0.1, 3, "Touching"], x29: [2, 6, "Avoiding"] };
   for (const [m, [a, b, src]] of Object.entries(want)) { const x = motions.xstage[m] || {}, f = x.file ? JSON.parse(readFileSync(x.file, "utf8")) : {};
     if (x.from !== a || x.to !== b || !String(f.src || "").includes(src)) fail(`50-2: ${m} 구간·원본이 지시와 다름(${x.from}~${x.to}, ${f.src})`); }
   if (motions.xstage.x26 && motions.xstage.x26.damp) fail("50-2: x26 에 damp 가 있음");
-  const u = motions.xstage.x30 || {}; if (!u.face || !(u.faceAt > 0) || !u.frame || !(u.frameMs > 0) || !JSON.parse(readFileSync("data/config.json", "utf8")).camera[u.frame]) fail("50-2·50-3: x30 우산 표정·카메라 구도 설정 없음");
+  const u = motions.xstage.x30 || {}, uf = (motions.motionFace || {}).x30 || {};  // 86-2: 표정은 xstage face·faceAt 대신 motionFace 표정 흐름(둘 다 있으면 부딪침)
+  if (u.face || !Array.isArray(uf.seq) || uf.seq.length < 4 || !uf.gift || !u.frame || !(u.frameMs > 0) || !JSON.parse(readFileSync("data/config.json", "utf8")).camera[u.frame]) fail("50-2·86-2: x30 우산 표정 흐름·카메라 구도 설정이 다름");
   const rules = ((GJ.momentFallback || {}).rules || []).map(r => r.gift).join();
   if (rules !== "firstaid,cocktail,towel,flower,umbrella,ring") fail(`50-2: 임시 규칙 선물 순서 ${rules}`);
   const m06 = motions.xstage.m06 || {}; if (!/flustered/.test(m06.file) || m06.to - m06.from < 2 || m06.to - m06.from > 4 || !(m06.motionVer >= 4)) fail("50-2: m06 허둥대기가 Flustered 2~4초·motionVer 4 이상이 아님");
   const d = motions.xstage.x33 || {}; if (d.from !== 4.7 || d.to !== 12 || !(d.motionVer >= 2)) fail("50-2: 춤 x33 구간이 4.7~12초·motionVer 2 이상이 아님");
   if (((col.card.photocard || {}).packNamePx) !== 9 || ((col.card.photocard || {}).packNameLines) !== 2) fail("50-3: 10장 결과 이름이 9px 두 줄(packNamePx·packNameLines)이 아님");
   if (!(motions.xstage.x26 || {}).tiltMax) fail("50-3: x26 숙임 제한(tiltMax) 없음");
-  { const f = JSON.parse(readFileSync(u.file, "utf8")), h = f.hip, mv = Math.max(...h.filter((_, i) => i % 3 !== 1).map(Math.abs)); if (mv > 0.001 || !u.inPlace) fail(`50-3: x30 골반이 앞뒤·좌우로 움직임(${mv})`); }
+  // 86-2: x30 은 실제로 다가왔다 돌아감 — 앞(+z)으로 골반 높이 × 0.25~0.5, 처음·끝 골반 앞뒤·좌우 0(끝 섞기 때 미끄러지지 않게), inPlace 아님
+  { const f = JSON.parse(readFileSync(u.file, "utf8")), h = f.hip, n = h.length / 3, z = [...Array(n)].map((_, i) => h[i * 3 + 2]), mz = Math.max(...z), ends = [h[0], h[2], h[(n - 1) * 3], h[(n - 1) * 3 + 2]].map(Math.abs);
+    if (u.inPlace || mz < 0.25 || mz > 0.5 || Math.max(...ends) > 0.001 || Math.abs(f.duration - u.to) > 0.05) fail(`86-2: x30 다가오기 골반 이동이 다름(가장 앞 ${mz}, 처음·끝 ${ends}, 길이 ${f.duration})`); }
   console.log(`- 50-2 순간 선물 반응 모션: ${ready.join("·")} 준비됨, 임시 규칙 ${rules.split(",").length}개 · m06 ${m06.from}~${m06.to}초 · 춤 ${d.from}~${d.to}초`); }
 // 52: 24 손 흔들기(m13) 일반, m16 응원하기는 대화 몸짓 목록에서 빠짐(ban) · 카드 팩 「들고 흔들어 보이기」(g08)는 m16 그대로
 if ((col.gradeRule.byId || {}).m13 !== "common" || col.items.find(x => x.id === "m13").grade !== "common") fail("52: m13 손 흔들기가 일반이 아님");
@@ -234,7 +237,8 @@ run("1장·10장 섞어 · 천장 켬", Array.from({ length: N }, () => rnd() < 
   for (const p in where) if (/"x31"/.test(readFileSync(p, "utf8"))) fail(`86-1: ${p} 에 x31 이 있음`);
   if (GJ.list.some(g => g.id !== "ring" && (g.motion === "x31" || g.reaction === "x31"))) fail("86-1: 반지가 아닌 선물이 x31 을 씀");
   const mf = (motions.motionFace || {}).x31 || {}; if (!mf.gift || !Array.isArray(mf.seq) || mf.seq.length < 3) fail("86-1: x31 표정 흐름 없음");
-  if (Object.entries(motions.motionFace || {}).some(([k, v]) => k !== "x31" && v.gift)) fail("86-1: x31 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
+  const GF = ["x31", "x26", "x30"];  // 86-2: 구급상자 x26·우산 x30 도 선물 반응 표정 흐름
+  if (Object.entries(motions.motionFace || {}).some(([k, v]) => !GF.includes(k) && v.gift)) fail("86-1·86-2: x31·x26·x30 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
   console.log(`- 86-1 반지 반응 x31: ${x.from}~${x.to}초(건너뜀 ${x.skip}) = ${dur.toFixed(2)}초 · 표정 ${mf.seq.map(s => s.at + s.f).join("→")} · gm06 51번 레어`); }
 // 시연 지정: 첫 장만 그것으로
 {

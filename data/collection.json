@@ -621,8 +621,9 @@
       "stage": 1,
       "play": {
         "m": "x26",
-        "f": "neutral",
-        "speed": 1
+        "f": "flustered",
+        "speed": 1,
+        "faceSeq": true
       }
     },
     {
@@ -677,8 +678,9 @@
       "stage": 5,
       "play": {
         "m": "x30",
-        "f": "sorrow",
-        "speed": 1
+        "f": "fun",
+        "speed": 1,
+        "faceSeq": true
       }
     },
     {
@@ -951,6 +953,7 @@
       "center": 0.3
     },
     "frameById": {
+      "x30": { "top": 1.13, "bottom": 0.36, "width": 0.56, "lift": 0.03, "center": 0.3, "fixed": true },
       "x23": {
         "top": 1.16,
         "bottom": 0.36,
@@ -992,6 +995,8 @@
     },
     "momentById": {
       "gm06": 73,
+      "gm01": 26,
+      "gm05": 61,
       "x17": 34,
       "m01": 25,
       "g17": 50,
