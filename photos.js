@@ -203,7 +203,9 @@ const Cam=(()=>{
     if(unlockQ.length&&!unlockBusy)setTimeout(unlockNext,h&&h.mid?Stage.dur(h.mid)*1000+700:600);
   }
   // 48: 촬영 중에 포즈를 바꿈(멈춤을 풀고 처음부터 반복)
-  function setPose(x){if(!on||!x)return;if(typeof PhotoAsk!=="undefined"&&PhotoAsk.fixed())return;  // 83: 3단계 제안 촬영은 p01 고정if(typeof Pose!=="undefined"&&!Pose.info(x.ref||x.id))return;  // 78-1: 쓸 수 있는 포즈만
+  function setPose(x){if(!on||!x)return;
+   if(typeof PhotoAsk!=="undefined"&&PhotoAsk.fixed())return;  // 83: 3단계 제안 촬영은 p01 고정
+   if(typeof Pose!=="undefined"&&!Pose.info(x.ref||x.id))return;  // 78-1: 쓸 수 있는 포즈만
    info=x;paused=false;Stage.camLoop(null);Stage.camLoop(info);if(x.f)Stage.setFace(x.f);render()}
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
   // 셔터 소리: 짧은 잡음 두 덩어리(찰-칵). 아이폰은 누른 그 순간(같은 작업) 안에서 소리 장치를 깨워야 해서 셔터 처리 맨 앞에서 부름
