@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261126-1510">
+<meta name="moti-version" content="20261126-1515">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,11 +548,11 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261126-1510">
-<link rel="stylesheet" href="photos.css?v=20261126-1510">
-<link rel="stylesheet" href="cards.css?v=20261126-1510">
-<link rel="stylesheet" href="pose.css?v=20261126-1510">
-<link rel="stylesheet" href="pack.css?v=20261126-1510">
+<link rel="stylesheet" href="onboarding.css?v=20261126-1515">
+<link rel="stylesheet" href="photos.css?v=20261126-1515">
+<link rel="stylesheet" href="cards.css?v=20261126-1515">
+<link rel="stylesheet" href="pose.css?v=20261126-1515">
+<link rel="stylesheet" href="pack.css?v=20261126-1515">
 </head>
 <body>
 <div class="app">
@@ -631,19 +631,19 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261126-1510"></script>
-<script src="motion.js?v=20261126-1510"></script>
-<script src="gacha.js?v=20261126-1510"></script>
-<script src="look.js?v=20261126-1510"></script>
-<script src="alive.js?v=20261126-1510"></script>
-<script src="film.js?v=20261126-1510"></script>
-<script src="photos.js?v=20261126-1510"></script>
-<script src="seoaphoto.js?v=20261126-1510"></script>
-<script src="cards.js?v=20261126-1510"></script>
-<script src="pose.js?v=20261126-1510"></script>
-<script src="pack.js?v=20261126-1510"></script>
-<script src="storypic.js?v=20261126-1510"></script>
-<script src="onboarding.js?v=20261126-1510"></script>
+<script src="icons.js?v=20261126-1515"></script>
+<script src="motion.js?v=20261126-1515"></script>
+<script src="gacha.js?v=20261126-1515"></script>
+<script src="look.js?v=20261126-1515"></script>
+<script src="alive.js?v=20261126-1515"></script>
+<script src="film.js?v=20261126-1515"></script>
+<script src="photos.js?v=20261126-1515"></script>
+<script src="seoaphoto.js?v=20261126-1515"></script>
+<script src="cards.js?v=20261126-1515"></script>
+<script src="pose.js?v=20261126-1515"></script>
+<script src="pack.js?v=20261126-1515"></script>
+<script src="storypic.js?v=20261126-1515"></script>
+<script src="onboarding.js?v=20261126-1515"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2119,7 +2119,7 @@ async function send(text,o){
   if(poseX&&poseX.f&&!v.face)v.face=poseX.f;
   // 17-1B: 결정적 순간이면 몸짓은 꼭 나옴(① 답장이 고른 몸짓 → ② 감정에 맞는 열린 몸짓 → ③ 지금 단계의 열린 몸짓)
   const keyM=Fx.key(say,v,prevAt);if(keyM&&!mid)mid=Fx.keyMotion(emo);
-  {const mv=((DATA.story||{}).extraMotions||{}).move;if(moved&&mv&&!poseX&&!giftMid&&canPlay(mv)&&placeOkMotion(mv))mid=mv}  // 55: 이번 답장에서 장소가 바뀌었으면(어디 가자 → 걸어감) 걸으며 목선 강조
+  {const mvs=[].concat(((DATA.story||{}).extraMotions||{}).move||[]),mv=mvs.find(id=>canPlay(id)&&placeOkMotion(id));if(moved&&mv&&!poseX&&!giftMid)mid=mv}  // 76: 목록 중 지금 쓸 수 있는 첫 몸짓(크리스마스 x37, 그 밖 x38 제자리 걷기)  // 55: 이번 답장에서 장소가 바뀌었으면(어디 가자 → 걸어감) 걸으며 목선 강조
   // 50-2: 선물 — 그림이 1초 떠올랐다 사라진 뒤 답장·반응 몸짓(서버 답이 그보다 빨리 와도)
   if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{}),...(v.fb&&!o&&!poseId&&(DATA.config.fallbackReply||{}).retry?{fb:1,retry:text}:{})};  // 91: 예비 지문 + 다시 보낼 내 말
