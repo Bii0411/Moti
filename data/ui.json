@@ -121,12 +121,16 @@
     "moodToast": "서아 기분 · {mood}",
     "moodGift": "{gift}이라면 반응이 다를 거예요",
     "_stageDown": "69: 판정 뒤 관계 단계가 내려갔을 때(이름 거절 등) 짧은 알림 한 줄({name} 내려간 단계 이름, data/seoa_story.json stageNames)",
-    "stageDown": "서아와의 사이가 「{name}」로 돌아갔어요."
+    "stageDown": "서아와의 사이가 「{name}」로 돌아갔어요.",
+    "_rift": "80: 본편 위기에서 엇갈림이 된 판정 뒤 한 번(단계 하락 알림과 같은 모양, 단계는 5 그대로)",
+    "rift": "서아와의 사이가 엇갈렸어요."
   },
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",
     "seoaFirst": "＋ 에서 선물하고 사진도 찍어요",
     "placeChanged": "장소가 바뀌었어요 · {place}",
+    "_nightDivider": "80: 밤 넘기기 시간 카드가 뜰 때 대화 기록에 한 번 남는 가운데 줄({card} = 서버 state.night_card). 서버 대화 기록·판정 recent 에는 안 감",
+    "nightDivider": "─ {card} ─",
     "_typing": "29-1: 내 메시지를 보낸 순간부터 답장이 올 때까지(직전 판정을 기다리는 시간 포함) 보이는 줄. 43: 「입력 중」 → 「생각 중」, 기다린 지 typingLongMs 가 지나면 typingLong(답장 기다리는 몸짓이 팔짱으로 넘어가는 때쯤, data/config.json wait). 답이 오면 다음 기다림은 다시 typing 부터",
     "typing": "서아가 생각 중…",
     "typingLong": "서아가 고민 중…",

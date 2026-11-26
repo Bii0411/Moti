@@ -10,6 +10,8 @@
   "reserved": "예약",
   "_userName": "69: nameScene = 본편을 3단계 + 이름 묻는 장면 직전으로(다음 답장이 이름 장면). 이름이 없으면 입장권 뒷면을 먼저 연다. 70: 「부르는 이름」 줄은 빼고 마이 탭 「내 정보」에서 바꿈",
   "nameScene": "3단계 이름 장면 바로",
+  "_s4": "80: 서버 S4 본편 시연. crisisNow = 5단계 위기 직전(다음 답장이 위기 소식 CRISIS, 되감기 지점 저장). riftNow = 위기 직전 지점을 먼저 만든 뒤 엇갈림이 된 판정처럼(엇갈림 알림 · 되감기 권유 · 다음 답장 RIFT_START → 한 번 답 → 「며칠 뒤 밤」). nightNow = 2단계 첫 밤 마무리(다음 답장 NIGHT_END → 한 번 답 → 「2일째 밤」). nightCard·riftCard = 그때 시간 카드 문구(서버 원고 그대로)",
+  "s4": {"crisisNow": "위기 바로", "riftNow": "엇갈림 바로", "nightNow": "밤 넘기기 바로", "nightCard": "2일째 밤", "riftCard": "며칠 뒤 밤"},
   "reserveStage": "다음 답장 뒤 {name} 단계로 상승",
   "reserveEvent": "다음 답장 뒤 {name} 해금",
   "_episode": "42: 에피소드 단계가 있는 특별 에피소드(크리스마스 이브) 안에서만 보이는 묶음. 판정 버튼 = 서버 판정 한 번처럼 에피소드 호감에 더함(플래그 버튼으로 켠 플래그가 같이 감). 단계 버튼 = 그 단계 시작 호감으로 바로(장면 없이). 장면 다시 = 지금 단계 장면. 처음부터 = 에피소드 대화·단계를 지우고 1단계 장면부터",
@@ -32,7 +34,8 @@
       "judge": "2단계 판정",
       "stage": "3단계 넘김",
       "old": "예전 저장값",
-      "demo": "시연"
+      "demo": "시연",
+      "night": "첫 밤 마무리"
     }
   },
   "_fail": "51: ?debug=1 「실패 엔딩」 묶음. 본편 실패 = 본 이야기로 가서(5단계 아래면 5단계로) 되감기 지점이 없으면 지금을 지점으로 두고 서버 「떠남」 엔딩이 온 것처럼. 크리스마스 실패 = 크리스마스 이브로 가서(4단계 이상이거나 지점이 없으면 3단계로) 내 메시지 수를 「자정」으로. 되감기 +1 = 되감기 장 하나 더",
@@ -48,8 +51,8 @@
     "endingsCleared": "엔딩 기록을 비웠어요",
     "finaleNow": "6단계 · 조연 마무리 바로"
   },
-  "_serverStage": "90: 단계 버튼으로 옮길 때 서버(story-routes·side-ending)가 보는 값. minMsgs = 그 단계에서 다음으로 오르는 데 필요한 내 메시지 수(서버와 같게, 버튼을 누르면 이미 채운 것으로). 6단계로 가면 메시지 수 0·첫 아침 전·오른 직후 장면(STAGE_UP_6)·그 갈래 조연 차례 finaleStep(마무리 직전), 다른 조연은 3(끝). 갈래가 없으면 defaultRoute",
-  "serverStage": {"minMsgs": {"2": 15, "3": 20, "4": 15}, "finaleStep": 2, "doneStep": 3, "stageUp6": "STAGE_UP_6", "defaultRoute": "care"},
+  "_serverStage": "90: 단계 버튼으로 옮길 때 서버(story-routes·side-ending)가 보는 값. minMsgs = 그 단계에서 다음으로 오르는 데 필요한 내 메시지 수(서버와 같게, 버튼을 누르면 이미 채운 것으로). 6단계로 가면 메시지 수 0·첫 아침 전·오른 직후 장면(STAGE_UP_6)·그 갈래 조연 차례 finaleStep(마무리 직전), 다른 조연은 3(끝). 갈래가 없으면 defaultRoute. 80: minMsgs 를 서버 S4 기준(2→3 9, 3→4 9, 4→5 6)으로",
+  "serverStage": {"minMsgs": {"2": 9, "3": 9, "4": 6}, "finaleStep": 2, "doneStep": 3, "stageUp6": "STAGE_UP_6", "defaultRoute": "care"},
   "sec": {
     "scenes": "장면 바로가기",
     "server": "서버",

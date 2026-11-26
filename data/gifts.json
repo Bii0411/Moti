@@ -15,6 +15,8 @@
     "cooldownTurns": 10
   },
   "_momentFallback": "서버가 gift_moment 를 아직 안 보낼 때의 임시 규칙(선물별). on 이면 서아 답장의 감정·지문·대사에 words(정규식)가 있으면 gift 순간을 reason 으로 엶(단계 조건은 그대로). 서버가 gift_moment 를 한 번이라도 보내면 꺼짐(저장값 S.momentSrv). 50-2: 꽃다발·우산·반지 규칙도 더함(반지는 반응 몸짓이 없어 아직 안 열림). 위에서부터 먼저 맞는 규칙",
+  "_momentWords": "80: 본편 그 단계(stage)에서 내 말 또는 서아 답장(지문·대사)에 words 중 하나가 있으면(띄어쓰기 무시) 서버 gift_moment 가 없어도(서버 신호 S.momentSrv 와 상관없이) 그 순간 선물을 엶. 서버 정상 답장 턴만, 특별 에피소드 아님, 이미 준 선물·쿨다운·다른 순간 선물이 열려 있으면 안 엶. reason 이 없으면 선물 창 맨 위 칸은 그 선물의 when",
+  "momentWords": {"cocktail": {"stage": 2, "words": ["칵테일", "한 잔 타 줄게", "술 만들어"]}},
   "momentFallback": {
     "on": true,
     "rules": [
@@ -138,8 +140,10 @@
       "kind": "moment",
       "stage": 4,
       "icon": "icons/gift2_flower.png",
-      "e": "💐",
-      "name": "꽃다발",
+      "e": "🔑",
+      "name": "바 여분 열쇠",
+      "desc": "라스트 오더의 여분 열쇠. 아무에게도 준 적 없다.",
+      "_icon": "80: 서버 S4 원고 6절 — 꽃다발을 바 여분 열쇠로. id flower 는 저장값·선물 기록·컬렉션·쿨다운·서버 요청 호환으로 그대로. 그림은 열쇠 아이콘이 오기 전까지 꽃다발 그림(icons/gift2_flower.png) 임시",
       "price": 150,
       "when": "처음 이름을 불렀을 때, 마음을 전할 순간",
       "reaction": "x29",
