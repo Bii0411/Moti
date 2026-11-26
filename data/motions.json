@@ -159,6 +159,19 @@
     "x48": { "file": "motions/xstage_lovely_embarrassing2.json", "from": 0.9, "to": 4.6, "fadeIn": 0.4, "fadeOut": 0.7, "inPlace": true },
     "x49": { "file": "motions/xstage_shy_short_laugh.json", "from": 1.6, "to": 4.5, "fadeIn": 0.5, "fadeOut": 0.8, "turn": 95 }
   },
+  "_preview": "84-1 시연 패널 「신규 모션 검수」(?debug=1 일 때만): only \"preview\" 몸짓을 하나씩 대화 구도·함께하기 구도에서 재생. faces = 같이 볼 표정 후보(index.html FACE 이름, 원고의 감정 후보에서 고름). 재생은 기록·해금·카드·관계를 바꾸지 않음(quiet)",
+  "preview": {
+    "x40": { "faces": ["smirk", "wink"] },
+    "x41": { "faces": ["surprised", "flustered", "fun"] },
+    "x42": { "faces": ["soft", "neutral"] },
+    "x43": { "faces": ["soft", "shy"] },
+    "x44": { "faces": ["fun", "flustered"] },
+    "x45": { "faces": ["fun", "smirk"] },
+    "x46": { "faces": ["surprised", "soft"] },
+    "x47": { "faces": ["pout", "sulky"] },
+    "x48": { "faces": ["shy", "joy"] },
+    "x49": { "faces": ["shy", "fun"] }
+  },
   "_hands": "53: 기본 손. 모션에 손가락 데이터(fingers)가 없을 때(손가락 없는 XSTAGE 모션·motion.js 의 코드 몸짓·대기 동작·표정만 있는 상태) 손가락에 거는 모양. relaxed = 손가락 뼈마다 기본 자세(쫙 편 손) 대비 지역 회전 [x,y,z,w] — XSTAGE 걷기(x22) 원본 손가락에서 뽑은 편하게 늘어뜨린 손(마디마다 조금씩 굽고 엄지는 안쪽). amount = 그 회전을 몇 배로(0 = 쫙 편 손, 1 = relaxed 그대로, 1보다 크면 더 쥔 손), thumb = 엄지만 따로(없으면 amount). byMotion = 손 모양이 뜻을 가진 몸짓만 예외. 손가락 데이터가 있는 모션은 이 값을 쓰지 않고 원본 손가락(처음·끝 섞기 동안 이 손과 섞임). blendSec = 몸짓이 바뀔 때 손 모양이 따라가는 시간(초). 기본 손이 바뀌어 다르게 보이게 된 몸짓은 motionVer 를 올려 카드 그림을 다시 만듦(코드 몸짓은 motions 의 motionVer, cards.js verOf)",
   "hands": {
     "amount": 0.45,

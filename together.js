@@ -155,7 +155,7 @@ const Together=(()=>{
   const withTimeout=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
   const faceSet=f=>{if(f&&FACE[f])Stage.setFace(f,"","solo")};
   // 몸짓 하나: 파일을 다 받은 뒤 실제로 재생을 시작한 순간부터 길이를 셈. 실패하면 null
-  async function playM(m,sp,mine){if(!okMotion(m))return null;
+  async function playM(m,sp,mine,kind){if(!(kind==="preview"?canPlay(m):okMotion(m)))return null;  // 84-1: 시연 패널 검수 재생(preview)만 서비스 권한 대신 재생 가능 여부만 봄
     if(XS[m]){const d=await withTimeout(Stage.xs(m),+D().loadTimeoutMs||8000);if(!mine())return null;if(!d)return null}
     if(!mine())return null;
     Stage.play(m,{quiet:true,solo:true,speed:sp>0?sp:1,blendMs:+D().blendMs||450});
@@ -187,7 +187,7 @@ const Together=(()=>{
     const kOf=v=>v.m+"|"+(v.f||""),fresh=ok.filter(v=>kOf(v)!==lastPick[key]),P=fresh.length?fresh:ok,v=P[Math.floor(Math.random()*P.length)];
     lastPick[key]=kOf(v);motion(my,v)}
   function motion(my,v){my.pending++;const lt=later(()=>loadingUI(my,true),300);
-    playM(v.m,v.sp,()=>alive(my)).then(r=>{clearTimeout(lt);my.pending--;if(!alive(my))return;
+    playM(v.m,v.sp,()=>alive(my),v.k).then(r=>{clearTimeout(lt);my.pending--;if(!alive(my))return;
       if(!r){note({fail:v.m});Stage.toRest(+D().blendMs||450);faceSet(idleFace());Stage.gaze(null);my.until=now();busyUI();return finishMaybe(my,true)}  // 불러오기 실패: 기본 자세로, 입력 풀기
       faceSet(v.f);my.motion=r;my.until=Math.max(my.until,r.start+r.ms);busyUI();note({play:v.m,ms:Math.round(r.ms)});finishMaybe(my)})}
   // 남은 단계·불러오는 몸짓이 없으면 until 에 끝냄
@@ -232,8 +232,15 @@ const Together=(()=>{
     stopAuto();if(Stage.playing())Stage.toRest(+D().blendMs||450);const mo=Cards.motionOf(cid),my={id:"card:"+cid,tok,t0:now(),until:0,left:0,pending:0,cam:false,motion:null};act=my;busyUI();
     Stage.gaze(null);note({card:cid,m:mo.m});motion(my,{m:mo.m,f:mo.f,sp:mo.sp});return true}
 
+  // 84-1 시연 패널 「신규 모션 검수」(?debug=1 만): 검수 전용(only preview) 몸짓도 함께하기 구도에서 재생. 사용자 행동처럼 하나만(끝나면 기본 자세·표정, 자동 교감 다시 셈).
+  // 기록·카드·호감·관계는 바꾸지 않음(행동과 같은 quiet·solo 재생). 실제 행동·자동·자유 모션의 권한 검사와는 따로
+  function preview(m,f){if(!on||typeof DEBUG==="undefined"||!DEBUG||!m||typeof canPlay!=="function"||!canPlay(m))return false;
+    if(act)stopAct("preview");stopAuto();if(Stage.playing())Stage.toRest(+D().blendMs||450);
+    const my={id:"preview:"+m,tok,t0:now(),until:0,left:0,pending:0,cam:false,motion:null};act=my;busyUI();Stage.gaze(null);note({preview:m});
+    motion(my,{m,f:f||"",k:"preview"});return true}
+
   // 확인용
   const info=()=>({on,tok,tab,stage:stageN(),acts:actsOf(stageN()),why:why(),stay:on?stayWhy():null,act:act&&{id:act.id,left:act.left,pending:act.pending,motion:act.motion&&act.motion.m,inMs:Math.round(act.until-now())},
     auto:autoAct?"on":autoT?"wait":"off",cool:Math.max(0,Math.round(cool-now())),cam:+cz.k.toFixed(3),gaze:Stage.gazeMode(),lent:Stage.lentTo(),free:on?freeList().map(x=>x.id):null,log:log.slice()});
-  return{enter,open:enter,close:()=>close(),run,playCard,why,fnUI,isOn:()=>on,freeList,info,icon:svg};
+  return{enter,open:enter,close:()=>close(),run,playCard,preview,why,fnUI,isOn:()=>on,freeList,info,icon:svg};
 })();
