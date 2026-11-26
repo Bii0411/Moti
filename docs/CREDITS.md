@@ -84,6 +84,7 @@
 | `motions/pose_body_pose_94.json` (p13) | `index.html`·`pose.js`(촬영 전용 포즈, 78) | XSTAGE 「[standard] Body pose 94」. 라이선스 범위 **확인 필요** | 원본 `standard_Body_pose_94.fbx`(2026-11-26 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps). 한 장짜리 포즈라 끝 키를 뽑아 5초 두 장으로. FBX는 저장소에 없음 |
 | `motions/pose_body_pose_95.json` (p14) | `index.html`·`pose.js`(촬영 전용 포즈, 78) | XSTAGE 「[standard] Body pose 95」. 라이선스 범위 **확인 필요** | 원본 `standard_Body_pose_95.fbx`(2026-11-26 받음)를 `tools/fbx2motion.mjs`로 변환(뼈 20개 + 손가락 30개, 30fps). 한 장짜리 포즈라 끝 키를 뽑아 5초 두 장으로. FBX는 저장소에 없음 |
 | `icons/gift2_*.png` 9개 (사탕·초콜릿·물 한 잔·반창고·손난로·구급상자·칵테일·따뜻한 수건·꽃다발) | `index.html`(선물 창, 선물 그림이 떠오르는 연출) | 팀 디자인 시안(2026-11-25 받은 선물 창 화면)에서 그림만 잘라 배경을 투명하게 만듦 | 원본 시안 이미지는 저장소에 없음 |
+| `icons/gift2_*.png` 11개 (93: 사탕·초콜릿·물 한 잔·반창고·손난로·구급상자·칵테일·따뜻한 수건 교체, 바 여분 열쇠 `gift2_key`·우산 `gift2_umbrella`·반지 `gift2_ring` 추가) | `index.html`(선물 창, 순간 선물 칸, 선물 그림이 떠오르는 연출) | 기획자 제공, ChatGPT 생성 이미지 | 512×512 RGBA PNG, 투명 배경, 중앙 정렬(기획자가 생성 이미지 2장에서 아이콘을 나누고 투명도 정리). 받은 그대로 넣음(크기·색 바꾸지 않음). 위 56단계 9개는 이걸로 바뀜 |
 | Noto Sans KR | `v1.html` | Google Fonts · SIL Open Font License |
 | ~~Fredoka SemiBold(600)~~ (59단계에서 안 씀) | 예전 로고 「moti」 그림 | — | 59: `assets/logo_moti.svg` 를 기획자 시안 로고로 바꿈 |
 | 기획자 시안 로고 「moti」(2026-11-25 받은 그림) | `assets/logo_moti.svg` (시작 화면, 헤더, 카드 뒷면, 카드 공유 그림) | 팀 자체 시안 | 그림의 윤곽을 따라 SVG 경로로 그림(59단계). 원본 그림은 저장소에 없음 |
