@@ -708,7 +708,7 @@ async function loadData(){
   if(c)DATA.config=c;if(f)DATA.face=f;if(m)DATA.motions=m;if(kw)DATA.keywords=kw;DATA.story=st;DATA.intro=it;
   if(st&&st.locations&&st.locations.length)SCENES=st.locations;
   for(const id in DATA.motions.motions)if(!MNAME[id])MNAME[id]=DATA.motions.motions[id].name;
-  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0,loopFrom:x.loopFrom!=null?+x.loopFrom:null}}  // 78: loopFrom
+  for(const id in DATA.motions.xstage||{}){const x=DATA.motions.xstage[id];if(id[0]!=="_"&&x&&x.file)XS[id]={url:x.file,from:+x.from||0,to:x.to!=null?+x.to:null,inPlace:!!x.inPlace,skip:Array.isArray(x.skip)?[+x.skip[0],+x.skip[1]]:null,repeat:Math.max(1,Math.round(+x.repeat||1)),fadeIn:+x.fadeIn||0,fadeOut:+x.fadeOut||0,turn:+x.turn||0,skipBlend:+x.skipBlend||0,damp:x.damp&&typeof x.damp==="object"?x.damp:null,ver:+x.motionVer||1,face:x.face||null,faceEmo:x.faceEmo||"",faceAt:+x.faceAt||0,tiltMax:x.tiltMax&&typeof x.tiltMax==="object"?x.tiltMax:null,frame:x.frame||null,frameMs:+x.frameMs||0,frameBackMs:+x.frameBackMs||0,loopFrom:x.loopFrom!=null?+x.loopFrom:null,hipScale:x.hipScale!=null?Math.max(0,Math.min(1,+x.hipScale)):1,back:!!x.back}}  // 84-2 D-7: hipScale·back(x44)  // 78: loopFrom
   // 50: ?giftPreview=1(확인용) — 순간 선물 반응 몸짓 id 를 이미 있는 몸짓으로 잠시 대신함(data/gifts.json preview). ver 0.5 = 진짜 모션이 오면 카드 그림을 다시 만들게
   if(qs.get("giftPreview")==="1")for(const id in GIFT.preview||{}){const src=GIFT.preview[id];if(id[0]==="_"||XS[id]||RIG.M[id])continue;
     if(XS[src])XS[id]={...XS[src],ver:.5};else if(RIG.M[src])RIG.M[id]=RIG.M[src];MNAME[id]=(MNAME[src]||src)+" (미리보기)"}
@@ -904,8 +904,10 @@ const Stage=(()=>{
     requestAnimationFrame(frame);
   }
   // XSTAGE 모션 파일 받기(한 번만). to 가 없으면 파일 끝까지
+  // 84-2 F-2: 같은 파일을 쓰는 몸짓(x19·x49 · x22·x38 · m14·x25)은 파일을 한 번만 받고 한 번만 풀어 같이 씀(xsUrl). 구간 값(to 등)은 몸짓마다 따로
+  const xsUrl={};
   function xsLoad(id){const x=XS[id];if(!x)return Promise.resolve(null);if(xsCache[id])return Promise.resolve(xsCache[id]);
-    return xsWait[id]||(xsWait[id]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new WeakMap();if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}).catch(()=>{delete xsWait[id];return null}))}
+    return xsWait[id]||(xsWait[id]=(xsUrl[x.url]||(xsUrl[x.url]=fetch(x.url).then(r=>r.json()).then(d=>{d.al=new WeakMap();return d}).catch(()=>{delete xsUrl[x.url];return null}))).then(d=>{if(!d){delete xsWait[id];return null}if(x.to==null||x.to>d.duration)x.to=d.duration;xsCache[id]=d;return d}))}
   // 39: 미리 받기 줄. xsQueue = 차례로 받기(앞 것이 끝나야 다음). xsRest = 나머지 모션을 쉬는 틈에 하나씩(한 번만 시작).
   // 대화 화면이 뜬 뒤 부름. wait() 가 참이면(첫 만남 연출 중 등) 기다렸다가. 시간 값 data/config.json preload
   let xsQ=Promise.resolve(),restOn=false;
@@ -917,7 +919,7 @@ const Stage=(()=>{
     ready.then(()=>xsQ).then(()=>setTimeout(go,P.restDelayMs!=null?P.restDelayMs:1500))}
   // 25: skip [a,b] = 파일의 a~b초를 건너뜀(거의 멈춘 구간을 줄일 때), repeat = 구간을 n번 되풀이(짧은 걷기 한 바퀴 등). 재생 길이 = (to−from−건너뛴 길이) × repeat
   const xsCyc=(x,fd)=>(x.to!=null?x.to:(fd!=null?fd:2))-x.from-(x.skip?x.skip[1]-x.skip[0]:0);
-  const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.repeat||1)};
+  const xsDur=id=>{const x=XS[id];return xsCyc(x,xsCache[id]?xsCache[id].duration:null)*(x.back?2:1)*(x.repeat||1)};  // 84-2: back = 구간을 끝까지 재생한 뒤 거꾸로 처음까지(물러섰다 같은 발 디딤으로 제자리로)
   // 45-1 손가락: x·y·z 정수(scale 배)만 담겨 있어 w 를 되살려 Float32Array 로 한 번 풀어 둠(d.fq). hold = 내내 같은 자세(한 프레임)
   function xsFq(d){if(d.fq)return d.fq;const F=d.fingers,s=F.scale||100,fq={};
     const un=(a,o,i)=>{const x=a[i*3]/s,y=a[i*3+1]/s,z=a[i*3+2]/s;o[i*4]=x;o[i*4+1]=y;o[i*4+2]=z;o[i*4+3]=Math.sqrt(Math.max(0,1-x*x-y*y-z*z))};
@@ -969,7 +971,7 @@ const Stage=(()=>{
   // 34: win.turn = 모션 전체를 세로축으로 돌리는 각도(도, + = 위에서 볼 때 시계 반대). 원본 배우가 옆을 보고 찍힌 모션(입 가리고 웃기)을 정면으로
   // 43: skipBlend = 건너뛰기(skip) 이음매 앞 몇 초 동안 건너뛴 뒤 자세와 섞음(이음매에서 툭 튀지 않게). damp = 뼈마다 모션을 따르는 몫(0~1, 나머지는 기본 자세. 고개를 너무 숙이는 모션 등)
   function xsApply(d,mt,win){
-    const cyc=xsCyc(win,d.duration),dur=cyc*(win.repeat||1);let tt=win.from+(win.repeat>1?mt%cyc:mt),t2=0,kb=0;
+    const cyc0=xsCyc(win,d.duration),cyc=win.back?cyc0*2:cyc0,dur=cyc*(win.repeat||1);let lm=win.repeat>1?mt%cyc:mt;if(win.back&&lm>cyc0)lm=cyc-lm;let tt=win.from+lm,t2=0,kb=0;  // 84-2: back = 끝에서 거꾸로
     if(win.skip){const SL=win.skip[1]-win.skip[0],sb=win.skipBlend||0;if(tt>=win.skip[0])tt+=SL;else if(sb>0&&tt>win.skip[0]-sb){const k=(tt-win.skip[0]+sb)/sb;kb=k*k*(3-2*k);t2=tt+SL}}
     const a=xsAlign(d),N=d.frames,f=tt*d.fps,i=Math.min(N-1,Math.floor(f)),j=Math.min(N-1,i+1),u=f-i;
     const f2=t2*d.fps,i2=Math.min(N-1,Math.floor(f2)),j2=Math.min(N-1,i2+1),u2=f2-i2;
@@ -990,7 +992,7 @@ const Stage=(()=>{
     if(win.damp)for(const k in xsTW)delete xsTW[k];
     if(d.fingers)xsFingers(d,a,tt,t2,kb,tn,w);
     const h=d.hip,h1=k=>h[i*3+k]+(h[j*3+k]-h[i*3+k])*u,ip=k=>(kb?h1(k)+(h[i2*3+k]+(h[j2*3+k]-h[i2*3+k])*u2-h1(k))*kb:h1(k))*a.hipH*w;
-    if(!win.inPlace){const hx=ip(0),hz=ip(2),c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);
+    if(!win.inPlace){const hs=win.hipScale!=null?win.hipScale:1,hx=ip(0)*hs,hz=ip(2)*hs,c=Math.cos(tn),sn=Math.sin(tn);md.root.position.x+=hx*c+hz*sn;md.root.position.z+=hz*c-hx*sn}md.root.position.y+=ip(1);  // 84-2 D-7: hipScale = 앞뒤·좌우 골반 이동을 이 몫만(그 몸짓만, 기본 1)
   }
   // 카메라 구도 (data/config.json camera): normal 상반신 · motion 허벅지 중간 · full 전신(춤)
   // 구도 = 모델(키 1.72m로 맞춤)에서 보여 줄 위·아래 높이(top·bottom)와 최소 너비(width), 카메라를 눈높이보다 올리는 값(lift).
