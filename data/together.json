@@ -1,0 +1,102 @@
+{
+  "_설명": "84 함께하기(together.js). 서아 본편 대화방 ＋ 기능판 「함께하기」 → 몰입형 전체 화면(위 3D · 아래 행동 버튼). 모든 반응은 앱 안에서만(서버·호감·대화 횟수·대화 기록·다이아·카드·서사 이벤트 변화 없음). 화면 문구는 data/ui.json together",
+  "_stages": "관계 단계(본편 S.story.stage)별로 쓸 수 있는 행동 id(이 순서대로 버튼). 여기 없는 단계(1 경계 · 5 위기·엇갈림)는 함께하기 잠금. freeStage 이상이면 아래에 「교감 / 모션」 탭",
+  "stages": {
+    "2": ["still", "tease"],
+    "3": ["still", "tease", "look", "eye", "hand"],
+    "4": ["still", "tease", "look", "eye", "hand", "close"],
+    "6": ["still", "tease", "look", "eye", "hand", "close"]
+  },
+  "freeStage": 6,
+  "_camera": "함께하기 전용 구도(모델 키 1.72m 기준 비율). frame top·bottom = 보여 줄 위·아래 높이(머리 위 여백 ~ 무릎 근처), width = 최소 너비, lift = 카메라를 가운데보다 올리는 몫. fov = 함께하기 동안 카메라 화각(끝나면 원래 값). focus = 가까이 다가가기 때 이 높이(가슴·얼굴 쪽)를 중심으로 다가감. rootFollow = 몸짓이 서아를 앞뒤로 옮길 때(다가가기 m12) 카메라가 따라 물러나는 몫(1 = 완전히, 0 = 안 따라감 → 몸짓 이동과 카메라 다가감이 겹쳐 너무 가까워지지 않게). topRatio = 화면에서 위 3D 칸 높이 몫",
+  "camera": {
+    "frame": { "top": 1.07, "bottom": 0.27, "width": 0.52, "lift": 0.02 },
+    "fov": 30,
+    "focus": 0.8,
+    "rootFollow": 0.7
+  },
+  "topRatio": 0.6,
+  "_timing": "cooldownMs = 행동이 끝난 뒤 다음 행동을 받기 전 짧은 쉼. loadTimeoutMs = 모션 파일을 이 시간 안에 못 받으면 실패로 보고 기본 자세로. stillMs = 「가만히 있기」로 돌아가는 시간. faceOnlyMs = 쓸 모션이 없을 때(장소 제한 등) 표정만으로 반응하는 길이. blendMs = 행동 몸짓·기본 자세로 넘어갈 때 섞는 시간",
+  "cooldownMs": 500,
+  "loadTimeoutMs": 8000,
+  "stillMs": 900,
+  "faceOnlyMs": 2600,
+  "blendMs": 450,
+  "_idleFace": "단계별 기본 표정(가만히 있기·행동이 끝난 뒤). 2 평온·조금 도도 · 3 부드럽게 · 4 편안하지만 서로 의식 · 6 다정하게",
+  "idleFace": { "2": "neutral", "3": "soft", "4": "soft", "6": "soft" },
+  "_auto": "자동 교감(C-1). 진입 뒤 firstMs 동안 아무 행동이 없으면 첫 자동 몸짓, 그 뒤 자동 몸짓이 끝난 때부터 gapMs[0]~gapMs[1] 사이 무작위 간격. motions 중 지금 장소에서 쓸 수 있는 것(직전 것 제외) 또는 faceOnlyChance 확률로 표정만(faces[단계] 중 기본 표정이 아닌 것, faceMs 동안). 쓸 모션이 없으면 표정만. 대사·카드·기록 없음",
+  "auto": {
+    "firstMs": 12000,
+    "gapMs": [12000, 20000],
+    "motions": ["m07", "c02"],
+    "faceOnlyChance": 0.4,
+    "faceMs": 3200,
+    "faces": {
+      "2": ["neutral", "smirk"],
+      "3": ["soft", "shy"],
+      "4": ["soft", "shy"],
+      "6": ["soft", "joy"]
+    }
+  },
+  "_actions": "행동별·단계별 연출. icon = 버튼 아이콘 이름(together.js). by[단계] = 그 단계 연출. steps = 행동 시작 기준 at(ms)에 할 일: f 표정 · gaze(\"away\" 시선을 옆으로 · \"camera\" 흔들림 없이 나를 봄 · null 평소 시선, 수줍음 표정·시선 피하기 몸짓이면 저절로 피함) · pick 몸짓 후보 [{m 몸짓, f 표정}](지금 장소에서 쓸 수 있는 것 중 직전 것 제외 무작위, 하나도 없으면 첫 후보의 표정만 faceOnlyMs) · cam \"in\" 카메라가 camIn 몫만큼 camInMs 동안 다가감(행동이 끝나면 camBackMs 동안 돌아옴, 「동작 줄이기」면 움직이지 않음). ms = 행동 최소 길이(몸짓이 있으면 실제 재생 시작부터 몸짓 길이가 끝날 때까지와 비교해 긴 쪽)",
+  "actions": {
+    "still": {
+      "icon": "still",
+      "by": {
+        "2": { "still": true, "steps": [{ "at": 0, "f": "neutral", "gaze": null }] },
+        "3": { "still": true, "steps": [{ "at": 0, "f": "soft", "gaze": null }] },
+        "4": { "still": true, "steps": [{ "at": 0, "f": "soft", "gaze": null }] },
+        "6": { "still": true, "steps": [{ "at": 0, "f": "soft", "gaze": null }] }
+      }
+    },
+    "tease": {
+      "icon": "tease",
+      "by": {
+        "2": { "steps": [{ "at": 0, "pick": [{ "m": "m20", "f": "smirk" }] }] },
+        "3": { "steps": [{ "at": 0, "pick": [{ "m": "m20", "f": "wink" }, { "m": "m03", "f": "fun" }] }] },
+        "4": { "steps": [{ "at": 0, "pick": [{ "m": "m01", "f": "fun" }, { "m": "m05", "f": "shy" }] }] },
+        "6": { "steps": [{ "at": 0, "pick": [{ "m": "m01", "f": "joy" }, { "m": "m20", "f": "wink" }] }] }
+      }
+    },
+    "look": {
+      "icon": "look",
+      "by": {
+        "3": { "ms": 3800, "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1100, "f": "soft", "gaze": "camera" }, { "at": 1600, "f": "shy", "gaze": null }] },
+        "4": { "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1000, "f": "soft", "gaze": "camera" }, { "at": 1400, "gaze": null, "pick": [{ "m": "c02", "f": "shy" }] }] },
+        "6": { "ms": 4200, "steps": [{ "at": 0, "f": "soft", "gaze": "away" }, { "at": 1000, "f": "soft", "gaze": "camera" }, { "at": 1700, "f": "joy", "gaze": "camera" }] }
+      }
+    },
+    "eye": {
+      "icon": "eye",
+      "by": {
+        "3": { "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 1000, "gaze": null, "pick": [{ "m": "m05", "f": "shy" }] }] },
+        "4": { "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 2000, "gaze": null, "pick": [{ "m": "m05", "f": "flustered" }, { "m": "m05", "f": "shy" }] }] },
+        "6": { "ms": 3600, "steps": [{ "at": 0, "f": "soft", "gaze": "camera" }, { "at": 1400, "f": "joy", "gaze": "camera" }, { "at": 3000, "f": "soft", "gaze": "camera" }] }
+      }
+    },
+    "hand": {
+      "icon": "hand",
+      "by": {
+        "3": { "steps": [{ "at": 0, "f": "shy", "gaze": "away" }, { "at": 900, "gaze": null, "pick": [{ "m": "m11", "f": "shy" }] }] },
+        "4": { "steps": [{ "at": 0, "gaze": null, "pick": [{ "m": "m11", "f": "soft" }] }] },
+        "6": { "steps": [{ "at": 0, "gaze": "camera", "pick": [{ "m": "m11", "f": "joy" }, { "m": "m11", "f": "soft" }] }] }
+      }
+    },
+    "close": {
+      "icon": "close",
+      "camIn": 0.12,
+      "camInMs": 600,
+      "camBackMs": 800,
+      "by": {
+        "4": { "steps": [{ "at": 0, "cam": "in", "gaze": null }, { "at": 400, "pick": [{ "m": "m03", "f": "flustered" }, { "m": "m06", "f": "shy" }] }] },
+        "6": { "steps": [{ "at": 0, "cam": "in", "gaze": "camera", "f": "soft" }, { "at": 600, "pick": [{ "m": "m12", "f": "soft" }, { "m": "m12", "f": "joy" }] }] }
+      }
+    }
+  },
+  "_free": "연인 자유 모션(D). 모션 탭 = 가진 무빙 카드 중 아래를 모두 만족하는 것: 서아 카드 · 대화 카드(source chat) 또는 packMotions 에 있는 카드팩 몸짓 · 모션 id 가 실제 재생 가능 · 지금 장소·이야기 줄기에서 허용(placeOkMotion) · 전용 몸짓 아님(data/motions.json only, 단 packMotions 는 허용 목록이라 통과) · data/seoa_story.json ban·extraMotions.move(걷기)·episodeOnly 아님 · exclude 아님. 선물·순간 선물·포즈·셀카·온보딩·프롤로그·답장 대기·걷기 카드는 빠짐. 카드의 표정·속도(Cards.motionOf) 그대로 재생",
+  "free": {
+    "packMotions": ["x32", "x34"],
+    "_exclude": "x17 첫 만남(프롤로그 전용) · x33 카드팩 춤(이번 자유 모션에서 뺌) · m23 옥상 춤(서사 이벤트)",
+    "exclude": ["x17", "x33", "m23"]
+  }
+}

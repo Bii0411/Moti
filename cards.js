@@ -49,7 +49,7 @@ const Cards=(()=>{
   let viewOn=()=>false;  // 카드 확대 중(아래 확대 부분이 채움)
   // 대화 무대가 바쁜지: 몸짓 재생 중이거나 끝난 지 quietMs 안·해금 연출 대기·촬영·서아 사진 만드는 중·카드 확대 재생 중·사진 화면
   const inRoom=()=>typeof curTab!=="undefined"&&curTab==="chat"&&S.room==="seoa";
-  const busyNow=()=>!!(Stage.recentMotion(inRoom()?(C().quietMs!=null?C().quietMs:1200):0)||(typeof unlockBusy!=="undefined"&&(unlockBusy||unlockQ.length))||(typeof Cam!=="undefined"&&Cam.isOpen())||(typeof SeoaPhoto!=="undefined"&&SeoaPhoto.isSending())||viewOn()||(typeof busy!=="undefined"&&busy&&inRoom()));
+  const busyNow=()=>!!(Stage.recentMotion(inRoom()?(C().quietMs!=null?C().quietMs:1200):0)||(typeof unlockBusy!=="undefined"&&(unlockBusy||unlockQ.length))||(typeof Cam!=="undefined"&&Cam.isOpen())||(typeof SeoaPhoto!=="undefined"&&SeoaPhoto.isSending())||viewOn()||(typeof busy!=="undefined"&&busy&&inRoom())||(typeof Together!=="undefined"&&Together.isOn()));  // 84: 함께하기 중엔 카드 그림을 만들지 않고 기다림
   // 다음에 만들 카드: 컬렉션 화면에 보이는 카드 → 그다음 기다린 차례대로
   function next(now){const ready=queue.filter(q=>now>=q.at);if(!ready.length)return null;
     const A=typeof curTab!=="undefined"&&curTab==="album"&&document.getElementById("album");
@@ -187,7 +187,8 @@ const Cards=(()=>{
     if(!r.width||r.bottom<app.top||r.top>app.bottom)return null;
     return `translate(${r.left-app.left-box.l}px,${r.top-app.top-box.t}px) scale(${r.width/box.w},${r.height/box.h})`}
   const cellOf=id=>document.querySelector(`#album .mc[data-f="${id}"]`);
-  function open(id,ids){build();vIds=ids&&ids.length?ids.slice():[id];vi=vIds.indexOf(id);if(vi<0){vIds.unshift(id);vi=0}
+  function open(id,ids){if(typeof Together!=="undefined")Together.close();  // 84: 렌더러를 둘이 같이 쓰지 않게
+    build();vIds=ids&&ids.length?ids.slice():[id];vi=vIds.indexOf(id);if(vi<0){vIds.unshift(id);vi=0}
     layout();const c=$v(".cvcard"),ms=V().zoomMs||300,tf=fromTf(cellOf(id));
     vOn=true;vEl.setAttribute("aria-hidden","false");document.querySelector(".app").classList.add("cvon");  // 38: 뒤 목록 카드 빛은 멈춤
     c.style.transition="none";c.style.transformOrigin="0 0";c.style.transform=tf||"translateY(24px) scale(.92)";vEl.classList.add("on");void c.offsetWidth;

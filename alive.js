@@ -65,7 +65,7 @@ const Alive=(()=>{
     if(o.avert&&!st.wasAvert)st.avSide=Math.random()<.5?-1:1;
     st.wasAvert=!!o.avert;
     if(o.avert){ty+=st.avSide*rad(g.avertYawDeg,30);tp+=rad(g.avertPitchDeg,8)}
-    else{
+    else if(!o.steady){  // 84: steady(함께하기 눈 맞추기·바라보기) = 흔들림 없이 카메라를 봄. 위·아래·좌우 한계는 아래 그대로
       // 사람처럼 2~5초마다 아주 작게 시선이 흔들렸다 돌아옴
       const j=g.jitter||{};
       if(t>st.jitNext){const a=rad(j.deg,2.5);st.jitY=(Math.random()*2-1)*a;st.jitP=(Math.random()*2-1)*a*.6;
@@ -198,7 +198,7 @@ const Alive=(()=>{
       }
     }
   }
-  // 매 프레임. now(ms), o={cam,mid,avert,big}
+  // 매 프레임. now(ms), o={cam,mid,avert,big,steady}
   function update(now,o){
     if(!md)return;
     const t=now/1000,dt=last?Math.min(1,t-last):STEP;last=t;
