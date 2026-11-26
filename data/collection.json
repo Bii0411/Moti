@@ -909,10 +909,12 @@
     },
     "face": "soft",
     "faceById": {
-      "x17": "neutral"
+      "x17": "neutral",
+      "m01": "joy"
     },
     "momentById": {
       "x17": 34,
+      "m01": 25,
       "m07": 35,
       "c02": 18,
       "m06": 55,
