@@ -166,7 +166,8 @@ const SeoaPhoto=(()=>{
     b.classList.remove("wait");b.innerHTML=`<img src="${Photos.thumbUrl(p)}" alt="">`}
   // 32: 대화 기록의 그 시각 자리에 끼워 넣음(addMsg 는 맨 끝에 붙임). 대화방에 있으면 읽은 것으로
   function insertMsg(m,cid){const L=chatOf(cid);if(L.some(x=>x.pid&&x.pid===m.pid))return;let i=L.length;while(i>0&&(L[i-1].at||0)>m.at)i--;L.splice(i,0,m);
-    if(L.length>60)S.chats[cid]=L.slice(-60);if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
+    {const L2=trimChat(cid,L);if(L2!==L)S.chats[cid]=L2}  // 81: 보관량은 index.html trimChat 그대로(서아 실제 대화 100개·전체 300줄, 다른 캐릭터 60줄)
+    if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
   // 말풍선 옆 시각: 오늘이면 「오후 11:42」, 어제면 「어제 오후 11:42」, 그 전이면 「11월 22일 오후 11:42」(문구 data/ui.json seoaPhoto)
   function timeLabel(t){const d=new Date(t),h=d.getHours(),hm=T("time",{ap:T(h<12?"am":"pm"),h:h%12||12,mm:String(d.getMinutes()).padStart(2,"0")});
     const day=x=>{const y=new Date(x);y.setHours(0,0,0,0);return y.getTime()},k=Math.round((day(Date.now())-day(t))/864e5);
