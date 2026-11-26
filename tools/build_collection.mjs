@@ -27,7 +27,7 @@ const push = (id, from) => {
 for (const k of Object.keys(story.unlock.stage).sort()) for (const id of story.unlock.stage[k].motions) push(id, { stage: +k });
 for (const sec of ["flag", "event"]) for (const k in story.unlock[sec]) for (const id of story.unlock[sec][k].motions) push(id, { sec, key: k });
 
-const gift = col.items.filter(x => x.source === "gift" || x.source === "pack" || x.source === "moment");  // 49: 카드 팩(pack) + 보류 선물(gift) · 50: 순간 선물 반응 카드(moment)
+const gift = col.items.filter(x => x.source === "gift" || x.source === "pack" || x.source === "moment" || x.source === "free");  // 78: 촬영 전용 포즈 카드(pose, 팩 p02~p14 · 무료 p01)도 그대로  // 49: 카드 팩(pack) + 보류 선물(gift) · 50: 순간 선물 반응 카드(moment)
 // 31: only 가 있는 칸 = 단계 해금이 아니라 정해진 연출에서만 얻는 칸(x17 「첫 만남」 = only "firstMeet"). 다시 만들어도 그대로 둠(대화 칸 뒤)
 const only = col.items.filter(x => x.only && !seen.has(x.id));
 // 44: hold(보류) 칸 = 지금은 얻을 수 없어 숨긴 칸(m23 바디웨이브 댄스, 옥상 춤 보류). ban·unlock 에서 빠져도 그대로 두고 번호를 지킴.
