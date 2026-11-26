@@ -2104,7 +2104,7 @@ const mEmo=id=>(DATA.motions.motions[id]||{}).emo||"";
 //   clash 에 든 표정(슬픔·화남 등 웃음과 부딪치는 감정)이면 그 몸짓을 쓰지 않음(drop), 그 밖에는 null(서버 표정 그대로)
 function motionFit(mid,face){const D=DATA.motions||{},x=mid&&(D.motionFace||{})[mid];if(!x)return null;
   if(face&&(x.clash||[]).includes(face))return{drop:true};
-  const weak=x.weak||D.motionFaceWeak||["neutral"];if(face&&FACE[face]&&!weak.includes(face))return null;
+  const weak=x.weak||D.motionFaceWeak||["neutral"];if(face&&FACE[face]&&!x.always&&!weak.includes(face))return null;  // 86-1: always = 서버 표정과 상관없이 몸짓 표정(x31 반지 반응)
   const fs=Array.isArray(x.seq)?x.seq.filter(s=>s&&FACE[s.f]):[];
   const f=fs.length?fs[0].f:FACE[x.face]?x.face:null;if(!f)return null;
   return{f,fs:fs.length?fs:null,td:x.talkDamp!=null?+x.talkDamp:null}}
@@ -2269,6 +2269,7 @@ async function send(text,o){
   if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
   // 84-2 A-3: 답장 몸짓에 맞춘 표정(선물 반응·포즈 부탁·사진 제안의 정해진 표정은 그대로). 웃음과 부딪치는 감정이면 그 몸짓을 빼고 표정만(결정적 순간은 몸짓 유지)
   let mfit=null;if(mid&&!giftMid&&!poseX&&!pAsk){mfit=motionFit(mid,v.face);if(mfit&&mfit.drop){mfit=null;if(!keyM){MOTION_LOG.push({drop:mid,face:v.face});mid=null}}}
+  else if(giftMid&&(((DATA.motions||{}).motionFace||{})[giftMid]||{}).gift){mfit=motionFit(giftMid,v.face);if(mfit&&mfit.drop)mfit=null}  // 86-1: 선물 반응 중 motionFace 에 gift 가 있는 몸짓(x31 반지)만 몸짓 시각에 맞춘 표정 흐름. 다른 선물 반응은 서버 표정 그대로
   if(mfit)v.face=mfit.f;
   const srvOk=src0==="server";  // 80: 실제 서버 정상 답장(특별 에피소드에서 아래가 v.src 를 바꾸기 전 출처). 서버 v2 를 쓰다 못 받은 답장은 bad(판정 recent 에서 뺌)
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{}),...(v.fb&&!o&&!poseId&&(DATA.config.fallbackReply||{}).retry?{fb:1,retry:text}:{}),...(!srvOk&&serverVer()===2&&!noServer()?{bad:1}:{})};  // 91: 예비 지문 + 다시 보낼 내 말
@@ -2549,7 +2550,16 @@ const Demo=(()=>{
     return `<h4>${esc(T("preview.title"))} <small>${esc(T("preview.note"))}</small></h4><div class="mlist">${pvIds().map(id=>{const fs=(P[id]||{}).faces||[],cf=pvCur(id),d=Stage.xsLoaded().includes(id)||!XS[id]||XS[id].to!=null?T("preview.dur",{s:Stage.dur(id).toFixed(1)}):T("preview.durWait");
       return `<div class="pvrow"><div class="pvh"><b>${id} ${esc(MNAME[id]||id)}</b><small>${esc(d)}${pvLast[id]!=null?" · "+esc(T("preview.last",{s:pvLast[id].toFixed(1)})):""}</small></div>
         <div class="row">${[...(pvAuto(id)?["auto"]:[]),...fs.filter(f=>FACE[f]),""].map(f=>B("pvFace",esc(f==="auto"?T("preview.auto"):f?(FACEKO[f]||f):T("preview.noFace")),{v:id+":"+f,on:cf===f})).join("")}</div>
-        <div class="row">${B("pvChat",esc(T("preview.chat")),{v:id})}${B("pvTogether",esc(T("preview.together")),{v:id})}</div></div>`}).join("")}</div>`}
+        <div class="row">${B("pvChat",esc(T("preview.chat")),{v:id})}${B("pvTogether",esc(T("preview.together")),{v:id})}${pvGiftOf(id)?B("pvGift",esc(T("preview.gift")),{v:id})+(Moment.cardOf(pvGiftOf(id))?B("pvCard",esc(T("preview.card")),{v:id}):""):""}</div></div>`}).join("")}</div>`}
+  // 86-1: 순간 선물 반응 몸짓(x31 반지)이면 「선물 흐름」(선물 그림이 떠올랐다 사라진 뒤 실제 선물 반응처럼 몸짓·표정 흐름)과 「카드 그림」(그 선물 카드의 대표 장면·표정으로 그림을 만들어 보여 주고 카드 표정으로 몸짓 재생).
+  //   둘 다 보기만 함: 다이아·선물 기록·순간 선물·관계·카드 획득 기록·최근 몸짓에 안 들어감(quiet)
+  const pvGiftOf=id=>GIFTS.find(g=>g.kind==="moment"&&g.reaction===id)||null;
+  async function pvGift(id){const g=pvGiftOf(id);if(!g)return;cancel();toChat();setOpen(false);await Stage.xs(id);const picAt=performance.now();burst(g.icon||g.e);
+    const w=(DATA.config.giftPicMs||1000)-(performance.now()-picAt);if(w>0)await new Promise(r=>setTimeout(r,w));
+    const x=((DATA.motions||{}).motionFace||{})[id]||{},fit=x.gift?motionFit(id,null):null;if(fit){Stage.setFace(fit.f);Stage.play(id,{quiet:true,faceSeq:fit.fs,talkDamp:fit.td})}else Stage.play(id,{quiet:true});pvMeasure(id)}
+  async function pvCard(id){const g=pvGiftOf(id),c=g&&Moment.cardOf(g);if(!c)return;cancel();toChat();setOpen(false);const C=COL.card||{},mo=Cards.motionOf(c.id);await Stage.xs(id);
+    const r=await SeoaPhoto.make({card:true,mid:mo.m,face:mo.f,K:Cards.frameOf(mo.m),scene:C.defaultScene||0,outfit:C.defaultOutfit||"ops",image:C.image,at:(C.momentById||{})[c.id]});
+    const u=URL.createObjectURL(r.full);Mini.open(`${c.id} ${c.name}`,`<img src="${u}" alt="" style="width:100%;border-radius:12px;display:block">`,()=>{});Stage.setFace(mo.f);Stage.play(mo.m,{quiet:true})}
   // 실제 재생 길이: 재생이 시작된 순간(파일을 다 받은 뒤)부터 그 몸짓이 끝날 때까지 잼
   function pvMeasure(id){const t0=performance.now();let st=null;const go=()=>{const p=Stage.playing();if(p===id&&st==null)st=performance.now();
     if(st!=null&&p!==id){pvLast[id]=(performance.now()-st)/1000;if(open)render();return}if(performance.now()-t0<30000)setTimeout(go,50)};go()}
@@ -2730,6 +2740,8 @@ const Demo=(()=>{
     if(a==="pvFace"){const i=(v||"").indexOf(":");pvFace[v.slice(0,i)]=v.slice(i+1);return render()}  // 84-1 신규 모션 검수
     if(a==="pvChat")return pvChat(v);
     if(a==="pvTogether")return pvTogether(v);
+    if(a==="pvGift")return pvGift(v);  // 86-1
+    if(a==="pvCard")return pvCard(v);
     Scenes.click(a,v);
   }
   function init(){
