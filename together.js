@@ -26,8 +26,11 @@ const Together=(()=>{
   const now=()=>performance.now();
 
   let root=null,on=false,tok=0,tab="act",act=null,cool=0,autoT=null,autoAct=null,chkI=null,lastAuto=null,lastStage=0,lastScene=-1,lastFree="",coolT=null;
-  const lastPick={};let timers=[];
-  const later=(f,ms)=>{const t=setTimeout(f,Math.max(0,ms||0));timers.push(t);return t};
+  const lastPick={};const timers=new Set();
+  // 84-1 E-4: 잡아 둔 타이머는 끝나거나(drop) 취소되면 목록에서 빠짐(오래 써도 쌓이지 않게). 닫을 때 남은 것 모두 취소
+  const later=(f,ms)=>{const t=setTimeout(()=>{timers.delete(t);f()},Math.max(0,ms||0));timers.add(t);return t};
+  const drop=t=>{if(t!=null){clearTimeout(t);timers.delete(t)}};
+  const firstMs=()=>+((D().auto||{}).firstMs)||12000;
   // 카메라 다가가기(가까이 다가가기): k = 거리 배율(1 = 기본 구도). from→to 를 ms 동안 부드럽게
   const cz={k:1,from:1,to:1,t0:0,ms:0};
   const log=[];const note=x=>{log.push({at:Math.round(now()),...x});if(log.length>40)log.shift()};
@@ -37,7 +40,15 @@ const Together=(()=>{
   const actsOf=n=>((D().stages||{})[n])||[];
   const freeOn=(n=stageN())=>n>=(+D().freeStage||6)&&actsOf(n).length>0;
   const idleFace=(n=stageN())=>((D().idleFace||{})[n])||"soft";
-  const okMotion=m=>!!m&&typeof canPlay==="function"&&canPlay(m)&&placeOkMotion(m);
+  // 84-1 E-3: 쓰임새마다 권한을 나눔. baseOk = 재생 가능 · 장소(placeBan·placeOnly) · 에피소드 전용(episodeOnly)
+  const baseOk=m=>!!m&&typeof canPlay==="function"&&canPlay(m)&&placeOkMotion(m);
+  const onlyOf=m=>((((typeof DATA!=="undefined"&&DATA.motions)||{}).motions||{})[m]||{}).only||"";
+  // 교감·자동(actOk): 지금 단계 행동 데이터·자동 목록에 적힌 후보만 여기까지 옴. 일반 대화 몸짓은 해금된 것(unlockedIds = 단계·판정 해금, ban·only 제외),
+  //   함께하기 전용 몸짓을 새로 만들면 only "together" 로 둠. 그 밖의 전용(preview·gift·pose·wait·onboarding·selfie·pack·walk 등)은 막음
+  const actOk=m=>{if(!baseOk(m))return false;const o=onlyOf(m);if(o)return o==="together";return typeof unlockedIds!=="function"||unlockedIds().includes(m)};
+  // 자유 모션(freeMotionOk): 가진 카드 조건·카드팩 허용 목록은 freeOk 가 봄. 여기서는 재생·장소 + 검수 전용 차단
+  const freeMotionOk=m=>baseOk(m)&&onlyOf(m)!=="preview";
+  const okFor=(m,kind)=>kind==="preview"?typeof canPlay==="function"&&canPlay(m):kind==="free"?freeMotionOk(m):actOk(m);
 
   // 들어갈 수 없는 이유(없으면 ""). UI 버튼·직접 호출 모두 이것을 지남(C-6)
   function why(){
@@ -102,7 +113,7 @@ const Together=(()=>{
       b.classList.toggle("tgon",mine);b.classList.toggle("tgwait",lock&&!mine);b.setAttribute("aria-disabled",lock?"true":"false")});
     root.querySelectorAll(".tgld").forEach(x=>{x.textContent=""})}
   function loadingUI(my,v){if(act!==my||!root)return;const b=root.querySelector(`.tga[data-act="${my.id}"] .tgld`);if(b&&v)b.textContent=T("loading")}
-  function setTabIn(k){if(!freeOn()||(k!=="act"&&k!=="motion")||k===tab)return;stopAct("tab");tab=k;render()}
+  function setTabIn(k){if(!freeOn()||(k!=="act"&&k!=="motion")||k===tab)return;tab=k;settle("tab",true);render()}  // 84-1 E-1: 행동·자동 교감 모두 정리하고 자동은 처음부터 다시 셈
 
   // ── 3D 카메라(빌린 그림판, 매 프레임) ──
   function tick(t,w,h){if(!on||!w||!h)return;const C=D().camera||{},F=C.frame||{top:1.07,bottom:.27,width:.52,lift:.02},cam=Stage.three().cam;
@@ -132,7 +143,7 @@ const Together=(()=>{
     note({open:stageN(),scene:S.scene})}
   // o.yielded = 다른 화면이 그림판을 빌리려 해서 닫음(그 화면이 곧 몸짓·표정을 정하므로 여기서 기본 자세·표정을 건드리지 않음)
   function close(o){if(!on)return;o=o||{};on=false;tok++;
-    timers.forEach(clearTimeout);timers=[];clearTimeout(autoT);autoT=null;clearTimeout(coolT);clearInterval(chkI);chkI=null;act=null;autoAct=null;cool=0;cz.k=cz.from=cz.to=1;cz.ms=0;
+    timers.forEach(clearTimeout);timers.clear();clearTimeout(autoT);autoT=null;drop(coolT);coolT=null;clearInterval(chkI);if(autoAct)autoAct.dead=true;chkI=null;act=null;autoAct=null;cool=0;cz.k=cz.from=cz.to=1;cz.ms=0;
     Stage.gaze(null);Stage.solo(false);
     if(Stage.lentTo()==="together")Stage.release();  // 그림판·화각·크기·360도 배경을 대화 무대로(32-A 저장값)
     Stage.clearLast();  // 끝난 함께하기 몸짓을 촬영·카드 그림·자동 몸짓이 「직전 대화 몸짓」으로 보지 않게
@@ -142,20 +153,22 @@ const Together=(()=>{
     note({close:o.yielded?"yield":o.why||"back"})}
   function check(){if(!on)return;const w=stayWhy();if(w)return close({why:w});
     if(S.scene!==lastScene){place();Stage.pano.view(S.scene)}  // 장소가 바뀌면(시연 등) 배경도 같이
-    if(stageN()!==lastStage){stopAct("stage");render()}
+    if(stageN()!==lastStage){lastStage=stageN();settle("stage",true);render();preload()}  // 84-1 E-1: 허용된 단계끼리 바뀌어도 하던 것을 정리하고 새 단계 표정·후보로
     else if(tab==="motion"&&freeList().map(x=>x.id).join(",")!==lastFree&&!act)render()}
+  // 84-1 E-2: 뒤로 가면 하던 행동·자동 교감·불러오는 몸짓을 모두 정리(입력 잠금·카메라 확대가 남지 않게, 늦게 받은 몸짓이 재생되지 않게).
+  //   돌아오면 그 세션이 그대로인지(stayWhy) 보고 자동 교감을 처음(firstMs)부터 셈
   function onVis(){if(!on)return;
-    if(document.hidden){clearTimeout(autoT);autoT=null;note({hidden:1});return}  // 뒤로 가면 자동 몸짓 멈춤
-    const w=stayWhy();if(w)return close({why:w});if(!act&&!autoAct)scheduleAuto(+((D().auto||{}).firstMs)||12000)}  // 돌아오면 조건을 다시 보고 처음부터 셈
+    if(document.hidden){settle("hidden",false);note({hidden:1});return}
+    const w=stayWhy();if(w)return close({why:w});settle("visible",true)}
 
   // ── 행동 ──
   // 몸짓 파일 미리 받기(지금 단계 행동·자동 몸짓 후보). 받는 동안에도 행동은 누를 수 있음(받은 뒤 실제 시작 기준으로 끝을 셈)
   function preload(){const n=stageN(),ids=new Set();for(const id of actsOf(n)){const by=(((D().actions||{})[id]||{}).by||{})[n]||{};(by.steps||[]).forEach(s=>(s.pick||[]).forEach(v=>ids.add(v.m)))}
     ((D().auto||{}).motions||[]).forEach(m=>ids.add(m));ids.forEach(m=>{if(XS[m])Stage.xs(m)})}
-  const withTimeout=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
+  const withTimeout=(p,ms)=>{let t=null;return Promise.race([p,new Promise(r=>{t=setTimeout(()=>r(null),ms)})]).finally(()=>clearTimeout(t))};  // 84-1 E-4: 먼저 받으면 기다림 타이머를 바로 지움
   const faceSet=f=>{if(f&&FACE[f])Stage.setFace(f,"","solo")};
   // 몸짓 하나: 파일을 다 받은 뒤 실제로 재생을 시작한 순간부터 길이를 셈. 실패하면 null
-  async function playM(m,sp,mine,kind){if(!(kind==="preview"?canPlay(m):okMotion(m)))return null;  // 84-1: 시연 패널 검수 재생(preview)만 서비스 권한 대신 재생 가능 여부만 봄
+  async function playM(m,sp,mine,kind){if(!okFor(m,kind))return null;  // 84-1: kind = 교감·자동(없음) · free(자유 모션) · preview(시연 패널 검수: 재생 가능 여부만)
     if(XS[m]){const d=await withTimeout(Stage.xs(m),+D().loadTimeoutMs||8000);if(!mine())return null;if(!d)return null}
     if(!mine())return null;
     Stage.play(m,{quiet:true,solo:true,speed:sp>0?sp:1,blendMs:+D().blendMs||450});
@@ -182,12 +195,12 @@ const Together=(()=>{
     if(s.pick)pick(my,s.pick,id);
     my.left--;finishMaybe(my)}
   // 몸짓 후보 고르기: 지금 장소에서 쓸 수 있는 것, 둘 이상이면 직전 것(몸짓+표정) 빼고 무작위. 없으면 첫 후보 표정만
-  function pick(my,list,key){const ok=(list||[]).filter(v=>okMotion(v.m));
+  function pick(my,list,key){const ok=(list||[]).filter(v=>actOk(v.m));
     if(!ok.length){const f=(list||[])[0]&&list[0].f;faceSet(f);my.until=Math.max(my.until,now()+(+D().faceOnlyMs||2600));note({faceOnly:key});return}
     const kOf=v=>v.m+"|"+(v.f||""),fresh=ok.filter(v=>kOf(v)!==lastPick[key]),P=fresh.length?fresh:ok,v=P[Math.floor(Math.random()*P.length)];
     lastPick[key]=kOf(v);motion(my,v)}
   function motion(my,v){my.pending++;const lt=later(()=>loadingUI(my,true),300);
-    playM(v.m,v.sp,()=>alive(my),v.k).then(r=>{clearTimeout(lt);my.pending--;if(!alive(my))return;
+    playM(v.m,v.sp,()=>alive(my),v.k).then(r=>{drop(lt);my.pending--;if(!alive(my))return;
       if(!r){note({fail:v.m});Stage.toRest(+D().blendMs||450);faceSet(idleFace());Stage.gaze(null);my.until=now();busyUI();return finishMaybe(my,true)}  // 불러오기 실패: 기본 자세로, 입력 풀기
       faceSet(v.f);my.motion=r;my.until=Math.max(my.until,r.start+r.ms);busyUI();note({play:v.m,ms:Math.round(r.ms)});finishMaybe(my)})}
   // 남은 단계·불러오는 몸짓이 없으면 until 에 끝냄
@@ -195,19 +208,25 @@ const Together=(()=>{
   function end(my){if(!alive(my))return;act=null;
     Stage.gaze(null);faceSet(idleFace());
     if(my.cam){const a=(D().actions||{})[my.id]||{};camGo(1,+a.camBackMs||800)}
-    cool=now()+(+D().cooldownMs||500);busyUI();clearTimeout(coolT);coolT=later(busyUI,(+D().cooldownMs||500)+20);
+    cool=now()+(+D().cooldownMs||500);busyUI();drop(coolT);coolT=later(busyUI,(+D().cooldownMs||500)+20);
     note({end:my.id,ms:Math.round(now()-my.t0)});
-    scheduleAuto(+((D().auto||{}).firstMs)||12000)}
+    scheduleAuto(firstMs())}
   // 탭 바꾸기·단계 바뀜: 하던 행동을 끝냄(기본 자세·표정·카메라로)
-  function stopAct(why){if(!act)return;const my=act;act=null;my.endT=null;Stage.toRest(+D().blendMs||450);Stage.gaze(null);faceSet(idleFace());if(my.cam||cz.to!==1)camGo(1,0);cz.k=cz.to=1;cz.ms=0;cool=0;note({stop:why})}
+  function stopAct(why){if(!act)return;const my=act;act=null;drop(my.endT);my.endT=null;Stage.toRest(+D().blendMs||450);Stage.gaze(null);faceSet(idleFace());if(my.cam||cz.to!==1)camGo(1,0);cz.k=cz.to=1;cz.ms=0;cool=0;note({stop:why})}
 
   // ── 자동 교감(C-1) ──
+  // 84-1 E-1·E-2: 하던 것 모두 정리 — 사용자 행동(불러오는 몸짓 결과 무효) · 자동 교감(불러오는 것 포함) · 지금 몸짓 → 기본 자세·표정·시선·카메라.
+  //   again = 자동 교감을 처음(firstMs)부터 다시 셈(닫힌 화면·뒤로 간 화면이면 scheduleAuto 가 만들지 않음)
+  function settle(why,again){if(!on)return;const was=act?act.id:autoAct?"auto":Stage.playing();
+    stopAct(why);stopAuto();if(Stage.playing())Stage.toRest(+D().blendMs||450);
+    Stage.gaze(null);faceSet(idleFace());if(cz.to!==1||cz.k!==1){camGo(1,0);cz.k=cz.to=1;cz.ms=0}cool=0;busyUI();
+    if(was)note({settle:why,was});if(again)scheduleAuto(firstMs())}
   function scheduleAuto(ms){clearTimeout(autoT);autoT=null;if(!on||document.hidden)return;const my=tok;autoT=setTimeout(()=>{autoT=null;if(on&&my===tok)autoGo()},ms)}
   const gapMs=()=>{const g=(D().auto||{}).gapMs||[12000,20000];return g[0]+Math.random()*Math.max(0,g[1]-g[0])};
   function autoGo(){if(!on)return;if(act||now()<cool)return scheduleAuto(2000);
     const C=D().auto||{},n=stageN(),idle=idleFace(n),fs=((C.faces||{})[n]||[]).filter(f=>FACE[f]),fsx=fs.filter(f=>f!==idle);
-    const ms=(C.motions||[]).filter(okMotion),fresh=ms.filter(m=>m!==lastAuto),P=fresh.length?fresh:ms;
-    const me={tok,dead:false};autoAct=me;const mine=()=>on&&autoAct===me&&!me.dead&&me.tok===tok;
+    const ms=(C.motions||[]).filter(actOk),fresh=ms.filter(m=>m!==lastAuto),P=fresh.length?fresh:ms;
+    const me={tok,dead:false};autoAct=me;const mine=()=>on&&autoAct===me&&!me.dead&&me.tok===tok&&!document.hidden;  // 84-1 E-2: 뒤로 간 동안 받은 몸짓은 재생하지 않음
     const done=()=>{if(!mine())return;autoAct=null;faceSet(idleFace());scheduleAuto(gapMs())};
     if(!P.length||Math.random()<(C.faceOnlyChance!=null?+C.faceOnlyChance:.4)){  // 표정만
       const f=(fsx.length?fsx:fs)[Math.floor(Math.random()*(fsx.length?fsx:fs).length)];faceSet(f);note({auto:"face",f});later(done,+C.faceMs||3200);return}
@@ -222,15 +241,15 @@ const Together=(()=>{
     const pack=(F.packMotions||[]).includes(m);
     if(!(x.source==="chat"&&!x.pose&&!x.play)&&!(x.source==="pack"&&pack))return false;  // 대화 카드 또는 카드팩 허용 목록만(선물·순간 선물·포즈·연출 카드 빠짐)
     if((F.exclude||[]).includes(m)||(F.exclude||[]).includes(x.id))return false;
-    const M=(DATA.motions.motions||{})[m]||{};if(M.only&&!pack)return false;  // 선물·포즈·셀카·온보딩·프롤로그·답장 대기·걷기 전용
+    const M=(DATA.motions.motions||{})[m]||{};if(M.only==="preview")return false;if(M.only&&!pack)return false;  // 선물·포즈·셀카·온보딩·프롤로그·답장 대기·걷기 전용 · 84-1 검수 전용은 팩 목록에 있어도 막음
     const ST=DATA.story||{},X=ST.extraMotions||{};
     if((ST.ban||[]).includes(m)||(X.move||[]).includes(m))return false;
-    return okMotion(m)}  // 재생 가능 · 장소(placeBan·placeOnly) · 에피소드 전용(episodeOnly)
+    return freeMotionOk(m)}  // 재생 가능 · 장소(placeBan·placeOnly) · 에피소드 전용(episodeOnly)
   function freeList(){if(!freeOn()||!COL||!COL.items)return[];return COL.items.filter(freeOk)}
   function playCard(cid){if(!on||act||now()<cool||tab!=="motion"||!freeOn())return false;
     const x=freeList().find(y=>y.id===cid);if(!x){note({deny:cid});return false}  // 안 가진 카드·허용 안 된 카드는 재생하지 않음
     stopAuto();if(Stage.playing())Stage.toRest(+D().blendMs||450);const mo=Cards.motionOf(cid),my={id:"card:"+cid,tok,t0:now(),until:0,left:0,pending:0,cam:false,motion:null};act=my;busyUI();
-    Stage.gaze(null);note({card:cid,m:mo.m});motion(my,{m:mo.m,f:mo.f,sp:mo.sp});return true}
+    Stage.gaze(null);note({card:cid,m:mo.m});motion(my,{m:mo.m,f:mo.f,sp:mo.sp,k:"free"});return true}
 
   // 84-1 시연 패널 「신규 모션 검수」(?debug=1 만): 검수 전용(only preview) 몸짓도 함께하기 구도에서 재생. 사용자 행동처럼 하나만(끝나면 기본 자세·표정, 자동 교감 다시 셈).
   // 기록·카드·호감·관계는 바꾸지 않음(행동과 같은 quiet·solo 재생). 실제 행동·자동·자유 모션의 권한 검사와는 따로
@@ -241,6 +260,6 @@ const Together=(()=>{
 
   // 확인용
   const info=()=>({on,tok,tab,stage:stageN(),acts:actsOf(stageN()),why:why(),stay:on?stayWhy():null,act:act&&{id:act.id,left:act.left,pending:act.pending,motion:act.motion&&act.motion.m,inMs:Math.round(act.until-now())},
-    auto:autoAct?"on":autoT?"wait":"off",cool:Math.max(0,Math.round(cool-now())),cam:+cz.k.toFixed(3),gaze:Stage.gazeMode(),lent:Stage.lentTo(),free:on?freeList().map(x=>x.id):null,log:log.slice()});
-  return{enter,open:enter,close:()=>close(),run,playCard,preview,why,fnUI,isOn:()=>on,freeList,info,icon:svg};
+    auto:autoAct?"on":autoT?"wait":"off",timers:timers.size,cool:Math.max(0,Math.round(cool-now())),cam:+cz.k.toFixed(3),gaze:Stage.gazeMode(),lent:Stage.lentTo(),free:on?freeList().map(x=>x.id):null,log:log.slice()});
+  return{enter,open:enter,close:()=>close(),run,playCard,preview,why,ok:(m,kind)=>okFor(m,kind),fnUI,isOn:()=>on,freeList,info,icon:svg};
 })();
