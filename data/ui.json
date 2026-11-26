@@ -121,12 +121,18 @@
     "moodToast": "서아 기분 · {mood}",
     "moodGift": "{gift}이라면 반응이 다를 거예요",
     "_stageDown": "69: 판정 뒤 관계 단계가 내려갔을 때(이름 거절 등) 짧은 알림 한 줄({name} 내려간 단계 이름, data/seoa_story.json stageNames)",
-    "stageDown": "서아와의 사이가 「{name}」로 돌아갔어요."
+    "stageDown": "서아와의 사이가 「{name}」로 돌아갔어요.",
+    "_rift": "80: 본편 위기에서 엇갈림이 된 판정 뒤 한 번(단계 하락 알림과 같은 모양, 단계는 5 그대로)",
+    "rift": "서아와의 사이가 엇갈렸어요."
   },
   "chat": {
     "_chat": "서아 대화방 맨 위 안내(대화를 비우면 다시 생김). placeChanged = 장소가 바뀌었을 때 대화 줄({place} 장소 이름, 18)",
     "seoaFirst": "＋ 에서 선물하고 사진도 찍어요",
     "placeChanged": "장소가 바뀌었어요 · {place}",
+    "_nightDivider": "80: 밤 넘기기 시간 카드가 뜰 때 대화 기록에 한 번 남는 가운데 줄({card} = 서버 state.night_card). 서버 대화 기록·판정 recent 에는 안 감",
+    "nightDivider": "─ {card} ─",
+    "_nightFail": "80-1: 밤 넘기기 중 판정(남은 일반 판정 묶음 또는 「[다음 밤]」 판정)이 자동 재시도까지 실패했을 때 대화 끝 안내 줄·토스트(아래 「다시 보내기」 = chat.retry)",
+    "nightFail": "다음 밤으로 넘어가지 못했어요. 다시 시도해 주세요.",
     "_typing": "29-1: 내 메시지를 보낸 순간부터 답장이 올 때까지(직전 판정을 기다리는 시간 포함) 보이는 줄. 43: 「입력 중」 → 「생각 중」, 기다린 지 typingLongMs 가 지나면 typingLong(답장 기다리는 몸짓이 팔짱으로 넘어가는 때쯤, data/config.json wait). 답이 오면 다음 기다림은 다시 typing 부터",
     "typing": "서아가 생각 중…",
     "typingLong": "서아가 고민 중…",
@@ -423,5 +429,16 @@
     "again": "한 번 더 · {label}",
     "done": "확인",
     "artAria": "카드 팩"
+  },
+  "_photoAsk": "83 사진 촬영 제안. shoot = 제안 답장 아래 버튼. lock = 본편 카메라가 잠겼을 때 안내(closer 1~2단계·3단계 제안 전, inChat 3단계 촬영 기회가 남음, later 3단계 기회를 쓴 뒤·4~5단계, soon 6단계 제안 전). poseFixed = 3단계 제안 촬영에서 다른 포즈를 고르려 할 때",
+  "photoAsk": {
+    "shoot": "서아 사진 찍어주기",
+    "lock": {
+      "closer": "서아와 조금 더 가까워지면 사진을 찍을 수 있어요.",
+      "inChat": "서아가 사진을 부탁한 대화에서 촬영할 수 있어요.",
+      "later": "서아와 더 가까워지면 다시 사진을 찍을 수 있어요.",
+      "soon": "서아와 함께한 순간을 남길 수 있는 날이 곧 찾아와요."
+    },
+    "poseFixed": "이번 사진은 서아가 부탁한 포즈로 찍어요."
   }
 }

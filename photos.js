@@ -125,7 +125,7 @@ const Cam=(()=>{
     root.querySelector('[data-c="clear"]').textContent=UI("photoFull.clear");root.querySelector('[data-c="grow"]').textContent=UI("photoFull.grow");
     root.querySelector("#camFull p").textContent=UI("photoFull.notice");
     root.addEventListener("click",e=>{const b=e.target.closest("[data-c]");if(!b)return;const k=b.dataset.c;
-      if(k==="close")close();else if(k==="shoot")shutter();else if(k==="pause")togglePause();else if(k==="pose")Pose.sheet("cam");
+      if(k==="close")close();else if(k==="shoot")shutter();else if(k==="pause")togglePause();else if(k==="pose"){if(typeof PhotoAsk!=="undefined"&&PhotoAsk.fixed())return toast(esc(UI("photoAsk.poseFixed")));Pose.sheet("cam")}
       else if(k==="last"){if(Photos.count())PhotoUI.sheet()}else if(k==="clear")PhotoUI.sheet();else if(k==="grow")PhotoUI.fullSheet()});
     // 두 손가락 확대 · 한 손가락 돌기 (포인터 이벤트, 마우스 끌기도 같음). 페이지 확대·스크롤로 새지 않게 touch-action:none + 기본 동작 막기
     fr.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;try{fr.setPointerCapture(e.pointerId)}catch(err){}ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});base()});
@@ -173,8 +173,11 @@ const Cam=(()=>{
     if(!flying){lb.innerHTML=L?`<img src="${Photos.thumbUrl(L)}" alt="">`:"";lb.classList.toggle("empty",!L)}
     root.querySelector("#camFull").classList.toggle("on",Photos.full())}
   // o.pose: 48 포즈에서 고른 몸짓({id,sp,name,ref,f,pose}). 78: 없으면 기본 자세(예전: 열기 직전 recentMs 안의 대화 몸짓)
+  // 83: o.ask = 서아 사진 제안 버튼 id. 마지막 관문 — 본편 관계 단계별 카메라 권한(PhotoAsk.gate). 잠겼으면 안내만, 열지 않음(＋ 카메라·포즈 「이 포즈로 찍기」·제안 버튼 모두 여기를 지남)
   function open(o){
-    if(on)return;if(!root)build();
+    if(on)return;
+    if(typeof PhotoAsk!=="undefined"){const g=PhotoAsk.gate(o);if(!g.ok){toast(esc(g.msg));return}PhotoAsk.begin(g.ses)}
+    if(!root)build();
     if(typeof View!=="undefined")View.rest(true);
     clearTimeout(faceRT);  // 들어간 순간의 표정 그대로(7초 뒤 기본 표정으로 돌아가는 타이머를 멈춤)
     const okPose=x=>!!x&&(typeof Pose==="undefined"||!!Pose.info(x.ref||x.id));  // 78-1: 쓸 수 없는 포즈(일반 몸짓·안 가진 포즈 카드)는 받지 않음
@@ -193,13 +196,16 @@ const Cam=(()=>{
     if(!on)return;on=false;root.classList.remove("on");root.setAttribute("aria-hidden","true");
     document.removeEventListener("gesturestart",stopG);document.removeEventListener("gesturechange",stopG);
     Stage.shadow(false);Stage.camLoop(null);Stage.release();
+    if(typeof PhotoAsk!=="undefined")PhotoAsk.end();  // 83: 제안 촬영에서 한 장 이상 저장했으면 반응(이벤트마다 한 번)
     // 촬영 중에 온 답장: 나온 뒤 마지막 답장의 몸짓을 재생(그때 처음 본 몸짓이면 도감 기록)
     const h=held;held=null;
     if(h){react(h.r,"",false,Fx.first(h.mid));firstSeen(h.mid)}else faceReset();
     if(unlockQ.length&&!unlockBusy)setTimeout(unlockNext,h&&h.mid?Stage.dur(h.mid)*1000+700:600);
   }
   // 48: 촬영 중에 포즈를 바꿈(멈춤을 풀고 처음부터 반복)
-  function setPose(x){if(!on||!x)return;if(typeof Pose!=="undefined"&&!Pose.info(x.ref||x.id))return;  // 78-1: 쓸 수 있는 포즈만
+  function setPose(x){if(!on||!x)return;
+   if(typeof PhotoAsk!=="undefined"&&PhotoAsk.fixed())return;  // 83: 3단계 제안 촬영은 p01 고정
+   if(typeof Pose!=="undefined"&&!Pose.info(x.ref||x.id))return;  // 78-1: 쓸 수 있는 포즈만
    info=x;paused=false;Stage.camLoop(null);Stage.camLoop(info);if(x.f)Stage.setFace(x.f);render()}
   function togglePause(){if(!info)return;paused=!paused;Stage.hold(paused);render()}
   // 셔터 소리: 짧은 잡음 두 덩어리(찰-칵). 아이폰은 누른 그 순간(같은 작업) 안에서 소리 장치를 깨워야 해서 셔터 처리 맨 앞에서 부름
@@ -233,9 +239,11 @@ const Cam=(()=>{
     if(busy)return;
     if(Photos.full()){PhotoUI.fullSheet();return}
     sound();flash();busy=true;
+    const ses=typeof PhotoAsk!=="undefined"?PhotoAsk.cur():null;  // 83: 누른 때의 제안 촬영(저장 도중 닫기·초기화돼도 그 세션에만)
     try{const r=await Shot.take(S.scene,(cam,a)=>setCam(cam,a),{onCanvas:fly});
       const meta={id:Photos.newId(),kind:"camera",at:Date.now(),mid:info?(info.ref||info.id):null,mname:info?motionName(info):null,scene:S.scene,place:r.place,liked:false,w:r.w,h:r.h};
       const sv=await Photos.add(meta,r.full,r.thumb);
+      if(ses)PhotoAsk.saved(ses);  // 83: 실제 저장 성공만 촬영 기회 사용으로(실패·가득 참·취소는 안 셈)
       (window.__photoPerf||(window.__photoPerf=[])).push({...r.ms,save:sv.ms,kb:Math.round(r.full.size/1024),thumbKb:Math.round(r.thumb.size/1024)});
       toast(esc(UI("cam.saved")),1800);
     }catch(e){console.error("사진 저장 실패",e)}
