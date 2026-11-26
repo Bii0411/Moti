@@ -1162,7 +1162,8 @@ const Stage=(()=>{
     if(cur&&cur.id!==IDLE&&!cur.wait)return p(cur);
     if(lastEnd&&lastEnd.id!==IDLE&&!lastEnd.wait&&performance.now()-lastEnd.at<=ms)return p(lastEnd);return null}
   // x 몸짓을 반복(지금 그 몸짓이 재생 중이면 그 자리에서 이어서). null 이면 기본 자세
-  function camLoop(x){if(!x){cur=null;return}if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
+  function camLoop(x){if(!x){cur=null;return}if(XS[x.id]&&!xsCache[x.id])xsLoad(x.id).then(()=>{if(cur&&cur.id===x.id&&cur.hold==null)cur.start=performance.now()/1000});  // 78: 아직 안 불러온 모션(촬영 전용 포즈)도 바로 불러오고, 다 받으면 처음부터
+    if(cur&&cur.id===x.id){cur.loop=true;cur.hold=null;return}
     cur={id:x.id,start:performance.now()/1000,sp:x.sp||1,name:x.name,ref:x.ref,loop:true}}
   // 촬영 화면이 돌 중심(바닥 x·z): k 0 = 몸(뿌리) ~ 1 = 머리 뼈. 가까이 볼수록 얼굴이 가운데 오게
   function center(k){if(!md)return{x:0,z:0};const r=md.root.position,hb=md.bones.Head;if(!hb||!k)return{x:r.x,z:r.z};
@@ -2269,7 +2270,7 @@ const SEGS=["all","chat","gift","pack"];  // 49: 「선물」 → 「카드 팩�
 const SEG_SRC={gift:"moment"};
 // 38-1: 칸 순서 = 카드 번호(no) 순서(전체·대화·선물 모두, 잠긴 칸도 제 번호 자리). 크게 보기의 이전·다음도 이 순서. 번호가 없는 칸은 맨 뒤(적힌 순서대로)
 function colList(seg){const N=o=>o.x.no>0?o.x.no:Infinity;
-  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===(SEG_SRC[seg]||seg))
+  return COL.items.map((x,i)=>({x,i})).filter(o=>seg==="all"||o.x.source===(SEG_SRC[seg]||seg)||(seg==="pack"&&o.x.source==="free"))  // 78: 무료 포즈 카드도 「카드 팩」 탭에
     .sort((a,b)=>(N(a)-N(b))||a.i-b.i).map(o=>o.x)}
 function renderAlbum(fresh){
   if(!SEGS.includes(albumSeg))albumSeg="all";

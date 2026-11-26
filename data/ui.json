@@ -34,6 +34,7 @@
         "rare": "RARE",
         "special": "SECRET"
       },
+      "pose": "포즈",
       "band": " · ",
       "mmdd": "{m}.{d}",
       "backAria": "아직 모으지 않은 카드 {no}",
@@ -293,18 +294,18 @@
     "ariaLast": "사진"
   },
   "pose": {
-    "_pose": "포즈(48단계, 원고 docs/drafts/48-포즈-원고.md). title·sub = ＋ 기능판에서 연 카드 목록, camTitle·camSub = 촬영 화면에서 연 카드 목록({n} = 모은 카드 수). ask = 카드를 누르면 자동으로 보내는 내 말({name} = 몸짓 이름). fallback = 서버 답장이 없을 때 서아 대사. shoot = 답장 아래 버튼. chip = 촬영 화면 아래 칩. camBtn = 촬영 화면 멈춤 옆 버튼. locked = 못 모은 칸을 눌렀을 때. ariaPick = 카드 버튼의 접근성 이름",
+    "_pose": "포즈(48단계, 원고 docs/drafts/48-포즈-원고.md). title·sub = ＋ 기능판에서 연 카드 목록, camTitle·camSub = 촬영 화면에서 연 카드 목록({n} = 모은 카드 수). ask = 카드를 누르면 자동으로 보내는 내 말({name} = 몸짓 이름). fallback = 서버 답장이 없을 때 서아 대사. shoot = 답장 아래 버튼. chip = 촬영 화면 아래 칩. camBtn = 촬영 화면 멈춤 옆 버튼. locked = 못 모은 칸을 눌렀을 때. 78: 목록은 촬영 전용 포즈 카드만({n} 가진 포즈 수 / {total} 전체 포즈 수). ariaPick = 카드 버튼의 접근성 이름",
     "title": "어떤 포즈를 부탁할까요?",
-    "sub": "카드를 누르면 서아에게 바로 부탁해요 · 모은 포즈 {n}",
+    "sub": "카드를 누르면 서아에게 바로 부탁해요 · 모은 포즈 {n} / {total}",
     "camTitle": "어떤 포즈로 찍을까요?",
-    "camSub": "고르면 바로 그 포즈가 반복돼요 · 모은 포즈 {n}",
-    "empty": "아직 모은 카드가 없어요. 대화하다 보면 하나씩 모여요.",
+    "camSub": "고르면 바로 그 포즈가 반복돼요 · 모은 포즈 {n} / {total}",
+    "empty": "아직 모은 포즈가 없어요. 카드팩에서 획득할 수 있어요.",
     "ask": "{name} 해 줄래?",
     "fallback": "…이거?",
     "shoot": "이 포즈로 찍기",
     "chip": "{name} · 부탁한 포즈",
     "camBtn": "포즈",
-    "locked": "아직 못 본 포즈예요",
+    "locked": "카드팩에서 획득할 수 있어요.",
     "ariaPick": "{name} 포즈 부탁하기"
   },
   "photoFull": {
