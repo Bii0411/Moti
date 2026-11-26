@@ -2969,7 +2969,8 @@ let curTab="chat";
 function placeStage(){const st=$("#stage");$("#stageSlot").appendChild(st);
   const vis=curTab==="chat"&&S.room==="seoa";st.style.display=vis?"":"none";
   Stage.pano.hold(!vis||FirstMeet.isOn()||FirstMeet.armed());if(vis)Stage.xsRest(()=>FirstMeet.isOn());}  // 39: 무대가 보일 때 360도 그림을 받고, 나머지 모션은 대화 화면이 뜬 뒤 쉬는 틈에(첫 만남 연출이 끝난 뒤)
-function setTab(t){if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+function setTab(t){MotionCue.clear();  // 91: 화면 이동 때 남은 모션 강조를 바로 지움
+  if(!Onboard.isOpen())$(".app").classList.remove("homehold");if(t==="home"&&curTab!=="home"){H.view=null;if(!H.q)H.search=false}Cards.close();curTab=t;  /* 23: 다른 탭에서 홈으로 오면 캐릭터 화면이 아니라 홈 첫 화면 */Fn.set(false);Cam.close();View.rest(true);$(".app").classList.toggle("inalbum",t==="album");$(".app").classList.toggle("inhome",t==="home");$("#bubble").classList.remove("on");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat")showList();  // 46: 「대화」 탭은 언제나 대화 목록부터(다른 탭에 다녀와도). 대화방으로 바로 가는 곳(홈 에피소드 카드·알림)은 이 뒤에 openRoom
   placeStage();
@@ -3080,6 +3081,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
   openSheet("#adultSheet");
 }
 function openRoom(cid){
+  MotionCue.clear();  // 91: 대화방을 열거나 바꿀 때 남은 모션 강조를 바로 지움
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
   S.room=cid;S.read[cid]=chatOf(cid).length;save();Moment.glow();
