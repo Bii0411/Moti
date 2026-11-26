@@ -118,6 +118,11 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .fni .tile svg{width:26px;height:26px;display:block}
 .fni b{font-size:12px;font-weight:600;color:#cfc8e4}
 .fni:active .tile{transform:scale(.95)}
+/* 83: 본편 카메라·포즈가 잠긴 칸 — 숨기지 않고 오른쪽 아래 작은 자물쇠 */
+.fni .tile{position:relative}
+.fni.plocked .tile{color:#8f88a6}
+.fnlock{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#2a2538;color:#d9d2ee;box-shadow:0 0 0 2px #0e0c16}
+.fnlock svg{width:12px;height:12px}
 /* 여러 줄 입력창: 엔터는 줄바꿈, 4줄까지 커지고 그 이상은 안에서 스크롤 (autoGrow). 16px = 아이폰 자동 확대 방지 */
 .inp{flex:1;min-width:0;width:0;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:11px 15px;color:var(--text);font:inherit;font-size:16px;line-height:22px;outline:none;resize:none;display:block;height:46px;max-height:112px;overflow-y:hidden;white-space:pre-wrap;overflow-wrap:anywhere}
 /* 안내 문구가 길어 두 줄: 글자만 13px로 줄이고(입력 글자는 16px 그대로) 빈 칸일 때만 위아래 여백을 줄여 46px 안에 넣음 */
@@ -650,6 +655,7 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 <script src="seoaphoto.js?v=20261126-1757"></script>
 <script src="cards.js?v=20261126-1757"></script>
 <script src="pose.js?v=20261126-1757"></script>
+<script src="photoask.js?v=20261126-1757"></script>
 <script src="pack.js?v=20261126-1757"></script>
 <script src="storypic.js?v=20261126-1757"></script>
 <script src="onboarding.js?v=20261126-1757"></script>
@@ -1670,7 +1676,7 @@ function renderLog(){
   L.innerHTML=chatOf(S.room||"seoa").map(m=>m.r==="sys"?`<div class="msg sys${m.night?" night":""}">${esc(m.t)}</div>`:
     m.r==="g"?`<div class="msg gift">${esc(m.t)}</div>`:
     m.r==="ph"?SeoaPhoto.bubble(m):
-    m.r==="c"?cParts(m).slice(0,reveal&&reveal.m===m?reveal.n:undefined).map(p=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")+(m.pose&&!(reveal&&reveal.m===m)?Pose.shootBtn(m.pose):"")+(m.fb&&m.retry&&!busy&&!(reveal&&reveal.m===m)&&m===chatOf(S.room||"seoa").slice(-1)[0]?`<button class="fbretry" data-retry="1">${esc(UI("chat.retry"))}</button>`:"")
+    m.r==="c"?cParts(m).slice(0,reveal&&reveal.m===m?reveal.n:undefined).map(p=>p.k==="n"?`<div class="mnarr">${esc(p.x)}</div>`:`<div class="msg c">${esc(p.x)}</div>`).join("")+(m.pose&&!(reveal&&reveal.m===m)?Pose.shootBtn(m.pose):"")+(m.pa&&!(reveal&&reveal.m===m)?PhotoAsk.btn(m.pa):"")+(m.fb&&m.retry&&!busy&&!(reveal&&reveal.m===m)&&m===chatOf(S.room||"seoa").slice(-1)[0]?`<button class="fbretry" data-retry="1">${esc(UI("chat.retry"))}</button>`:"")
     :m.r==="u"?userParts(m.t).map(p=>p.k==="n"?`<div class="mnarr u">${esc(p.x)}</div>`:`<div class="msg u">${esc(p.x)}</div>`).join("")
     :`<div class="msg ${m.r}">${esc(m.t)}</div>`).join("")+SeoaPhoto.sendingHtml()+(typeof Night!=="undefined"?Night.html():"")+(busy||reveal?`<div class="msg c typing">${esc(typingText())}</div>`:"");
   L.scrollTop=L.scrollHeight;
@@ -1725,7 +1731,7 @@ const isFiller=t=>(DATA.config.serverFiller||["…"]).includes(String(t).replace
 function readReply(j){
   if(!j)return null;
   if(typeof j.dialogue==="string"&&isFiller(j.dialogue))return null;  // 29: 서버 대체 응답 「…」 = 실패로 봄 → 예비 대사
-  if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null,giftMoment:j.gift_moment||null};
+  if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null,giftMoment:j.gift_moment||null,photoAsk:j.photo_ask||null};  // 83: 서버 S5 사진 제안
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};
   return null;
 }
@@ -1779,10 +1785,10 @@ const MEMO_KEYS=["stage_notes","promises","stage_note_due","stage_note_queue"];
 //     본편 /chat·/judge 에 받은 그대로 감(앱이 만들거나 고치지 않음, 시연 패널만 예외). 크리스마스 요청에서는 빼고(pending_event 는 null), 본편 값은 그대로 둠
 const S4_KEYS=["crisis","crisis_msgs","stage_label","rewind_offer","won_line","hint_due","stage_hints","hint_msgs","night_next","night_card","night_wait","scene_msgs","rift_sorry"];
 const MAIN_KEYS=S4_KEYS.concat(["route","scene","scene_judges_left","used_events"]);
-const noNameFlow=o=>{NAME_KEYS.concat(MEMO_KEYS,MAIN_KEYS).forEach(k=>delete o[k]);if("pending_event" in o)o.pending_event=null;return o};
+const noNameFlow=o=>{NAME_KEYS.concat(MEMO_KEYS,MAIN_KEYS).forEach(k=>delete o[k]);if("pending_event" in o)o.pending_event=null;PhotoAsk.strip(o);return o};  // 83: 사진 제안 키도 본편 전용
 // 80: 시연 패널 단계·장면 이동·관계 초기화 때 앞 위기·엇갈림·밤 넘기기·장면 예약이 남지 않게(서버 기본값으로)
 function clearS4(st){S4_KEYS.forEach(k=>delete st[k]);st.scene=null;st.scene_judges_left=0;S.night=null;if(typeof Night!=="undefined")Night.stop()}
-function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return{...st,...gm};const sc=SCENES[S.scene];
+function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return Thread.cur()==="main"?PhotoAsk.req(PhotoAsk.strip({...st,...gm})):PhotoAsk.strip({...st,...gm});const sc=SCENES[S.scene];  // 83: 본편만 photo_ask_v·photo_asks(S.photoAsk.offered)
   const o=noNameFlow({...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location});
   if(Thread.cur()===(((DATA.rewind||{}).xmas||{}).thread||"s2"))o.episode_turns_left=End.left();  // 90: 크리스마스 자정까지 남은 내 메시지 수(서버 자정 기색)
   return o}
@@ -1958,12 +1964,12 @@ function runJudge(){
     return judgeP}
   // 80: 본편 recent = 요약 때 또는 서버가 단계 기록을 기다릴 때(stage_note_due · stage_note_queue) 최근 실제 대화 historyMessages(80)개. 실패 답장과 그 요청은 뺌
   const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
-  const body={char:"seoa",state:{...st,user_name:userName()},last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need||noteDue?recentTalk():[]};
+  const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip({...st,user_name:userName()})),last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need||noteDue?recentTalk():[]};
   if(J.ok)body.reply_ok=J.ok;  // 80: 서버 S4-1-1 — last_user 메시지마다 정상 답장(true). 예전 묶음(정상 여부 모름)은 빼고 보냄
   judgeP=post("/judge",body,45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;LASTJ={at:Date.now(),ep:0,delta:j.affection_delta!=null?j.affection_delta:(+j.state.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
       const prev={...st},fl=usedFlags(j.flags);  // 80: 받기 전 상태(엇갈림 알림) · withdraw 는 앱에서 안 씀
-      Object.assign(st,j.state);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,fl);if(keep)st.stage=keep;const q=[];
+      Object.assign(st,j.state);PhotoAsk.fromJudge(st);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,fl);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need,recent:body.recent.length,reply_ok:body.reply_ok||null});
       Route.judged(before,st.affection,fl);  // 51: 갈래 세기·정하기(80: 첫 밤 마무리에서도)
       if(curStage()>before)stageUp(before,curStage(),q);
@@ -2097,7 +2103,7 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
   if(j){const nm=j.motionNames.map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
     const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"||face==="bored"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
     const sc=j.location?SCENES.findIndex(x=>x.name===j.location):-1;
-    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,src:"server"}}
+    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,photoAsk:j.photoAsk||null,src:"server"}}
   return localReply(text,allowed);
 }
 // Claude를 못 쓸 때의 예시 대사
@@ -2187,6 +2193,8 @@ async function send(text,o){
     await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   {const wf=wordFace(actionText(v));if(wf)v.face=wf}  // 73: 지문에 「피식」「노려보」 같은 말이 있으면 그 표정
+  // 83: 서버 S5 사진 제안 — 본편 정상 서버 답장 + 지금 단계와 id 가 맞고 아직 안 보인 제안만(예비 지문·크리스마스·포즈 부탁·선물·중복은 무시). 제안 순간 표정은 photo_ask.face
+  const pAsk=src0==="server"&&!epOn&&!poseId&&!giftId&&!v.fb&&serverVer()===2?PhotoAsk.check(v.photoAsk):null;if(pAsk)v.face=pAsk.face;
   const emo=v.emotion||(DATA.motions.faceEmotion||{})[v.face]||"";
   // 48: 포즈 부탁 — 서버 답장이 아니면(서버 없음·실패) 예비 대사 대신 짧은 기본 대사(data/ui.json pose.fallback)
   if(poseId&&v.src!=="server"){v.line=UI("pose.fallback");v.action=null}
@@ -2202,6 +2210,7 @@ async function send(text,o){
   if(giftMid&&o.picAt){const w=(DATA.config.giftPicMs||1000)-(performance.now()-o.picAt);if(w>0){await new Promise(r=>setTimeout(r,w));if(gen!==GEN)return}}
   const srvOk=src0==="server";  // 80: 실제 서버 정상 답장(특별 에피소드에서 아래가 v.src 를 바꾸기 전 출처). 서버 v2 를 쓰다 못 받은 답장은 bad(판정 recent 에서 뺌)
   const msg={...(v.action?{act:v.action}:{}),...(emo?{emo}:{}),...(mid?{mid}:{}),...(poseId?{pose:poseId}:{}),...(v.fb&&!o&&!poseId&&(DATA.config.fallbackReply||{}).retry?{fb:1,retry:text}:{}),...(!srvOk&&serverVer()===2&&!noServer()?{bad:1}:{})};  // 91: 예비 지문 + 다시 보낼 내 말
+  PhotoAsk.offer(pAsk,msg);  // 83: 보여 준 제안을 대화 기록과 같은 save 에(msg.pa = 말풍선 아래 「서아 사진 찍어주기」)
   addReply(v.line,msg,"seoa");
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo},mid});
@@ -2209,6 +2218,7 @@ async function send(text,o){
   // 50-C: 순간 선물 — 지금 묶음의 반응 카드를 처음이면 얻음(같은 카드를 이미 가졌으면 반응만)
   if(o&&o.moment&&giftMid){const gc=Moment.cardOf(gBy(o.moment));if(gc&&!S.col[gc.id]){const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
     S.col[gc.id]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(gc.id);notifyNew(gc);if(curTab==="album")renderAlbum(gc.id)}}
+  PhotoAsk.after(pAsk);  // 83: photo_3 처음이면 손가락 하트 카드 · ＋ 자물쇠
   Demo.render();
   afterReply(v,srvOk&&!epOn?usedEvent:undefined);  // 80: 사건은 본편 정상 서버 답장 뒤에만 비움
   Moment.afterReply(v,say);  // 50: 순간 선물 열기(서버 gift_moment 또는 임시 규칙) · 80: 칵테일 말(내 말·서아 말)
@@ -2432,15 +2442,16 @@ const Demo=(()=>{
   // ── 초기화 ──
   function resetSeoa(){
     SeoaPhoto.resetThread(Thread.cur());  // 81
+    PhotoAsk.reset();  // 83
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
     Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0,routeCount:null,routeWhy:null,rw:null,night:null});Night.stop();Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
-    all(){S=blank();Photos.clear();Cards.clear();StoryPic.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
+    all(){S=blank();PhotoAsk.reset();Photos.clear();Cards.clear();StoryPic.clear();DS.scene=0;saveDS();start();setScene(0);Stage.setFace("neutral");setTab("home");Onboard.open()},  // 시연 장면도 끝냄(알림·장소 규칙이 원래대로). 온보딩 첫 화면부터(7-A)
     seoa:resetSeoa,
     chat(){S.chats={};S.read={};S.sid={};S.judgeBuf=[];S.judgeKeep=null;const st=story();st.recent_lines=[];st.summary="";start()},
-    bond(){const so=story();Object.assign(so,{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{},name_state:"none",judge_soon:false,name_quiet:0});MEMO_KEYS.forEach(k=>delete so[k]);clearS4(so);End.clearMain();S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;Route.clear()},  // 80: 위기·엇갈림·밤 넘기기·위기 지점도
+    bond(){const so=story();Object.assign(so,{stage:1,affection:0,stage_flags:[],pending_event:null,used_events:{},name_state:"none",judge_soon:false,name_quiet:0});MEMO_KEYS.forEach(k=>delete so[k]);clearS4(so);End.clearMain();PhotoAsk.reset();S.bond=0;S.unlocked=[];S.demoNext=null;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;Route.clear()},  // 80: 위기·엇갈림·밤 넘기기·위기 지점도
     album(){S.col={};delete S.colIntro;Cards.clear()}  // 26: 소개 창도 다시 뜸 · 26-1: 카드 그림도 지움
   };
   function reset(k){if(k!=="album")cancel();RESET[k]();refresh();toast(esc(T("resetToast",{name:k==="all"?T("resetAll"):T("resets."+k)})),1800);if(k==="all")reveal()}
@@ -2479,6 +2490,17 @@ const Demo=(()=>{
       Object.assign(st,{affection:10,day:1,pending_event:"NIGHT_END",night_next:"NIGHT_START_2",night_card:C4.nightCard||"",night_wait:0,stage_flags:[]});
       ue().NIGHT_END_2=turn;if(!st.route)Route.decide("night");S4.judged(prev,null)}
     save();renderBond();refresh()}
+  // 83: 사진 제안 바로 보기. 서버를 부르지 않고 서버 S5 가 돌려줄 답장(data/demo.json photoAskDemo)을 실제 제안 처리(PhotoAsk.check·offer·after)에 그대로 넣음.
+  //     so = 3단계(갈래 없으면 tease) · 그 갈래 장면 장소, lover = 6단계 · stayed. 그 제안 하나만 처음 상태로 돌린 뒤(다시 볼 수 있게). 호감·대화 횟수·판정 없음
+  function photoAskDemo(kind){cancel();if(Thread.cur()!=="main")Thread.go("main");End.stop();toChat();delete S.demoNext;
+    const C=(DATA.demo||{}).photoAskDemo||{},st=story(),id=kind==="lover"?"photo_6":"photo_3";
+    setStage(PhotoAsk.stageOf(id));if(!st.route)st.route="tease";if(id==="photo_6")st.ending="stayed";
+    const d=C[id==="photo_3"?id+"_"+st.route:id]||{};if(d.scene!=null&&d.scene!==S.scene)setScene(d.scene);if(SCENES[S.scene])st.location=SCENES[S.scene].name;
+    PhotoAsk.forget(id);save();
+    const x=PhotoAsk.check({...(d.photo_ask||{}),route:id==="photo_3"?st.route:(d.photo_ask||{}).route});if(!x)return;
+    const msg={...(d.action?{act:d.action}:{}),...(d.emotion?{emo:d.emotion}:{})};
+    PhotoAsk.offer(x,msg);addReply(d.dialogue||"",msg,"seoa");react({m:IDLE,f:x.face,t:d.dialogue||"",e:d.emotion||""},"",false,"");PhotoAsk.after(x);
+    renderBond();refresh()}
   function toChat(){setTab("chat");if(S.room!=="seoa")openRoom("seoa");const i=$("#inp");if(document.activeElement===i)i.blur();reveal()}
   function playMotion(mid){toChat();Stage.play(mid,{fx:Fx.pick("view",mid)})}
   function preview(mid){toChat();const g=groupOf(mid);unlockFx(mid,g&&g.text||"","view")}
@@ -2518,7 +2540,7 @@ const Demo=(()=>{
         <div class="kv">${esc(T("episode.flags"))}</div><div class="row">${["care","sincere","pursue","comfort"].map(f=>B("epFlag",esc(f),{v:f,on:ef.includes(f)})).join("")}</div>`}
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("photoAskSo",esc(T("photoAskDemo.soBtn")))}${B("photoAskLover",esc(T("photoAskDemo.loverBtn")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 카드 팩(49): 다음 카드 팩 결과(첫 장만, 등급 또는 카드) · 천장 초기화 · 카드 팩 카드 모두 열기 · 비우기
     const PN=S.packNext||{},pItems=Gacha.pool(COL.items);
@@ -2597,7 +2619,9 @@ const Demo=(()=>{
     if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];SeoaPhoto.resetThread(e.id);if(S.rw)delete S.rw[e.id];save();startStory(e.id);return refresh()}
     if(a==="routeJudge"){Route.judged(curStage(),story().affection||0,[v]);return refresh()}  // 51: 판정 한 번처럼 갈래만
     if(a==="routeClear"){Route.clear();return refresh()}
-    if(a==="crisisNow"){s4Demo("crisis");return refresh()}  // 80: 위기 바로
+    if(a==="crisisNow"){s4Demo("crisis");return refresh()}
+    if(a==="photoAskSo"){setOpen(false);return photoAskDemo("so")}  // 83
+    if(a==="photoAskLover"){setOpen(false);return photoAskDemo("lover")}  // 80: 위기 바로
     if(a==="riftNow"){s4Demo("rift");return refresh()}  // 80: 엇갈림 바로(위기 직전 지점 먼저)
     if(a==="nightNow"){s4Demo("night");return refresh()}  // 80: 2단계 첫 밤 마무리 바로
     // 80: 「본편 실패」(예전 떠난 밤) 시연 버튼은 숨김(본편 실패 엔딩을 새 진행에서 안 씀)
@@ -3327,6 +3351,7 @@ const End=(()=>{
     openSheet("#rwConfirm");$("#rwNo").onclick=closeSheets;$("#rwOk").onclick=()=>{closeSheets();restart()}}
   function restart(){const k=th();stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();
     delete R()[k];SeoaPhoto.resetThread(k);  // 81: 그 줄기의 부재중 셀카 상태도 처음으로
+    if(k==="main")PhotoAsk.reset();  // 83: 본편 사진 제안 상태도 처음으로(카드·앨범 사진은 그대로)
     if(k==="main"){S.night=null;Night.stop();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;S.story={};S.bond=0;S.routeCount=null;delete S.routeWhy;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;S.demoNext=null;
       S.introDone=false;S.scene=0;save();setScene(0,{fade:true});Outfit.sync();renderBond();renderTop();openRoom("seoa")}  // 오프닝부터(첫 만남 연출은 이미 봤으면 다시 안 함)
     else{Thread.go("main");if(S.threads)delete S.threads[k];save();startStory(k)}}  // 이미 산 에피소드라 다이아를 다시 받지 않음
@@ -3467,9 +3492,9 @@ const Night=(()=>{
   // 자동 「[다음 밤]」 /judge(첫마디 바로 뒤). last_user 「[다음 밤]」 · last_reply 첫마디 · need_summary false · reply_ok []. 판정 횟수(요약 주기)에 안 셈
   function judgeOnce(n){const st=story(),tk=++judgeTok,g=GEN,aff0=st.affection||0,t0=performance.now();
     const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
-    const body={char:"seoa",state:{...st,user_name:userName()},last_user:msg(),last_reply:n.reply||"",need_summary:false,reply_ok:[],recent:noteDue?recentTalk():[]};
+    const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip({...st,user_name:userName()})),last_user:msg(),last_reply:n.reply||"",need_summary:false,reply_ok:[],recent:noteDue?recentTalk():[]};
     const p=post("/judge",body,45000).then(j=>{if(!j||!j.state||g!==GEN||tk!==judgeTok||!main())return false;
-      const prev={...st},before=curStage();Object.assign(st,j.state);
+      const prev={...st},before=curStage();Object.assign(st,j.state);PhotoAsk.fromJudge(st);
       LASTJ={at:Date.now(),ep:0,night:1,delta:j.affection_delta!=null?j.affection_delta:(+st.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
       JLOG.push({turn:S.bond||0,n:0,night:1,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:false});
       const q=[];if(curStage()>before)stageUp(before,curStage(),q);else if(curStage()<before)stageDown(before,curStage());
@@ -3694,14 +3719,14 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();Ending.migrate();Night.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();PhotoAsk.bind();PhotoAsk.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;
   function set(v){on=!!v;const p=$("#fnPanel"),b=$("#fnBtn");if(!p)return;p.classList.toggle("on",on);p.setAttribute("aria-hidden",on?"false":"true");
-    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");Moment.glow();b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
+    b.classList.toggle("on",on);b.setAttribute("aria-expanded",on?"true":"false");Moment.glow();PhotoAsk.lockUI();b.setAttribute("aria-label",UI(on?"fn.close":"fn.open"));
     if(on){const i=$("#inp");if(document.activeElement===i)i.blur();const L=$("#log");setTimeout(()=>{L.scrollTop=L.scrollHeight},240)}}
-  function run(k){set(false);if(k==="gift")giftGuide();else if(k==="camera")Cam.open();else if(k==="pose")Pose.sheet("chat");else if(k==="photo")PhotoUI.sheet()}
+  function run(k){set(false);if(k==="gift")giftGuide();else if(k==="camera")Cam.open();else if(k==="pose"){const g=PhotoAsk.gate();if(!g.ok)return toast(esc(g.msg));Pose.sheet("chat")}else if(k==="photo")PhotoUI.sheet()}
   return{set,toggle:()=>set(!on),run,isOn:()=>on}})();
 $("#fnBtn").onclick=()=>Fn.toggle();
 document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.onclick=()=>Fn.run(b.dataset.fn));
