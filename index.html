@@ -2620,9 +2620,9 @@ const Demo=(()=>{
     if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];SeoaPhoto.resetThread(e.id);if(S.rw)delete S.rw[e.id];save();startStory(e.id);return refresh()}
     if(a==="routeJudge"){Route.judged(curStage(),story().affection||0,[v]);return refresh()}  // 51: 판정 한 번처럼 갈래만
     if(a==="routeClear"){Route.clear();return refresh()}
-    if(a==="crisisNow"){s4Demo("crisis");return refresh()}
+    if(a==="crisisNow"){s4Demo("crisis");return refresh()}  // 80: 위기 바로
     if(a==="photoAskSo"){setOpen(false);return photoAskDemo("so")}  // 83
-    if(a==="photoAskLover"){setOpen(false);return photoAskDemo("lover")}  // 80: 위기 바로
+    if(a==="photoAskLover"){setOpen(false);return photoAskDemo("lover")}
     if(a==="riftNow"){s4Demo("rift");return refresh()}  // 80: 엇갈림 바로(위기 직전 지점 먼저)
     if(a==="nightNow"){s4Demo("night");return refresh()}  // 80: 2단계 첫 밤 마무리 바로
     // 80: 「본편 실패」(예전 떠난 밤) 시연 버튼은 숨김(본편 실패 엔딩을 새 진행에서 안 씀)
