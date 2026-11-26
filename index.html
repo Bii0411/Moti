@@ -2491,10 +2491,11 @@ const Demo=(()=>{
       ue().NIGHT_END_2=turn;if(!st.route)Route.decide("night");S4.judged(prev,null)}
     save();renderBond();refresh()}
   // 83: 사진 제안 바로 보기. 서버를 부르지 않고 서버 S5 가 돌려줄 답장(data/demo.json photoAskDemo)을 실제 제안 처리(PhotoAsk.check·offer·after)에 그대로 넣음.
-  //     so = 3단계(갈래 없으면 tease) · 그 갈래 장면 장소, lover = 6단계 · stayed. 그 제안 하나만 처음 상태로 돌린 뒤(다시 볼 수 있게). 호감·대화 횟수·판정 없음
+  //     so = 3단계(처음엔 지금 갈래·없으면 tease, 다시 누르면 다른 갈래) · 그 갈래 장면 장소, lover = 6단계 · stayed. 그 제안 하나만 처음 상태로 돌린 뒤(다시 볼 수 있게). 호감·대화 횟수·판정 없음
   function photoAskDemo(kind){cancel();if(Thread.cur()!=="main")Thread.go("main");End.stop();toChat();delete S.demoNext;
     const C=(DATA.demo||{}).photoAskDemo||{},st=story(),id=kind==="lover"?"photo_6":"photo_3";
-    setStage(PhotoAsk.stageOf(id));if(!st.route)st.route="tease";if(id==="photo_6")st.ending="stayed";
+    const r0=id==="photo_3"&&(PhotoAsk.st().ev.photo_3||{}).route;  // 썸: 앞서 본 photo_3 이 있으면 다른 갈래로(누를 때마다 장난 ↔ 다정)
+    setStage(PhotoAsk.stageOf(id));st.route=r0==="tease"?"care":r0==="care"?"tease":(st.route||"tease");if(id==="photo_6")st.ending="stayed";
     const d=C[id==="photo_3"?id+"_"+st.route:id]||{};if(d.scene!=null&&d.scene!==S.scene)setScene(d.scene);if(SCENES[S.scene])st.location=SCENES[S.scene].name;
     PhotoAsk.forget(id);save();
     const x=PhotoAsk.check({...(d.photo_ask||{}),route:id==="photo_3"?st.route:(d.photo_ask||{}).route});if(!x)return;

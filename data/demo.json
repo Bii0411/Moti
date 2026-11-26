@@ -184,7 +184,7 @@
     "minLeft": "min_msgs_left {v}",
     "left": "남은"
   },
-  "_photoAskDemo": "83 시연 패널 「썸 촬영 제안 바로 보기」(3단계, 갈래가 없으면 tease) · 「연인 촬영 해금 바로 보기」(6단계). 서버를 부르지 않고 서버 S5 가 돌려줄 답장(지문·확정 대사·emotion·photo_ask)을 그대로 실제 제안 처리 함수에 넣음. 대사는 서버 yoon_seoa_prompt.md PHOTO_* 블록 원고 그대로. scene = 제안 장소 번호(바 2층 1 · 바 옥상 4)",
+  "_photoAskDemo": "83 시연 패널 「썸 촬영 제안 바로 보기」(3단계, 처음엔 지금 갈래·없으면 tease, 다시 누르면 다른 갈래) · 「연인 촬영 해금 바로 보기」(6단계). 서버를 부르지 않고 서버 S5 가 돌려줄 답장(지문·확정 대사·emotion·photo_ask)을 그대로 실제 제안 처리 함수에 넣음. 대사는 서버 yoon_seoa_prompt.md PHOTO_* 블록 원고 그대로. scene = 제안 장소 번호(바 2층 1 · 바 옥상 4)",
   "photoAskDemo": {
     "soBtn": "썸 촬영 제안 바로 보기",
     "loverBtn": "연인 촬영 해금 바로 보기",
