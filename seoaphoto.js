@@ -35,7 +35,7 @@ const SeoaPhoto=(()=>{
   // 구도: 키 비율 top·bottom·width 가 들어오게 거리를 잡음(11단계 포토부스 구도와 같은 계산) + lift(위에서 내려다보기) + shift(서아를 옆으로 비킴)
   function setCam(cam,aspect,K,yaw,shift){
     const H=Stage.height(),tn=Math.tan(cam.fov*Math.PI/360),top=K.top,bot=K.bottom,cy=(top+bot)/2*H;
-    const d=Math.max((top-bot)*H/2/tn,K.width*H/2/(tn*aspect)),r=yaw*Math.PI/180,o=Stage.center(K.center||0);
+    const d=Math.max((top-bot)*H/2/tn,K.width*H/2/(tn*aspect)),r=yaw*Math.PI/180,o=K.fixed?{x:0,z:0}:Stage.center(K.center||0);  // 86-2: K.fixed = 몸이 움직여도 카메라는 처음 자리(우산 x30 이 다가오는 게 보이게)
     const rx=Math.cos(r)*shift*H,rz=-Math.sin(r)*shift*H;  // 카메라 오른쪽 방향으로 shift 만큼(서아는 사진에서 왼쪽으로)
     cam.position.set(o.x+Math.sin(r)*d+rx,cy+(K.lift||0)*H,o.z+Math.cos(r)*d+rz);cam.lookAt(o.x+rx,cy,o.z+rz)}
   // 32-B 진짜 셀카(data/seoa_photo.json kinds.selfie.types): 종류 하나를 뽑음(직전 셀카와 같은 종류는 피함). 종류 값이 kinds.selfie 기본값을 덮음
