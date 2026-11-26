@@ -2431,6 +2431,7 @@ const Demo=(()=>{
     Object.assign(st,{route:r,morning_done:!!o.morning,pending_event:o.morning?null:(C.stageUp6||"STAGE_UP_6"),mari_step:r==="tease"?f:d,taeo_step:r==="care"?f:d})}
   // ── 초기화 ──
   function resetSeoa(){
+    SeoaPhoto.resetThread(Thread.cur());  // 81
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
     Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0,routeCount:null,routeWhy:null,rw:null,night:null});Night.stop();Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
     start();setScene(0);Stage.setFace("neutral");
@@ -2593,7 +2594,7 @@ const Demo=(()=>{
     if(a==="epJudge"){const fl=DS.epFlags||[];DS.epFlags=[];saveDS();toChat();EpStage.judged(+v,fl);return refresh()}
     if(a==="epFlag"){const fl=DS.epFlags||(DS.epFlags=[]),i=fl.indexOf(v);if(i>=0)fl.splice(i,1);else fl.push(v);saveDS();return render()}
     if(a==="epScene"){toChat();if(typeof EpScene!=="undefined")EpScene.run(EpStage.n());return refresh()}
-    if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];if(S.rw)delete S.rw[e.id];save();startStory(e.id);return refresh()}
+    if(a==="epReset"){const e=Thread.ep();if(!e)return;cancel();Thread.go("main");delete S.threads[e.id];SeoaPhoto.resetThread(e.id);if(S.rw)delete S.rw[e.id];save();startStory(e.id);return refresh()}
     if(a==="routeJudge"){Route.judged(curStage(),story().affection||0,[v]);return refresh()}  // 51: 판정 한 번처럼 갈래만
     if(a==="routeClear"){Route.clear();return refresh()}
     if(a==="crisisNow"){s4Demo("crisis");return refresh()}  // 80: 위기 바로
@@ -3325,7 +3326,7 @@ const End=(()=>{
     el.innerHTML=`<h2>${esc(T("restart.title"))}</h2><p>${esc(T("restart.body"))}</p><div class="row"><button class="cta no" id="rwNo">${esc(T("restart.cancel"))}</button><button class="cta" id="rwOk">${esc(T("restart.ok"))}</button></div>`;
     openSheet("#rwConfirm");$("#rwNo").onclick=closeSheets;$("#rwOk").onclick=()=>{closeSheets();restart()}}
   function restart(){const k=th();stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();
-    delete R()[k];
+    delete R()[k];SeoaPhoto.resetThread(k);  // 81: 그 줄기의 부재중 셀카 상태도 처음으로
     if(k==="main"){S.night=null;Night.stop();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;S.story={};S.bond=0;S.routeCount=null;delete S.routeWhy;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;S.demoNext=null;
       S.introDone=false;S.scene=0;save();setScene(0,{fade:true});Outfit.sync();renderBond();renderTop();openRoom("seoa")}  // 오프닝부터(첫 만남 연출은 이미 봤으면 다시 안 함)
     else{Thread.go("main");if(S.threads)delete S.threads[k];save();startStory(k)}}  // 이미 산 에피소드라 다이아를 다시 받지 않음
