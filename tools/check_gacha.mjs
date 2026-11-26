@@ -103,7 +103,7 @@ if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById
   if (rules !== "firstaid,cocktail,towel,flower,umbrella,ring") fail(`50-2: 임시 규칙 선물 순서 ${rules}`);
   const m06 = motions.xstage.m06 || {}; if (!/flustered/.test(m06.file) || m06.to - m06.from < 2 || m06.to - m06.from > 4 || !(m06.motionVer >= 4)) fail("50-2: m06 허둥대기가 Flustered 2~4초·motionVer 4 이상이 아님");
   const d = motions.xstage.x33 || {}; if (d.from !== 4.7 || d.to !== 12 || !(d.motionVer >= 2)) fail("50-2: 춤 x33 구간이 4.7~12초·motionVer 2 이상이 아님");
-  if (((col.card.photocard || {}).packNamePx) !== 9 || ((col.card.photocard || {}).packNameLines) !== 2) fail("50-3: 10장 결과 이름이 9px 두 줄(packNamePx·packNameLines)이 아님");
+  if ("packNamePx" in (col.card.photocard || {}) || "packNameLines" in (col.card.photocard || {})) fail("87-1: 10장 결과는 2열 · 목록과 같은 이름 맞추기 — packNamePx·packNameLines 가 남아 있음");
   if (!(motions.xstage.x26 || {}).tiltMax) fail("50-3: x26 숙임 제한(tiltMax) 없음");
   // 86-2: x30 은 실제로 다가왔다 돌아감 — 앞(+z)으로 골반 높이 × 0.25~0.5, 처음·끝 골반 앞뒤·좌우 0(끝 섞기 때 미끄러지지 않게), inPlace 아님
   { const f = JSON.parse(readFileSync(u.file, "utf8")), h = f.hip, n = h.length / 3, z = [...Array(n)].map((_, i) => h[i * 3 + 2]), mz = Math.max(...z), ends = [h[0], h[2], h[(n - 1) * 3], h[(n - 1) * 3 + 2]].map(Math.abs);

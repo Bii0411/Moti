@@ -1,7 +1,7 @@
 // moti 카드 팩(49단계). 컬렉션 「카드 팩」 탭의 배너·확률 보기·뽑기 연출. 값 data/pack.json, 문구 data/ui.json pack, 계산 gacha.js
 // 배너: 왼쪽 팩 그림(38 포토카드 「Seoa」 뒷면을 살짝 기울임) · 가운데 「카드 팩」·천장 안내 · 오른쪽 「1장 뽑기」「10장 뽑기」 버튼(위아래). 아래 오른쪽 「확률 보기 ›」
 // 뽑기: 다이아 빼기 → gacha.draw(천장은 1장·10장 합쳐 S.packPity) → 새 카드는 S.col 에 기록(본 이야기의 그때 옷·장소, 26·43 방식으로 그림 예약) · 이미 가진 카드는 환급
-// 연출(#packFx): 팩이 열림 → 카드가 뒷면으로 나옴 → 눌러서 한 장씩 뒤집기(레어는 뒤집힐 때 홀로그램 빛) → 10장은 「모두 뒤집기」로 한꺼번에 → 결과(NEW·이미 있어요)
+// 연출(#packFx): 팩이 열림 → 카드가 뒷면으로 나옴 → 눌러서 한 장씩 뒤집기(레어는 뒤집힐 때 홀로그램 빛) → 10장은 「모두 뒤집기」로 한꺼번에 → 결과(NEW·이미 있어요). 87-1: 10장 결과 = 2열 5줄 세로 넘김
 // cards.js 다음, index.html 본 스크립트보다 먼저 불린다. S·DATA·COL·UI·Cards 등은 함수 안에서만 쓴다.
 
 const Pack=(()=>{
@@ -65,6 +65,8 @@ const Pack=(()=>{
   function build(){if(el)return el;el=document.createElement("div");el.id="packFx";el.className="pkfx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");
     document.querySelector(".app").appendChild(el);
     el.addEventListener("click",onClick);
+    // 87-1: 연출 중 손가락 끌기는 10장 묶음 칸(세로 넘김) 안에서만 — 뒤 화면(컬렉션)이 같이 움직이지 않게
+    el.addEventListener("touchmove",e=>{if(!fx||!e.target.closest(".pkfx.gridon .pkstage"))e.preventDefault()},{passive:false});
     // 그림이 다 만들어지면 연출 안 카드에도 바로 넣음
     Cards.onChange(k=>{if(!fx||!k)return;const id=k.slice(k.indexOf(":")+1);el.querySelectorAll(`.mc.got[data-f="${id}"] .mcimg`).forEach(im=>{const a=S.col[id];if(!a)return;Cards.url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=im.parentNode.querySelector(".mcsil");if(sv)sv.remove()})})});
     return el}
@@ -103,11 +105,11 @@ const Pack=(()=>{
       if(!cd.classList.contains("show"))return;  // 아직 뒤집히는 중
       if(fx.i<fx.res.length-1){fx.i++;dealOne()}else result()}
     else if(fx.phase==="grid"){const cd=e.target.closest(".pkgrid .pkcard");if(cd)flip(cd,+cd.dataset.i)}}
-  // 결과 묶음: 10장 = 5열 두 줄(이미 뒤집은 카드는 앞면), 1장 = 큰 카드 그대로
+  // 결과 묶음: 10장 = 2열 5줄, 가운데 칸만 세로로 넘김(87-1, 예전 5열 두 줄). 이미 뒤집은 카드는 앞면 그대로, 1장 = 큰 카드 그대로
   function grid(){const g=$f(".pkgrid");g.innerHTML=fx.res.map(card).join("");Cards.hydrate(g);
     g.querySelectorAll(".pkcard").forEach(cd=>{if(fx.flipped.has(+cd.dataset.i))cd.classList.add("flip","show","now")});
     g.hidden=false;$f(".pkone").innerHTML="";el.classList.add("gridon");fx.phase="grid";$f(".pkcount").textContent="";
-    const pc=(COL.card||{}).photocard||{};g.style.setProperty("--pkNm",(pc.packNamePx||9)+"px");g.style.setProperty("--pkNmLines",pc.packNameLines||2);return g}  // 50-3: 10장 결과 이름은 글자를 줄이지 않고 9px 두 줄, 넘치면 「…」(pack.css)
+    $f(".pkstage").scrollTop=0;Cards.fitNames(g);return g}  // 87-1: 보이게 한 뒤에 이름 맞추기(숨긴 채로는 너비가 0)
   function flipAll(){if(fx.phase!=="one")return;const g=grid();$f(".pkacts").innerHTML="";$f(".pkhint").textContent="";
     const rest=[...g.querySelectorAll(".pkcard")].filter(cd=>!fx.flipped.has(+cd.dataset.i));
     rest.forEach((cd,k)=>later(()=>flip(cd,+cd.dataset.i),120+k*FX("auto")));
