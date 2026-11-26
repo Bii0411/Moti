@@ -5,6 +5,7 @@
 
 | 날짜 | 앱 단계 | 서버가 할 일 | 상태 |
 | --- | --- | --- | --- |
+| 2026-11-26 | 83 사진 촬영 제안 · 서버 S5 | (서버가 먼저 바꿈, PR #22) `/chat` 응답 `photo_ask` {id photo_3·photo_6, route, pose p01, face, camera_face}. 앱은 본편 `/chat`·`/judge` state 에 `photo_ask_v: 1`·`photo_asks`(보여 준 id) 를 보내고, `/judge` 응답의 `photo_asks` 는 합집합으로 보관. 에피소드 요청에는 두 키 없음 | 앱에서 처리함 (83, [보고서](reports/83-사진촬영-제안.md)) |
 | 2026-11-26 | 80 S4 통합 · 서버 S4-1-1 | (서버가 먼저 바꿈, PR #21) 화해 거부(withdraw) 우선 · 갈래 장면 완료를 /judge 선택 필드 `reply_ok` 로 셈 · 성공 대사 확인 기준. 앱은 `reply_ok`(last_user 메시지마다 true)를 보냄 | 앱에서 처리함 (80, 아래 「80 · S4 통합」, [보고서](reports/80-S4-통합연동.md)) |
 | 2026-11-26 | 80 S4 통합 · 서버 S4-1 | (서버가 먼저 바꿈, PR #20) 필수 갈래 사건 · 2단계 첫 밤 마무리에서 갈래 확정 · pending_event 는 정상 답장 뒤에만 비우기 · 새 키 `scene_msgs`·`rift_sorry`·`stage_note_queue` · stage_note_due 때 recent 80 | 앱에서 처리함 (80) |
 | 2026-11-26 | 80 S4 통합 · 서버 S4 | (서버가 먼저 바꿈) 5단계 「위기」 · 엇갈림 → 화해 · 되감기 권유 `rewind_offer` · 밤 넘기기(`night_next`·`night_card`·「[다음 밤]」) · 속마음 힌트 · 꽃다발 → 바 여분 열쇠. 남은 날·`departed` 실패 엔딩은 본편에서 더 안 나옴 | 앱에서 처리함 (80) |

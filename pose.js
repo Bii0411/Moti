@@ -25,6 +25,7 @@ const Pose=(()=>{
    const m=Cards.motionOf(id)||{};
     return{id:m.m||id,sp:m.sp||1,name:it.name,ref:id,f:m.f||null,pose:true}}
   function sheet(where){
+    if(where!=="cam"&&typeof PhotoAsk!=="undefined"){const g=PhotoAsk.gate();if(!g.ok)return toast(esc(g.msg))}  // 83: 본편 카메라가 잠긴 동안은 ＋ 포즈(촬영 부탁)도 막음
     from=where==="cam"?"cam":"chat";
     grantFree();const {free,got,rest}=lists(),s=$("#poseSheet"),C=from==="cam",n=free.length+got.length;
     s.innerHTML=`<h2>${esc(T(C?"camTitle":"title"))}</h2><p class="sub">${esc(n?T(C?"camSub":"sub",{n,total:n+rest.length}):T("empty"))}</p>${Cards.grid([...free,...got,...rest])}`;
@@ -43,6 +44,7 @@ const Pose=(()=>{
     ask(id)}
   // A: 대화에서 부탁. 답장 처리(index.html send)가 take() 로 꺼내 그 몸짓을 꼭 재생하고, 답장에 pose 표시를 남김
   function ask(id){const it=colBy(id);if(!it||busy)return;if(!usable(it))return toast(esc(T("locked")));  // 78-1
+    if(typeof PhotoAsk!=="undefined"){const g=PhotoAsk.gate();if(!g.ok)return toast(esc(g.msg))}  // 83
     if(curTab!=="chat"||(S.room||"seoa")!=="seoa")return;
     pending=id;send(T("ask",{name:it.name}))}
   function take(){const p=pending;pending=null;return p}
