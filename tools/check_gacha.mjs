@@ -93,7 +93,7 @@ if (JSON.stringify(col.card.frameById.x33) !== JSON.stringify(col.card.frameById
     if (!(x.to > x.from) || x.to > f.duration + .01) fail(`50-2: ${m} 구간 ${x.from}~${x.to} 이 파일 길이 ${f.duration.toFixed(2)} 밖`);
     if (!(x.fadeIn >= .2 && x.fadeIn <= .3) && m !== "x30") fail(`50-2: ${m} fadeIn 이 0.2~0.3 이 아님`);
     ready.push(g.name); }
-  const want = { x26: [1, 4, "Glancing"], x27: [3, 8, "Shake_Head"], x28: [0.1, 3, "Touching"], x29: [2, 6, "Avoiding"] };
+  const want = { x26: [1, 4.5, "Glancing"], x27: [3, 8, "Shake_Head"], x28: [0.1, 3, "Touching"], x29: [2, 6, "Avoiding"] };
   for (const [m, [a, b, src]] of Object.entries(want)) { const x = motions.xstage[m] || {}, f = x.file ? JSON.parse(readFileSync(x.file, "utf8")) : {};
     if (x.from !== a || x.to !== b || !String(f.src || "").includes(src)) fail(`50-2: ${m} 구간·원본이 지시와 다름(${x.from}~${x.to}, ${f.src})`); }
   if (motions.xstage.x26 && motions.xstage.x26.damp) fail("50-2: x26 에 damp 가 있음");
@@ -234,7 +234,8 @@ run("1장·10장 섞어 · 천장 켬", Array.from({ length: N }, () => rnd() < 
   for (const p in where) if (/"x31"/.test(readFileSync(p, "utf8"))) fail(`86-1: ${p} 에 x31 이 있음`);
   if (GJ.list.some(g => g.id !== "ring" && (g.motion === "x31" || g.reaction === "x31"))) fail("86-1: 반지가 아닌 선물이 x31 을 씀");
   const mf = (motions.motionFace || {}).x31 || {}; if (!mf.gift || !Array.isArray(mf.seq) || mf.seq.length < 3) fail("86-1: x31 표정 흐름 없음");
-  if (Object.entries(motions.motionFace || {}).some(([k, v]) => k !== "x31" && v.gift)) fail("86-1: x31 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
+  const GF = ["x31", "x26", "x30"];  // 86-2: 구급상자 x26·우산 x30 도 선물 반응 표정 흐름
+  if (Object.entries(motions.motionFace || {}).some(([k, v]) => !GF.includes(k) && v.gift)) fail("86-1·86-2: x31·x26·x30 말고 선물 표정 흐름(gift)이 켜진 몸짓이 있음");
   console.log(`- 86-1 반지 반응 x31: ${x.from}~${x.to}초(건너뜀 ${x.skip}) = ${dur.toFixed(2)}초 · 표정 ${mf.seq.map(s => s.at + s.f).join("→")} · gm06 51번 레어`); }
 // 시연 지정: 첫 장만 그것으로
 {

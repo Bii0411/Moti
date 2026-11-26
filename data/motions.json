@@ -143,7 +143,7 @@
     "p14": { "file": "motions/pose_body_pose_95.json", "from": 0, "to": 5.0, "fadeIn": 1.0, "fadeOut": 0.8, "inPlace": true, "loopFrom": 1.2, "_": "78 촬영 전용(Body pose 95, 한 장짜리 포즈). 1초 동안 자세를 잡고 약 3초 유지. 반복은 1.2초(자세 완성)부터 그대로" },
     "x38": { "file": "motions/xstage_walk.json", "from": 2.067, "to": 3.233, "inPlace": true, "repeat": 3, "fadeIn": 0.3, "fadeOut": 0.5, "_": "76: 대화 중 제자리 걷기. x22(걸어 나가기 연출)와 같은 한 걸음 주기를 3번 — 크리스마스 밖에서 걷는 말·이동에 씀" },
     "x37": { "file": "motions/xstage_sexy_walking_show_neck.json", "from": 0.3, "to": 5.4, "fadeIn": 0.4, "fadeOut": 0.6, "inPlace": true },
-    "x26": { "file": "motions/xstage_glancing_nervously.json", "from": 1.0, "to": 4.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 90, "inPlace": true, "tiltMax": { "Spine01": 8, "Spine02": 12, "neck": 18, "Head": 26 }, "motionVer": 2 },
+    "x26": { "file": "motions/xstage_glancing_x26.json", "from": 1.0, "to": 4.5, "fadeIn": 0.25, "fadeOut": 0.5, "turn": 90, "inPlace": true, "tiltMax": { "Spine01": 9, "Spine02": 16, "neck": 23, "Head": 34 }, "motionVer": 3, "_": "86-2: 예전(motionVer 2)은 원본 파일에 tiltMax(머리 26°)만 걸어, 고개를 숙였다(80°) → 들어 쳐다보고(19°) → 다시 숙이며 고개를 돌리는(87°) 움직임이 26°→19°→26° 로 납작해져 거의 안 보였음. 이제 tools/xs_tilt_scale.mjs 로 뼈마다 세로 기울기를 같은 비율로 줄인 파일(등 8·가슴 14·목 20·머리 30° 가 가장 큰 기울기, 옆으로 돌린 고개는 그대로)을 씀 → 몸짓 0~0.6초 고개를 들어 → 0.6~1.2초 쳐다봄 → 1.2~1.5초 휙 숙이며 시선을 피함 → 끝까지 앞머리 사이로 눈이 보이게 숙인 채. tiltMax 는 안전 한계로 남김(값만 보정 파일 최대보다 조금 위). 끝을 4.0 → 4.5초로 늘려 은근한 고마움 표정이 보일 틈을 줌" },
     "x27": { "file": "motions/xstage_shake_head_up_down.json", "from": 3.0, "to": 8.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 7, "inPlace": true },
     "x28": { "file": "motions/xstage_shy_touching_hands.json", "from": 0.1, "to": 3.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 78, "inPlace": true },
     "x29": { "file": "motions/xstage_shy_avoiding_eye_contact.json", "from": 2.0, "to": 6.0, "fadeIn": 0.25, "fadeOut": 0.3, "turn": 93, "inPlace": true },
@@ -174,6 +174,7 @@
     "x49": { "face": "shy", "_": "m01(큰 웃음)과 달리 조용히 수줍게 웃음" },
     "x44": { "face": "fun" },
     "x45": { "face": "fun" },
+    "x26": { "face": "surprised", "gift": true, "always": true, "seq": [{ "at": 0, "f": "surprised" }, { "at": 1.1, "f": "flustered" }, { "at": 2.2, "f": "shy" }], "talkDamp": 0.85, "_": "86-2 구급상자 반응(경계 단계). 몸짓 시각 기준: 0~1.1 고개를 들어 쳐다보며 놀람 → 1.1 휙 숙이며 시선을 피하기 직전 당황 → 2.2 숙인 채 앞머리 사이로 은근히 고마워하는 수줍음 → 끝(3.5초) 뒤 기본 표정" },
     "x31": { "face": "surprised", "gift": true, "always": true, "seq": [{ "at": 0, "f": "surprised" }, { "at": 1.5, "f": "soft" }, { "at": 3.4, "f": "shy" }, { "at": 5.0, "f": "fun" }, { "at": 7.2, "f": "soft" }], "talkDamp": 0.7, "_": "86-1 반지 반응(선물 반응 중 이 몸짓만 표정 흐름을 씀: gift). 몸짓 시각 기준: 0~1.5 두 손을 턱 앞에 모으며 놀람 → 1.5 숙여 받으며 살짝 미소 → 3.4 몸을 세워 반지를 내려다보며 수줍음 → 5.0 안고 흔들며 웃음(눈 뜬 웃음) → 7.2 손을 내리며 살짝 미소. always = 서버 표정과 상관없이 이 흐름" }
   },
   "_preview": "84-1 시연 패널 「신규 모션 검수」(?debug=1 일 때만): only \"preview\" 몸짓을 하나씩 대화 구도·함께하기 구도에서 재생. faces = 같이 볼 표정 후보(index.html FACE 이름, 원고의 감정 후보에서 고름). 재생은 기록·해금·카드·관계를 바꾸지 않음(quiet)",
@@ -189,7 +190,8 @@
     "x47": { "faces": ["pout", "sulky"] },
     "x48": { "faces": ["shy", "joy"] },
     "x49": { "faces": ["shy", "fun"] },
-    "x31": { "faces": ["shy", "joy"] }
+    "x31": { "faces": ["shy", "joy"] },
+    "x26": { "faces": ["flustered", "shy", "neutral"] }
   },
   "_hands": "53: 기본 손. 모션에 손가락 데이터(fingers)가 없을 때(손가락 없는 XSTAGE 모션·motion.js 의 코드 몸짓·대기 동작·표정만 있는 상태) 손가락에 거는 모양. relaxed = 손가락 뼈마다 기본 자세(쫙 편 손) 대비 지역 회전 [x,y,z,w] — XSTAGE 걷기(x22) 원본 손가락에서 뽑은 편하게 늘어뜨린 손(마디마다 조금씩 굽고 엄지는 안쪽). amount = 그 회전을 몇 배로(0 = 쫙 편 손, 1 = relaxed 그대로, 1보다 크면 더 쥔 손), thumb = 엄지만 따로(없으면 amount). byMotion = 손 모양이 뜻을 가진 몸짓만 예외. 손가락 데이터가 있는 모션은 이 값을 쓰지 않고 원본 손가락(처음·끝 섞기 동안 이 손과 섞임). blendSec = 몸짓이 바뀔 때 손 모양이 따라가는 시간(초). 기본 손이 바뀌어 다르게 보이게 된 몸짓은 motionVer 를 올려 카드 그림을 다시 만듦(코드 몸짓은 motions 의 motionVer, cards.js verOf)",
   "hands": {
