@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261127-1221">
+<meta name="moti-version" content="20261128-0337">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -570,12 +570,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261127-1221">
-<link rel="stylesheet" href="photos.css?v=20261127-1221">
-<link rel="stylesheet" href="cards.css?v=20261127-1221">
-<link rel="stylesheet" href="pose.css?v=20261127-1221">
-<link rel="stylesheet" href="pack.css?v=20261127-1221">
-<link rel="stylesheet" href="together.css?v=20261127-1221">
+<link rel="stylesheet" href="onboarding.css?v=20261128-0337">
+<link rel="stylesheet" href="photos.css?v=20261128-0337">
+<link rel="stylesheet" href="cards.css?v=20261128-0337">
+<link rel="stylesheet" href="pose.css?v=20261128-0337">
+<link rel="stylesheet" href="pack.css?v=20261128-0337">
+<link rel="stylesheet" href="together.css?v=20261128-0337">
 </head>
 <body>
 <div class="app">
@@ -656,21 +656,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261127-1221"></script>
-<script src="motion.js?v=20261127-1221"></script>
-<script src="gacha.js?v=20261127-1221"></script>
-<script src="look.js?v=20261127-1221"></script>
-<script src="alive.js?v=20261127-1221"></script>
-<script src="film.js?v=20261127-1221"></script>
-<script src="photos.js?v=20261127-1221"></script>
-<script src="seoaphoto.js?v=20261127-1221"></script>
-<script src="cards.js?v=20261127-1221"></script>
-<script src="pose.js?v=20261127-1221"></script>
-<script src="photoask.js?v=20261127-1221"></script>
-<script src="together.js?v=20261127-1221"></script>
-<script src="pack.js?v=20261127-1221"></script>
-<script src="storypic.js?v=20261127-1221"></script>
-<script src="onboarding.js?v=20261127-1221"></script>
+<script src="icons.js?v=20261128-0337"></script>
+<script src="motion.js?v=20261128-0337"></script>
+<script src="gacha.js?v=20261128-0337"></script>
+<script src="look.js?v=20261128-0337"></script>
+<script src="alive.js?v=20261128-0337"></script>
+<script src="film.js?v=20261128-0337"></script>
+<script src="photos.js?v=20261128-0337"></script>
+<script src="seoaphoto.js?v=20261128-0337"></script>
+<script src="cards.js?v=20261128-0337"></script>
+<script src="pose.js?v=20261128-0337"></script>
+<script src="photoask.js?v=20261128-0337"></script>
+<script src="together.js?v=20261128-0337"></script>
+<script src="pack.js?v=20261128-0337"></script>
+<script src="storypic.js?v=20261128-0337"></script>
+<script src="onboarding.js?v=20261128-0337"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -815,7 +815,20 @@ const Outfit={
   // 16: 본 이야기의 흰 옷은 친해진 뒤(comfortStage) 와인 바(privatePlaces 장소)에서만. 배경과 세트
   want(){if((S.thread||"main")!=="main"&&S.epOutfit&&(this.cfg().files||{})[S.epOutfit]){const e=typeof Thread!=="undefined"&&Thread.ep(),bs=e&&e.outfitByScene&&e.outfitByScene[S.scene];return bs&&(this.cfg().files||{})[bs]&&(typeof EpStage==="undefined"||!EpStage.on()||EpStage.dressed())?bs:S.epOutfit}  // 40: 에피소드 안 장소별 의상(outfitByScene) · 42: 단계가 있는 에피소드는 장면에서 갈아입은 뒤(또는 dressFrom 단계부터)
   // 16-2: 에피소드 의상은 에피소드 줄기에서만(본 이야기에 크리스마스 옷이 남던 문제)
-const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
+const k=this.rule();
+    // 101: 같은 밤(서버 state.day 가 같은 동안)에는 장소가 바뀌어도 그 밤 처음 정해진 옷 그대로(S.nightLook). day 가 없는 예전 저장값은 위 규칙 그대로
+    const d=story().day;if(d==null||!(DATA.config&&DATA.config.outfits))return k;const L=S.nightLook,F=this.cfg().files||{};
+    if(L&&F[L.k]){if(L.day===d)return L.k;if(L.next&&d>L.day){L.day=d;L.next=false;save();return L.k}}  // next = 밤 넘기기 카드에서 정한 옷 → 판정이 day 를 올려도 그 옷
+    S.nightLook={day:d,k};save();return k},
+  // 16: 단계·장소 규칙만(밤 고정 없이). 흰 옷은 친해진 뒤(comfortStage) privatePlaces 장소에서
+  rule(){const pl=this.cfg().privatePlaces||[0];return curStage()>=(this.cfg().comfortStage||3)&&pl.includes(S.scene||0)?"private":"ops"},
+  // 101: 밤 넘기기 시간 카드(바 1층으로 옮긴 직후) — 새 밤의 옷을 지금 규칙으로 정함
+  nightTurn(){const d=story().day;S.nightLook=d==null?null:{day:d,k:this.rule(),next:true};save()},
+  // 101: 같은 밤 안에서 옷이 바뀌는 상징 장면 — 서아 답장 지문·대사에 갈아입는 말(outfits.dressWords)이 있고, 지금 규칙 옷이 기본(ops)이 아니며 고정된 옷과 다를 때만
+  dress(text){const W=this.cfg().dressWords||[],L=S.nightLook;if(!L||!text||!W.some(w=>text.includes(w))||(S.thread||"main")!=="main")return false;
+    const k=this.rule();if(k===L.k||k===(this.cfg().base||"ops"))return false;L.k=k;L.next=false;save();this.sync();return true},
+  // 101: 장면 바로가기·초기화·되감기 등 — 밤 고정을 풀고 지금 규칙으로 다시
+  unlock(){S.nightLook=null},
   // 지금 상황에 맞는 의상으로. 처음 흰 옷으로 바뀌는 순간에는 서아 한마디(data/ui.json outfit.firstPrivate)
   sync(){const k=this.want();if(typeof Stage!=="undefined"&&Stage.outfit)Stage.outfit(k);
     if(k==="private"&&!S.privSeen&&S.introDone){S.privSeen=true;save();const t=UI("outfit.firstPrivate");if(t&&t!=="outfit.firstPrivate")setTimeout(()=>addMsg("c",t,{tag:UI("outfit.firstPrivateTag")},"seoa"),900)}}
@@ -1602,11 +1615,22 @@ function burst(e){const b=$("#burst");if(/\.(svg|png)$/.test(e))b.innerHTML=`<im
 ["animationend","animationcancel"].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t.classList){t.classList.remove("go");t.classList.remove("fresh")}}));
 // showScene: 배경만 바꿈(대화 장소 값은 그대로) · setScene: 대화의 현재 장소를 바꿈
 function showScene(i){if(!SCENES[i])i=0;$("#stage").style.backgroundImage=`url(${SCENES[i].img})`;Stage.pano.show(i);$("#where").textContent=SCENES[i].name;Look.setPlace(SCENES[i].name)}
+// 101: 서버 답장이 장소를 바꾸면 답장(지문·대사)을 먼저 보이고 → 첫 조각이 다 보인 뒤(replyReveal 간격, 적어도 placeFade.afterReplyMs)
+// → 서아 몸짓이 끝나면(최대 placeFade.afterReplyBusyMs, 넘으면 그냥) 기존 장소 전환(Place)으로 배경을 바꾸고, 바뀌는 순간 「장소가 바뀌었어요」 한 줄.
+// 그 사이 다른 장소 변경(밤 넘기기 바 1층·초기화·다음 답장의 새 장소 등)이 오면 기다리던 전환은 버림. 특별 에피소드는 예전 순서 그대로(send)
+const PlaceAfter=(()=>{let tok=0,want=null;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  async function go(i,gen,m){const my=++tok;want=i;const c=(DATA.config&&DATA.config.placeFade)||{},P=m?cParts(m):[];
+    await sleep(Math.max(c.afterReplyMs!=null?+c.afterReplyMs:900,P.length?revealGap(P[0]):0));
+    if(my!==tok||gen!==GEN)return;want=null;
+    if(!SCENES[i]||i===S.scene)return;
+    const pf=setScene(i,{fade:true,after:true,busyMax:c.afterReplyBusyMs!=null?+c.afterReplyBusyMs:2000,onSwap:()=>addMsg("sys",UI("chat.placeChanged",{place:SCENES[i].name}),null,"seoa")});
+    await pf}
+  return{go,cancel(){tok++;want=null},pending:()=>want}})();
 let sceneBackT;
-function setScene(i,o){clearTimeout(sceneBackT);if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene]&&(!(e.places||[]).includes(i)||!EpStage.placeOk(i)))i=e.scene}  // 42: 에피소드 단계로 아직 안 열린 장소(placeFrom)도 막음  // 40: 에피소드 places 안에서는 장소 이동 허용 · 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
+function setScene(i,o){clearTimeout(sceneBackT);if(!(o&&o.after))PlaceAfter.cancel();if(typeof Thread!=="undefined"){const e=Thread.ep();if(e&&SCENES[e.scene]&&(!(e.places||[]).includes(i)||!EpStage.placeOk(i)))i=e.scene}  // 42: 에피소드 단계로 아직 안 열린 장소(placeFrom)도 막음  // 40: 에피소드 places 안에서는 장소 이동 허용 · 16-4: 특별 에피소드 중에는 어디서 불러도 그 에피소드 장소(예전 저장값·새로고침 포함)
   if(!SCENES[i])i=0;S.scene=i;S.places=S.places||[];if(!S.places.includes(i))S.places.push(i);if(SCENES[i].name)story().location=SCENES[i].name;
   // 39: o.fade = 대화 중 장소가 바뀜 → 어두워졌다 밝아지는 전환(Place). 의상도 어두운 동안 바꿈. 돌려주는 약속은 새 장소로 바뀐 순간(밝아지기 시작) 풀림
-  if(o&&o.fade)return Place.go(i,{dark:!!o.dark,then:()=>{if(typeof Outfit!=="undefined")Outfit.sync()}});
+  if(o&&o.fade)return Place.go(i,{dark:!!o.dark,busyMax:o.busyMax,then:()=>{if(typeof Outfit!=="undefined")Outfit.sync();if(o.onSwap)o.onSwap()}});
   Place.cancel();if(typeof Outfit!=="undefined")setTimeout(()=>Outfit.sync(),0);showScene(i);return Promise.resolve()}
 // 다시 보기 동안만 그때 장소를 보여 주고, 끝나면 대화의 원래 장소로
 function sceneForReplay(i,ms){clearTimeout(sceneBackT);showScene(i);sceneBackT=setTimeout(()=>showScene(S.scene),ms)}
@@ -1632,7 +1656,7 @@ const Place=(()=>{
     const now=()=>{off();showScene(i);if(then)then()};
     if(!vis()||c.on===false){now();return}
     const t0=performance.now();info.i=i;info.busyMs=0;info.waitMs=0;info.ready=null;
-    if(!o.dark)while(busyNow()&&performance.now()-t0<(c.busyMaxMs||12000)){await sleep(100);if(my!==tok)return}
+    if(!o.dark)while(busyNow()&&performance.now()-t0<(o.busyMax!=null?o.busyMax:(c.busyMaxMs||12000))){await sleep(100);if(my!==tok)return}
     info.busyMs=Math.round(performance.now()-t0);
     if(!vis()){if(my===tok)now();return}
     const v=veil(),out=o.dark?0:(c.outMs!=null?c.outMs:300),inn=c.inMs!=null?c.inMs:400,L=SCENES[i]||SCENES[0];
@@ -1896,6 +1920,7 @@ function stageUp(from,to,q){
     const g=DATA.story&&DATA.story.unlock.stage[n];if(g)q.push(g);
     SeoaPhoto.stageUp(n);  // 12: 대표 몸짓 연출이 끝난 뒤 그 단계 사진(68: 끔, 아무것도 안 함)
   }
+  {const m=talkOf("seoa").filter(x=>x.r==="c").slice(-1)[0];if(m)Outfit.dress(turnText(m))}  // 101: 단계가 오른 답장 지문에 갈아입는 대목이 있으면 그 단계 옷으로
   Route.check();  // 51: 갈래 없이 3단계를 넘으면 그때 정함(서버·앱이 이미 정한 갈래는 그대로)
   renderBond();  // 80: 되감기 지점은 5단계에 오른 뒤가 아니라 위기(CRISIS) 답장 직전(End.crisisPoint)
 }
@@ -2248,9 +2273,11 @@ async function send(text,o){
     // 40-1: 에피소드 placeWords — 내 말(없으면 서아 말)에 장소 단어가 있으면 그 에피소드 안 장소(places)로 이동
     const e=Thread.ep(),W=e.placeWords||{},hit=src=>{for(const k in W){if(+k!==S.scene&&(e.places||[]).includes(+k)&&EpStage.placeOk(+k)&&new RegExp(W[k]).test(src||""))return +k}return null};
     const h=hit(text);v.scene=h!=null?h:hit(v.dialogue||v.line||"");v.src="server"}
-  let moved=false;
-  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){moved=true;const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
-    await pf;if(gen!==GEN)return}  // 39: 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
+  let moved=false,later=null;
+  if(v.scene!=null&&SCENES[v.scene]&&v.scene!==S.scene&&(v.src==="server"||!S.placeLock)){moved=true;
+    if(!Thread.ep())later=v.scene;  // 101: 본편은 답장 먼저, 배경은 아래 PlaceAfter 로 뒤에
+    else{const pf=setScene(v.scene,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[v.scene].name}),null,"seoa");
+    await pf;if(gen!==GEN)return}}  // 39: (특별 에피소드) 무대가 어두워졌다 새 장소로 바뀐 순간에 답장(말풍선·몸짓)이 이어짐
   // 몸짓: 서버가 준 몸짓 → 지문의 행동 단어 → 대기 동작 유지
   {const wf=wordFace(actionText(v));if(wf)v.face=wf}  // 73: 지문에 「피식」「노려보」 같은 말이 있으면 그 표정
   // 83: 서버 S5 사진 제안 — 본편 정상 서버 답장 + 지금 단계와 id 가 맞고 아직 안 보인 제안만(예비 지문·크리스마스·포즈 부탁·선물·중복은 무시). 제안 순간 표정은 photo_ask.face
@@ -2279,7 +2306,9 @@ async function send(text,o){
   // 촬영 중(10-B): 답장은 대화 기록에만. 몸짓·표정·입은 촬영 화면을 나올 때 마지막 답장 것으로
   if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:v.face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},mid});
   else{react({m:mid||IDLE,f:v.face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},"",false,(giftMid?"":Fx.first(mid))||(keyM?"push":""),srvOk&&Thread.cur()==="main"&&!giftMid&&!poseX);  // 91: 본편 정상 서버 답장의 일반 몸짓만 테두리 강조(예비 지문·선물 반응·포즈 부탁·에피소드 제외)
-if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
+if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}
+  if(later!=null)PlaceAfter.go(later,gen,talkOf("seoa").filter(x=>x.r==="c").slice(-1)[0]);else PlaceAfter.cancel();  // 101: 답장·몸짓이 시작된 뒤 배경 전환 / 장소가 그대로인 답장이면 앞 답장의 기다리던 전환은 버림
+  if(srvOk&&!epOn)Outfit.dress(actionText(v)+" "+(v.line||""));  // 101: 단계 옷으로 갈아입는 대목(이미 오른 단계의 지문이 이번 답장에 온 경우)  // 19: 결정적 순간 = 카메라 다가감과 같은 때 게이지 반짝임  // 17-1A: 처음 보는 몸짓(레어·시크릿 확대, 일반 카메라만) · 17-1B: 결정적 순간은 카메라만
   // 50-C: 순간 선물 — 지금 묶음의 반응 카드를 처음이면 얻음(같은 카드를 이미 가졌으면 반응만)
   if(o&&o.moment&&giftMid){const gc=Moment.cardOf(gBy(o.moment));if(gc&&!S.col[gc.id]){const last=talkOf("seoa").filter(m=>m.r==="c").slice(-1)[0];
     S.col[gc.id]=seenNow({line:last?(last.act?`*${last.act}* `:"")+last.t:""});save();Cards.capture(gc.id);notifyNew(gc);if(curTab==="album")renderAlbum(gc.id)}}
@@ -2491,7 +2520,7 @@ const Demo=(()=>{
   const stageMotions=k=>(U().stage[k]||{}).motions||[];
   // 단계 n 으로: 그 단계까지의 몸짓은 열고, 위 단계 몸짓은 닫음. 대화 횟수·호감도도 그 단계 시작값으로(이후 진행이 자연스럽게)
   function setStage(n){
-    const st=story(),D=DATA.story||{};n=Math.max(1,Math.min(6,n));st.stage=n;
+    const st=story(),D=DATA.story||{};n=Math.max(1,Math.min(6,n));st.stage=n;Outfit.unlock();  // 101: 시연에서 단계를 바꾸면 그 단계 옷으로
     const above=new Set();for(let k=n+1;k<=6;k++)stageMotions(k).forEach(id=>above.add(id));
     S.unlocked=(S.unlocked||[]).filter(id=>!above.has(id));
     for(let k=2;k<=n;k++)stageMotions(k).forEach(id=>{if(!S.unlocked.includes(id))S.unlocked.push(id)});
@@ -2510,7 +2539,7 @@ const Demo=(()=>{
     SeoaPhoto.resetThread(Thread.cur());  // 81
     PhotoAsk.reset();  // 83
     S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;
-    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0,routeCount:null,routeWhy:null,rw:null,night:null});Night.stop();Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
+    Cards.clear();StoryPic.clear();Object.assign(S,{bond:0,col:{},packPity:null,packNext:null,mood:"normal",birthday:false,force:null,scene:0,story:{},unlocked:[],introDone:false,demoNext:null,placeLock:false,fx:null,judgeBuf:[],judgeKeep:null,judgeN:0,greet:null,moment:null,momentLast:{},giftLog:[],turnN:0,routeCount:null,routeWhy:null,rw:null,night:null,nightLook:null});Night.stop();Moment.glow();  // 50: 열린 순간 선물·「또」 기록도 비움(준 적 있는 선물 S.giftGiven·서버 신호 S.momentSrv 는 그대로)
     start();setScene(0);Stage.setFace("neutral");
   }
   const RESET={
@@ -3451,7 +3480,7 @@ const End=(()=>{
     S.rwUsed=(S.rwUsed||0)+1;restore(k,p);r.end=null;r.wait=false;save();renderTop();
     addMsg("c",C().line||"",{intro:true,rewind:1},"seoa");renderBond();renderLog();Demo.render()}
   function restore(k,p){Together.close();/* 84: 되감기 */stop();GEN++;judgeTok++;judgeP=null;busy=false;waiting=false;finishReveal();EpScene.stop();Fn.set(false);closeSheets();
-    S.chats.seoa=cp(p.chat);S.read.seoa=S.chats.seoa.length+1;S.judgeBuf=cp(p.jb||[]);S.judgeN=p.jn||0;S.judgeKeep=null;
+    S.chats.seoa=cp(p.chat);S.read.seoa=S.chats.seoa.length+1;if(k==="main")Outfit.unlock();/* 101 */S.judgeBuf=cp(p.jb||[]);S.judgeN=p.jn||0;S.judgeKeep=null;
     if(k==="main"){S.story=cp(p.story);S.bond=p.bond||0;if(p.route){S.routeCount=cp(p.route.c);S.routeWhy=p.route.why}S.night=cp(p.night||null);Night.stop()}  // 80: state 통째(섞지 않음) · 밤 넘기기 진행도 그 시점
     else{const st=story();st.recent_lines=cp(p.lines||[]);st.summary=p.summary||"";
       const T0=S.threads||(S.threads={}),t=T0[k]||(T0[k]={});t.ep=cp(p.ep)||t.ep;
@@ -3465,7 +3494,7 @@ const End=(()=>{
     delete R()[k];SeoaPhoto.resetThread(k);  // 81: 그 줄기의 부재중 셀카 상태도 처음으로
     if(k==="main")PhotoAsk.reset();  // 83: 본편 사진 제안 상태도 처음으로(카드·앨범 사진은 그대로)
     if(k==="main"){S.night=null;Night.stop();S.chats.seoa=[];S.read.seoa=0;if(S.sid)delete S.sid.seoa;S.story={};S.bond=0;S.routeCount=null;delete S.routeWhy;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=0;S.demoNext=null;
-      S.introDone=false;S.scene=0;save();setScene(0,{fade:true});Outfit.sync();renderBond();renderTop();openRoom("seoa")}  // 오프닝부터(첫 만남 연출은 이미 봤으면 다시 안 함)
+      S.introDone=false;S.scene=0;Outfit.unlock();save();setScene(0,{fade:true});Outfit.sync();renderBond();renderTop();openRoom("seoa")}  // 오프닝부터(첫 만남 연출은 이미 봤으면 다시 안 함)
     else{Thread.go("main");if(S.threads)delete S.threads[k];save();startStory(k)}}  // 이미 산 에피소드라 다이아를 다시 받지 않음
   // 시연 패널: 그 줄기로 가서, 지점이 없으면 지금을 지점으로 두고 바로 실패
   function demo(k){
@@ -3577,7 +3606,7 @@ const Night=(()=>{
     const vis=!!el&&S.room==="seoa"&&curTab==="chat";
     if(vis){el.querySelector("b").textContent=n.card;if(c.color)el.style.background=c.color;el.style.transitionDuration=out+"ms";el.hidden=false;void el.offsetWidth;el.classList.add("on");
       await sleep(out);if(!alive())return;el.classList.add("txt")}
-    const pl=+c.place||0;if(SCENES[pl]&&S.scene!==pl){Place.cancel();setScene(pl);if(typeof Outfit!=="undefined")Outfit.sync()}
+    const pl=+c.place||0;if(SCENES[pl]&&S.scene!==pl){Place.cancel();setScene(pl)}Outfit.nightTurn();Outfit.sync();  // 101: 새 밤의 옷은 바 1층에 온 이 순간 규칙으로(그 밤 동안 유지)
     if(!vis)return;
     await sleep(c.cardMs!=null?+c.cardMs:1500);if(!alive())return;
     el.classList.remove("txt");el.style.transitionDuration=inn+"ms";el.classList.remove("on");setTimeout(()=>{if(!el.classList.contains("on"))el.hidden=true},inn+60);await sleep(Math.round(inn*.6))}
@@ -3593,7 +3622,7 @@ const Night=(()=>{
       if(!Cam.isOpen())react({m:IDLE,f:f.face||"soft",t:f.line,e:""},"",false,"");
       renderLog();return false}
     const sc=v.location?SCENES.findIndex(x=>x.name===v.location):-1;
-    if(sc>=0&&sc!==S.scene){const pf=setScene(sc,{fade:true});addMsg("sys",UI("chat.placeChanged",{place:SCENES[sc].name}),null,"seoa");await pf;if(!alive())return false}
+    const later=sc>=0&&sc!==S.scene?sc:null;  // 101: 첫마디도 답장 먼저, 배경은 뒤에(바 1층 전환은 위 시간 카드 그대로)
     let face=emoFace(v.emotion);{const wf=wordFace(actionText(v));if(wf)face=wf}
     const emo=v.emotion||(DATA.motions.faceEmotion||{})[face]||"";let mid=pickMotion(v.motion,actionText(v),"");
     let mfit=motionFit(mid,face);if(mfit&&mfit.drop){mfit=null;mid=null}if(mfit)face=mfit.f;  // 84-2 A-3
@@ -3601,6 +3630,7 @@ const Night=(()=>{
     const st=story(),last=talkOf("seoa").slice(-1)[0];n.reply=turnText(last);n.ph="judge";
     st.recent_lines=[...(st.recent_lines||[]),n.reply].slice(-3);if(v.location)st.location=v.location;save();
     if(Cam.isOpen())Cam.hold({r:{m:mid||IDLE,f:face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},mid});else{react({m:mid||IDLE,f:face,t:v.line,e:emo,fs:mfit&&mfit.fs,td:mfit&&mfit.td},"",false,Fx.first(mid));firstSeen(mid)}
+    if(later!=null)PlaceAfter.go(later,GEN,last);
     Demo.render();return true}
   // 자동 「[다음 밤]」 /judge(첫마디 바로 뒤). last_user 「[다음 밤]」 · last_reply 첫마디 · need_summary false · reply_ok []. 판정 횟수(요약 주기)에 안 셈
   function judgeOnce(n){const st=story(),tk=++judgeTok,g=GEN,aff0=st.affection||0,t0=performance.now();
