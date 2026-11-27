@@ -47,7 +47,15 @@
         "ink": "#4b4560",
         "sub": "#8a8398",
         "tagBg": "#ffffff",
-        "tagInk": "#4b4560"
+        "tagInk": "#4b4560",
+        "title": "#3b3452",
+        "titleHi": "rgba(255,255,255,0.7)",
+        "deco": "#a49cbb",
+        "decoHi": "#c8c1d8",
+        "tagLine": "rgba(75,69,96,0.22)",
+        "photoLine": "rgba(75,69,96,0.16)",
+        "edge": "rgba(60,52,80,0.16)",
+        "edgeHi": "rgba(255,255,255,0.75)"
       }
     },
     "rare": {
@@ -68,19 +76,33 @@
         "tagInk": "#d6c9ff",
         "light": "rgba(255,255,255,0.2)",
         "sheen": "rgba(255,255,255,0.55)",
-        "moveS": 7
+        "moveS": 7,
+        "title": "#342b55",
+        "titleHi": "rgba(255,255,255,0.85)",
+        "deco": "#8b78f0",
+        "decoHi": "#6fd9c4",
+        "tagLine": "rgba(214,201,255,0.75)",
+        "glow": "rgba(196,176,255,0.45)",
+        "photoLine": "rgba(255,255,255,0.8)",
+        "edge": "rgba(92,80,160,0.22)",
+        "edgeHi": "rgba(255,255,255,0.85)",
+        "sparkle": "#ffffff",
+        "twinkle": true
       }
     },
     "special": {
       "color": "#f5c66b",
       "card": {
+        "_frame87_2": "87-2: 금속 느낌을 살리려 밝은·어두운 금색 단계를 늘림(같은 금색 계열, 지나친 노랑은 피함)",
         "frame": [
-          "#b9873a",
-          "#f5c66b",
-          "#fff0c6",
-          "#e0ad4c",
-          "#f5c66b",
-          "#a87a2e"
+          "#8f6223",
+          "#d6a24a",
+          "#fff0c4",
+          "#c48e38",
+          "#f3cf7c",
+          "#fff7dc",
+          "#b5832f",
+          "#7d5621"
         ],
         "frameAngle": 125,
         "ink": "#3e2d12",
@@ -95,7 +117,17 @@
         ],
         "sparkle": "#fff6d8",
         "sparkles": 3,
-        "moveS": 9
+        "moveS": 9,
+        "title": "#25152f",
+        "titleHi": "rgba(255,243,210,0.9)",
+        "deco": "#6e4814",
+        "decoHi": "#fff3cc",
+        "tagLine": "#f0c66e",
+        "glow": "rgba(255,206,110,0.6)",
+        "photoLine": "#7a5419",
+        "edge": "#6b4512",
+        "edgeHi": "rgba(255,246,214,0.9)",
+        "twinkle": true
       }
     }
   },
@@ -1051,16 +1083,19 @@
       "radius": 0.07,
       "photoRadius": 0.045,
       "band": 0.25,
-      "name": 0.085,
+      "_87_2": "87-2 C안: name = 이름 글자(카드 너비 비율, 글꼴 assets/fonts/card-title.woff2 Pretendard Black), no = 번호(card-latin.woff2 Chakra Petch Bold Italic), noW = 번호 칸 너비, skew = 이름·번호·등급 표 기울기(도), small = 단계·장소·날짜 줄, tag = 등급 표 글자. 목록·크게 보기·뽑기(cards.css)와 공유 그림(cards.js shareImage)이 같은 값을 씀",
+      "name": 0.108,
       "nameMinPx": 10,
       "nameFitMinPx": 6,
-      "small": 0.055,
+      "small": 0.047,
       "smallMinPx": 7,
-      "no": 0.1,
-      "noMinPx": 11,
-      "tag": 0.05,
+      "no": 0.148,
+      "noMinPx": 12,
+      "noW": 0.2,
+      "skew": 9,
+      "tag": 0.057,
       "tagMinPx": 6.5,
-      "tagTrack": 0.18,
+      "tagTrack": 0.08,
       "photoY": 0.3
     },
     "back": {

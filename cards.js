@@ -113,11 +113,15 @@ const Cards=(()=>{
     n("pcB",d(P.border,.0625));n("pcR",d(P.radius,.07));n("pcr",d(P.photoRadius,.045));n("pcBand",d(P.band,.25));
     n("pcNm",d(P.name,.085));n("pcNmMin",d(P.nameMinPx,10)+"px");n("pcSm",d(P.small,.055));n("pcSmMin",d(P.smallMinPx,7)+"px");
     n("pcNo",d(P.no,.1));n("pcNoMin",d(P.noMinPx,11)+"px");n("pcTag",d(P.tag,.05));n("pcTagMin",d(P.tagMinPx,6.5)+"px");n("pcTrack",d(P.tagTrack,.18)+"em");n("pcY",d(P.photoY,.3)*100+"%");
+    n("pcSkew",d(P.skew,9)+"deg");n("pcNoW",d(P.noW,.22));  // 87-2: 이름·번호·등급 표 기울기, 번호 칸 너비
     n("bkBg",d(B.bg,"#16131f"));n("bkLine",d(B.line,"rgba(255,255,255,.07)"));n("bkName",d(B.name,"#a99fcc"));n("bkW",d(B.nameWidth,.6)*100+"%");n("bkNo",d(B.no,"#6c6585"));
     GR.forEach(g=>{const c=G(g),au=c.aurora||[];
       n("fr-"+g,gradCss(c.frame||["#f4f1ea"],c.frameAngle));n("ink-"+g,c.ink||"#4b4560");n("sub-"+g,c.sub||c.ink||"#8a8398");n("tbg-"+g,c.tagBg||"#fff");n("tink-"+g,c.tagInk||c.ink||"#4b4560");
       n("lt-"+g,c.light||"transparent");n("sh-"+g,c.sheen||"transparent");n("sp-"+g,c.sparkle||"#fff");n("mv-"+g,(c.moveS||8)+"s");
-      n("au-"+g,au.length?`linear-gradient(115deg,${[...au,au[0]].join(",")})`:"none")});
+      n("au-"+g,au.length?`linear-gradient(115deg,${[...au,au[0]].join(",")})`:"none");
+      // 87-2: 이름 글자·빛 받는 아래 가장자리, 장식(궤도·별·사선) 두 색, 등급 표 테두리·빛, 사진 둘레 줄, 테두리 안쪽 어두운 줄·밝은 줄
+      n("tt-"+g,c.title||c.ink||"#4b4560");n("th-"+g,c.titleHi||"transparent");n("dc-"+g,c.deco||c.sub||"#8a8398");n("dh-"+g,c.decoHi||c.deco||"#ffffff");
+      n("tl-"+g,c.tagLine||"transparent");n("gl-"+g,c.glow||"transparent");n("pl-"+g,c.photoLine||"transparent");n("ed-"+g,c.edge||"transparent");n("eh-"+g,c.edgeHi||"transparent")});
     return v.join(";")}
   // 등급마다 사진 위 효과: 레어 빛 한 줄, 시크릿 오로라 + 반짝이(개수 grades.special.card.sparkles)
   function fx(g){const c=G(g);let h="";if(c.light)h+='<i class="pclt"></i>';if(c.aurora&&c.aurora.length)h+='<i class="pcau"></i>';
@@ -128,13 +132,18 @@ const Cards=(()=>{
   // 아래 띠 작은 줄: 관계 단계 이름 · 처음 본 장소(짧은 이름) · 처음 본 날짜 MM.DD (기록이 없는 것은 뺌)
   function bandLine(a){const d=new Date(a.at),sc=SCENES[a.scene];
     return [a.stage?stageName(a.stage):"",sc?(sc.short||sc.name):"",a.at?T("mmdd",{m:P2(d.getMonth()+1),d:P2(d.getDate())}):""].filter(Boolean).join(T("band"))}
-  const band=(x,a)=>`<span class="pcbd"><span class="pctx"><b class="pcnm">${esc(x.name)}</b><small class="pcsub">${esc(bandLine(a))}</small></span><i class="pcno">${no2(x)}</i></span>`;
+  // 87-2 C안: 아래 띠 = 기울어진 굵은 이름(궤도 곡선 + 별) / 가는 줄(끝에 사선) / 「///」 + 단계 · 장소 · 날짜 | 기울어진 구분선 + 별 + 큰 번호 + 번호 아래 사선
+  //   장식 밀도는 카드 크기에 따라(cards.css 컨테이너 쿼리): 목록 3열 = 이름·번호·줄만, 2열 이상 = 사선·별·궤도, 크게 보기 = 반짝임까지
+  const ORB='<svg class="pcorb" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path class="ou" d="M2,25 C6,38 62,43 88,27 C99,20 99,9 86,6"/><path class="o1" d="M2,25 C6,38 62,43 88,27 C99,20 99,9 86,6"/><path class="o2" d="M10,9 C28,1 56,-1 76,3"/></svg>';
+  const band=(x,a)=>`<span class="pcbd"><span class="pctx"><span class="pcnmw">${ORB}<b class="pcnm">${esc(x.name)}</b><i class="pcst s4"></i><i class="pcst s5"></i></span><i class="pcrule"></i><small class="pcsub">${esc(bandLine(a))}</small></span><span class="pcnoa"><i class="pcdiv"></i><i class="pcst s6"></i><i class="pcno">${no2(x)}</i><i class="pcnobar"></i></span></span>`;
+  // 87-2: 등급 표 = 기울어진 각진 영문(같은 글꼴, 등급마다 색·빛만 다름) + 양옆 작은 별 + 궤도 고리
+  const tag=g=>`<span class="pctag"><i class="pcst"></i><b>${esc(tagOf(g))}</b><i class="pcst"></i></span>`;
   const curChar=()=>typeof colChar!=="undefined"?colChar:"seoa";
   function backName(ch){const c=typeof chBy==="function"&&chBy(ch);if(!c||!c.nameEn)return "";
     return `<span class="pcname" style="--nm:url(assets/name_${esc(ch)}.svg)"><span class="sr">${esc(c.nameEn)}</span></span>`}
   function cell(x){const a=S.col[x.id];
     if(a){const u=urlNow(a.char,x.id);
-      return `<button class="mc got" data-f="${x.id}" aria-label="${esc(T("open",{name:x.name}))}"><span class="pc g-${x.grade}"><span class="pcph">${u?`<img class="mcimg" src="${u}" alt="">`:`${SIL}<img class="mcimg" alt="" hidden>`}${fx(x.grade)}</span><span class="pctag">${esc(tagOf(x.grade))}</span>${x.pose?`<span class="pcpose">${esc(T("pose"))}</span>`:""}${band(x,a)}</span></button>`}  // 78: 포즈 카드 표시
+      return `<button class="mc got" data-f="${x.id}" aria-label="${esc(T("open",{name:x.name}))}"><span class="pc g-${x.grade}"><span class="pcph">${u?`<img class="mcimg" src="${u}" alt="">`:`${SIL}<img class="mcimg" alt="" hidden>`}${fx(x.grade)}</span>${tag(x.grade)}${x.pose?`<span class="pcpose">${esc(T("pose"))}</span>`:""}${band(x,a)}</span></button>`}  // 78: 포즈 카드 표시
     // 38: 열렸지만 못 본 칸·잠긴 칸 모두 같은 뒷면. 누를 수 없는 칸(힌트 없음)
     return `<div class="mc back" role="img" aria-label="${esc(T("backAria",{no:no2(x)}))}"><span class="pc">${backName(curChar())}<i class="pcno">${no2(x)}</i></span></div>`}
   const grid=L=>`<div class="mcards" style="${vars()}">${L.map(cell).join("")}</div>`;
@@ -146,6 +155,8 @@ const Cards=(()=>{
   function fitName(e,min){if(!e)return;e.style.fontSize="";const cw=e.clientWidth,sw=e.scrollWidth;if(!cw||sw<=cw+.5)return;
     const fs=parseFloat(getComputedStyle(e).fontSize)||10;min=min||((C().photocard||{}).nameFitMinPx)||6;e.style.fontSize=Math.max(min,Math.floor(fs*cw/sw*96)/100)+"px"}  // 0.96 = 글자 폭 반올림으로 1px 넘치는 것 막기
   const fitNames=(root,min)=>root&&root.querySelectorAll(".pcnm").forEach(e=>fitName(e,min));
+  // 87-2: 카드 글꼴(assets/fonts)이 늦게 오면 글자 폭이 바뀌므로 그때 이름 맞추기를 다시
+  if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener("loadingdone",()=>fitNames(document.body));
   function hydrate(root){fitNames(root);root.querySelectorAll(".mc.got").forEach(b=>{const im=b.querySelector(".mcimg");if(!im||!im.hidden)return;const id=b.dataset.f,a=S.col[id];if(!a)return;
     url(a.char,id).then(u=>{if(!u||!im.isConnected)return;im.src=u;im.hidden=false;const sv=b.querySelector(".mcsil");if(sv)sv.remove()})})}
   subs.push(k=>{const r=document.getElementById("album");if(!r||!k)return;const id=k.slice(k.indexOf(":")+1),b=r.querySelector(`.mc.got[data-f="${id}"]`);if(!b)return;
@@ -160,7 +171,7 @@ const Cards=(()=>{
   const $v=s=>vEl.querySelector(s);
   function build(){if(vEl)return;vEl=document.createElement("div");vEl.className="cv";vEl.id="cardView";vEl.setAttribute("role","dialog");vEl.setAttribute("aria-modal","true");vEl.setAttribute("aria-hidden","true");
     vEl.innerHTML=`<div class="cvbg"></div><button class="cvx" data-cv="close" aria-label="${esc(T("close"))}">${Icon.svg("close",22)}</button>
-      <div class="cvcard"><div class="cvframe"><div class="pc"><div class="pcph cvin"><div class="cvplace"></div><div class="cvdim"></div><div class="cvgl"></div>${SIL}<img class="cvimg" alt=""><span class="cvfx"></span><span class="cvload"></span></div><span class="pctag"></span><span class="pcbd"><span class="pctx"><b class="pcnm"></b><small class="pcsub"></small></span><i class="pcno"></i></span></div></div></div>
+      <div class="cvcard"><div class="cvframe"><div class="pc"><div class="pcph cvin"><div class="cvplace"></div><div class="cvdim"></div><div class="cvgl"></div>${SIL}<img class="cvimg" alt=""><span class="cvfx"></span><span class="cvload"></span></div><span class="pctag"></span><span class="pcbd"></span></div></div></div>
       <div class="cvinfo"><p class="cvln"></p></div>
       <div class="cvbar"><button data-cv="prev">${Icon.svg("back",18)}<span></span></button><button data-cv="share" class="cvsh"><span></span></button><button data-cv="next"><span></span>${Icon.svg("back",18)}</button></div>`;
     document.querySelector(".app").appendChild(vEl);
@@ -205,9 +216,9 @@ const Cards=(()=>{
   async function show(){const id=vIds[vi],x=colBy(id),a=S.col[id];if(!x||!a)return close();
     const my=++vTok,mo=motionOf(id),key=a.outfit||C().defaultOutfit||"ops",sc=SCENES[a.scene]||SCENES[0];
     // 38: 목록 칸과 같은 포토카드(테두리·등급 표·아래 띠·번호). 아래 글은 처음 봤을 때 대사만(이름·단계·날짜는 띠 안)
-    $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade+(x.pose?" pose":"");$v(".pctag").textContent=tagOf(x.grade);{const pp=$v(".cvframe>.pc");let pb=pp.querySelector(".pcpose");if(x.pose&&!pb){pb=document.createElement("span");pb.className="pcpose";pp.appendChild(pb)}if(pb){pb.textContent=T("pose");pb.hidden=!x.pose}}  // 78
+    $v(".cvframe").setAttribute("style",vars());$v(".cvframe>.pc").className="pc g-"+x.grade+(x.pose?" pose":"");$v(".cvframe .pctag").outerHTML=tag(x.grade);{const pp=$v(".cvframe>.pc");let pb=pp.querySelector(".pcpose");if(x.pose&&!pb){pb=document.createElement("span");pb.className="pcpose";pp.appendChild(pb)}if(pb){pb.textContent=T("pose");pb.hidden=!x.pose}}  // 78
     $v(".cvfx").innerHTML=fx(x.grade);
-    $v(".pcnm").textContent=x.name;$v(".pcsub").textContent=bandLine(a);$v(".pcno").textContent=no2(x);fitName($v(".pcnm"));
+    $v(".cvframe .pcbd").outerHTML=band(x,a);fitName($v(".cvframe .pcnm"));  // 87-2: 목록 칸과 같은 띠(장식 포함)
     const ln=x.line||speechOnly(a.line||a.text||"");$v(".cvln").textContent=ln;$v(".cvln").hidden=!ln;  // 52: 칸에 적힌 한 줄(data/collection.json line, 카드 팩 SECRET 등)이 먼저
     $v('[data-cv="prev"]').disabled=vi<=0;$v('[data-cv="next"]').disabled=vi>=vIds.length-1;
     $v(".cvplace").style.backgroundImage=`url(${sc.img})`;
@@ -253,7 +264,9 @@ const Cards=(()=>{
     g.save();g.translate(cx,y+h/2);g.transform(1,0,Math.tan(-15*Math.PI/180),1,0,0);g.translate(-cx,-(y+h/2));g.fillStyle=gr;g.fillRect(cx-bw/2,y-h*.3,bw,h*1.6);g.restore()}
   function star(g,cx,cy,s){const r=s/2,q=r*.22;g.beginPath();g.moveTo(cx,cy-r);g.lineTo(cx+q,cy-q);g.lineTo(cx+r,cy);g.lineTo(cx+q,cy+q);g.lineTo(cx,cy+r);g.lineTo(cx-q,cy+q);g.lineTo(cx-r,cy);g.lineTo(cx-q,cy-q);g.closePath();g.fill()}
   const fit=(g,t,w)=>{if(g.measureText(t).width<=w)return t;while(t.length>1&&g.measureText(t+"…").width>w)t=t.slice(0,-1);return t+"…"};
-  async function shareImage(id){const a=S.col[id],x=colBy(id);if(!a||!x)return null;const b=await blob(a.char,id);if(!b)return null;const img=await loadImg(b);if(!img)return null;
+  async function shareImage(id){const a=S.col[id],x=colBy(id);if(!a||!x)return null;
+    try{if(document.fonts)await Promise.all([document.fonts.load(`900 40px "MotiCardTitle"`,x.name),document.fonts.load(`italic 700 40px "MotiCardLatin"`,"SECRETDAILYRARE0123456789")])}catch(e){}  // 87-2: 카드 글꼴이 다 온 뒤 그림(못 받으면 대체 글꼴)
+    const b=await blob(a.char,id);if(!b)return null;const img=await loadImg(b);if(!img)return null;
     const P=PC(),Sh=C().share||{},gc=G(x.grade),d=(v,y)=>v!=null?v:y;
     const Bk=d(P.border,.0625),CW=Math.round(img.naturalWidth/(1-2*Bk)),CH=Math.round(CW*1.5),B=CW*Bk,R=CW*d(P.radius,.07),r=CW*d(P.photoRadius,.045),BH=CW*d(P.band,.25);
     const pad=Math.round(CW*.05),foot=Math.round(CW*.06);
@@ -270,18 +283,59 @@ const Cards=(()=>{
     if(gc.aurora&&gc.aurora.length){g.fillStyle=cssGrad(g,px,py,pw,ph,[...gc.aurora,gc.aurora[0]],115);g.fillRect(px,py,pw,ph)}
     if(gc.sparkles){g.fillStyle=gc.sparkle||"#fff";[[.84,.14,1],[.14,.47,.7],[.74,.8,.85]].slice(0,Math.min(3,gc.sparkles)).forEach(([sx,sy,k])=>star(g,px+pw*sx,py+ph*sy,CW*.07*k))}
     g.restore();
-    // 왼쪽 위 등급 표(영문, 자간 넓게)
-    const tf=CW*d(P.tag,.05),tr=tf*d(P.tagTrack,.18),tt=tagOf(x.grade);g.font=font(800,tf);g.textBaseline="middle";
-    const cw=[...tt].map(ch=>g.measureText(ch).width),tw=cw.reduce((p,q)=>p+q,0)+tr*(cw.length-1),th=tf*1.8,tx=px+CW*.035,ty=py+CW*.035;
-    g.fillStyle=gc.tagBg||"#fff";rr(g,tx,ty,tw+tf*1.2,th,th/2);g.fill();g.fillStyle=gc.tagInk||"#4b4560";
-    let cx=tx+tf*.6;[...tt].forEach((ch,i)=>{g.fillText(ch,cx,ty+th/2+tf*.04);cx+=cw[i]+tr});
-    // 아래 띠: 이름 / 작은 줄 · 오른쪽 번호
-    const nf=CW*d(P.name,.085),sf=CW*d(P.small,.055),nof=CW*d(P.no,.1),bt=Y+CH-BH,lx=X+B,blockH=nf*1.2+sf*1.35,top=bt+(BH-blockH)/2;
-    g.font=font(800,nof);g.textBaseline="middle";const nt=no2(x),nw=g.measureText(nt).width;g.fillStyle=gc.ink||"#4b4560";g.fillText(nt,X+CW-B-nw,bt+BH/2);
-    const tw2=CW-2*B-nw-CW*.04;g.textBaseline="alphabetic";
-    g.font=font(800,nf);const nw2=g.measureText(x.name).width;if(nw2>tw2)g.font=font(800,Math.max(nf*.55,nf*tw2/nw2));  // 52: 긴 이름은 글자만 줄임
-    g.fillStyle=gc.ink||"#4b4560";g.fillText(fit(g,x.name,tw2),lx,top+nf*.98);
-    g.font=font(600,sf);g.fillStyle=gc.sub||gc.ink||"#8a8398";g.fillText(fit(g,bandLine(a),tw2),lx,top+nf*1.2+sf*1.08);
+    // 87-2: 목록·크게 보기(cards.css)와 같은 C안 모양을 같은 값(collection.json photocard·grades)으로. 반짝임은 멈춘 한 순간으로
+    const K=v=>CW*v,sk=Math.tan(d(P.skew,9)*Math.PI/180),FT=`"MotiCardTitle","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`,FL=`"MotiCardLatin","Pretendard","Apple SD Gothic Neo",system-ui,sans-serif`;
+    const dc=gc.deco||gc.sub||"#8a8398",dhi=gc.decoHi||dc,tt=gc.title||gc.ink||"#4b4560",th=gc.titleHi||null;
+    // 테두리 안쪽: 어두운 가는 줄 + 밝은 줄, 사진 둘레 줄
+    if(gc.edgeHi){g.strokeStyle=gc.edgeHi;g.lineWidth=K(.011);rr(g,X+K(.0055),Y+K(.0055),CW-K(.011),CH-K(.011),R-K(.0055));g.stroke()}
+    if(gc.edge){g.strokeStyle=gc.edge;g.lineWidth=K(.0045);rr(g,X+K(.00225),Y+K(.00225),CW-K(.0045),CH-K(.0045),R-K(.00225));g.stroke()}
+    if(gc.photoLine){g.strokeStyle=gc.photoLine;g.lineWidth=K(.004);rr(g,px-K(.002),py-K(.002),pw+K(.004),ph+K(.004),r+K(.002));g.stroke()}
+    const star4=(cx,cy,sz,col)=>{g.fillStyle=col;star(g,cx,cy,sz)};
+    // 기울인 사선 줄무늬(폭 w, 높이 h, 한 칸 bar, 주기 per)
+    const slashes=(x0,cy,w,h,bar,per,ang,col,al)=>{g.save();g.globalAlpha=al;g.fillStyle=col;const t=Math.tan(ang*Math.PI/180);for(let x=x0;x<x0+w-.5;x+=per){g.beginPath();g.moveTo(x+t*h/2,cy-h/2);g.lineTo(x+bar+t*h/2,cy-h/2);g.lineTo(x+bar-t*h/2,cy+h/2);g.lineTo(x-t*h/2,cy+h/2);g.closePath();g.fill()}g.restore()};
+    // 왼쪽 위 등급 표: Chakra Petch Bold Italic, 양옆 별, 테두리·빛, 레어·시크릿은 궤도 고리
+    {const tf=K(d(P.tag,.052)),tr=tf*d(P.tagTrack,.08),tt2=tagOf(x.grade).toUpperCase();g.font=`italic 700 ${tf}px ${FL}`;g.textBaseline="middle";
+      const cw=[...tt2].map(ch=>g.measureText(ch).width),txw=cw.reduce((p,q)=>p+q,0)+tr*cw.length,st=tf*.62,gap=tf*.35,pl=tf*.7,prr=tf*.8,h=tf*1.74;
+      const w=pl+st+gap+txw+gap+st+prr,tx=px+K(.03),ty=py+K(.03);
+      if(gc.tagLine&&(x.grade!=="common")){g.save();g.strokeStyle=gc.tagLine;g.globalAlpha=.7;g.lineWidth=K(.0025);g.beginPath();g.ellipse(tx+w/2,ty+h/2,w*.57,h*.78,-8*Math.PI/180,-.75*Math.PI,.25*Math.PI);g.stroke();g.restore()}
+      g.save();if(gc.glow){g.shadowColor=gc.glow;g.shadowBlur=K(.024)}g.fillStyle=gc.tagBg||"#fff";rr(g,tx,ty,w,h,h/2);g.fill();g.restore();
+      if(gc.tagLine){g.strokeStyle=gc.tagLine;g.lineWidth=K(.003);rr(g,tx+K(.0015),ty+K(.0015),w-K(.003),h-K(.003),h/2);g.stroke()}
+      const ink=x.grade==="special"?(()=>{const gr=g.createLinearGradient(0,ty+h*.2,0,ty+h*.8);gr.addColorStop(0,"#fff6d6");gr.addColorStop(.48,"#f7d27f");gr.addColorStop(1,"#c99239");return gr})():(gc.tagInk||"#4b4560");
+      const scol=x.grade==="special"?"#ffe7a6":(gc.tagInk||"#4b4560");
+      star4(tx+pl+st/2,ty+h/2,st,scol);let cx=tx+pl+st+gap;g.fillStyle=ink;[...tt2].forEach((ch,i)=>{g.fillText(ch,cx,ty+h/2+tf*.04);cx+=cw[i]+tr});star4(cx+gap-tr+st/2,ty+h/2,st,scol)}
+    // 아래 띠
+    const bt=Y+CH-BH,lx=X+B+K(.004),ncR=X+CW-B-K(.004),ncL=ncR-K(d(P.noW,.2)),txR=ncL-K(.035);
+    const nf0=K(d(P.name,.1)),sf=K(d(P.small,.047)),nof=K(d(P.no,.135));
+    g.font=`900 ${nf0}px ${FT}`;let nf=nf0;const maxW=txR-lx-K(.022)-nf0*.12;{const w0=g.measureText(x.name).width;if(w0>maxW)nf=Math.max(nf0*.4,nf0*maxW/w0*.97)}  // 52: 긴 이름은 글자만 줄임
+    g.font=`900 ${nf}px ${FT}`;const name=fit(g,x.name,maxW),nw=g.measureText(name).width;
+    const lineH=nf*1.16,colH=lineH+K(.011)+K(.0035)+K(.011)+sf*1.3,y0=bt+(BH-colH)/2+K(.006);
+    const wx=lx,wy=y0,ww=nw+nf*.12+K(.022),wh=lineH;
+    // 궤도 곡선 + 별
+    {const ox=wx-K(.03),oy=wy-wh*.34,ow=ww+K(.09),oh=wh*1.68,P_=(a,b)=>[ox+a/100*ow,oy+b/40*oh];
+      const path=(pts)=>{g.beginPath();g.moveTo(...P_(pts[0],pts[1]));for(let i=2;i<pts.length;i+=6)g.bezierCurveTo(...P_(pts[i],pts[i+1]),...P_(pts[i+2],pts[i+3]),...P_(pts[i+4],pts[i+5]))};
+      const o1=[2,25,6,38,62,43,88,27,99,20,99,9,86,6],o2=[10,9,28,1,56,-1,76,3],lw=K(x.grade==="common"?.0032:.0044);g.save();g.lineCap="round";
+      const oc=x.grade==="common"?dc:(x.grade==="special"?"#fff6da":dhi),oa=x.grade==="common"?.55:1;
+      if(x.grade==="special"){g.strokeStyle="#7c5214";g.globalAlpha=.38;g.lineWidth=lw*2.4;path(o1);g.stroke()}
+      g.strokeStyle=oc;g.globalAlpha=oa;g.lineWidth=x.grade==="special"?lw*1.2:lw;path(o1);g.stroke();g.globalAlpha=oa*.45;g.lineWidth=lw;path(o2);g.stroke();g.restore();
+      const sc=x.grade==="common"?dc:dhi;g.save();g.globalAlpha=x.grade==="common"?.7:1;star4(wx-K(.012)+K(.023),wy-K(.032)+K(.023),K(.046),sc);g.globalAlpha*=.85;star4(wx+ww+K(.024)+K(.015),wy-K(.01)+K(.015),K(.03),sc);g.restore()}
+    // 이름(기울임, 아래 가장자리 빛)
+    {const bx=wx+K(.006),by=wy+lineH*.8;g.save();g.translate(bx,by);g.transform(1,0,-sk,1,0,0);g.font=`900 ${nf}px ${FT}`;g.textBaseline="alphabetic";
+      if(th){g.fillStyle=th;g.fillText(name,0,K(.004))}g.fillStyle=tt;g.fillText(name,0,0);g.restore()}
+    // 가는 줄(끝에 사선)
+    {const ry=wy+lineH+K(.011),rw=txR-lx,gr=g.createLinearGradient(lx,0,lx+rw,0);gr.addColorStop(0,dc);gr.addColorStop(.55,dc);gr.addColorStop(1,"rgba(0,0,0,0)");
+      g.save();g.globalAlpha=.75;g.fillStyle=gr;g.fillRect(lx,ry,rw,K(.0035));g.restore();slashes(lx+rw-K(.07),ry+K(.00175),K(.07),K(.015),K(.009),K(.018),9*2.6,dc,.75)}
+    // 「///」 + 단계 · 장소 · 날짜
+    {const sy=wy+lineH+K(.011)+K(.0035)+K(.011)+sf*.65;slashes(lx+K(.004),sy,K(.034),sf*.8,K(.007),K(.0135),9*2.6,dc,.85);
+      g.font=`600 ${sf}px "Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif`;g.textBaseline="middle";g.fillStyle=gc.sub||gc.ink||"#8a8398";
+      const sx=lx+K(.004)+K(.034)+K(.014);g.fillText(fit(g,bandLine(a),txR-sx),sx,sy)}
+    // 번호 칸: 기울어진 구분선 + 별 + 큰 번호 + 사선 줄
+    {const dt=bt+BH*.2,db=bt+BH*.8,t2=Math.tan(9*1.6*Math.PI/180)*(db-dt)/2,gr=g.createLinearGradient(0,dt,0,db);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(.3,dc);gr.addColorStop(.7,dc);gr.addColorStop(1,"rgba(0,0,0,0)");
+      g.save();g.globalAlpha=.7;g.strokeStyle=gr;g.lineWidth=K(.0035);g.beginPath();g.moveTo(ncL+t2,dt);g.lineTo(ncL-t2,db);g.stroke();g.restore();
+      g.save();g.globalAlpha=x.grade==="common"?.7:1;star4(ncL-K(.016)+K(.018),bt+BH*.12+K(.018),K(.036),x.grade==="common"?dc:dhi);g.restore();
+      g.font=`italic 700 ${nof}px ${FL}`;g.textBaseline="alphabetic";const nt=no2(x),ntw=g.measureText(nt).width,barH=K(.014),blk=nof*.95+K(.014)+barH,ny=bt+(BH-blk)/2,nx=ncR-nof*.06-ntw;
+      if(th){g.fillStyle=th;g.fillText(nt,nx,ny+nof*.8+K(.0045))}g.fillStyle=tt;g.fillText(nt,nx,ny+nof*.8);
+      const bw=(ncR-ncL-K(.03))*.8,bx=ncR-bw,by=ny+nof*.95+K(.014)+barH/2;slashes(bx,by,K(.051),barH,K(.008),K(.017),9*2.6,dc,.85);
+      g.save();g.globalAlpha=.85;g.fillStyle=dc;g.fillRect(bx+K(.064),by-K(.00175),bw-K(.064),K(.0035));g.restore()}
     g.restore();
     // 카드 바깥 오른쪽 아래 moti 로고
     const mf=CW*(Sh.markK||.03);g.fillStyle="rgba(255,255,255,.6)";const lg=await logoPath(),base=Y+CH+(pad+foot)/2+mf*.4;
