@@ -7,10 +7,10 @@
 .mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
 .mc{position:relative;display:block;width:100%;aspect-ratio:2/3;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;container-type:inline-size}
 .pc{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(var(--pcB)*100cqw) calc(var(--pcB)*100cqw) 0;border-radius:calc(var(--pcR)*100cqw);overflow:hidden;isolation:isolate;
-  --fr:var(--fr-common);--ink:var(--ink-common);--sub:var(--sub-common);--tbg:var(--tbg-common);--tink:var(--tink-common);--lt:var(--lt-common);--sh:var(--sh-common);--sp:var(--sp-common);--au:var(--au-common);--mv:var(--mv-common);
+  --fr:var(--fr-common);--ink:var(--ink-common);--sub:var(--sub-common);--tbg:var(--tbg-common);--tink:var(--tink-common);--lt:var(--lt-common);--sh:var(--sh-common);--sp:var(--sp-common);--au:var(--au-common);--mv:var(--mv-common);--tt:var(--tt-common);--th:var(--th-common);--dc:var(--dc-common);--dh:var(--dh-common);--tl:var(--tl-common);--gl:var(--gl-common);--pl:var(--pl-common);--ed:var(--ed-common);--eh:var(--eh-common);
   background:var(--fr);color:var(--ink)}
-.pc.g-rare{--fr:var(--fr-rare);--ink:var(--ink-rare);--sub:var(--sub-rare);--tbg:var(--tbg-rare);--tink:var(--tink-rare);--lt:var(--lt-rare);--sh:var(--sh-rare);--sp:var(--sp-rare);--au:var(--au-rare);--mv:var(--mv-rare)}
-.pc.g-special{--fr:var(--fr-special);--ink:var(--ink-special);--sub:var(--sub-special);--tbg:var(--tbg-special);--tink:var(--tink-special);--lt:var(--lt-special);--sh:var(--sh-special);--sp:var(--sp-special);--au:var(--au-special);--mv:var(--mv-special)}
+.pc.g-rare{--fr:var(--fr-rare);--ink:var(--ink-rare);--sub:var(--sub-rare);--tbg:var(--tbg-rare);--tink:var(--tink-rare);--lt:var(--lt-rare);--sh:var(--sh-rare);--sp:var(--sp-rare);--au:var(--au-rare);--mv:var(--mv-rare);--tt:var(--tt-rare);--th:var(--th-rare);--dc:var(--dc-rare);--dh:var(--dh-rare);--tl:var(--tl-rare);--gl:var(--gl-rare);--pl:var(--pl-rare);--ed:var(--ed-rare);--eh:var(--eh-rare);}
+.pc.g-special{--fr:var(--fr-special);--ink:var(--ink-special);--sub:var(--sub-special);--tbg:var(--tbg-special);--tink:var(--tink-special);--lt:var(--lt-special);--sh:var(--sh-special);--sp:var(--sp-special);--au:var(--au-special);--mv:var(--mv-special);--tt:var(--tt-special);--th:var(--th-special);--dc:var(--dc-special);--dh:var(--dh-special);--tl:var(--tl-special);--gl:var(--gl-special);--pl:var(--pl-special);--ed:var(--ed-special);--eh:var(--eh-special);}
 /* 레어·시크릿: 테두리 위로 반짝임 한 줄이 천천히 지나감(사진 뒤라 테두리·띠에만 보임) */
 .pc.g-rare::before,.pc.g-special::before{content:"";position:absolute;top:-20%;bottom:-20%;left:0;width:45%;z-index:0;pointer-events:none;
   background:linear-gradient(90deg,transparent,var(--sh),transparent);transform:translateX(-130%) skewX(-15deg);animation:pcsheen var(--mv) ease-in-out infinite}
@@ -32,25 +32,78 @@
 .pcsp.s2{left:11%;top:44%;width:5cqw;height:5cqw;animation-delay:-.9s}
 .pcsp.s3{right:22%;top:76%;width:6cqw;height:6cqw;animation-delay:-1.7s}
 @keyframes pctw{0%,100%{opacity:0;transform:scale(.4)}45%{opacity:.95;transform:scale(1)}70%{opacity:.3;transform:scale(.7)}}
-/* 왼쪽 위 등급 표: 영문 작은 대문자, 자간 넓게 */
-.pctag{position:absolute;z-index:4;left:calc((var(--pcB) + .035)*100cqw);top:calc((var(--pcB) + .035)*100cqw);font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));font-weight:800;line-height:1;
-  letter-spacing:var(--pcTrack);text-transform:uppercase;padding:.4em calc(.6em - var(--pcTrack)) .4em .6em;border-radius:999px;background:var(--tbg);color:var(--tink);white-space:nowrap}
+/* ── 87-2 C안 카드 앞면 ──
+   글꼴: 이름 = Pretendard Black(assets/fonts/card-title.woff2, 카드 이름 글자만), 등급 표·번호 = Chakra Petch Bold Italic(card-latin.woff2, ASCII). 둘 다 SIL OFL 1.1.
+   못 받으면 앱 글꼴(Pretendard·Apple SD Gothic Neo·Noto Sans KR)의 굵은 글자 + 기울임으로 보임(font-display swap).
+   크기는 모두 카드 너비 비율(cqw). 장식 밀도는 카드 크기에 따라: 150px 미만(목록 3열) = 이름·번호·줄·구분선만 / 150px 이상(뽑기 2열) = 사선·별·궤도 / 250px 이상(크게 보기) = 등급 표 고리·별 반짝임.
+   블러는 등급 표 빛 한 겹(레어·시크릿)뿐, 움직이는 것은 opacity·transform 만 */
+@font-face{font-family:"MotiCardTitle";src:url(assets/fonts/card-title.woff2) format("woff2");font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:"MotiCardLatin";src:url(assets/fonts/card-latin.woff2) format("woff2");font-weight:700;font-style:italic;font-display:swap}
+.pc{--fT:"MotiCardTitle","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;--fL:"MotiCardLatin","Pretendard","Apple SD Gothic Neo",system-ui,sans-serif}
+/* 테두리: 바깥 가는 어두운 줄 + 안쪽 밝은 줄(블러 없는 inset), 사진 둘레 가는 줄 */
+.mc.got .pc,.cvframe>.pc{box-shadow:inset 0 0 0 max(1px,.45cqw) var(--ed),inset 0 0 0 max(2px,1.1cqw) var(--eh)}
+.mc.got .pcph,.cvframe .pcph{box-shadow:0 0 0 max(1px,.4cqw) var(--pl)}
+/* 별(4각) — 장식 공통 */
+.pcst{position:absolute;display:none;width:4cqw;height:4cqw;background:var(--dh);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);pointer-events:none}
+/* 왼쪽 위 등급 표: 기울어진 각진 영문, 등급마다 색·빛만 다름 */
+.pctag{position:absolute;z-index:4;left:calc((var(--pcB) + .03)*100cqw);top:calc((var(--pcB) + .03)*100cqw);display:flex;align-items:center;gap:.35em;
+  font-family:var(--fL);font-style:italic;font-weight:700;font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));line-height:1;letter-spacing:var(--pcTrack);text-transform:uppercase;
+  padding:.38em .8em .36em .7em;border-radius:999px;background:var(--tbg);color:var(--tink);white-space:nowrap;box-shadow:inset 0 0 0 max(1px,.3cqw) var(--tl),0 0 2.4cqw var(--gl)}
+.pctag b{font-weight:inherit;display:block;padding-right:.08em}
+.pc.g-special .pctag b{background:linear-gradient(180deg,#fff6d6 0%,#f7d27f 48%,#c99239 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pctag .pcst{position:relative;width:.62em;height:.62em;flex:none;background:var(--tink)}
+.pc.g-special .pctag .pcst{background:#ffe7a6}
+.pctag::after{content:"";position:absolute;inset:-28% -7%;border-radius:50%;border:max(1px,.25cqw) solid var(--tl);border-left-color:transparent;border-bottom-color:transparent;transform:rotate(-8deg);opacity:0;pointer-events:none}
 /* 78: 포즈 카드 표시(오른쪽 위, 등급 표와 같은 크기의 보라 알약) */
 .pcpose{position:absolute;z-index:4;right:calc((var(--pcB) + .035)*100cqw);top:calc((var(--pcB) + .035)*100cqw);font-size:max(var(--pcTagMin),calc(var(--pcTag)*100cqw));font-weight:800;line-height:1;padding:.4em .7em;border-radius:999px;background:rgba(124,92,255,.88);color:#fff;white-space:nowrap}
-/* 아래 띠: 이름 / 작은 줄(단계 · 장소 · MM.DD) · 오른쪽 번호 */
-.pcbd{position:relative;z-index:1;flex:none;height:calc(var(--pcBand)*100cqw);display:flex;align-items:center;gap:4cqw}
-.pctx{flex:1;min-width:0;display:flex;flex-direction:column}
-.pcnm{display:block;font-size:max(var(--pcNmMin),calc(var(--pcNm)*100cqw));font-weight:800;line-height:1.2;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:keep-all}
-.pcsub{display:block;font-size:max(var(--pcSmMin),calc(var(--pcSm)*100cqw));font-weight:600;line-height:1.35;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcno{flex:none;font-style:normal;font-size:max(var(--pcNoMin),calc(var(--pcNo)*100cqw));font-weight:800;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+/* 아래 띠: [이름(궤도·별) / 줄+사선 / ///단계·장소·날짜] | 구분선·별·번호·사선 */
+.pcbd{position:relative;z-index:1;flex:none;height:calc(var(--pcBand)*100cqw);display:flex;align-items:center;padding:0 .4cqw}
+.pctx{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1.1cqw;padding:1.2cqw 3.5cqw 0 0}
+.pcnmw{position:relative;align-self:flex-start;max-width:100%;display:flex;padding:0 1.6cqw 0 .6cqw}
+.pcnm{display:block;font-family:var(--fT);font-weight:900;font-size:max(var(--pcNmMin),calc(var(--pcNm)*100cqw));line-height:1.16;letter-spacing:-.015em;color:var(--tt);
+  transform:skewX(calc(var(--pcSkew)*-1));text-shadow:0 .4cqw 0 var(--th);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:keep-all;padding-right:.12em}
+.pcrule{position:relative;display:block;height:max(1px,.35cqw);background:linear-gradient(90deg,var(--dc) 0%,var(--dc) 55%,transparent 100%);opacity:.75}
+.pcrule::after{content:"";position:absolute;right:0;top:50%;width:7cqw;height:1.5cqw;margin-top:-.75cqw;display:none;background:repeating-linear-gradient(90deg,var(--dc) 0 .9cqw,transparent .9cqw 1.8cqw);transform:skewX(calc(var(--pcSkew)*-2.6))}
+.pcsub{display:block;font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;font-size:max(var(--pcSmMin),calc(var(--pcSm)*100cqw));font-weight:600;line-height:1.3;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+.pcsub::before{content:"";display:none;width:3.4cqw;height:.8em;margin:0 1.4cqw -.06em .4cqw;background:repeating-linear-gradient(90deg,var(--dc) 0 .7cqw,transparent .7cqw 1.35cqw);transform:skewX(calc(var(--pcSkew)*-2.6));opacity:.85}
+.pcnoa{position:relative;flex:none;width:calc(var(--pcNoW)*100cqw);height:100%;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding-left:3cqw}
+.pcnoa .pcno{display:block;font-family:var(--fL);font-style:italic;font-weight:700;font-size:max(var(--pcNoMin),calc(var(--pcNo)*100cqw));line-height:.95;letter-spacing:-.02em;color:var(--tt);text-shadow:0 .45cqw 0 var(--th);font-variant-numeric:tabular-nums;padding-right:.06em}
+.pcdiv{position:absolute;left:0;top:20%;bottom:20%;width:max(1px,.35cqw);background:linear-gradient(180deg,transparent,var(--dc) 30%,var(--dc) 70%,transparent);transform:skewX(calc(var(--pcSkew)*-1.6));opacity:.7}
+.pcnobar{display:none;width:80%;height:1.4cqw;margin-top:1.4cqw;background-image:repeating-linear-gradient(90deg,var(--dc) 0 .8cqw,transparent .8cqw 1.7cqw),linear-gradient(var(--dc),var(--dc));background-size:5.1cqw 100%,calc(100% - 6.4cqw) max(1px,.35cqw);background-position:left center,right center;background-repeat:no-repeat;transform:skewX(calc(var(--pcSkew)*-2.6));opacity:.85}
+/* 이름을 감싸는 궤도 곡선(SVG, 선 굵기는 카드 크기와 상관없이 가늘게) */
+.pcorb{position:absolute;display:none;left:-3cqw;top:-34%;width:calc(100% + 9cqw);height:168%;overflow:visible;pointer-events:none;fill:none;stroke:var(--dh);stroke-linecap:round}
+.pcorb path{vector-effect:non-scaling-stroke;stroke-width:1.1}
+.pcorb .o2{opacity:.45}
+.pc.g-common .pcorb{stroke:var(--dc);opacity:.55}
+.pcorb .ou{display:none}
+.pc.g-special .pcorb .ou{display:block;stroke:#7c5214;stroke-width:2.6;opacity:.38}  /* 시크릿: 금색 위에서 보이게 어두운 밑줄 + 밝은 윗줄 */
+.pc.g-special .pcorb .o1{stroke:#fff6da;stroke-width:1.3}
+.pcnmw .s4{left:-1.2cqw;top:-3.2cqw;width:4.6cqw;height:4.6cqw}
+.pcnmw .s5{right:-5.4cqw;top:-1cqw;width:3cqw;height:3cqw;opacity:.85}
+.pcnoa .s6{left:-1.6cqw;top:12%;width:3.6cqw;height:3.6cqw}
+.pc.g-common .pcst{background:var(--dc);opacity:.7}
+/* 뽑기 2열 이상(150px~): 사선·별·궤도 */
+@container (min-width:150px){
+  .pcrule::after,.pcnobar{display:block}
+  .pcsub::before{display:inline-block}
+  .pcst,.pcorb{display:block}
+}
+/* 크게 보기·큰 카드(250px~): 등급 표 궤도 고리, 별 반짝임(레어·시크릿) */
+@container (min-width:250px){
+  .pc.g-rare .pctag::after,.pc.g-special .pctag::after{opacity:.7}
+  .pc.g-rare .pcorb path.o1,.pc.g-special .pcorb path.o1{stroke-width:1.5}.pc.g-special .pcorb path.ou{stroke-width:3.2}
+  .pc.g-rare .pcbd .pcst,.pc.g-special .pcbd .pcst{animation:pcstw 3.2s ease-in-out infinite}
+  .pc .pcbd .s5{animation-delay:-1.1s}.pc .pcbd .s6{animation-delay:-2.2s}
+}
+@keyframes pcstw{0%,100%{opacity:.95;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
 /* 아직 모으지 않은 칸 = 포토카드 뒷면: 가운데 영문 이름(그림 마스크, 색 bkName) + 오른쪽 아래 작은 번호 */
 .mc.back .pc{background:var(--bkBg);padding:0;align-items:center;justify-content:center;color:var(--bkName)}
 .mc.back .pc::after{content:"";position:absolute;inset:calc(var(--pcB)*100cqw);border:1px solid var(--bkLine);border-radius:calc(var(--pcr)*100cqw);pointer-events:none}
 .pcname{display:block;width:var(--bkW);aspect-ratio:2/1;background:currentColor;-webkit-mask:var(--nm) center/contain no-repeat;mask:var(--nm) center/contain no-repeat}
-.mc.back .pcno{position:absolute;right:calc((var(--pcB) + .04)*100cqw);bottom:calc((var(--pcB) + .035)*100cqw);font-size:max(8px,calc(.065*100cqw));font-weight:700;color:var(--bkNo)}
+.mc.back .pcno{font-style:normal;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.02em;position:absolute;right:calc((var(--pcB) + .04)*100cqw);bottom:calc((var(--pcB) + .035)*100cqw);font-size:max(8px,calc(.065*100cqw));font-weight:700;color:var(--bkNo)}
 /* 「동작 줄이기」 설정이면 빛을 멈춤. 카드를 크게 볼 때는 뒤 목록 빛도 멈춤 */
-@media (prefers-reduced-motion:reduce){.pc::before,.pcfx i{animation:none!important}}
-.app.cvon .mcards .pc::before,.app.cvon .mcards .pcfx i{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.pc::before,.pcfx i,.pcst{animation:none!important}}
+.app.cvon .mcards .pc::before,.app.cvon .mcards .pcfx i,.app.cvon .mcards .pcst{animation-play-state:paused}
 .mc.fresh{animation:fresh 1.6s ease-out}
 .mcchips{display:flex;gap:6px;margin:0 0 10px;overflow-x:auto}
 .mcchips button{flex:none;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:12px;font-weight:700;color:var(--sub)}
