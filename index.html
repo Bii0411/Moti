@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-0337">
+<meta name="moti-version" content="20261128-0352">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -452,6 +452,16 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 #giftSheet .item.locked b{color:#8f88a8;border-top-color:transparent}
 #giftSheet .gsec{display:flex;align-items:center;gap:8px;font-size:15px;color:#f3efff;margin:18px 2px 6px}
 #giftSheet .gsec::before{content:"";width:3px;height:16px;border-radius:2px;background:#b9a6ff}
+/* 102: 선물 창 = 위 목록(스크롤) + 맨 아래 고정 「함께 전할 말」·「건네기」 */
+#giftSheet{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+#giftSheet .gbody{flex:1;min-height:0;overflow-y:auto;margin:0 -14px;padding:0 14px 10px}
+#giftSheet .gfoot{flex:none;display:flex;gap:8px;align-items:center;margin:0 -14px;padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(190,168,255,.16);background:#15131d}
+#giftSheet .gwords{flex:1;min-width:0;height:42px;border-radius:12px;border:1px solid rgba(190,168,255,.28);background:rgba(40,34,58,.7);color:#f3efff;font-size:16px;padding:0 12px;outline:none}
+#giftSheet .gwords:focus{border-color:rgba(206,188,255,.8)}
+#giftSheet .gwords::placeholder{color:#8f88a8}
+#giftSheet .ggive{flex:none;height:42px;border-radius:12px;padding:0 14px;font-size:14px;font-weight:800;color:#1d1730;background:linear-gradient(120deg,#cbb8ff,#a78bfa);display:flex;align-items:center;gap:4px;white-space:nowrap}
+#giftSheet .ggive:disabled{opacity:.38;cursor:default}
+#giftSheet .item.gt.sel,#giftSheet .mhero.sel{border:2px solid #f3efff;box-shadow:0 0 0 2px rgba(167,139,250,.55),0 0 16px rgba(170,140,255,.45)}
 #giftSheet .gsub{color:#a99ad6;font-size:11.5px;margin:-2px 2px 10px 13px}
 .mhero .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .mhero .mtag{align-self:flex-start;font-size:10px;font-weight:800;color:#1d1730;background:linear-gradient(120deg,#b9873a,#f5c66b 45%,#fff0c6 60%,#e0ad4c);border-radius:999px;padding:2px 8px}
@@ -570,12 +580,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-0337">
-<link rel="stylesheet" href="photos.css?v=20261128-0337">
-<link rel="stylesheet" href="cards.css?v=20261128-0337">
-<link rel="stylesheet" href="pose.css?v=20261128-0337">
-<link rel="stylesheet" href="pack.css?v=20261128-0337">
-<link rel="stylesheet" href="together.css?v=20261128-0337">
+<link rel="stylesheet" href="onboarding.css?v=20261128-0352">
+<link rel="stylesheet" href="photos.css?v=20261128-0352">
+<link rel="stylesheet" href="cards.css?v=20261128-0352">
+<link rel="stylesheet" href="pose.css?v=20261128-0352">
+<link rel="stylesheet" href="pack.css?v=20261128-0352">
+<link rel="stylesheet" href="together.css?v=20261128-0352">
 </head>
 <body>
 <div class="app">
@@ -656,21 +666,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-0337"></script>
-<script src="motion.js?v=20261128-0337"></script>
-<script src="gacha.js?v=20261128-0337"></script>
-<script src="look.js?v=20261128-0337"></script>
-<script src="alive.js?v=20261128-0337"></script>
-<script src="film.js?v=20261128-0337"></script>
-<script src="photos.js?v=20261128-0337"></script>
-<script src="seoaphoto.js?v=20261128-0337"></script>
-<script src="cards.js?v=20261128-0337"></script>
-<script src="pose.js?v=20261128-0337"></script>
-<script src="photoask.js?v=20261128-0337"></script>
-<script src="together.js?v=20261128-0337"></script>
-<script src="pack.js?v=20261128-0337"></script>
-<script src="storypic.js?v=20261128-0337"></script>
-<script src="onboarding.js?v=20261128-0337"></script>
+<script src="icons.js?v=20261128-0352"></script>
+<script src="motion.js?v=20261128-0352"></script>
+<script src="gacha.js?v=20261128-0352"></script>
+<script src="look.js?v=20261128-0352"></script>
+<script src="alive.js?v=20261128-0352"></script>
+<script src="film.js?v=20261128-0352"></script>
+<script src="photos.js?v=20261128-0352"></script>
+<script src="seoaphoto.js?v=20261128-0352"></script>
+<script src="cards.js?v=20261128-0352"></script>
+<script src="pose.js?v=20261128-0352"></script>
+<script src="photoask.js?v=20261128-0352"></script>
+<script src="together.js?v=20261128-0352"></script>
+<script src="pack.js?v=20261128-0352"></script>
+<script src="storypic.js?v=20261128-0352"></script>
+<script src="onboarding.js?v=20261128-0352"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2349,12 +2359,17 @@ function afterReply(v,used){
 
 // ───────────────────────── 선물 ─────────────────────────
 function openSheet(id){$("#scrim").classList.add("on");$(id).classList.add("on")}
-function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));Mini.close()}
+function closeSheets(){$("#scrim").classList.remove("on");document.querySelectorAll(".sheet").forEach(s=>s.classList.remove("on"));Mini.close();giftKb()}  // 102: 선물 창을 키보드 위로 올렸던 자리 되돌림
 // 선물 창(9-A, 원고 3절, 24에서 다듬음, 49에서 뽑기를 뺌): 「서아에게 건넬 것」 · 「서아 기분 · {기분}」 · 선물 카드(기분에 맞으면 표시). 확률·천장 표시 없음
 const gradeKo=g=>UI("collection.grade."+g);
 // 50: 맨 위 순간 선물 칸(열려 있을 때만) · 「언제든」 줄 · 「특별한 순간에」 줄(한 번이라도 준 것은 이름·그림, 아직이면 ??? 와 자물쇠)
 const LOCK_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>';
+// 102: 선물을 누르면 「고른 상태」(gSel) → 맨 아래 「함께 전할 말」(선택) + 「건네기」로 한 번에. 열 때 대화 입력창에 쓰던 글을 칸으로 옮김
+let gSel=null;
 function giftSheet(focus){
+  const wasOn=$("#giftSheet").classList.contains("on")&&$("#gWords");  // 창이 열린 채 다시 그리면 고른 것·쓴 말 그대로
+  const words0=wasOn?$("#gWords").value:($("#inp").value||"").replace(/\s+/g," ").trim().slice(0,80);
+  if(!wasOn)gSel=null;
   const st=curState(),open=Moment.open(),og=open&&gBy(open.id),G=S.giftGiven||{};
   const tile=g=>{const m=g.rec&&g.rec===st;return `<button class="item gt ${m?"match":""} ${focus===g.id?"focus":""}" data-g="${g.id}">
     ${m?`<span class="rec">${esc(UI("gift.match"))}</span>`:""}${giftPic(g)}<b>${esc(g.name)}</b><div class="p">${Icon.gem(13)} ${g.price}</div></button>`};
@@ -2363,18 +2378,35 @@ function giftSheet(focus){
     return reach?`<button class="item gt mo ${isOpen?"now":""} ${given?"":"dim"}" data-m="${g.id}">${giftPic(g)}<b>${esc(g.name)}</b>${given&&!isOpen&&g.when?`<small class="gw">${esc(g.when)}</small>`:`<div class="p">${Icon.gem(13)} ${g.price}</div>`}</button>`
       :`<button class="item gt mo locked" data-m="${g.id}" aria-label="${esc(UI("gift.lockedAria"))}"><span class="gi ge lk">${LOCK_SVG}</span><b>${esc(UI("gift.locked"))}</b><div class="p">&nbsp;</div></button>`};
   const card=og&&Moment.cardOf(og),own=card&&S.col[card.id];
-  $("#giftSheet").innerHTML=`<h2>${esc(UI("gift.title"))}</h2>
+  $("#giftSheet").innerHTML=`<div class="gbody"><h2>${esc(UI("gift.title"))}</h2>
   ${UI("gift.sub")?`<p class="sub">${esc(UI("gift.sub"))}</p>`:""}  <!-- 75: 안내 줄은 data 값이 있을 때만 -->
   ${og?`<button class="mhero" data-g="${og.id}">${giftPic(og,"gi mh")}<span class="mt">${UI("gift.nowGood")?`<span class="mtag">${esc(UI("gift.nowGood"))}</span>`:""}<b>${esc(og.name)}</b>${og.desc?`<small class="md">${esc(og.desc)}</small>`:""}<small>${esc(open.reason||og.when||"")}</small><span class="mcard">${esc(UI("gift.card"))}${own?" · "+esc(UI("gift.cardOwned")):""}</span></span><span class="mp">${Icon.gem(14)} ${og.price}</span></button>`:""}
   <h3 class="gsec">${esc(UI("gift.secAlways"))}</h3>
   <div class="items g3">${GIFTS.filter(g=>g.kind!=="moment").map(tile).join("")}</div>
   <h3 class="gsec">${esc(UI("gift.secMoment"))}</h3>${UI("gift.secMomentSub")?`<p class="gsub">${esc(UI("gift.secMomentSub"))}</p>`:""}
-  <div class="items g3">${GIFTS.filter(g=>g.kind==="moment").map(mtile).join("")}</div>`;
-  $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>give(b.dataset.g));
-  $("#giftSheet").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const g=gBy(b.dataset.m);if(Moment.isOpen(g.id))return give(g.id);
+  <div class="items g3">${GIFTS.filter(g=>g.kind==="moment").map(mtile).join("")}</div></div>
+  <div class="gfoot"><input id="gWords" class="gwords" type="text" maxlength="80" enterkeyhint="send" autocomplete="off" placeholder="${esc(UI("gift.placeholder"))}" aria-label="${esc(UI("gift.placeholder"))}"><button class="ggive" id="gGive" disabled></button></div>`;
+  const W=$("#gWords");W.value=words0||"";
+  W.oninput=()=>{const c=W.value.replace(/[\r\n]+/g," ");if(c!==W.value)W.value=c};
+  W.onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();giftGo()}};
+  $("#gGive").onclick=giftGo;
+  const pick=id=>{const g=gBy(id);if(!g||!giftable(g))return;if(S.dia<g.price){toast(esc(UI("gift.noDia")));return}gSel=id;giftSel()};
+  $("#giftSheet").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>pick(b.dataset.g));
+  $("#giftSheet").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const g=gBy(b.dataset.m);if(Moment.isOpen(g.id))return pick(g.id);
     toast(`<b>${esc(UI("gift.lockedToast"))}</b>`)});
-  openSheet("#giftSheet");
+  if(gSel&&!giftable(gBy(gSel)))gSel=null;giftSel();
+  openSheet("#giftSheet");giftKb();
 }
+// 102: 고른 선물 테두리 + 「건네기 · 💎가격」(안 골랐으면 흐리고 안 눌림)
+function giftSel(){const el=$("#giftSheet");el.querySelectorAll("[data-g],[data-m]").forEach(b=>b.classList.toggle("sel",!!gSel&&(b.dataset.g||b.dataset.m)===gSel));
+  const g=gSel&&gBy(gSel),bt=$("#gGive");if(!bt)return;bt.disabled=!g;
+  bt.innerHTML=g?esc(UI("gift.giveBtn",{price:"@P@"})).split("@P@").join(`${Icon.gem(14)} ${g.price}`):esc(UI("gift.giveBtnNone"))}
+function giftGo(){const g=gSel&&gBy(gSel);if(!g)return;const W=$("#gWords");give(g.id,W?W.value:"")}
+// 102: 키보드가 올라오면 선물 창을 키보드 위로(아이폰 사파리는 화면이 줄지 않음 — 이름 바꾸기 창과 같은 방식)
+function giftKb(){const el=$("#giftSheet"),vv=window.visualViewport;if(!el)return;
+  const k=vv&&el.classList.contains("on")?Math.max(0,innerHeight-vv.height-vv.offsetTop):0;el.style.bottom=k?k+"px":"";el.style.maxHeight=k?Math.max(200,vv.height-24)+"px":""}
+if(window.visualViewport){visualViewport.addEventListener("resize",giftKb);visualViewport.addEventListener("scroll",giftKb)}
+
 // 50: 처음 「선물」을 누르면 한 번만 안내(그 뒤로는 시트 안 「특별한 순간에」 줄 설명)
 function giftGuide(){if(S.giftGuide)return giftSheet();
   const el=$("#giftGuide");el.innerHTML=`<div class="gg-lock">${LOCK_SVG}</div><h2>${esc(UI("gift.guide.title"))}</h2><p>${esc(UI("gift.guide.body"))}</p><button class="cta" id="ggOk">${esc(UI("gift.guide.ok"))}</button>`;
@@ -2388,11 +2420,14 @@ let subT;
 function stageSub(text){text=speechOnly(text);const b=$("#bubble");if(!text||!b)return;b.textContent=text;b.classList.add("on");clearTimeout(subT);subT=setTimeout(()=>b.classList.remove("on"),Math.max(3500,text.length*120))}
 // 선물 건네기(49): 💎 빼기 → 내 행동 한 줄 「(○○를 건넨다)」를 보냄(서버로는 「[유저가 선물함: ○○]」) → 서아 답장·몸짓·판정은 평소 대화와 같음(send).
 // 서버 답이 없으면 예비 대사 대신 지문 한 줄(data/ui.json gift.fallback). 등급 뽑기·카드·반응 대사 없음(카드는 컬렉션 「카드 팩」)
-function give(id){
+// 102: words = 함께 전할 말(선택, 80자·한 줄). 화면은 「(○○를 건넨다) 한마디」 한 메시지, 서버·판정·기록은 「[유저가 선물함: ○○] 한마디」 한 줄
+function give(id,words){
   const g=gBy(id),st=curState();if(!g||!giftable(g))return;
+  words=String(words||"").replace(/\s+/g," ").trim().slice(0,80);
   if(S.dia<g.price){toast(esc(UI("gift.noDia")));return}
   if(busy){toast(esc(UI("gift.busy")));return}
-  closeSheets();setTab("chat");openRoom("seoa");
+  if(Night.gate()!=="none"){toast(esc(UI("chat.nightFail")));return}  // 102: 창을 닫기 전에 막음(쓴 한마디가 창에 그대로)
+  closeSheets();giftKb();setTab("chat");openRoom("seoa");
   if(busy){toast(esc(UI("gift.busy")));return}
   if(Night.gate()!=="none"){toast(esc(UI("chat.nightFail")));return}  // 80-1: 밤 넘기기가 멈춘 동안은 다이아를 빼기 전에 막음(send 관문에서 선물 말이 안 나가므로)
   S.dia-=g.price;
@@ -2407,7 +2442,8 @@ function give(id){
   if(st==="sulky"&&!S.force){S.mood="normal"}  // 예전 규칙 그대로(삐짐은 선물로 풀림). 관계는 판정이 정함
   save();renderTop();
   const picAt=burst(g.icon||g.e);
-  send(UI("gift.act",{obj:objJosa(g.name)}),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · "),gift:g.id,giftMid:mid,giftHalf:again,picAt,...(mom?{moment:g.id}:{})});
+  gSel=null;
+  send(UI("gift.act",{obj:objJosa(g.name)})+(words?" "+words:""),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · ")+(words?" "+words:""),gift:g.id,giftMid:mid,giftHalf:again,picAt,...(mom?{moment:g.id}:{})});
 }
 
 // 50: 순간 선물. 서버 답장 gift_moment({id, reason}) 또는 임시 규칙(data/gifts.json momentFallback)으로 한 번에 하나 열림.
