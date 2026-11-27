@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-0352">
+<meta name="moti-version" content="20261128-0400">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -580,12 +580,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-0352">
-<link rel="stylesheet" href="photos.css?v=20261128-0352">
-<link rel="stylesheet" href="cards.css?v=20261128-0352">
-<link rel="stylesheet" href="pose.css?v=20261128-0352">
-<link rel="stylesheet" href="pack.css?v=20261128-0352">
-<link rel="stylesheet" href="together.css?v=20261128-0352">
+<link rel="stylesheet" href="onboarding.css?v=20261128-0400">
+<link rel="stylesheet" href="photos.css?v=20261128-0400">
+<link rel="stylesheet" href="cards.css?v=20261128-0400">
+<link rel="stylesheet" href="pose.css?v=20261128-0400">
+<link rel="stylesheet" href="pack.css?v=20261128-0400">
+<link rel="stylesheet" href="together.css?v=20261128-0400">
 </head>
 <body>
 <div class="app">
@@ -666,21 +666,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-0352"></script>
-<script src="motion.js?v=20261128-0352"></script>
-<script src="gacha.js?v=20261128-0352"></script>
-<script src="look.js?v=20261128-0352"></script>
-<script src="alive.js?v=20261128-0352"></script>
-<script src="film.js?v=20261128-0352"></script>
-<script src="photos.js?v=20261128-0352"></script>
-<script src="seoaphoto.js?v=20261128-0352"></script>
-<script src="cards.js?v=20261128-0352"></script>
-<script src="pose.js?v=20261128-0352"></script>
-<script src="photoask.js?v=20261128-0352"></script>
-<script src="together.js?v=20261128-0352"></script>
-<script src="pack.js?v=20261128-0352"></script>
-<script src="storypic.js?v=20261128-0352"></script>
-<script src="onboarding.js?v=20261128-0352"></script>
+<script src="icons.js?v=20261128-0400"></script>
+<script src="motion.js?v=20261128-0400"></script>
+<script src="gacha.js?v=20261128-0400"></script>
+<script src="look.js?v=20261128-0400"></script>
+<script src="alive.js?v=20261128-0400"></script>
+<script src="film.js?v=20261128-0400"></script>
+<script src="photos.js?v=20261128-0400"></script>
+<script src="seoaphoto.js?v=20261128-0400"></script>
+<script src="cards.js?v=20261128-0400"></script>
+<script src="pose.js?v=20261128-0400"></script>
+<script src="photoask.js?v=20261128-0400"></script>
+<script src="together.js?v=20261128-0400"></script>
+<script src="pack.js?v=20261128-0400"></script>
+<script src="storypic.js?v=20261128-0400"></script>
+<script src="onboarding.js?v=20261128-0400"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1865,12 +1865,22 @@ const NAME_KEYS=["name_state","judge_soon","name_quiet"];
 const MEMO_KEYS=["stage_notes","promises","stage_note_due","stage_note_queue"];
 // 80: 서버 S4·S4-1 본편 전용 상태(위기·엇갈림·화해 · 속마음 힌트 · 밤 넘기기 · 갈래 · 갈래 장면). 본편 판정이 돌려준 state 를 story 에 통째로 저장할 때 같이 남고
 //     본편 /chat·/judge 에 받은 그대로 감(앱이 만들거나 고치지 않음, 시연 패널만 예외). 크리스마스 요청에서는 빼고(pending_event 는 null), 본편 값은 그대로 둠
-const S4_KEYS=["crisis","crisis_msgs","stage_label","rewind_offer","won_line","hint_due","stage_hints","hint_msgs","night_next","night_card","night_wait","scene_msgs","rift_sorry"];
+// 103: 서버 S6 장면 순서 — crisis_news(위기 소식 확인)·stage_up_due(상징 장면을 기다리는 단계)·stage_up_msgs(확인 때 단계 메시지 수)도 같은 묶음
+//      (받은 그대로 본편 /chat·/judge 로, 크리스마스 요청에서는 빼고, 시연 패널·관계 초기화 때는 지워 서버 기본값으로)
+const S4_KEYS=["crisis","crisis_msgs","stage_label","rewind_offer","won_line","hint_due","stage_hints","hint_msgs","night_next","night_card","night_wait","scene_msgs","rift_sorry","crisis_news","stage_up_due","stage_up_msgs"];
 const MAIN_KEYS=S4_KEYS.concat(["route","scene","scene_judges_left","used_events"]);
-const noNameFlow=o=>{NAME_KEYS.concat(MEMO_KEYS,MAIN_KEYS).forEach(k=>delete o[k]);if("pending_event" in o)o.pending_event=null;PhotoAsk.strip(o);return o};  // 83: 사진 제안 키도 본편 전용
+// 103: 앱 전용 기록(서버로 안 보냄). ev_shown = 사건 연출을 이미 한 「사건@단계」 목록 — 본편 story 안에 두어 되감기(story 통째)·처음부터(story={})에 같이 따라감
+const APP_KEYS=["ev_shown"];
+const noAppKeys=o=>{APP_KEYS.forEach(k=>delete o[k]);return o};
+// 103: 서버 S6 은 사건 답장이 실제로 안 나갔으면 같은 pending_event 를 다시 보냄 → 사건 연출(해금 알림 등)은 그 사건·단계에서 한 번만
+const EvShown={key:ev=>ev+"@"+curStage(),
+  has(ev){const a=story().ev_shown;return Array.isArray(a)&&a.includes(this.key(ev))},
+  mark(ev){const st=story(),k=this.key(ev);st.ev_shown=Array.isArray(st.ev_shown)?st.ev_shown:[];if(!st.ev_shown.includes(k))st.ev_shown.push(k);save()},
+  once(ev){if(!ev||this.has(ev))return false;this.mark(ev);return true}};
+const noNameFlow=o=>{noAppKeys(o);NAME_KEYS.concat(MEMO_KEYS,MAIN_KEYS).forEach(k=>delete o[k]);if("pending_event" in o)o.pending_event=null;PhotoAsk.strip(o);return o};  // 83: 사진 제안 키도 본편 전용
 // 80: 시연 패널 단계·장면 이동·관계 초기화 때 앞 위기·엇갈림·밤 넘기기·장면 예약이 남지 않게(서버 기본값으로)
-function clearS4(st){S4_KEYS.forEach(k=>delete st[k]);st.scene=null;st.scene_judges_left=0;S.night=null;if(typeof Night!=="undefined")Night.stop()}
-function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return Thread.cur()==="main"?PhotoAsk.req(PhotoAsk.strip({...st,...gm})):PhotoAsk.strip({...st,...gm});const sc=SCENES[S.scene];  // 83: 본편만 photo_ask_v·photo_asks(S.photoAsk.offered)
+function clearS4(st){S4_KEYS.concat(APP_KEYS).forEach(k=>delete st[k]);st.scene=null;st.scene_judges_left=0;S.night=null;if(typeof Night!=="undefined")Night.stop()}
+function chatState(){const st=story(),gm={gift_moments:Moment.list(),route:st.route||null,user_name:userName()};if(!EpStage.on())return Thread.cur()==="main"?PhotoAsk.req(PhotoAsk.strip(noAppKeys({...st,...gm}))):PhotoAsk.strip(noAppKeys({...st,...gm}));const sc=SCENES[S.scene];  // 83: 본편만 photo_ask_v·photo_asks(S.photoAsk.offered)
   const o=noNameFlow({...st,...gm,episode:Thread.cur(),episode_stage:EpStage.n(),episode_stage_name:EpStage.name(),location:sc?sc.name:st.location});
   if(Thread.cur()===(((DATA.rewind||{}).xmas||{}).thread||"s2"))o.episode_turns_left=End.left();  // 90: 크리스마스 자정까지 남은 내 메시지 수(서버 자정 기색)
   return o}
@@ -2048,7 +2058,7 @@ function runJudge(){
     return judgeP}
   // 80: 본편 recent = 요약 때 또는 서버가 단계 기록을 기다릴 때(stage_note_due · stage_note_queue) 최근 실제 대화 historyMessages(80)개. 실패 답장과 그 요청은 뺌
   const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
-  const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip({...st,user_name:userName()})),last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need||noteDue?recentTalk():[]};
+  const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip(noAppKeys({...st,user_name:userName()}))),last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need||noteDue?recentTalk():[]};
   if(J.ok)body.reply_ok=J.ok;  // 80: 서버 S4-1-1 — last_user 메시지마다 정상 답장(true). 예전 묶음(정상 여부 모름)은 빼고 보냄
   judgeP=post("/judge",body,45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;LASTJ={at:Date.now(),ep:0,delta:j.affection_delta!=null?j.affection_delta:(+j.state.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
@@ -2334,7 +2344,7 @@ if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}
   const fbV2=serverVer()===2&&!noServer()&&v.fb;  // 91: 서버 v2 를 쓰다 실패한 예비 지문 → 관계·호감을 움직이지 않음(대화 횟수 규칙은 서버 v1·「서버 없음」 시연에서만)
   if(epOn){if(serverVer()===2&&src0==="server")queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),null,o&&o.giftHalf);else if(!fbV2)EpStage.turn()}  // 42: 에피소드 판정은 에피소드 단계에만(시연 예약·사건 없음)
   else if(serverVer()===2&&srvOk){  // 80: 실제 서버 정상 답장만(드라큘라 등 단계 없는 에피소드에서 출처를 바꾼 예비 대사는 판정·해금 안 함)
-    const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev)unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에
+    const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev&&EvShown.once(usedEvent))unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에 · 103: 같은 사건·단계는 한 번만
     queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),keep,o&&o.giftHalf);
   }else if(!R&&!fbV2)countStage();
   const goNight=!epOn&&srvOk&&serverVer()===2&&Night.replied(usedEvent);  // 80: 밤 마무리 답장 → 유저 한 번 답의 정상 답장이면 밤 넘기기 시작
@@ -2420,7 +2430,8 @@ let subT;
 function stageSub(text){text=speechOnly(text);const b=$("#bubble");if(!text||!b)return;b.textContent=text;b.classList.add("on");clearTimeout(subT);subT=setTimeout(()=>b.classList.remove("on"),Math.max(3500,text.length*120))}
 // 선물 건네기(49): 💎 빼기 → 내 행동 한 줄 「(○○를 건넨다)」를 보냄(서버로는 「[유저가 선물함: ○○]」) → 서아 답장·몸짓·판정은 평소 대화와 같음(send).
 // 서버 답이 없으면 예비 대사 대신 지문 한 줄(data/ui.json gift.fallback). 등급 뽑기·카드·반응 대사 없음(카드는 컬렉션 「카드 팩」)
-// 102: words = 함께 전할 말(선택, 80자·한 줄). 화면은 「(○○를 건넨다) 한마디」 한 메시지, 서버·판정·기록은 「[유저가 선물함: ○○] 한마디」 한 줄
+// 102: words = 함께 전할 말(선택, 80자·한 줄). 화면은 「(○○를 건넨다) 한마디」 한 메시지, 서버·판정·기록은 한 줄
+// 103: 서버 줄은 「[유저가 선물함: ○○] · (꼬리표 · ) 「한마디」」 — 한마디를 data/ui.json gift.srvWords 로 감싸 꼬리표와 「 · 」로 나눔
 function give(id,words){
   const g=gBy(id),st=curState();if(!g||!giftable(g))return;
   words=String(words||"").replace(/\s+/g," ").trim().slice(0,80);
@@ -2443,7 +2454,7 @@ function give(id,words){
   save();renderTop();
   const picAt=burst(g.icon||g.e);
   gSel=null;
-  send(UI("gift.act",{obj:objJosa(g.name)})+(words?" "+words:""),{srv:[UI("gift.srv",{gift:g.name}),...tags].join(" · ")+(words?" "+words:""),gift:g.id,giftMid:mid,giftHalf:again,picAt,...(mom?{moment:g.id}:{})});
+  send(UI("gift.act",{obj:objJosa(g.name)})+(words?" "+words:""),{srv:[UI("gift.srv",{gift:g.name}),...tags,...(words?[UI("gift.srvWords",{words})]:[])].join(" · "),gift:g.id,giftMid:mid,giftHalf:again,picAt,...(mom?{moment:g.id}:{})});
 }
 
 // 50: 순간 선물. 서버 답장 gift_moment({id, reason}) 또는 임시 규칙(data/gifts.json momentFallback)으로 한 번에 하나 열림.
@@ -3671,7 +3682,7 @@ const Night=(()=>{
   // 자동 「[다음 밤]」 /judge(첫마디 바로 뒤). last_user 「[다음 밤]」 · last_reply 첫마디 · need_summary false · reply_ok []. 판정 횟수(요약 주기)에 안 셈
   function judgeOnce(n){const st=story(),tk=++judgeTok,g=GEN,aff0=st.affection||0,t0=performance.now();
     const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
-    const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip({...st,user_name:userName()})),last_user:msg(),last_reply:n.reply||"",need_summary:false,reply_ok:[],recent:noteDue?recentTalk():[]};
+    const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip(noAppKeys({...st,user_name:userName()}))),last_user:msg(),last_reply:n.reply||"",need_summary:false,reply_ok:[],recent:noteDue?recentTalk():[]};
     const p=post("/judge",body,45000).then(j=>{if(!j||!j.state||g!==GEN||tk!==judgeTok||!main())return false;
       const prev={...st},before=curStage();Object.assign(st,j.state);PhotoAsk.fromJudge(st);
       LASTJ={at:Date.now(),ep:0,night:1,delta:j.affection_delta!=null?j.affection_delta:(+st.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
