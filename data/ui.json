@@ -451,6 +451,47 @@
     "_thread": "이야기 줄기(16단계). 특별 에피소드 대화는 본 이야기와 따로 이어짐. sub = 특별 에피소드 안에서 대화방 이름 밑 설명 줄({name} 에피소드 이름, 25-1: 본 이야기·다른 캐릭터는 설명 줄 없이 이름만). 46: 대화방 머리의 「본 이야기로」 단추(back·backToast)는 없앰 — 이야기 바꾸기는 대화 목록에서 옆으로 넘겨서",
     "sub": "{name}"
   },
+  "_attend": "110 출석 보상 창·마이 출석 카드 문구(보상표·숫자는 data/attendance.json). title·total·sub = 창 위({n} 누적 일수), day = 칸 이름({n} 1~10), today = 오늘 칸 이름, claim = 받기 버튼, claimed = 오늘 이미 받았을 때 버튼(누를 수 없음), got = 받은 뒤 알림({name} = reward.*.got), fallback = 대신 받았을 때 덧붙는 줄(epTicket·secret), reward = 보상 종류마다 cell(칸 아래 짧은 이름, {n} 개수) · got(알림 이름). my* = 마이 출석 카드({n} 누적 일수, {d} 다음 칸 일수, {name} 다음 보상 cell 이름, {p} 히든 카드 1회권 수, {e} 에피소드 이용권 수). packTicket = 히든 카드 화면 이용권 버튼({n} 남은 장 수). ticketAgain = 이용권으로 뽑은 뒤 「한 번 더」. ep* = 특별 에피소드를 이용권/다이아로 열기 고르는 작은 창({name} 에피소드 이름, {n} 이용권 수, {price} 다이아). debug* = 시연 패널(?debug=1)",
+  "attend": {
+    "title": "출석 체크",
+    "total": "누적 {n}일째",
+    "sub": "하루 빠져도 이어서 받아요",
+    "day": "{n}일",
+    "today": "오늘",
+    "claim": "받기",
+    "claimed": "오늘 받았어요",
+    "got": "{name} 받았어요",
+    "aria": "출석 체크 창",
+    "fallback": {
+      "epTicket": "특별 에피소드를 모두 가지고 있어 다이아로 드려요",
+      "secret": "시크릿 카드를 모두 가지고 있어 다이아로 드려요"
+    },
+    "reward": {
+      "dia": { "cell": "{n}", "got": "다이아 {n}개" },
+      "packTicket": { "cell": "히든 카드 1회권", "got": "히든 카드 1회권 {n}장" },
+      "epTicket": { "cell": "에피소드 이용권", "got": "특별 에피소드 이용권 {n}장" },
+      "secret": { "cell": "시크릿 카드", "got": "시크릿 확정 카드 {n}장" }
+    },
+    "myTitle": "출석 {n}일째",
+    "myDone": "오늘 받음",
+    "myClaim": "받기",
+    "myNext": "다음 보상: {d}일째 {name}",
+    "myGoal": "10일째 시크릿 카드",
+    "myOwn": "보유 · 히든 카드 1회권 {p} · 에피소드 이용권 {e}",
+    "packTicket": "1회권으로 뽑기 ({n}장)",
+    "ticketAgain": "한 번 더 · 1회권으로 뽑기",
+    "epTitle": "{name}",
+    "epBody": "특별 에피소드 이용권으로 열 수 있어요.",
+    "epUseTicket": "이용권으로 열기 ({n}장)",
+    "epUseDia": "다이아로 열기 · {gem}{price}",
+    "epOpened": "이용권으로 열었어요",
+    "debugTitle": "출석",
+    "debugInfo": "누적 {n}일 · 마지막 {last} · 오늘 {today}",
+    "debugNext": "출석: 다음 날로",
+    "debugReset": "출석 초기화",
+    "debugNextToast": "하루가 지난 것처럼 했어요",
+    "debugResetToast": "출석 기록을 지웠어요"
+  },
   "pack": {
     "_pack": "49 컬렉션 「카드 팩」 탭(87-1: 화면 이름은 「히든 카드」, 내부 이름·키·파일은 pack 그대로. 배너·확률 보기·뽑기 연출). 숫자는 data/pack.json. title = 배너 가운데 이름, pity = 천장 안내({n} = data/pack.json pity.count, {min} = 그 등급 이름), one·ten = 버튼 이름, odds = 배너 아래 작은 줄, oddsTitle·oddsGrade·oddsCards·oddsNote = 확률 보기 작은 창({n}·{min} 천장, {refund} 중복 환급), pct = %, noDia = 다이아가 모자랄 때(마이 페이지 충전으로 옮겨 감), tapOpen·tapFlip·tapNext = 연출 아래 안내, count = 「몇 번째 / 전체」, flipAll = 10장 모두 뒤집기, new = 새 카드 표, owned = 이미 가진 카드({refund}), ownedShort = 10장 묶음의 짧은 표, summary·summaryNew·summaryDup = 끝난 뒤 한 줄({n} 장 수, {refund} 돌려받은 다이아), again = 한 번 더({label} 뽑기 이름), done = 닫기, artAria = 팩 그림 접근성 이름",
     "title": "히든 카드",

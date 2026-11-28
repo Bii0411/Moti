@@ -21,8 +21,11 @@ const Pack=(()=>{
       <div class="pkmid"><b>${esc(T("title"))}</b><small>${esc(T("pity",{n:p.pity.count,min:gk(p.pity.min||"rare")}))}</small></div>
       <div class="pkbtns">${btn(1)}${btn(10)}</div>
     </div>
+    ${tickets()?`<button class="pktix" data-pull="1" data-tix="1">${Icon.svg("cards",15)}<span>${esc(UI("attend.packTicket",{n:tickets()}))}</span></button>`:""}
     <div class="pkoddsrow"><button class="pkodds" data-pkodds="1">${esc(T("odds"))}</button></div>`}
-  function bind(root){root.querySelectorAll("[data-pull]").forEach(b=>b.onclick=()=>pull(+b.dataset.pull));
+  // 110: 출석 히든 카드 1회권(S.tix.pack). 있으면 배너 아래 「1회권으로 뽑기 (n장)」 — 다이아 대신 1장, 확률·천장·환급은 1장 뽑기와 같음
+  const tickets=()=>typeof Attend!=="undefined"?Attend.tix().pack:0;
+  function bind(root){root.querySelectorAll("[data-pull]").forEach(b=>b.onclick=()=>pull(+b.dataset.pull,{ticket:!!b.dataset.tix}));
     const o=root.querySelector("[data-pkodds]");if(o)o.onclick=showOdds}
 
   // ── 확률 보기: 등급별 확률 + 팩에 들어 있는 카드(카드마다 %) ──
@@ -41,10 +44,10 @@ const Pack=(()=>{
     const c=Outfit.cfg(),pl=c.privatePlaces||[0],ow=main?Outfit.want():(curStage()>=(c.comfortStage||3)&&pl.includes(sc)?"private":"ops");
     return seenNow({scene:sc,outfit:outfitForScene(sc,ow),thread:"main",pack:1})}
   let fx=null;  // 연출 상태
-  function pull(n){if(fx)return;
-    const cost=price(n);
-    if(S.dia<cost){toast(esc(T("noDia")));toCharge();return}
-    S.dia-=cost;
+  function pull(n,o){if(fx)return;o=o||{};
+    const tk=!!o.ticket&&n===1&&tickets()>0,cost=tk?0:price(n);
+    if(!tk&&S.dia<cost){toast(esc(T("noDia")));toCharge();return}
+    if(tk)Attend.tix().pack--;else S.dia-=cost;
     const F=S.packNext;S.packNext=null;
     const r=Gacha.draw(n,odds(),P().pity,left(),COL.items,null,F);
     S.packPity=r.left;
@@ -55,7 +58,7 @@ const Pack=(()=>{
     S.dia+=refund;
     save();renderTop();
     res.filter(c=>c.isNew).forEach(c=>Cards.capture(c.item.id,{delay:0}));
-    show(n,res,refund);
+    show(n,res,refund,{ticket:tk});
   }
   // 다이아가 모자라면 마이 페이지 충전 칸으로
   function toCharge(){setTab("my");requestAnimationFrame(()=>{const c=document.getElementById("chargeCard");if(c){c.scrollIntoView({block:"center",behavior:"smooth"});c.classList.remove("pkhl");void c.offsetWidth;c.classList.add("pkhl")}})}
@@ -72,8 +75,8 @@ const Pack=(()=>{
     return el}
   const card=(c,i)=>`<div class="pkcard g-${c.grade}${c.isNew?" new":" dup"}" data-i="${i}"><div class="pkin"><div class="pkface pkb">${Cards.backCell("seoa")}</div><div class="pkface pkf">${Cards.cell(c.item)}</div></div>
     <span class="pkmark">${c.isNew?`<b class="pknew">${esc(T("new"))}</b>`:`<b class="pkdup" data-s="${esc(T("ownedShort",{refund:P().refund||0}))}">${esc(T("owned",{refund:P().refund||0}))}</b>`}</span></div>`;
-  function show(n,res,refund){build();
-    fx={n,res,refund,i:0,flipped:new Set(),phase:"open",timers:[]};
+  function show(n,res,refund,o){build();o=o||{};
+    fx={n,res,refund,i:0,flipped:new Set(),phase:"open",timers:[],ticket:!!o.ticket,secret:!!o.secret};
     el.style.cssText=Cards.vars();
     el.innerHTML=`<div class="pkbg"></div>
       <div class="pkstage"><div class="pkpack"><span class="pkart2">${Cards.backCell("seoa")}</span><span class="pkart1">${Cards.backCell("seoa")}</span><i class="pkflash"></i></div>
@@ -99,7 +102,7 @@ const Pack=(()=>{
     later(()=>cd.classList.add("show"),FX("flip"));
     return true}
   function onClick(e){if(!fx)return;const b=e.target.closest("[data-pk]");
-    if(b){const k=b.dataset.pk;if(k==="all")return flipAll();if(k==="done")return close();if(k==="again"){const n=fx.n;close();return pull(n)}return}
+    if(b){const k=b.dataset.pk;if(k==="all")return flipAll();if(k==="done")return close();if(k==="again"){const n=fx.n,tk=fx.ticket&&tickets()>0;close();return pull(n,{ticket:tk})}return}
     if(fx.phase==="one"){const cd=e.target.closest(".pkone .pkcard")||(e.target.closest(".pkstage")&&$f(".pkone .pkcard"));if(!cd)return;
       if(flip(cd,fx.i)){$f(".pkhint").textContent=fx.n>1&&fx.i<fx.res.length-1?T("tapNext"):"";if(fx.n===1)later(result,FX("flip")+(fx.res[0].grade!=="common"?FX("rareHold"):200));return}
       if(!cd.classList.contains("show"))return;  // 아직 뒤집히는 중
@@ -120,11 +123,18 @@ const Pack=(()=>{
     const nn=fx.res.filter(c=>c.isNew).length,nd=fx.res.length-nn;
     $f(".pkhint").innerHTML=[nn?`<b>${esc(T("summaryNew",{n:nn}))}</b>`:"",nd?esc(T("summaryDup",{n:nd,refund:fx.refund})):""].filter(Boolean).join("<br>");
     $f(".pkcount").textContent="";
-    $f(".pkacts").innerHTML=`<button class="pkagain" data-pk="again">${esc(T("again",{label:T(fx.n===10?"ten":"one")}))}<em>${Icon.gem(12)}${price(fx.n)}</em></button><button class="pkdone" data-pk="done">${esc(T("done"))}</button>`}
+    // 110: 시크릿 확정 카드는 「한 번 더」 없이 확인만. 1회권으로 뽑았고 아직 남았으면 「한 번 더」도 1회권으로
+    const again=fx.secret?"":fx.ticket&&tickets()>0?`<button class="pkagain" data-pk="again">${esc(UI("attend.ticketAgain"))}</button>`:`<button class="pkagain" data-pk="again">${esc(T("again",{label:T(fx.n===10?"ten":"one")}))}<em>${Icon.gem(12)}${price(fx.n)}</em></button>`;
+    $f(".pkacts").innerHTML=`${again}<button class="pkdone" data-pk="done">${esc(T("done"))}</button>`}
   function close(){if(!fx)return;fx.timers.forEach(clearTimeout);fx=null;el.classList.remove("on","opened","result","gridon");el.innerHTML="";
     if(typeof curTab!=="undefined"&&curTab==="album")renderAlbum()}
+  // 110: 출석 시크릿 확정 카드 — 뽑기 없이 그 카드를 가진 것으로(천장 S.packPity·S.packNext 는 그대로)
+  function grant(item){if(!item||S.col[item.id])return false;S.col[item.id]=seen();save();Cards.capture(item.id,{delay:0});return true}
+  // 110: 출석 10일째 — 이미 grant 한 시크릿 카드 한 장을 1장 뽑기와 같은 연출로(팩 열림 → 뒤집기 → 결과 「확인」만)
+  function showSecret(item){if(!item||fx)return;
+    show(1,[{item,grade:item.grade,forced:false,isNew:true}],0,{secret:true})}
   const isOpen=()=>!!fx;
   // 확인용(캡처): 팩 열림을 기다리지 않고 바로 다음으로
   const skipOpen=()=>{if(fx&&fx.open)fx.open()};
-  return{banner,bind,showOdds,pull,close,isOpen,skipOpen,left,toCharge,state:()=>fx&&{phase:fx.phase,i:fx.i,n:fx.n,flipped:[...fx.flipped],res:fx.res.map(c=>({id:c.item.id,grade:c.grade,isNew:c.isNew,forced:c.forced})),refund:fx.refund}};
+  return{banner,bind,showOdds,pull,close,isOpen,grant,showSecret,skipOpen,left,toCharge,state:()=>fx&&{phase:fx.phase,i:fx.i,n:fx.n,flipped:[...fx.flipped],res:fx.res.map(c=>({id:c.item.id,grade:c.grade,isNew:c.isNew,forced:c.forced})),refund:fx.refund}};
 })();

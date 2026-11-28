@@ -1,0 +1,44 @@
+/* moti 출석 보상(110). 출석 창(#attSheet, 기존 .sheet 그대로 아래에서 올라옴) · 마이 출석 카드(.atmy). 새 블러·애니메이션 없음 */
+
+/* ── 출석 창 ── */
+.attsheet{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.atgrab{width:38px;height:4px;border-radius:2px;background:#ffffff26;margin:-4px auto 10px}
+.athd{display:flex;align-items:baseline;gap:8px}
+.athd h2{flex:1;margin:0}
+.athd b{font-size:13px;font-weight:800;color:var(--pri2);font-variant-numeric:tabular-nums}
+.attsheet .sub{margin:3px 0 12px}
+.atgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.atc{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:7px 2px 8px;border-radius:12px;border:1px solid var(--line);background:#1c1927;text-align:center}
+.atc .atd{font-size:10.5px;font-weight:700;color:var(--sub)}
+.atc .ati{height:24px;display:flex;align-items:center;justify-content:center;color:var(--pri2)}
+.atc .ati.secret{color:var(--gold)}
+.atc .atn{font-size:10px;font-weight:700;line-height:1.25;color:#e6e1f5;word-break:keep-all;overflow-wrap:anywhere;min-height:2.5em;display:flex;align-items:center}
+.atc .ati.dia+.atn{font-size:12px;font-variant-numeric:tabular-nums}
+.atc.last{border-color:#6b5a2e}
+.atc.today{border:2px solid var(--pri);padding:6px 1px 7px;background:#221b36}
+.atc.today .atd{color:var(--pri2)}
+.atc.got>span{opacity:.38}
+.atc .atk{position:absolute;right:4px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center}
+.atc .atk svg{width:10px;height:10px}
+.atgo{display:block;width:100%;margin-top:14px;padding:13px;border-radius:12px;background:var(--pri);font-weight:800;font-size:15px;color:#fff}
+.atgo:disabled{background:#2a2540;color:var(--sub)}
+
+/* ── 마이 출석 카드 ── */
+.atmy{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.atmh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.atmh b{flex:1;font-size:15px}
+.atmh .atok{font-size:12px;font-weight:700;color:var(--sub)}
+.atmh .atmb{font-size:12px;font-weight:800;color:#fff;background:var(--pri);border-radius:999px;padding:4px 12px}
+.atbar{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.atbar i{height:6px;border-radius:3px;background:#2a2635}
+.atbar i.on{background:var(--pri)}
+.atmn{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:11.5px;color:var(--sub)}
+.atmn span:first-child{color:#ddd6f3;min-width:0}
+.atmn span:last-child{flex:none}
+.atown{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:11.5px;color:var(--sub)}
+
+/* ── 특별 에피소드 이용권 / 다이아 고르기(작은 창 #mini) ── */
+.epch p{font-size:13.5px;line-height:1.5;color:var(--sub);margin:0 2px 12px;word-break:keep-all}
+.epch button{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:12px;border-radius:12px;font-weight:800;font-size:14px}
+.epch .ok{background:var(--pri);color:#fff}
+.epch .alt{margin-top:8px;background:#221b36;border:1px solid #4b3d78;color:var(--text)}

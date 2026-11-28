@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1816">
+<meta name="moti-version" content="20261128-1905">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -586,12 +586,13 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1816">
-<link rel="stylesheet" href="photos.css?v=20261128-1816">
-<link rel="stylesheet" href="cards.css?v=20261128-1816">
-<link rel="stylesheet" href="pose.css?v=20261128-1816">
-<link rel="stylesheet" href="pack.css?v=20261128-1816">
-<link rel="stylesheet" href="together.css?v=20261128-1816">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1905">
+<link rel="stylesheet" href="photos.css?v=20261128-1905">
+<link rel="stylesheet" href="cards.css?v=20261128-1905">
+<link rel="stylesheet" href="pose.css?v=20261128-1905">
+<link rel="stylesheet" href="pack.css?v=20261128-1905">
+<link rel="stylesheet" href="attendance.css?v=20261128-1905">
+<link rel="stylesheet" href="together.css?v=20261128-1905">
 </head>
 <body>
 <div class="app">
@@ -660,6 +661,7 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
   <div class="sheet" id="fullSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet posesheet" id="poseSheet" role="dialog" aria-modal="true"></div>
   <div class="sheet namesheet" id="nameSheet" role="dialog" aria-modal="true"></div>
+  <div class="sheet attsheet" id="attSheet" role="dialog" aria-modal="true"></div>
   <div class="pview" id="pView" role="dialog" aria-modal="true"></div>
   <div class="pconfirm" id="pConfirm"></div>
   <div class="mini" id="mini"></div>
@@ -672,21 +674,22 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1816"></script>
-<script src="motion.js?v=20261128-1816"></script>
-<script src="gacha.js?v=20261128-1816"></script>
-<script src="look.js?v=20261128-1816"></script>
-<script src="alive.js?v=20261128-1816"></script>
-<script src="film.js?v=20261128-1816"></script>
-<script src="photos.js?v=20261128-1816"></script>
-<script src="seoaphoto.js?v=20261128-1816"></script>
-<script src="cards.js?v=20261128-1816"></script>
-<script src="pose.js?v=20261128-1816"></script>
-<script src="photoask.js?v=20261128-1816"></script>
-<script src="together.js?v=20261128-1816"></script>
-<script src="pack.js?v=20261128-1816"></script>
-<script src="storypic.js?v=20261128-1816"></script>
-<script src="onboarding.js?v=20261128-1816"></script>
+<script src="icons.js?v=20261128-1905"></script>
+<script src="motion.js?v=20261128-1905"></script>
+<script src="gacha.js?v=20261128-1905"></script>
+<script src="look.js?v=20261128-1905"></script>
+<script src="alive.js?v=20261128-1905"></script>
+<script src="film.js?v=20261128-1905"></script>
+<script src="photos.js?v=20261128-1905"></script>
+<script src="seoaphoto.js?v=20261128-1905"></script>
+<script src="cards.js?v=20261128-1905"></script>
+<script src="pose.js?v=20261128-1905"></script>
+<script src="photoask.js?v=20261128-1905"></script>
+<script src="together.js?v=20261128-1905"></script>
+<script src="pack.js?v=20261128-1905"></script>
+<script src="attendance.js?v=20261128-1905"></script>
+<script src="storypic.js?v=20261128-1905"></script>
+<script src="onboarding.js?v=20261128-1905"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -712,11 +715,12 @@ async function checkVersion(){let v=null;
 async function loadData(){
   await checkVersion();
   const get=p=>fetch(p+(APP_V?"?v="+encodeURIComponent(APP_V):""),{cache:"no-cache"}).then(r=>r.ok?r.json():null).catch(()=>null);
-  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw,en,tg]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json"),get("data/endings.json"),get("data/together.json")]);
+  const [c,f,m,st,it,kw,lk,dm,dsc,ui,ob,chs,eps,gf,col,ph,sp,pk,rw,en,tg,at]=await Promise.all([get("data/config.json"),get("data/emotion_face.json"),get("data/motions.json"),get("data/seoa_story.json"),get("data/seoa_intro.json"),get("data/motion_keywords.json"),get("data/look.json"),get("data/demo.json"),get("data/demo_scenes.json"),get("data/ui.json"),get("data/onboarding.json"),get("data/characters.json"),get("data/episodes.json"),get("data/gifts.json"),get("data/collection.json"),get("data/photos.json"),get("data/seoa_photo.json"),get("data/pack.json"),get("data/rewind.json"),get("data/endings.json"),get("data/together.json"),get("data/attendance.json")]);
   if(pk&&pk.price)DATA.pack=pk;  // 49 카드 팩
   DATA.rewind=rw||{};  // 51 실패 엔딩 · 되감기
   DATA.endings=en||{};  // 54 엔딩 기록 · 성공 엔딩
   DATA.together=tg||{};  // 84 함께하기
+  DATA.attend=at||{};  // 110 출석 보상
   DATA.photos=ph||{};DATA.seoaPhoto=sp||{};
   if(gf&&gf.list){GIFT=gf;GIFTS=gf.list}if(col&&col.items){COL=col;COL.held=COL.items.filter(x=>x.hold);COL.items=COL.items.filter(x=>!x.hold)}  // 44: 보류 칸(hold)은 앱 어디에도 안 나오고 세지 않음(저장값 S.col 은 그대로)
   if(chs&&chs.list)CH=chs.list;REC=(chs&&chs.recommend)||CH.map(x=>x.id);if(eps)EPS=eps;STORIES=EPS.special||[];
@@ -813,8 +817,9 @@ let SCENES=[{name:"",img:"bg_seoa_street.jpg"}];
 // ───────────────────────── 상태 (이 브라우저에만 저장) ─────────────────────────
 const KEY="moti_gift_proto_v2";
 // story: 서아 이야기 상태(서버 v2와 주고받음) · col: 명장면 수집 기록(9단계, 예전 firsts) · packPity: 카드 팩 천장 남은 장 수(49, 예전 pity = 선물 천장) · packNext: 시연 패널 다음 카드 팩 결과 · unlocked: 판정·사건으로 열린 몸짓 · introDone: 인트로를 봤는지
+// 110: 시작 다이아 0(새 사용자는 출석 1일째로 500). att: 출석 기록 · tix: 이용권(히든 카드 1회권 pack, 특별 에피소드 이용권 ep) — attendance.js 가 처음 쓸 때 만듦
 // rooms: 대화 목록에 보이는 대화방(6-C). 처음엔 비어 있고, 캐릭터 대화방에 들어가면(홈 카드 등) 생긴다
-const blank=()=>({v:5,bond:0,stories:{},plus:false,dia:500,chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},col:{},packPity:null,packNext:null,unlocked:[],introDone:false});
+const blank=()=>({v:5,bond:0,stories:{},plus:false,dia:0,chats:{},read:{},room:null,rooms:[],mood:"normal",birthday:false,force:null,scene:0,story:{},col:{},packPity:null,packNext:null,unlocked:[],introDone:false});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||blank()}catch(e){S=blank()}
 // 예전 저장값 옮기기: 장소 2곳(0 네온 거리, 1 도시 옥상) → 5곳(2 네온 골목, 4 바 옥상). 이미 대화하던 사람은 인트로를 건너뜀
 if(!S.v){const mv=i=>i===1?4:2;S.scene=mv(S.scene||0);
@@ -2817,6 +2822,8 @@ const Demo=(()=>{
         <div class="row">${[1,2,0].map(n=>B("server",esc(T("serverModes."+n)),{v:n,on:serverMode()===n})).join("")}</div>${q!=null?`<div class="kv">${esc(T("serverQueryWins"))}</div>`:""}`;
       h+=`<h4>${esc(T("sec.lastReply"))}</h4>${lastHtml()}`;
       h+=judgeHtml();  // 54-C: 마지막 /judge 결과와 progress
+      const ai=Attend.info();  // 110: 출석(날짜를 하루 넘긴 것처럼 → 홈에서 출석 창 · 기록 지우기)
+      h+=`<h4>${esc(UI("attend.debugTitle"))} <small>${esc(UI("attend.debugInfo",ai))}</small></h4><div class="row">${B("attNext",esc(UI("attend.debugNext")))}${B("attReset",esc(UI("attend.debugReset")))}</div>`;
       h+=`<h4>${esc(T("sec.charLock"))}</h4><div class="row">${B("charUnlock",esc(T("charUnlock")),{on:CharLock.off()})}</div>`;  // 107: 이 기기에서만 다른 캐릭터 잠금 풀기
       h+=`<h4>${esc(T("sec.reset"))}</h4><div class="row">${["seoa","chat","bond","album"].map(k=>B("reset",esc(T("resets."+k)),{v:k})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.stage"))} <small>${esc(mainStageName(cs))}${st.crisis?" · crisis "+esc(st.crisis):""}${S.night?" · night "+esc(S.night.ph):""}</small></h4><div class="row">${[1,2,3,4,5,6].map(n=>B("stage",`${n} ${esc(stageName(n))}`,{v:n,on:cs===n})).join("")}</div>`;
@@ -2850,7 +2857,9 @@ const Demo=(()=>{
     if(a==="adultReset"){delete S.adult;if(S.room&&needAdult(S.room)){S.room=null;if(curTab==="chat")showList()}toast(esc(T("resetToast",{name:OT("demo.adultReset")})),1800);return refresh()}
     if(a==="scene0")return firstOpen();
     if(a==="charUnlock"){const on=!CharLock.off();CharLock.set(on);if(S.room&&isLocked(S.room)){S.room=null;save();if(curTab==="chat")showList()}toast(esc(T(on?"charUnlockOn":"charUnlockOff")),1800);return refresh()}  // 107
-    if(a==="resetAll")return reset("all");  // 한 번 누르면 바로(7-1)
+    if(a==="resetAll")return reset("all");
+    if(a==="attNext"){cancel();Attend.debugNext();toast(esc(UI("attend.debugNextToast")),1600);refresh();reveal();setTab("home");return}  // 110
+    if(a==="attReset"){Attend.debugReset();toast(esc(UI("attend.debugResetToast")),1600);return refresh()}  // 한 번 누르면 바로(7-1)
     if(a==="dia"){S.dia+=500;toast(Icon.fill(esc(T("diaToast"))),1600);return refresh()}
     if(a==="mood")return setMood(v);
     if(a==="keyForce"){const F=Fx.st();F.keyForce=!F.keyForce;save();return refresh()}
@@ -3117,11 +3126,20 @@ function renderChar(h,c){
   $("#hBack").onclick=closeChar;
 }
 $("#hSearch").onclick=openSearch;
-function startStory(id){
+// 110: 특별 에피소드 이용권으로 열지 다이아로 열지(작은 창)
+function epChoose(st,n){const A=k=>UI("attend."+k,{name:st.name,n,price:st.price});
+  Mini.open(A("epTitle"),`<div class="epch"><p>${esc(A("epBody"))}</p><button class="ok" data-ep="ticket">${esc(A("epUseTicket"))}</button><button class="alt" data-ep="dia">${Icon.fill(esc(A("epUseDia")),13)}</button></div>`,
+    m=>m.querySelectorAll("[data-ep]").forEach(b=>b.onclick=()=>{Mini.close();startStory(st.id,b.dataset.ep)}))}
+function startStory(id,how){
   const st=STORIES.find(x=>x.id===id);if(!st)return;
   if(isLocked(st.char||"seoa"))return lockToast();  // 107
-  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
-  if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
+  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id,how));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
+  if(st.price&&!S.stories[id]){
+    // 110: 특별 에피소드 이용권(출석 7일째)이 있으면 「이용권으로 열기 / 다이아로 열기」 고르기
+    const tk=Attend.tix().ep;
+    if(!how&&tk>0)return epChoose(st,tk);
+    if(how==="ticket"&&tk>0){Attend.tix().ep--;toast(esc(UI("attend.epOpened")),1800)}
+    else{if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}}
   // 8-1: 서아 오프닝을 아직 안 봤으면 본 것으로 처리하고 특별 에피소드 첫 대사만(기본 에피소드 「시작」은 그대로 오프닝부터)
   if((st.char||"seoa")==="seoa"&&!S.introDone)S.introDone=true;
   S.stories[id]=1;
@@ -3217,6 +3235,7 @@ function renderMy(){
   <div class="card plus"><div class="mph"><span class="wm">moti <span>PLUS</span></span>${S.plus?`<small class="on">${esc(UI("my.plusOn"))}</small>`:`<span class="pp"><b>${esc(UI("my.plusPrice"))}</b> ${esc(UI("my.plusPer"))}</span>`}</div>
     <ul class="perks">${perks}</ul>
     <button class="cta" id="plusBtn">${esc(S.plus?UI("my.plusStop"):UI("my.plusStart"))}</button><p class="fine">${esc(UI("my.demoNote"))}</p></div>
+  ${Attend.myHTML()}
   <div class="card" id="chargeCard"><div class="mch"><b>${esc(UI("my.chargeTitle"))}</b><span class="bal">${GEM(15)}${Number(S.dia).toLocaleString()}</span></div>
     <div class="packs">${packs}</div>
     <p class="alnote" style="margin:10px 0 0">${esc(UI("my.chargeNote"))}</p></div>
@@ -3225,6 +3244,7 @@ function renderMy(){
   $("#my").querySelectorAll("[data-rel]").forEach(b=>b.onclick=()=>enterRoom(b.dataset.rel));
   const rh=$("#relHome");if(rh)rh.onclick=()=>setTab("home");
   $("#meEdit").onclick=()=>NameSheet.open();
+  Attend.bindMy($("#my"));  // 110
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
   $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:Number(b.dataset.p).toLocaleString()})))});
 }
@@ -3241,7 +3261,7 @@ function setTab(t){MotionCue.clear();  // 91: 화면 이동 때 남은 모션 �
   for(const [k,v] of [["chat","#vChat"],["album","#vAlbum"],["home","#vHome"],["my","#vMy"]])$(v).classList.toggle("on",t===k);
   if(t==="chat")showList();  // 46: 「대화」 탭은 언제나 대화 목록부터(다른 탭에 다녀와도). 대화방으로 바로 가는 곳(홈 에피소드 카드·알림)은 이 뒤에 openRoom
   placeStage();
-  if(t==="album"){renderAlbum();Cards.fill();if(!S.colIntro){S.colIntro=1;save();colIntro()}}if(t==="home")renderHome();if(t==="my")renderMy()}
+  if(t==="album"){renderAlbum();Cards.fill();if(!S.colIntro){S.colIntro=1;save();colIntro()}}if(t==="home"){renderHome();Attend.maybeShow()}if(t==="my")renderMy()}  // 110: 하루 첫 접속 출석 창은 홈에 왔을 때
 // 46: 서아는 이야기(본 이야기 + 시작한 특별 에피소드)마다 따로 읽음. 안 읽은 수 = 모든 이야기 합
 const unreadOne=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(m=>m.r==="c"||m.r==="ph").length};
 const unreadOf=cid=>cid==="seoa"?Swipe.keys().reduce((a,k)=>a+Swipe.unread(k),0):unreadOne(cid);
@@ -3993,8 +4013,8 @@ if(FilmShot.on)FilmShot.start();  // 개발용 필름 사진 만들기(7-2, film
 function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};if(!d)return;
   if(qs.get("bg")==="raw"||b.on===false){d.classList.add("raw");return}
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
-dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();Ending.migrate();Night.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
-  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();PhotoAsk.bind();PhotoAsk.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
+dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();Ending.migrate();Night.migrate();renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로) · 110: 주석 뒤에 붙어 안 불리던 renderTop·renderBond·탭 이름을 주석 앞으로
+  document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();PhotoAsk.bind();PhotoAsk.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init();Attend.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
 // 107-1: 이미 홈 탭에서 「홈」을 다시 누르면 — 캐릭터 화면이면 뒤로 가기와 같이(closeChar, 원래 스크롤 위치), 검색 중이면 검색 닫기(X 와 같이 검색어 지움) 뒤 홈 맨 위, 홈 첫 화면이면 맨 위로 부드럽게
 function homeAgain(){const h=$("#home");
   if(H.view)return closeChar();
