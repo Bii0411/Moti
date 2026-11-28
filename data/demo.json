@@ -10,8 +10,8 @@
   "reserved": "예약",
   "_userName": "69: nameScene = 본편을 3단계 + 이름 묻는 장면 직전으로(다음 답장이 이름 장면). 이름이 없으면 입장권 뒷면을 먼저 연다. 70: 「부르는 이름」 줄은 빼고 마이 탭 「내 정보」에서 바꿈",
   "nameScene": "3단계 이름 장면 바로",
-  "_s4": "80: 서버 S4 본편 시연. crisisNow = 5단계 위기 직전(다음 답장이 위기 소식 CRISIS, 되감기 지점 저장). riftNow = 위기 직전 지점을 먼저 만든 뒤 엇갈림이 된 판정처럼(엇갈림 알림 · 되감기 권유 · 다음 답장 RIFT_START → 한 번 답 → 「며칠 뒤 밤」). nightNow = 2단계 첫 밤 마무리(다음 답장 NIGHT_END → 한 번 답 → 「2일째 밤」). nightCard·riftCard = 그때 시간 카드 문구(서버 원고 그대로)",
-  "s4": {"crisisNow": "위기 바로", "riftNow": "엇갈림 바로", "nightNow": "밤 넘기기 바로", "nightCard": "2일째 밤", "riftCard": "며칠 뒤 밤"},
+  "_s4": "80: 서버 S4 본편 시연. crisisNow = 5단계 위기 직전(다음 답장이 위기 소식 CRISIS, 되감기 지점 저장). riftNow = 위기 직전 지점을 먼저 만든 뒤 엇갈림이 된 판정처럼(엇갈림 알림 · 되감기 권유 · 다음 답장 RIFT_START → 한 번 답 → 「며칠 뒤 밤」). nightNow = 2단계 첫 밤 마무리(다음 답장 NIGHT_END → 한 번 답 → 「2일째 밤」). nightCard·riftCard = 그때 시간 카드 문구(서버 원고 그대로). 104: loversNow = 5단계 · crisis done · lovers ask · 다음 답장 LOVERS_ASK · judge_soon(서버 S7 마음 확인 직후), loversLabel = 그때 서버가 주는 stage_label",
+  "s4": {"crisisNow": "위기 바로", "riftNow": "엇갈림 바로", "nightNow": "밤 넘기기 바로", "nightCard": "2일째 밤", "riftCard": "며칠 뒤 밤", "loversNow": "연인 확정 바로", "loversLabel": "고백"},
   "reserveStage": "다음 답장 뒤 {name} 단계로 상승",
   "reserveEvent": "다음 답장 뒤 {name} 해금",
   "_episode": "42: 에피소드 단계가 있는 특별 에피소드(크리스마스 이브) 안에서만 보이는 묶음. 판정 버튼 = 서버 판정 한 번처럼 에피소드 호감에 더함(플래그 버튼으로 켠 플래그가 같이 감). 단계 버튼 = 그 단계 시작 호감으로 바로(장면 없이). 장면 다시 = 지금 단계 장면. 처음부터 = 에피소드 대화·단계를 지우고 1단계 장면부터",
@@ -193,7 +193,8 @@
     "photo_6": { "action": "서아가 당신의 어깨에 가볍게 기대며 미소를 짓는다.", "dialogue": "우리 사진 좀 더 남겨 두자. 앞으로 같이 있을 날도 많잖아.", "emotion": "기쁨", "photo_ask": { "id": "photo_6", "route": "care", "pose": "p01", "face": "joy", "camera_face": "soft" } }
   },
   "_together": "84 시연 「함께하기 열기」: 서아 본편 대화방으로 가서 ＋ 함께하기와 같은 진입 확인을 거쳐 엶(단계 버튼으로 단계를 먼저 정함)",
-  "together": "함께하기 열기",
+  "together": "함께하기 열기"
+,
   "_preview": "84-1 시연 패널 「신규 모션 검수」(?debug=1): 검수 전용(only preview) 몸짓 목록. 표정 고르기 · 대화 구도 · 함께하기 구도(실제 진입 조건 그대로). 재생은 해금·카드·관계·대화 기록을 바꾸지 않음",
   "preview": {
     "title": "신규 모션 검수",

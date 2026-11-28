@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-0400">
+<meta name="moti-version" content="20261128-1301">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -580,12 +580,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-0400">
-<link rel="stylesheet" href="photos.css?v=20261128-0400">
-<link rel="stylesheet" href="cards.css?v=20261128-0400">
-<link rel="stylesheet" href="pose.css?v=20261128-0400">
-<link rel="stylesheet" href="pack.css?v=20261128-0400">
-<link rel="stylesheet" href="together.css?v=20261128-0400">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1301">
+<link rel="stylesheet" href="photos.css?v=20261128-1301">
+<link rel="stylesheet" href="cards.css?v=20261128-1301">
+<link rel="stylesheet" href="pose.css?v=20261128-1301">
+<link rel="stylesheet" href="pack.css?v=20261128-1301">
+<link rel="stylesheet" href="together.css?v=20261128-1301">
 </head>
 <body>
 <div class="app">
@@ -666,21 +666,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-0400"></script>
-<script src="motion.js?v=20261128-0400"></script>
-<script src="gacha.js?v=20261128-0400"></script>
-<script src="look.js?v=20261128-0400"></script>
-<script src="alive.js?v=20261128-0400"></script>
-<script src="film.js?v=20261128-0400"></script>
-<script src="photos.js?v=20261128-0400"></script>
-<script src="seoaphoto.js?v=20261128-0400"></script>
-<script src="cards.js?v=20261128-0400"></script>
-<script src="pose.js?v=20261128-0400"></script>
-<script src="photoask.js?v=20261128-0400"></script>
-<script src="together.js?v=20261128-0400"></script>
-<script src="pack.js?v=20261128-0400"></script>
-<script src="storypic.js?v=20261128-0400"></script>
-<script src="onboarding.js?v=20261128-0400"></script>
+<script src="icons.js?v=20261128-1301"></script>
+<script src="motion.js?v=20261128-1301"></script>
+<script src="gacha.js?v=20261128-1301"></script>
+<script src="look.js?v=20261128-1301"></script>
+<script src="alive.js?v=20261128-1301"></script>
+<script src="film.js?v=20261128-1301"></script>
+<script src="photos.js?v=20261128-1301"></script>
+<script src="seoaphoto.js?v=20261128-1301"></script>
+<script src="cards.js?v=20261128-1301"></script>
+<script src="pose.js?v=20261128-1301"></script>
+<script src="photoask.js?v=20261128-1301"></script>
+<script src="together.js?v=20261128-1301"></script>
+<script src="pack.js?v=20261128-1301"></script>
+<script src="storypic.js?v=20261128-1301"></script>
+<script src="onboarding.js?v=20261128-1301"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1867,7 +1867,8 @@ const MEMO_KEYS=["stage_notes","promises","stage_note_due","stage_note_queue"];
 //     본편 /chat·/judge 에 받은 그대로 감(앱이 만들거나 고치지 않음, 시연 패널만 예외). 크리스마스 요청에서는 빼고(pending_event 는 null), 본편 값은 그대로 둠
 // 103: 서버 S6 장면 순서 — crisis_news(위기 소식 확인)·stage_up_due(상징 장면을 기다리는 단계)·stage_up_msgs(확인 때 단계 메시지 수)도 같은 묶음
 //      (받은 그대로 본편 /chat·/judge 로, 크리스마스 요청에서는 빼고, 시연 패널·관계 초기화 때는 지워 서버 기본값으로)
-const S4_KEYS=["crisis","crisis_msgs","stage_label","rewind_offer","won_line","hint_due","stage_hints","hint_msgs","night_next","night_card","night_wait","scene_msgs","rift_sorry","crisis_news","stage_up_due","stage_up_msgs"];
+const S4_KEYS=["crisis","crisis_msgs","stage_label","rewind_offer","won_line","hint_due","stage_hints","hint_msgs","night_next","night_card","night_wait","scene_msgs","rift_sorry","crisis_news","stage_up_due","stage_up_msgs","lovers","lovers_msgs","lovers_asks"];
+// 104: 서버 S7 연인 확정 — lovers(none·ask·wait·done)·lovers_msgs·lovers_asks 도 같은 묶음(받은 그대로 본편 요청에만). won_line 은 「+」로 이은 값도 읽지 않고 그대로
 const MAIN_KEYS=S4_KEYS.concat(["route","scene","scene_judges_left","used_events"]);
 // 103: 앱 전용 기록(서버로 안 보냄). ev_shown = 사건 연출을 이미 한 「사건@단계」 목록 — 본편 story 안에 두어 되감기(story 통째)·처음부터(story={})에 같이 따라감
 const APP_KEYS=["ev_shown"];
@@ -2066,7 +2067,7 @@ function runJudge(){
       Object.assign(st,j.state);PhotoAsk.fromJudge(st);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,fl);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need,recent:body.recent.length,reply_ok:body.reply_ok||null});
       Route.judged(before,st.affection,fl);  // 51: 갈래 세기·정하기(80: 첫 밤 마무리에서도)
-      if(curStage()>before)stageUp(before,curStage(),q);
+      if(curStage()>before&&(curStage()<6||j.stage_up===true))stageUp(before,curStage(),q);  // 104: 연인(6단계) 연출은 판정 stage_up true 로 6 이 된 때만(마음 확인 판정은 5 그대로라 없음)
       else if(curStage()<before)stageDown(before,curStage());  // 69: 이름 거절 등으로 단계가 내려감
       const F=DATA.story?DATA.story.unlock.flag:{};
       if(!keep)fl.forEach(f=>{const g=F[f];if(g&&(!g.minStage||curStage()>=g.minStage))q.push(g)});
@@ -2465,7 +2466,8 @@ const Moment={
   // 50-1: 순간 선물마다 반응 몸짓 하나(reaction)·카드 한 장. 관계 단계 하나에 선물 하나(stage)
   reactionOf(g){const m=g&&g.reaction;return m&&canPlay(m)?m:null},
   cardOf(g){return g&&COL.items.find(x=>x.source==="moment"&&x.gift===g.id)||null},
-  stageOk(g){return !!g&&curStage()>=(+g.stage||1)},  // 본 이야기 관계 단계 ≥ 그 선물의 단계
+  stageOk(g){if(!g)return false;if(curStage()>=(+g.stage||1))return true;
+    const A=g.alsoAt;return !!(A&&Thread.cur()==="main"&&curStage()===+A.stage&&(A.lovers||[]).includes(story().lovers))},  // 본 이야기 관계 단계 ≥ 그 선물의 단계 · 104: alsoAt(반지 = 5단계 연인 확정 질문 lovers ask·wait 에서도)
   ready(g){return !!(g&&g.kind==="moment"&&!Thread.ep()&&this.stageOk(g)&&this.reactionOf(g))},  // 특별 에피소드에서는 늘 닫힘
   // 서버에 보내는 「지금 열 수 있는 순간 선물」: 단계·반응 몸짓을 앱이 거른 것만. 하나가 열려 있으면 비움(한 번에 하나)
   // 90: 닫힌(안 줬거나 준) 순간 선물은 내 메시지 cooldownTurns 번 동안 목록에서 뺌(서버는 「준」 선물만 셈 — story-routes 보고서 앱 팀 6)
@@ -2660,6 +2662,9 @@ const Demo=(()=>{
     else if(kind==="rift"){crisisOn();const prev={...st};
       Object.assign(st,{stage:5,affection:40,crisis:"rift",crisis_msgs:0,rift_sorry:false,stage_label:(DATA.story||{}).riftLabel||"엇갈림",pending_event:"RIFT_START",night_next:"RIFT_NIGHT",night_card:C4.riftCard||"",rewind_offer:true,judge_soon:false});
       ue().RIFT_START=turn;S4.judged(prev,null)}
+    else if(kind==="lovers"){setStage(5);if(!st.route)st.route=(((DATA.demo||{}).serverStage||{}).defaultRoute)||"care";quiet();const prev={...st};  // 104: 연인 확정 바로 — 위기에서 마음을 확인한 판정처럼
+      Object.assign(st,{affection:55,crisis:"done",crisis_msgs:0,lovers:"ask",lovers_msgs:0,lovers_asks:0,stage_label:C4.loversLabel||"고백",pending_event:"LOVERS_ASK",judge_soon:true,night_next:null,night_card:null,stage_flags:[]});
+      ue().CRISIS=ue().CRISIS!=null?ue().CRISIS:turn;S4.judged(prev,null)}
     else if(kind==="night"){setStage(2);quiet();const prev={...st};
       Object.assign(st,{affection:10,day:1,pending_event:"NIGHT_END",night_next:"NIGHT_START_2",night_card:C4.nightCard||"",night_wait:0,stage_flags:[]});
       ue().NIGHT_END_2=turn;if(!st.route)Route.decide("night");S4.judged(prev,null)}
@@ -2715,7 +2720,7 @@ const Demo=(()=>{
         <div class="kv">${esc(T("episode.flags"))}</div><div class="row">${["care","sincere","pursue","comfort"].map(f=>B("epFlag",esc(f),{v:f,on:ef.includes(f)})).join("")}</div>`}
     h+=`<h4>${esc(T("sec.server"))}</h4><div class="st"><span class="dot ${wakeState}"></span><span>${esc(T("wake."+wakeState))}${wakeMs!=null&&wakeState!=="waking"?" · "+esc(T("wake.ms",{ms:wakeMs})):""}</span><span class="kv">· ${esc(T("serverModes."+serverMode()))}</span></div>
       <div class="row">${B("wake",esc(T("wake.button")))}</div>`;
-    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("photoAskSo",esc(T("photoAskDemo.soBtn")))}${B("photoAskLover",esc(T("photoAskDemo.loverBtn")))}${B("together",esc(T("together")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
+    h+=`<h4>${esc(T("sec.quick"))}</h4><div class="row">${B("opening",esc(T("opening")))}${B("firstMeet",esc(T("firstMeet")))}${B("idleWatch",esc(T("idleWatch")))}${B("replayOnboard",esc(OT("demo.replay")))}${B("nameScene",esc(T("nameScene")))}${B("crisisNow",esc(T("s4.crisisNow")))}${B("riftNow",esc(T("s4.riftNow")))}${B("nightNow",esc(T("s4.nightNow")))}${B("loversNow",esc(T("s4.loversNow")))}${B("photoAskSo",esc(T("photoAskDemo.soBtn")))}${B("photoAskLover",esc(T("photoAskDemo.loverBtn")))}${B("together",esc(T("together")))}${B("adultReset",esc(OT("demo.adultReset")))}${B("resetAll",esc(T("resetAll")))}${B("dia",Icon.fill(esc(T("dia"))))}</div>`;
     h+=`<h4>${esc(T("sec.mood"))}</h4><div class="row">${SORDER.map(k=>B("mood",`${esc(T("moods."+k))}`,{v:k,on:curState()===k})).join("")}</div>`;
     // 카드 팩(49): 다음 카드 팩 결과(첫 장만, 등급 또는 카드) · 천장 초기화 · 카드 팩 카드 모두 열기 · 비우기
     const PN=S.packNext||{},pItems=Gacha.pool(COL.items);
@@ -2801,6 +2806,7 @@ const Demo=(()=>{
     if(a==="together"){cancel();toChat();setOpen(false);setTimeout(()=>Together.enter(),350);return}  // 84: 함께하기 열기(실제 진입 조건 그대로 — 잠긴 단계면 안내만)
     if(a==="riftNow"){s4Demo("rift");return refresh()}  // 80: 엇갈림 바로(위기 직전 지점 먼저)
     if(a==="nightNow"){s4Demo("night");return refresh()}  // 80: 2단계 첫 밤 마무리 바로
+    if(a==="loversNow"){s4Demo("lovers");return refresh()}  // 104: 연인 확정 바로(서버 S7)
     // 80: 「본편 실패」(예전 떠난 밤) 시연 버튼은 숨김(본편 실패 엔딩을 새 진행에서 안 씀)
     if(a==="failXmas"){cancel();End.demo("s2");return refresh()}  // 51: 크리스마스 실패 바로 보기
     if(a==="rwTicket"){S.rwTickets=(S.rwTickets||0)+1;save();return refresh()}
