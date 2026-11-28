@@ -758,6 +758,14 @@
 - **반지 순간 선물:** 5단계 lovers ask·wait 에서도 `gift_moments` 에 들어감(`data/gifts.json` `alsoAt`). 수건·열쇠·우산·반지 when 문구를 장면에 맞춤
 - **시연 패널:** 「연인 확정 바로」
 
+## 105단계에서 main에 들어온 것 (`step/105-system-lines` 병합, 2026-11-28)
+
+보고서: [reports/105-안내-문장.md](reports/105-안내-문장.md)
+
+- **장소 줄:** 본편에서 장소가 바뀐 답장의 장면(보낸 `pending_event`, 없으면 서버 `state.scene`) + 도착 장소 → 문장(`data/ui.json` `chat.placeWhy`), 같은 장면에서는 처음 한 번만. 그 밖은 도착 장소 문장(`chat.placeArrive`), 둘 다 없거나 크리스마스는 예전 「장소가 바뀌었어요 · ○○」. 밤 넘기기로 바 1층에 올 때는 줄 없음
+- **관계 변화 줄:** 「관계가 변했어요 · ○○」 아래 작은 한 줄(`chat.stageLine`). 「고백」은 stage_label 이 바뀔 때 한 번, 엇갈림은 토스트 대신 이 줄로 한 번
+- **회복:** 엇갈림 중 `RECONCILE_OPEN` 정상 답장 뒤 단계 이름 「회복」(대화방·마이·대화 목록, stage 5 그대로, 앱 전용 `story.heal`, 되감기·초기화에 같이)
+
 ## 서버 배포 상태 (확인 가능한 범위)
 
 - 주소: `https://seoa-backand.onrender.com` — 응답함.
