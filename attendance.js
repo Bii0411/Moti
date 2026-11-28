@@ -90,7 +90,7 @@ const Attend=(()=>{
 
   // ── 시연 패널(?debug=1) ──
   function debugNext(){st().off=(+st().off||0)+1;save()}
-  function debugReset(){S.att={n:0,last:null,seen:null,off:0};save()}
+  function debugReset(){S.att={n:0,last:null,seen:null,off:0};delete S.ad;save()}  // 110-1: 광고 보상 횟수도 같이
   const info=()=>({n:st().n,last:st().last||"-",today:today()});
 
   function init(){bindSwipe();
