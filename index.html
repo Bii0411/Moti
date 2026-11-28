@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1925">
+<meta name="moti-version" content="20261128-2059">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -549,6 +549,7 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .dp .dot.waking{background:#facc15}.dp .dot.awake{background:#22c55e}.dp .dot.down{background:#ef4444}
 .dp .kv{color:var(--sub);line-height:1.5}
 .dp details{margin-top:4px}
+.dp button.dim{opacity:.55}  /* 111: 발표 묶음 예비 버튼(흐린 글씨) */
 .dp summary{cursor:pointer;color:var(--pri2)}
 .dp pre{white-space:pre-wrap;word-break:break-all;font-size:10px;line-height:1.4;background:#0008;border-radius:8px;padding:6px 8px;margin-top:4px;max-height:220px;overflow:auto}
 .dp input[type=range]{flex:1;min-width:0;accent-color:var(--pri)}
@@ -591,13 +592,13 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1925">
-<link rel="stylesheet" href="photos.css?v=20261128-1925">
-<link rel="stylesheet" href="cards.css?v=20261128-1925">
-<link rel="stylesheet" href="pose.css?v=20261128-1925">
-<link rel="stylesheet" href="pack.css?v=20261128-1925">
-<link rel="stylesheet" href="attendance.css?v=20261128-1925">
-<link rel="stylesheet" href="together.css?v=20261128-1925">
+<link rel="stylesheet" href="onboarding.css?v=20261128-2059">
+<link rel="stylesheet" href="photos.css?v=20261128-2059">
+<link rel="stylesheet" href="cards.css?v=20261128-2059">
+<link rel="stylesheet" href="pose.css?v=20261128-2059">
+<link rel="stylesheet" href="pack.css?v=20261128-2059">
+<link rel="stylesheet" href="attendance.css?v=20261128-2059">
+<link rel="stylesheet" href="together.css?v=20261128-2059">
 </head>
 <body>
 <div class="app">
@@ -679,22 +680,22 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1925"></script>
-<script src="motion.js?v=20261128-1925"></script>
-<script src="gacha.js?v=20261128-1925"></script>
-<script src="look.js?v=20261128-1925"></script>
-<script src="alive.js?v=20261128-1925"></script>
-<script src="film.js?v=20261128-1925"></script>
-<script src="photos.js?v=20261128-1925"></script>
-<script src="seoaphoto.js?v=20261128-1925"></script>
-<script src="cards.js?v=20261128-1925"></script>
-<script src="pose.js?v=20261128-1925"></script>
-<script src="photoask.js?v=20261128-1925"></script>
-<script src="together.js?v=20261128-1925"></script>
-<script src="pack.js?v=20261128-1925"></script>
-<script src="attendance.js?v=20261128-1925"></script>
-<script src="storypic.js?v=20261128-1925"></script>
-<script src="onboarding.js?v=20261128-1925"></script>
+<script src="icons.js?v=20261128-2059"></script>
+<script src="motion.js?v=20261128-2059"></script>
+<script src="gacha.js?v=20261128-2059"></script>
+<script src="look.js?v=20261128-2059"></script>
+<script src="alive.js?v=20261128-2059"></script>
+<script src="film.js?v=20261128-2059"></script>
+<script src="photos.js?v=20261128-2059"></script>
+<script src="seoaphoto.js?v=20261128-2059"></script>
+<script src="cards.js?v=20261128-2059"></script>
+<script src="pose.js?v=20261128-2059"></script>
+<script src="photoask.js?v=20261128-2059"></script>
+<script src="together.js?v=20261128-2059"></script>
+<script src="pack.js?v=20261128-2059"></script>
+<script src="attendance.js?v=20261128-2059"></script>
+<script src="storypic.js?v=20261128-2059"></script>
+<script src="onboarding.js?v=20261128-2059"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -2793,7 +2794,7 @@ const Demo=(()=>{
     if(!open||!P())return;
     const st=story(),cs=curStage();
     let h=`<div class="hd"><b>${esc(T("title"))}</b>${DEBUG?`<span class="dbg">${esc(T("debugTag"))}</span>`:""}${B("close",esc(T("close")))}</div>`;
-    h+=Scenes.html(T,B);
+    h+=Scenes.html(T,B,DEBUG?presentHtml():"");  // 111: 발표 묶음(장면 바로가기 바로 위, ?debug=1 만)
     // 42: 에피소드 단계(그 에피소드 안에서만). 판정 버튼 = 서버 판정 한 번처럼(켠 플래그와 같이), 단계 = 그 단계 시작 호감으로 바로
     if(EpStage.on()){const es=EpStage.st(),en=EpStage.n(),ef=DS.epFlags||[];
       h+=`<h4>${esc(T("episode.title",{name:Thread.ep().name}))}</h4>
@@ -2851,7 +2852,36 @@ const Demo=(()=>{
     P().innerHTML=h;
   }
   function onClick(e){
-    const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+    const b=e.target.closest("[data-a]");if(!b)return;return act(b.dataset.a,b.dataset.v)}
+  // 111: 발표 묶음 — 기존 버튼(act)을 불러 쓰고 패널을 닫음. 번호·문구·카드 번호·에피소드 id 는 data/demo.json present
+  function presentHtml(){const P=k=>T("present."+k),n=i=>B("present",esc(i+". "+P("b"+i)),{v:i});
+    return `<h4>${esc(P("title"))}</h4><div class="row">${[0,1,2,3,4,5,6,7].map(n).join("")}${B("present",esc(P("spare")),{v:"spare",cls:"dim"})}</div>`}
+  function present(k){const C=(DATA.demo||{}).present||{},P=x=>esc(T("present."+x));
+    if(k==="0"){setOpen(false);reset("all");Attend.debugReset();return}  // 전체 초기화(온보딩 첫 화면) + 출석 초기화
+    if(Onboard.isOpen())Onboard.hide();  // 장면 바로가기처럼: 온보딩 중이면 저장 없이 닫고 그 화면으로
+    if(k==="1"){const x=COL.items.find(o=>+o.no===+C.cardNo);if(!x)return toast(P("noCard"),1600);
+      cancel();setOpen(false);if(!S.col[x.id]){S.col[x.id]=seenNow(x.source==="pack"?{line:"",pack:1}:{line:""});Cards.fill()}
+      S.colIntro=1;albumSeg="all";colChar="seoa";save();setTab("album");
+      const ids=colList("all").filter(o=>S.col[o.id]&&(S.col[o.id].char||"seoa")==="seoa").map(o=>o.id);
+      setTimeout(()=>Cards.open(x.id,ids),350);return}
+    if(k==="2"){act("colOpenAll");setOpen(false);S.colIntro=1;save();albumSeg="all";colChar="seoa";setTab("album");return}
+    if(k==="3")return act("photoAskSo");
+    if(k==="4")return act("photoAskLover");
+    if(k==="5")return act("seoaPhotoNow");
+    if(k==="6"){act("stayWin","care");return setOpen(false)}
+    if(k==="7"){const id=C.xmas||"s2",e=STORIES.find(x=>x.id===id),n=+C.xmasStage||4;if(!e)return toast(P("noXmas"),1600);
+      cancel();setOpen(false);if(needAdult(e.char||"seoa"))S.adult={at:Date.now()};  // 성인 확인은 시연용으로 통과
+      if((e.char||"seoa")==="seoa"&&!S.introDone)S.introDone=true;  // startStory 와 같이: 본편 오프닝이 끼어들지 않게
+      S.stories[id]=1;if(Thread.cur()!==id){const fresh=Thread.go(id);if(fresh){setScene(e.scene);addMsg("sys",UI("home.storyStart",{name:e.name}),null,"seoa")}}  // 다이아 차감 없이 가진 것으로
+      if(S.rw&&S.rw[id])delete S.rw[id].end;toChat();EpScene.stop();
+      const s=EpStage.st();if(s){if(EpStage.n()<n)EpStage.setStage(n);else{s.play=null;s.redress=true}}save();Outfit.sync();
+      EpScene.run(n);return refresh()}
+    if(k==="spare"){const g=C.spareGift||"firstaid";cancel();setOpen(false);if(Thread.cur()!=="main")Thread.go("main");End.stop();toChat();
+      if(S.moment)return toast(P("momentOpen"),1600);if((S.giftGiven||{})[g])return toast(P("momentGiven"),1600);
+      if(!Moment.start(g,"","demo"))return toast(P("momentNo"),1600);toast(P("momentOk"),1600);return refresh()}
+  }
+  function act(a,v){
+    if(a==="present")return present(v);
     if(a==="close")return setOpen(false);
     if(a==="nameScene"){if(!userName()){setOpen(false);Onboard.openBack({onDone:()=>nameScene()});return}return nameScene()}  // 69: 이름이 없으면 입장권 뒷면부터
     if(a==="wake")return wakeServer();
@@ -2971,11 +3001,11 @@ const Scenes=(()=>{
     save();unlockShow(q);Demo.render();return curStage();
   }
   const resText=R=>!R?"":R.stage?T("reserveStage",{name:stageName(R.stage)}):R.event?T("reserveEvent",{name:evMotions(R.event).map(id=>MNAME[id]||id).join(", ")||R.event}):"";
-  function html(T,B){
+  function html(T,B,pre){
     const list=L();if(!list.length)return "";
     const c=cur(),now=list[c-1],nx=list[c];
     return `<div class="now">${esc(T("now"))} <b>${now?esc(now.n+" "+now.name):esc(T("none"))}</b> · ${esc(T("next"))} ${nx?esc(nx.n+" "+nx.name):esc(T("none"))}${S.demoNext?`<br><span class="rs">${esc(T("reserved"))} · ${esc(resText(S.demoNext))}</span>`:""}</div>
-      <h4>${esc(T("sec.scenes"))}</h4><div class="row">${B("scene0",esc("0 "+Demo.OT("demo.scene0")))}${list.map(sc=>B("scene",esc(sc.n+" "+sc.name),{v:sc.n,on:c===sc.n})).join("")}</div>`;
+      ${pre||""}<h4>${esc(T("sec.scenes"))}</h4><div class="row">${B("scene0",esc("0 "+Demo.OT("demo.scene0")))}${list.map(sc=>B("scene",esc(sc.n+" "+sc.name),{v:sc.n,on:c===sc.n})).join("")}</div>`;
   }
   function click(a,v){if(a==="scene"){go(+v);return true}return false}
   // 단축키: ?debug=1 일 때만, 입력창에 글자를 치는 중에는 무시
@@ -3479,7 +3509,7 @@ const EpStage={
   judgeState(){const s=this.st();return{...noNameFlow(chatState()),stage:this.n(),affection:s.aff||0,stage_flags:(s.flags||[]).slice(),pending_event:null,departure_days_left:null,ending:null}},  // 42-C: episode 신호도 같이
   // 시연 패널: 단계 n 으로(호감 = 그 단계 기준, 플래그·신호 비움). 4단계 이상이면 자취방이 열리고, dressFrom 이상이면 자취방 옷
   // 자취방 옷(outfitByScene)을 입을 때인지: 장면에서 갈아입은 뒤(dressed) 또는 dressFrom 단계부터
-  dressed(){const s=this.st(),C=this.cfg();return !s||!!s.dressed||this.n()>=(C.dressFrom||5)},
+  dressed(){const s=this.st(),C=this.cfg();if(s&&s.redress)return false;return !s||!!s.dressed||this.n()>=(C.dressFrom||5)},  // 111: redress = 발표 7번(옷 갈아입는 장면 다시 보기) 동안은 갈아입기 전 옷
   setStage(n){const s=this.st(),C=this.cfg();if(!s)return;n=Math.max(1,Math.min(6,n));s.stage=n;s.aff=C.affectionAt[n-1]||0;s.flags=[];s.miss=0;s.signaled=[];s.dressed=n>=(C.dressFrom||5);s.play=null;save()}
 };
 // 42: 에피소드 단계 장면(data/episodes.json stageScenes). 단계가 오르면 그 단계 장면을 오프닝처럼 문단 간격을 두고 보여 주고, 끝나면 자유 대화.
@@ -3496,7 +3526,7 @@ const EpScene=(()=>{
     L.forEach((id,i)=>{if(!i)Stage.play(id);else setTimeout(()=>{if(alive()&&vis())Stage.play(id)},at);at+=Math.max(600,Stage.dur(id)*1000*.9)})}
   function cue(c,t,alive){if(!vis())return;if(c.motion)motion(c.motion,alive);if(c.face){Stage.setFace(c.face);faceReset()}const d=speechOnly(t);if(d&&!/^\*/.test(t))say(d)}
   // 옷 바꾸고 그 모델이 올라올 때까지(최대 modelWaitMs)
-  async function dress(){const s=EpStage.st();if(s&&!s.dressed){s.dressed=true;save()}Outfit.sync();const k=Outfit.want(),t0=performance.now();
+  async function dress(){const s=EpStage.st();if(s&&s.redress){delete s.redress;save()}if(s&&!s.dressed){s.dressed=true;save()}Outfit.sync();const k=Outfit.want(),t0=performance.now();
     while(Stage.outfitNow()!==k&&performance.now()-t0<(W().modelWaitMs||8000))await sleep(100)}
   // 42-1: 걷는 동안 3D 칸 확대(data/config.json walk.zoom 구도). 걸어 나가기 직전에 커지고, 화면 밖에 있는 동안 그대로, 걸어 들어와 선 뒤 돌아옴
   const zoom=()=>W().zoom||"walkBig";
@@ -3505,7 +3535,7 @@ const EpScene=(()=>{
     const t0=performance.now();  // 화면 밖에 나간 순간부터 offMinMs
     if(!alive())return;if(c.dress)await dress();
     if(ok){const left=(W().offMinMs||900)-(performance.now()-t0);if(left>0)await sleep(left)}}
-  async function walkIn(alive){const s=EpStage.st();if(s&&!s.dressed)await dress();if(!alive())return;
+  async function walkIn(alive){const s=EpStage.st();if(s&&(!s.dressed||s.redress))await dress();if(!alive())return;
     if(!vis()){Stage.walk.place("in");View.release();return}
     if(Stage.walk.phase()!=="off")Stage.walk.place("off");
     const ms=View.hold(zoom());if(ms>0)await sleep(ms);if(!alive())return;  // 이어하기 때: 화면 밖에 세운 채 커진 뒤 걸어 들어옴
@@ -3538,7 +3568,7 @@ const EpScene=(()=>{
     const nx=queue.shift();if(nx)run(nx)}
   // 47: 장면 뒤 카드(42-C e01 크리스마스 이브)는 뺌. 장면이 끝나면 따로 보상 없이 자유 대화
   // 끊기(줄기 바꿈·시연 패널 초기화): 서아는 제자리로, 진행 자리는 남김(다시 들어오면 이어 감)
-  function stop(){tok++;queue=[];if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in");View.release()}
+  function stop(){tok++;queue=[];const s0=EpStage.on()&&EpStage.st();if(s0&&s0.redress){delete s0.redress;save()}if(running){running=false;busy=false}if(Stage.walk&&Stage.walk.busy())Stage.walk.place("in");View.release()}
   // 다시 들어왔을 때 끊긴 장면 이어 가기
   function resume(){const ep=EpStage.on()&&EpStage.st();if(!running&&ep&&ep.play)run(ep.play.n,ep.play)}
   // 오래 머물 때 신호 한 줄(그 단계에서 한 번)
