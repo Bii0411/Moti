@@ -15,6 +15,9 @@
 .pkbtn.ten{background:var(--pri);border-color:var(--pri)}
 .pkbtn em{font-style:normal;display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .pkbtn:active,.pkagain:active,.pkdone:active,.pkall:active{transform:scale(.97)}
+/* 110: 출석 히든 카드 1회권 버튼(배너 아래, 있을 때만) */
+.pktix{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:40px;margin:2px 0 4px;border-radius:12px;border:1px solid var(--pri);background:#221b36;color:var(--pri2);font-size:13.5px;font-weight:800;-webkit-tap-highlight-color:transparent}
+.pktix:active{transform:scale(.98)}
 .pkoddsrow{display:flex;justify-content:flex-end;margin:0 0 8px}
 .pkodds{padding:4px 2px;font-size:12px;font-weight:600;color:var(--sub);-webkit-tap-highlight-color:transparent}
 

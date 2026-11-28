@@ -3126,11 +3126,20 @@ function renderChar(h,c){
   $("#hBack").onclick=closeChar;
 }
 $("#hSearch").onclick=openSearch;
-function startStory(id){
+// 110: 특별 에피소드 이용권으로 열지 다이아로 열지(작은 창)
+function epChoose(st,n){const A=k=>UI("attend."+k,{name:st.name,n,price:st.price});
+  Mini.open(A("epTitle"),`<div class="epch"><p>${esc(A("epBody"))}</p><button class="ok" data-ep="ticket">${esc(A("epUseTicket"))}</button><button class="alt" data-ep="dia">${Icon.fill(esc(A("epUseDia")),13)}</button></div>`,
+    m=>m.querySelectorAll("[data-ep]").forEach(b=>b.onclick=()=>{Mini.close();startStory(st.id,b.dataset.ep)}))}
+function startStory(id,how){
   const st=STORIES.find(x=>x.id===id);if(!st)return;
   if(isLocked(st.char||"seoa"))return lockToast();  // 107
-  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
-  if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
+  if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id,how));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
+  if(st.price&&!S.stories[id]){
+    // 110: 특별 에피소드 이용권(출석 7일째)이 있으면 「이용권으로 열기 / 다이아로 열기」 고르기
+    const tk=Attend.tix().ep;
+    if(!how&&tk>0)return epChoose(st,tk);
+    if(how==="ticket"&&tk>0){Attend.tix().ep--;toast(esc(UI("attend.epOpened")),1800)}
+    else{if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}}
   // 8-1: 서아 오프닝을 아직 안 봤으면 본 것으로 처리하고 특별 에피소드 첫 대사만(기본 에피소드 「시작」은 그대로 오프닝부터)
   if((st.char||"seoa")==="seoa"&&!S.introDone)S.introDone=true;
   S.stories[id]=1;
