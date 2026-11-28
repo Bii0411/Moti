@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1337">
+<meta name="moti-version" content="20261128-1352">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -581,12 +581,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1337">
-<link rel="stylesheet" href="photos.css?v=20261128-1337">
-<link rel="stylesheet" href="cards.css?v=20261128-1337">
-<link rel="stylesheet" href="pose.css?v=20261128-1337">
-<link rel="stylesheet" href="pack.css?v=20261128-1337">
-<link rel="stylesheet" href="together.css?v=20261128-1337">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1352">
+<link rel="stylesheet" href="photos.css?v=20261128-1352">
+<link rel="stylesheet" href="cards.css?v=20261128-1352">
+<link rel="stylesheet" href="pose.css?v=20261128-1352">
+<link rel="stylesheet" href="pack.css?v=20261128-1352">
+<link rel="stylesheet" href="together.css?v=20261128-1352">
 </head>
 <body>
 <div class="app">
@@ -667,21 +667,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1337"></script>
-<script src="motion.js?v=20261128-1337"></script>
-<script src="gacha.js?v=20261128-1337"></script>
-<script src="look.js?v=20261128-1337"></script>
-<script src="alive.js?v=20261128-1337"></script>
-<script src="film.js?v=20261128-1337"></script>
-<script src="photos.js?v=20261128-1337"></script>
-<script src="seoaphoto.js?v=20261128-1337"></script>
-<script src="cards.js?v=20261128-1337"></script>
-<script src="pose.js?v=20261128-1337"></script>
-<script src="photoask.js?v=20261128-1337"></script>
-<script src="together.js?v=20261128-1337"></script>
-<script src="pack.js?v=20261128-1337"></script>
-<script src="storypic.js?v=20261128-1337"></script>
-<script src="onboarding.js?v=20261128-1337"></script>
+<script src="icons.js?v=20261128-1352"></script>
+<script src="motion.js?v=20261128-1352"></script>
+<script src="gacha.js?v=20261128-1352"></script>
+<script src="look.js?v=20261128-1352"></script>
+<script src="alive.js?v=20261128-1352"></script>
+<script src="film.js?v=20261128-1352"></script>
+<script src="photos.js?v=20261128-1352"></script>
+<script src="seoaphoto.js?v=20261128-1352"></script>
+<script src="cards.js?v=20261128-1352"></script>
+<script src="pose.js?v=20261128-1352"></script>
+<script src="photoask.js?v=20261128-1352"></script>
+<script src="together.js?v=20261128-1352"></script>
+<script src="pack.js?v=20261128-1352"></script>
+<script src="storypic.js?v=20261128-1352"></script>
+<script src="onboarding.js?v=20261128-1352"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -1848,10 +1848,12 @@ async function askServer(cid,text,o){
     // v2 요청: 최근 기록(73: 서아는 config.historyMessages 개, 다른 캐릭터는 32개), 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
     const hist=(o&&o.auto?talkOf(cid):talkOf(cid).slice(0,-1)).slice(-(cid==="seoa"?histN():32)).map(m=>({r:m.r,t:turnText(m)}));
     const pn=photoNote(cid,hist);
-    const j=await postChat({char:cid,message:oneLine(text),history:hist.map(h=>h.r==="u"?{...h,t:oneLine(h.t)}:h),state:cid==="seoa"?chatState():{},motion_list:cid==="seoa"?motionList():[]},replyWait());
+    const cs=cid==="seoa"?chatState():{};
+    const j=await postChat({char:cid,message:oneLine(text),history:hist.map(h=>h.r==="u"?{...h,t:oneLine(h.t)}:h),state:cs,motion_list:cid==="seoa"?motionList():[]},replyWait());
     if(j&&typeof j.dialogue==="string"&&isFiller(j.dialogue)&&lastRaw)lastRaw.error="filler";  // 시연 패널 「마지막 답장」 출처
     else if(j&&pn)SeoaPhoto.noteDone();
-    return readReply(j);
+    const r=readReply(j);if(r&&Array.isArray(cs.gift_moments))r.gm=cs.gift_moments.map(g=>({id:g.id,name:g.name,when:g.when}));  // 106: 이 요청에 실제로 보낸 순간 선물 목록 → 판정 대기 항목에
+    return r;
   }
   const hist=talkOf(cid).slice(-12,-1).map(m=>({r:m.r,t:turnText(m)}));
   const pn=photoNote(cid,hist);
@@ -2038,8 +2040,9 @@ const judgeEvery=()=>Math.max(1,Math.round(+DATA.config.judgeEvery||1));
 const JLOG=[];  // 확인용: 판정마다 {turn 내 메시지 수, n 넘긴 턴 수, aff0→aff1, stage, ms, summary}
 // 50: h = 같은 선물을 또 준 턴(그 턴이 든 판정의 호감 상승을 data/gifts.json repeat.affectionScale 배로)
 // 80: ok = 정상 서버 답장(묶음에는 정상 답장만 들어옴 → reply_ok 의 true). 예전 저장 묶음에는 없음
-function queueJudge(u,c,keep,h){
-  const B=S.judgeBuf||(S.judgeBuf=[]);B.push(h?{u,c,ok:1,h:1}:{u,c,ok:1});
+// 106: gm = 그 답장의 /chat 에 실제로 보낸 gift_moments(본편만). 판정 때 묶음의 합집합을 state.gift_moments 로(서버 S8 「열었다」 기록)
+function queueJudge(u,c,keep,h,gm){
+  const B=S.judgeBuf||(S.judgeBuf=[]),it=h?{u,c,ok:1,h:1}:{u,c,ok:1};if(Array.isArray(gm))it.gm=gm;B.push(it);
   if(B.length>judgeEvery())B.splice(0,B.length-judgeEvery());  // 최대 judgeEvery 개(판정이 실패해 남은 옛 턴은 앞에서부터 버림)
   if(keep)S.judgeKeep=Math.max(S.judgeKeep||0,keep);
   save();
@@ -2064,6 +2067,9 @@ function judgeText(B){const M=DATA.config.judgeMaxChars||{},U=B.map(x=>oneLine(x
 function recentTalk(n=histN()){const T=talkOf("seoa"),out=[];
   for(let i=0;i<T.length;i++){const m=T[i],nx=T[i+1];if(m.r==="c"&&(m.bad||m.fb))continue;if(m.r==="u"&&nx&&nx.r==="c"&&(nx.bad||nx.fb))continue;out.push({r:m.r,t:turnText(m)})}
   return out.slice(-n)}
+// 106: 판정 묶음 B 의 항목별 gift_moments 합집합(id 로 겹치지 않게, {id,name,when}). 어느 항목에도 저장값이 없으면 null
+function judgeGifts(B){const A=B.filter(x=>Array.isArray(x.gm));if(!A.length)return null;const out=[],seen=new Set();
+  A.forEach(x=>x.gm.forEach(g=>{if(g&&g.id&&!seen.has(g.id)){seen.add(g.id);out.push({id:g.id,name:g.name,when:g.when})}}));return out}
 let judgeTok=0;  // 29-1: 기다림이 judgeWaitMs 를 넘겨 버린 판정은 결과가 와도 무시
 function runJudge(){
   const st=story(),before=curStage(),gen=GEN,keep=S.judgeKeep||null,tok=++judgeTok;
@@ -2075,7 +2081,8 @@ function runJudge(){
   const t0=performance.now(),aff0=st.affection||0;
   const half=B.some(x=>x.h)?(+((GIFT.repeat||{}).affectionScale)||1):1,halve=d=>d>0&&half!==1?Math.round(d*half):d;  // 50: 또 준 선물
   // 42: 에피소드 단계가 있는 에피소드: 에피소드 단계·호감으로 판정을 받고, 호감 변화와 플래그만 에피소드에 더함(본 이야기 상태는 그대로. 요약만 이 줄기 것으로)
-  if(EpStage.on()){const es=EpStage.judgeState(),ea0=es.affection,ep=Thread.cur();
+  if(EpStage.on()){const es=EpStage.judgeState(),ea0=es.affection,ep=Thread.cur();delete es.gift_moments;  // 106: 에피소드 판정에는 순간 선물 목록을 안 보냄(chatState 에서 딸려 온 빈 목록도 뺌)
+    
     judgeP=post("/judge",{char:"seoa",state:es,last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need?recent:[]},45000)
       .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok||Thread.cur()!==ep)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;
         const d=halve((+j.state.affection||0)-ea0),fl=(j.flags||[]).filter(f=>typeof f==="string");if(need&&j.state.summary)st.summary=j.state.summary;
@@ -2087,11 +2094,12 @@ function runJudge(){
   // 80: 본편 recent = 요약 때 또는 서버가 단계 기록을 기다릴 때(stage_note_due · stage_note_queue) 최근 실제 대화 historyMessages(80)개. 실패 답장과 그 요청은 뺌
   const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
   const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip(noAppKeys({...st,user_name:userName()}))),last_user:lastUser,last_reply:lastReply,need_summary:need,recent:need||noteDue?recentTalk():[]};
+  delete body.state.gift_moments;const gms=judgeGifts(B);if(gms)body.state.gift_moments=gms;  // 106: 묶음 항목에 저장된 목록의 합집합(저장값이 하나도 없으면 키 없음 = 서버 「모름」)
   if(J.ok)body.reply_ok=J.ok;  // 80: 서버 S4-1-1 — last_user 메시지마다 정상 답장(true). 예전 묶음(정상 여부 모름)은 빼고 보냄
   judgeP=post("/judge",body,45000)
     .then(j=>{if(!j||!j.state||gen!==GEN||tok!==judgeTok)return;S.judgeBuf=[];S.judgeKeep=null;S.judgeN=(S.judgeN||0)+1;LASTJ={at:Date.now(),ep:0,delta:j.affection_delta!=null?j.affection_delta:(+j.state.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
       const prev={...st},fl=usedFlags(j.flags);  // 80: 받기 전 상태(엇갈림 알림) · withdraw 는 앱에서 안 씀
-      Object.assign(st,j.state);PhotoAsk.fromJudge(st);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,fl);if(keep)st.stage=keep;const q=[];
+      Object.assign(st,j.state);delete st.gift_moments;PhotoAsk.fromJudge(st);if(half!==1)st.affection=aff0+halve((st.affection||0)-aff0);Fx.judged((st.affection||0)-aff0,fl);if(keep)st.stage=keep;const q=[];
       JLOG.push({turn:S.bond||0,n:B.length,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:need,recent:body.recent.length,reply_ok:body.reply_ok||null});
       Route.judged(before,st.affection,fl);  // 51: 갈래 세기·정하기(80: 첫 밤 마무리에서도)
       if(curStage()>before&&(curStage()<6||j.stage_up===true))stageUp(before,curStage(),q);  // 104: 연인(6단계) 연출은 판정 stage_up true 로 6 이 된 때만(마음 확인 판정은 5 그대로라 없음)
@@ -2236,7 +2244,7 @@ JSON만 출력: {"line":"...","motion":"m01","face":"soft","mood":"normal","scen
   if(j){const nm=j.motionNames.map(n=>Object.keys(allowed).find(k=>allowed[k]===n)).filter(Boolean);
     const face=emoFace(j.emotion);const mood=face==="angry"||face==="sulky"||face==="bored"?"sulky":/미안|사과|고마/.test(text)?"normal":S.mood;
     const sc=j.location?SCENES.findIndex(x=>x.name===j.location):-1;
-    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,photoAsk:j.photoAsk||null,src:"server"}}
+    return{line:j.line,action:j.action,motion:j.motion||nm[0]||null,emotion:j.emotion,face,mood,scene:sc>=0?sc:null,location:sc>=0?j.location:null,giftMoment:j.giftMoment||null,photoAsk:j.photoAsk||null,gm:j.gm,src:"server"}}
   return localReply(text,allowed);
 }
 // Claude를 못 쓸 때의 예시 대사
@@ -2374,7 +2382,7 @@ if(!giftMid)firstSeen(mid);if(keyM)BondTop.shine()}
   if(epOn){if(serverVer()===2&&src0==="server")queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),null,o&&o.giftHalf);else if(!fbV2)EpStage.turn()}  // 42: 에피소드 판정은 에피소드 단계에만(시연 예약·사건 없음)
   else if(serverVer()===2&&srvOk){  // 80: 실제 서버 정상 답장만(드라큘라 등 단계 없는 에피소드에서 출처를 바꾼 예비 대사는 판정·해금 안 함)
     const ev=!R&&usedEvent&&DATA.story&&DATA.story.unlock.event[usedEvent];if(ev&&EvShown.once(usedEvent))unlockShow([ev]);  // 사건 해금은 그 사건 답장 뒤에 · 103: 같은 사건·단계는 한 번만
-    queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),keep,o&&o.giftHalf);
+    queueJudge(say,turnText(talkOf("seoa").slice(-1)[0]),keep,o&&o.giftHalf,v.gm);
   }else if(!R&&!fbV2)countStage();
   const goNight=!epOn&&srvOk&&serverVer()===2&&Night.replied(usedEvent);  // 80: 밤 마무리 답장 → 유저 한 번 답의 정상 답장이면 밤 넘기기 시작
   renderBond();renderTop();perfEnd(P);
@@ -3718,7 +3726,7 @@ const Night=(()=>{
     const noteDue=st.stage_note_due!=null||(Array.isArray(st.stage_note_queue)&&st.stage_note_queue.length>0);
     const body={char:"seoa",state:PhotoAsk.req(PhotoAsk.strip(noAppKeys({...st,user_name:userName()}))),last_user:msg(),last_reply:n.reply||"",need_summary:false,reply_ok:[],recent:noteDue?recentTalk():[]};
     const p=post("/judge",body,45000).then(j=>{if(!j||!j.state||g!==GEN||tk!==judgeTok||!main())return false;
-      const prev={...st},before=curStage();Object.assign(st,j.state);PhotoAsk.fromJudge(st);
+      const prev={...st},before=curStage();Object.assign(st,j.state);delete st.gift_moments;PhotoAsk.fromJudge(st);
       LASTJ={at:Date.now(),ep:0,night:1,delta:j.affection_delta!=null?j.affection_delta:(+st.affection||0)-aff0,flags:j.flags||[],reason:j.reason||null,changes:j.changes||null,progress:j.progress||null};
       JLOG.push({turn:S.bond||0,n:0,night:1,aff0,aff1:st.affection||0,stage:curStage(),flags:j.flags||[],ms:Math.round(performance.now()-t0),summary:false});
       const q=[];if(curStage()>before)stageUp(before,curStage(),q);else if(curStage()<before)stageDown(before,curStage());
