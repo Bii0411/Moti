@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1702">
+<meta name="moti-version" content="20261128-1723">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -584,12 +584,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1702">
-<link rel="stylesheet" href="photos.css?v=20261128-1702">
-<link rel="stylesheet" href="cards.css?v=20261128-1702">
-<link rel="stylesheet" href="pose.css?v=20261128-1702">
-<link rel="stylesheet" href="pack.css?v=20261128-1702">
-<link rel="stylesheet" href="together.css?v=20261128-1702">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1723">
+<link rel="stylesheet" href="photos.css?v=20261128-1723">
+<link rel="stylesheet" href="cards.css?v=20261128-1723">
+<link rel="stylesheet" href="pose.css?v=20261128-1723">
+<link rel="stylesheet" href="pack.css?v=20261128-1723">
+<link rel="stylesheet" href="together.css?v=20261128-1723">
 </head>
 <body>
 <div class="app">
@@ -670,21 +670,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1702"></script>
-<script src="motion.js?v=20261128-1702"></script>
-<script src="gacha.js?v=20261128-1702"></script>
-<script src="look.js?v=20261128-1702"></script>
-<script src="alive.js?v=20261128-1702"></script>
-<script src="film.js?v=20261128-1702"></script>
-<script src="photos.js?v=20261128-1702"></script>
-<script src="seoaphoto.js?v=20261128-1702"></script>
-<script src="cards.js?v=20261128-1702"></script>
-<script src="pose.js?v=20261128-1702"></script>
-<script src="photoask.js?v=20261128-1702"></script>
-<script src="together.js?v=20261128-1702"></script>
-<script src="pack.js?v=20261128-1702"></script>
-<script src="storypic.js?v=20261128-1702"></script>
-<script src="onboarding.js?v=20261128-1702"></script>
+<script src="icons.js?v=20261128-1723"></script>
+<script src="motion.js?v=20261128-1723"></script>
+<script src="gacha.js?v=20261128-1723"></script>
+<script src="look.js?v=20261128-1723"></script>
+<script src="alive.js?v=20261128-1723"></script>
+<script src="film.js?v=20261128-1723"></script>
+<script src="photos.js?v=20261128-1723"></script>
+<script src="seoaphoto.js?v=20261128-1723"></script>
+<script src="cards.js?v=20261128-1723"></script>
+<script src="pose.js?v=20261128-1723"></script>
+<script src="photoask.js?v=20261128-1723"></script>
+<script src="together.js?v=20261128-1723"></script>
+<script src="pack.js?v=20261128-1723"></script>
+<script src="storypic.js?v=20261128-1723"></script>
+<script src="onboarding.js?v=20261128-1723"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -3975,7 +3975,13 @@ function applyBg(){const d=$("#bgdim"),b=(DATA.look&&DATA.look.background)||{};i
   d.style.setProperty("--bgDark",String(1-(b.brightness!=null?b.brightness:.8)));d.style.setProperty("--bgDesat",String(1-(b.saturation!=null?b.saturation:.9)))}
 dataReady.then(()=>{Stage.frameTo("normal",0);applyBg();wakeServer();start();moveToV2();Route.check("old");End.migrate();Ending.migrate();Night.migrate();  // 51-1: 예전 저장값(3단계 이상인데 갈래 없음 → 센 수로 바로 · 5단계인데 되감기 지점 없음 → 지금을 지점으로)renderTop();renderBond();$("#navAlbum").textContent=UI("nav.album");
   document.querySelectorAll("#fnPanel [data-fn]").forEach(b=>b.querySelector("b").textContent=UI("fn."+b.dataset.fn));Fn.set(false);Photos.init();SeoaPhoto.init();Cards.init().then(async()=>{if(S.dropCards){await Cards.remove("seoa",S.dropCards);delete S.dropCards;save()}return Cards.refresh()});Pose.init();PhotoAsk.bind();PhotoAsk.init();renderAlbum();setScene(S.scene||0);setTab("home");Demo.init();pingLater();IdleWatch.init()});  // 시작 화면은 홈(7-A: 온보딩을 마쳤으면 바로 홈)
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+// 107-1: 이미 홈 탭에서 「홈」을 다시 누르면 — 캐릭터 화면이면 뒤로 가기와 같이(closeChar, 원래 스크롤 위치), 검색 중이면 검색 닫기(X 와 같이 검색어 지움) 뒤 홈 맨 위, 홈 첫 화면이면 맨 위로 부드럽게
+function homeAgain(){const h=$("#home");
+  if(H.view)return closeChar();
+  if(H.q||H.search){H.q="";H.search=false;renderHome();h.scrollTop=0;return}
+  const i=$("#hQ");if(i&&document.activeElement===i)i.blur();
+  const y0=h.scrollTop;if(!y0)return;h.scrollTo({top:0,behavior:"smooth"});setTimeout(()=>{if(h.scrollTop===y0)h.scrollTop=0},400)}  // 부드러운 스크롤이 안 되는 브라우저면 바로 맨 위로
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>b.dataset.tab==="home"&&curTab==="home"&&!Onboard.isOpen()?homeAgain():setTab(b.dataset.tab));
 // ＋ 기능판(10-A): ＋ → 입력칸 아래 기능판(＋는 ×로), 입력칸을 누르면 닫힘. 선물하기는 예전 선물 창 그대로
 const Fn=(()=>{let on=false;
   function set(v){on=!!v;const p=$("#fnPanel"),b=$("#fnBtn");if(!p)return;p.classList.toggle("on",on);p.setAttribute("aria-hidden",on?"false":"true");
