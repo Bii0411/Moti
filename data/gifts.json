@@ -111,7 +111,7 @@
       "stage": 1,
       "e": "🧰",
       "name": "구급상자",
-      "price": 60,
+      "price": 50,
       "when": "서아가 다쳐서 왔을 때",
       "reaction": "x26"
     },
@@ -121,7 +121,7 @@
       "stage": 2,
       "e": "🍸",
       "name": "칵테일",
-      "price": 120,
+      "price": 80,
       "when": "서아가 지쳐 보이거나 자기 술 얘기를 할 때",
       "reaction": "x27"
     },
@@ -131,7 +131,7 @@
       "stage": 3,
       "e": "♨️",
       "name": "따뜻한 수건",
-      "price": 80,
+      "price": 100,
       "when": "며칠 뒤 밤, 비에 젖어 들어왔을 때 · 폭우 장면",
       "reaction": "x28"
     },
@@ -168,7 +168,7 @@
       "e": "☂️",
       "icon": "icons/gift2_umbrella.png",
       "name": "우산",
-      "price": 100,
+      "price": 200,
       "when": "위기 소식을 꺼냈을 때",
       "reaction": "x30"
     },

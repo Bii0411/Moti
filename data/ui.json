@@ -253,7 +253,7 @@
     "nameChangeDia": 30,
     "firstChangeFree": true,
     "showEndings": false,
-    "_my": "마이 페이지 카드 문구(12단계). xstage* = 맨 아래 XSTAGE 바로 가기 카드(69, xstageUrl 이 비면 카드 없음, 새 탭으로 열림). charged = 충전 버튼을 눌렀을 때 알림({n} 다이아 개수, 18). lv = 관계 줄 하트 아이콘의 접근성 이름. relTitle·relCount·relEmpty·relGoHome·relSoon·relAria = 「관계」 묶음(28: 대화한 캐릭터마다 한 줄, {n} 캐릭터 수, {name} 캐릭터 이름). collection = 관계 줄 오른쪽 위 무빙 카드 수({n} 모은 수, {total} 전체). perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, price 표시 가격, tag 있으면 위에 작은 태그)",
+    "_my": "마이 페이지 카드 문구(12단계). xstage* = 맨 아래 XSTAGE 바로 가기 카드(69, xstageUrl 이 비면 카드 없음, 새 탭으로 열림). charged = 충전 버튼을 눌렀을 때 알림({n} 다이아 개수, 18). lv = 관계 줄 하트 아이콘의 접근성 이름. relTitle·relCount·relEmpty·relGoHome·relSoon·relAria = 「관계」 묶음(28: 대화한 캐릭터마다 한 줄, {n} 캐릭터 수, {name} 캐릭터 이름). collection = 관계 줄 오른쪽 위 무빙 카드 수({n} 모은 수, {total} 전체). perks = PLUS 혜택 줄(icon 은 index.html MYI 의 이름, {plusCap} = data/photos.json slots.plusCap). packs = 다이아 충전 상품(dia 개수, bonus 보너스 개수(없으면 줄 없음, 충전 때 dia+bonus 가 들어옴), price 표시 가격, tag 있으면 위에 작은 태그). bonus = 상품 개수 아래 보너스 줄({bonus} 개수, 109)",
     "xstageTitle": "더 많은 모션이 궁금하다면?",
     "xstageSub": "모션캡처로 촬영한 3D 모션을 XSTAGE에서 만나 보세요",
     "xstageGo": " 바로 가기",
@@ -301,19 +301,27 @@
     "packs": [
       {
         "dia": 100,
-        "price": "7,000원"
+        "price": "1,100원"
       },
       {
         "dia": 500,
-        "price": "35,000원",
+        "bonus": 30,
+        "price": "5,500원"
+      },
+      {
+        "dia": 1000,
+        "bonus": 100,
+        "price": "11,000원",
         "tag": "인기"
       },
       {
-        "dia": 1200,
-        "price": "84,000원"
+        "dia": 3000,
+        "bonus": 500,
+        "price": "33,000원"
       }
     ],
-    "chargeNote": "1다이아 70원"
+    "bonus": "+{bonus} 보너스",
+    "chargeNote": "100다이아 1,100원"
   },
   "fn": {
     "_fn": "＋ 기능판(10단계, 원고 docs/drafts/10-11-카메라-사진-포토부스-문구.md). gift·camera·photo·pose(48) = 기능 이름. together(84) = 본편 서아 대화방에서 포즈 칸 대신(크리스마스 등 에피소드는 포즈 그대로). open·close = ＋ 버튼의 접근성 이름(화면에는 아이콘만)",

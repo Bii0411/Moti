@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1758">
+<meta name="moti-version" content="20261128-1816">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -253,10 +253,12 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .packs .amt{display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px}
 .packs button{position:relative}
 .packs button.hot{border-color:#8b5cf6}
-.packs .tg{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;background:#8b5cf6;border-radius:999px;padding:1px 7px;white-space:nowrap}
+.packs .ptag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;background:#8b5cf6;border-radius:999px;padding:1px 7px;white-space:nowrap}
 .gem{display:block;flex:none}
 .dpill{display:inline-flex;align-items:center;gap:5px}
-.packs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.packs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 8px;padding-top:6px}
+.packs .bn{display:block;font-size:11px;font-weight:700;color:#c4b5fd;margin-top:2px}
+.packs .bn.none{visibility:hidden}
 .packs button{background:#0f0d16;border:1px solid var(--line);border-radius:12px;padding:13px 4px 11px;font-size:13px;font-weight:800}
 .packs button small{display:block;font-size:11px;color:var(--sub);font-weight:500;margin-top:2px}
 .bondbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
@@ -584,12 +586,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1758">
-<link rel="stylesheet" href="photos.css?v=20261128-1758">
-<link rel="stylesheet" href="cards.css?v=20261128-1758">
-<link rel="stylesheet" href="pose.css?v=20261128-1758">
-<link rel="stylesheet" href="pack.css?v=20261128-1758">
-<link rel="stylesheet" href="together.css?v=20261128-1758">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1816">
+<link rel="stylesheet" href="photos.css?v=20261128-1816">
+<link rel="stylesheet" href="cards.css?v=20261128-1816">
+<link rel="stylesheet" href="pose.css?v=20261128-1816">
+<link rel="stylesheet" href="pack.css?v=20261128-1816">
+<link rel="stylesheet" href="together.css?v=20261128-1816">
 </head>
 <body>
 <div class="app">
@@ -670,21 +672,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1758"></script>
-<script src="motion.js?v=20261128-1758"></script>
-<script src="gacha.js?v=20261128-1758"></script>
-<script src="look.js?v=20261128-1758"></script>
-<script src="alive.js?v=20261128-1758"></script>
-<script src="film.js?v=20261128-1758"></script>
-<script src="photos.js?v=20261128-1758"></script>
-<script src="seoaphoto.js?v=20261128-1758"></script>
-<script src="cards.js?v=20261128-1758"></script>
-<script src="pose.js?v=20261128-1758"></script>
-<script src="photoask.js?v=20261128-1758"></script>
-<script src="together.js?v=20261128-1758"></script>
-<script src="pack.js?v=20261128-1758"></script>
-<script src="storypic.js?v=20261128-1758"></script>
-<script src="onboarding.js?v=20261128-1758"></script>
+<script src="icons.js?v=20261128-1816"></script>
+<script src="motion.js?v=20261128-1816"></script>
+<script src="gacha.js?v=20261128-1816"></script>
+<script src="look.js?v=20261128-1816"></script>
+<script src="alive.js?v=20261128-1816"></script>
+<script src="film.js?v=20261128-1816"></script>
+<script src="photos.js?v=20261128-1816"></script>
+<script src="seoaphoto.js?v=20261128-1816"></script>
+<script src="cards.js?v=20261128-1816"></script>
+<script src="pose.js?v=20261128-1816"></script>
+<script src="photoask.js?v=20261128-1816"></script>
+<script src="together.js?v=20261128-1816"></script>
+<script src="pack.js?v=20261128-1816"></script>
+<script src="storypic.js?v=20261128-1816"></script>
+<script src="onboarding.js?v=20261128-1816"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -3208,7 +3210,7 @@ function renderMy(){
   renderBond();const M=(DATA.ui||{}).my||{};
   const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
   const perks=(M.perks||[]).map(p=>`<li><span class="mi">${MYI[p.icon]||""}</span><span>${esc(p.text.split("{plusCap}").join(plusCap))}${p.sub?`<em>${esc(p.sub)}</em>`:""}</span></li>`).join("");
-  const packs=(M.packs||[]).map(p=>`<button data-p="${p.dia}" class="${p.tag?"hot":""}">${p.tag?`<span class="tg">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><small>${esc(p.price)}</small></button>`).join("");
+  const packs=(M.packs||[]).map(p=>{const bn=+p.bonus||0;return `<button data-p="${(+p.dia||0)+bn}" class="${p.tag?"hot":""}">${p.tag?`<span class="ptag">${esc(p.tag)}</span>`:""}<span class="amt">${GEM(17)}${Number(p.dia).toLocaleString()}</span><span class="bn${bn?"":" none"}">${bn?esc(UI("my.bonus",{bonus:bn.toLocaleString()})):"&nbsp;"}</span><small>${esc(p.price)}</small></button>`}).join("");  // 109: bonus 가 있으면 개수 아래 보너스 줄, 누르면 dia+bonus
   $("#my").innerHTML=`${meHTML()}
   ${relHTML()}
   ${M.showEndings?Ending.html():""}
@@ -3224,7 +3226,7 @@ function renderMy(){
   const rh=$("#relHome");if(rh)rh.onclick=()=>setTab("home");
   $("#meEdit").onclick=()=>NameSheet.open();
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
-  $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:b.dataset.p})))});
+  $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:Number(b.dataset.p).toLocaleString()})))});
 }
 
 // ───────────────────────── 탭 / 시작 ─────────────────────────
