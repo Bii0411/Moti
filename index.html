@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1401">
+<meta name="moti-version" content="20261128-1702">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -297,8 +297,10 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .hcc b{font-size:14px}
 .hcc small{font-size:12px;color:var(--sub);line-height:1.45;white-space:normal;word-break:keep-all;overflow-wrap:break-word}
 .hcc .htag{font-style:normal;font-size:11px;color:#8d87a3;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}  /* 62: 카드 아래 해시태그 한 줄(넘치면 …) */
-.hcc .pl,.chero .pl{position:absolute;top:8px;right:8px;font-size:11px;font-weight:800;background:#e8467c;color:#fff;border-radius:10px;padding:2px 8px}
+.hcc .pls,.chero .pls{position:absolute;top:8px;right:8px;display:flex;gap:4px}  /* 107: 위 표시 묶음(곧 만나요 + 19+) */
+.hcc .pl,.chero .pl{font-size:11px;font-weight:800;background:#e8467c;color:#fff;border-radius:10px;padding:2px 8px}
 .hcc .pl.age,.chero .pl.age{background:#e11d48;font-weight:900}
+.hcc .pl.lk,.chero .pl.lk{background:#2a2a34;color:#d6d3df}  /* 107: 곧 만나요 */
 .hnone{padding:36px 0}
 .chd{display:flex;align-items:center;margin:0 -6px 6px}
 .chd .bk{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--text)}
@@ -337,6 +339,7 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .ep .tx{flex:1;min-width:0}.ep b{font-size:14px}.ep p{font-size:12px;color:var(--sub);margin-top:2px;line-height:1.4}
 .ep .eb,.story .eb{flex:none;height:32px;line-height:32px;padding:0 14px;border-radius:16px;background:var(--pri);color:#fff;font-size:13px;font-weight:800}
 .eb.adult{background:#e11d48}
+.ep .eb.lk{background:var(--line);color:var(--sub)}  /* 107: 잠긴 캐릭터 「곧 만나요」(누를 수는 있음) */
 .story .eb{margin-left:auto}
 .epsoon{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--sub);font-size:13px}
 .empty{color:var(--sub);font-size:13px;padding:20px 0;text-align:center}
@@ -581,12 +584,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1401">
-<link rel="stylesheet" href="photos.css?v=20261128-1401">
-<link rel="stylesheet" href="cards.css?v=20261128-1401">
-<link rel="stylesheet" href="pose.css?v=20261128-1401">
-<link rel="stylesheet" href="pack.css?v=20261128-1401">
-<link rel="stylesheet" href="together.css?v=20261128-1401">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1702">
+<link rel="stylesheet" href="photos.css?v=20261128-1702">
+<link rel="stylesheet" href="cards.css?v=20261128-1702">
+<link rel="stylesheet" href="pose.css?v=20261128-1702">
+<link rel="stylesheet" href="pack.css?v=20261128-1702">
+<link rel="stylesheet" href="together.css?v=20261128-1702">
 </head>
 <body>
 <div class="app">
@@ -667,21 +670,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1401"></script>
-<script src="motion.js?v=20261128-1401"></script>
-<script src="gacha.js?v=20261128-1401"></script>
-<script src="look.js?v=20261128-1401"></script>
-<script src="alive.js?v=20261128-1401"></script>
-<script src="film.js?v=20261128-1401"></script>
-<script src="photos.js?v=20261128-1401"></script>
-<script src="seoaphoto.js?v=20261128-1401"></script>
-<script src="cards.js?v=20261128-1401"></script>
-<script src="pose.js?v=20261128-1401"></script>
-<script src="photoask.js?v=20261128-1401"></script>
-<script src="together.js?v=20261128-1401"></script>
-<script src="pack.js?v=20261128-1401"></script>
-<script src="storypic.js?v=20261128-1401"></script>
-<script src="onboarding.js?v=20261128-1401"></script>
+<script src="icons.js?v=20261128-1702"></script>
+<script src="motion.js?v=20261128-1702"></script>
+<script src="gacha.js?v=20261128-1702"></script>
+<script src="look.js?v=20261128-1702"></script>
+<script src="alive.js?v=20261128-1702"></script>
+<script src="film.js?v=20261128-1702"></script>
+<script src="photos.js?v=20261128-1702"></script>
+<script src="seoaphoto.js?v=20261128-1702"></script>
+<script src="cards.js?v=20261128-1702"></script>
+<script src="pose.js?v=20261128-1702"></script>
+<script src="photoask.js?v=20261128-1702"></script>
+<script src="together.js?v=20261128-1702"></script>
+<script src="pack.js?v=20261128-1702"></script>
+<script src="storypic.js?v=20261128-1702"></script>
+<script src="onboarding.js?v=20261128-1702"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -791,6 +794,17 @@ const chBy=id=>CH.find(c=>c.id===id);
 // 연령 등급(7-C): ageRating 이 있는 캐릭터(서도윤 19)는 홈 카드 배지를 원고 문구(data/onboarding.json adult.badge)로, 인증 전에는 대화방 대신 인증 시트
 const needAdult=cid=>{const c=chBy(cid);return !!(c&&c.ageRating>=19&&!S.adult)};
 const badgeOf=c=>c.ageRating>=19?(Onboard.T("adult.badge")||c.ageRating+"+"):c.badge;
+// 107: 잠긴 캐릭터(data/characters.json locked: true) = 대화방에 못 들어감(소개 화면은 보임). ?debug=1 패널에서만 이 기기 잠금 풀기(localStorage, 일반 화면은 늘 잠금)
+const CharLock={key:"moti.charUnlock",
+  off(){if(!DEBUG)return false;try{return localStorage.getItem(this.key)==="1"}catch(e){return false}},
+  set(on){try{if(on)localStorage.setItem(this.key,"1");else localStorage.removeItem(this.key)}catch(e){}}};
+const isLocked=cid=>{const c=chBy(cid);return !!(c&&c.locked)&&!CharLock.off()};
+const lockToast=()=>toast(esc(UI("home.lockedToast")));
+// 107: 카드·소개 사진 위 표시. 잠긴 동안 「곧 만나요」(+19+), NEW·3D 는 숨김. 아니면 예전 badgeOf 그대로
+const badgesHTML=c=>{const L=[];
+  if(isLocked(c.id)){L.push(`<span class="pl lk">${esc(UI("home.lockedBadge"))}</span>`);if(c.ageRating>=19)L.push(`<span class="pl age">${esc(Onboard.T("adult.badge")||c.ageRating+"+")}</span>`)}
+  else{const bd=badgeOf(c);if(bd)L.push(`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`)}
+  return L.length?`<span class="pls">${L.join("")}</span>`:""};
 // 서아 장소 5곳 (data/seoa_story.json locations, 서버 location 값과 1:1). 못 불러오면 배경 하나로 버팀
 let SCENES=[{name:"",img:"bg_seoa_street.jpg"}];
 
@@ -1843,6 +1857,7 @@ async function postChat(body){
 const histN=()=>Math.max(1,Math.round(+DATA.config.historyMessages||32));
 // 80: o.auto = 밤 넘기기 자동 요청(「[다음 밤]」 — 내 말이 대화 기록에 없어서 기록 끝을 빼지 않음)
 async function askServer(cid,text,o){
+  if(isLocked(cid))return null;  // 107: 잠긴 캐릭터에는 /chat 을 보내지 않음
   if(noServer())return null;  // 시연 패널 「서버 없음」: 바로 예시 대사
   if(serverVer()===2){
     // v2 요청: 최근 기록(73: 서아는 config.historyMessages 개, 다른 캐릭터는 32개), 이야기 상태, 해금된 몸짓(직전 몸짓 제외)
@@ -2267,6 +2282,7 @@ function localReply(t,allowed){
   return pick([{line:"쉿. 이 층 카메라는 내가 다 꺼 놨어.",motion:"m05",face:"soft",mood:S.mood},{line:"방금 그 표정, 기록해 둘게. 내 전용 파일에.",motion:"m01",face:"fun",mood:S.mood},{line:"…너랑 있으면 시간 가는 줄 모르겠어.",motion:"m02",face:"soft",mood:S.mood}]);
 }
 async function askOther(cid,text){
+  if(isLocked(cid))return null;  // 107
   const c=chBy(cid),sm=noServer()?null:await getSample();
   if(sm){
     const hist=chatOf(cid).filter(m=>m.r==="u"||m.r==="c").slice(-10).map(m=>(m.r==="u"?"유저: ":c.name+": ")+m.t).join("\n");
@@ -2288,6 +2304,7 @@ async function send(text,o){
   text=(text||"").trim();if(!text||busy)return;
   const say=o&&o.srv||text,giftId=o&&o.gift||null;
   const room=S.room||"seoa";
+  if(isLocked(room))return lockToast();  // 107: 잠긴 캐릭터에는 보내지 않음
   if(room==="seoa"&&End.locked())return;  // 51: 실패한 줄기는 잠김(끝 화면)
   // 80: 밤 넘기기가 끝나지 않았으면 그것부터 — 첫마디 요청이 실패한 채면 내 말은 입력창에 두고 첫마디만 다시, 판정만 남았으면 그 판정을 먼저 한 번
   if(room==="seoa"&&!(o&&o.night)){const ng=Night.gate();if(ng!=="none"){Night.retry();return}}  // 80-1: 판정만 남았어도 일반 /chat 은 보내지 않음(내 말은 입력창에 그대로, 밤 넘기기 판정부터 다시)
@@ -2780,6 +2797,7 @@ const Demo=(()=>{
         <div class="row">${[1,2,0].map(n=>B("server",esc(T("serverModes."+n)),{v:n,on:serverMode()===n})).join("")}</div>${q!=null?`<div class="kv">${esc(T("serverQueryWins"))}</div>`:""}`;
       h+=`<h4>${esc(T("sec.lastReply"))}</h4>${lastHtml()}`;
       h+=judgeHtml();  // 54-C: 마지막 /judge 결과와 progress
+      h+=`<h4>${esc(T("sec.charLock"))}</h4><div class="row">${B("charUnlock",esc(T("charUnlock")),{on:CharLock.off()})}</div>`;  // 107: 이 기기에서만 다른 캐릭터 잠금 풀기
       h+=`<h4>${esc(T("sec.reset"))}</h4><div class="row">${["seoa","chat","bond","album"].map(k=>B("reset",esc(T("resets."+k)),{v:k})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.stage"))} <small>${esc(mainStageName(cs))}${st.crisis?" · crisis "+esc(st.crisis):""}${S.night?" · night "+esc(S.night.ph):""}</small></h4><div class="row">${[1,2,3,4,5,6].map(n=>B("stage",`${n} ${esc(stageName(n))}`,{v:n,on:cs===n})).join("")}</div>`;
       h+=`<h4>${esc(T("sec.affection"))} <small>${esc(T("affectionNote"))}</small></h4><div class="aff"><input type="range" min="0" max="100" step="1" value="${st.affection||0}" id="dpAff"><b id="dpAffV">${st.affection||0}</b></div>`;
@@ -2811,6 +2829,7 @@ const Demo=(()=>{
     if(a==="replayOnboard")return replayOnboard();
     if(a==="adultReset"){delete S.adult;if(S.room&&needAdult(S.room)){S.room=null;if(curTab==="chat")showList()}toast(esc(T("resetToast",{name:OT("demo.adultReset")})),1800);return refresh()}
     if(a==="scene0")return firstOpen();
+    if(a==="charUnlock"){const on=!CharLock.off();CharLock.set(on);if(S.room&&isLocked(S.room)){S.room=null;save();if(curTab==="chat")showList()}toast(esc(T(on?"charUnlockOn":"charUnlockOff")),1800);return refresh()}  // 107
     if(a==="resetAll")return reset("all");  // 한 번 누르면 바로(7-1)
     if(a==="dia"){S.dia+=500;toast(Icon.fill(esc(T("diaToast"))),1600);return refresh()}
     if(a==="mood")return setMood(v);
@@ -2997,7 +3016,7 @@ function homeList(){
   let list=[...CH];
   if(H.sort==="rec")list.sort((a,b)=>REC.indexOf(a.id)-REC.indexOf(b.id));
   if(H.sort==="hot")list.sort((a,b)=>b.chats-a.chats);
-  if(H.sort==="new")list.sort((a,b)=>(b.badge==="NEW")-(a.badge==="NEW"));
+  if(H.sort==="new"){const nw=c=>c.badge==="NEW"&&!isLocked(c.id);list.sort((a,b)=>nw(b)-nw(a))}  // 107: 잠긴 동안은 NEW 가 안 보이므로 앞으로도 안 올림
   if(H.tag)list=list.filter(c=>(c.tags||[]).includes(H.tag));
   const q=norm(H.q);
   if(q)list=list.filter(c=>[c.name,c.desc,...(c.tags||[])].some(x=>norm(x).includes(q)));
@@ -3011,14 +3030,14 @@ const spPrice=st=>needAdult(st.char||"seoa")?epAdult():`<span class="pr ${st.pri
 function renderEps(cid){
   const box=$("#hEps");if(!box)return;
   const c=chBy(cid);if(!c){box.innerHTML="";return}
-  const b=(EPS.basic||{})[cid],sp=STORIES.filter(s=>(s.char||"seoa")===cid),ad=needAdult(cid);
+  const b=(EPS.basic||{})[cid],sp=STORIES.filter(s=>(s.char||"seoa")===cid),ad=needAdult(cid),lk=isLocked(cid);
   box.innerHTML=`<h2>${esc(UI("home.basic"))}</h2>
-  ${b?`<button class="ep" data-b="${cid}"><span class="tx"><b>${esc(b.title)}</b><p>${esc(b.situation)}</p></span>${ad?epAdult():`<span class="eb">${esc(S.rooms.includes(cid)?UI("home.btnContinue"):UI("home.btnStart"))}</span>`}</button>`:""}
+  ${b?`<button class="ep" data-b="${cid}"><span class="tx"><b>${esc(b.title)}</b><p>${esc(b.situation)}</p></span>${lk?`<span class="eb lk">${esc(UI("home.lockedBtn"))}</span>`:ad?epAdult():`<span class="eb">${esc(S.rooms.includes(cid)?UI("home.btnContinue"):UI("home.btnStart"))}</span>`}</button>`:""}
   <h2>${esc(UI("home.special"))}</h2>
   ${sp.length?sp.map(st=>`<button class="story" data-s="${st.id}"><span class="im" style="background-image:url(${(SCENES[st.scene]||SCENES[0]).img})"></span><span><b>${esc(st.name)}</b><p>${esc(st.desc)}</p><span class="mo">${esc(UI("home.motion",{name:MNAME[st.m]||st.m}))}</span></span>
     ${spPrice(st)}</button>`).join("")+`<p class="alnote" style="margin-top:6px">${esc(UI("home.specialNote"))}</p>`
   :`<div class="epsoon">${esc(UI("home.soon"))}</div>`}`;
-  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{if(x.dataset.b==="seoa"){Thread.go("main");FirstMeet.arm()}enterRoom(x.dataset.b)});  // 31: 처음 「시작」이면 첫 만남 연출  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
+  box.querySelectorAll("[data-b]").forEach(x=>x.onclick=()=>{if(isLocked(x.dataset.b))return lockToast();if(x.dataset.b==="seoa"){Thread.go("main");FirstMeet.arm()}enterRoom(x.dataset.b)});  // 31: 처음 「시작」이면 첫 만남 연출  // 19+ 인증 전이면 enterRoom 이 인증 시트 → 끝나면 대화방
   box.querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>startStory(x.dataset.s));
 }
 // 헤더 검색 칸(홈 탭에서만 보임). 누르면 홈 맨 위에 입력창이 열림
@@ -3028,7 +3047,7 @@ function openSearch(){H.view=null;H.search=true;renderHome();const i=$("#hQ");if
 function gridHTML(){
   const list=homeList();
   if(!list.length)return `<div class="empty hnone">${esc(UI("home.searchEmpty"))}</div>`;
-  return `<div class="hgrid">${list.map(c=>{const b=(EPS.basic||{})[c.id],bd=badgeOf(c);return `<button class="hcc" data-c="${c.id}"><span class="pic" style="background-image:url(${c.img})">${bd?`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`:""}</span><span class="tx"><b>${esc(c.name)}</b>${c.desc?`<small>${esc(c.desc)}</small>`:b?`<small>${esc(b.title)}</small>`:""}${(c.tags||[]).length?`<em class="htag">${c.tags.map(t=>"#"+esc(t)).join(" ")}</em>`:""}</span></button>`}).join("")}</div>`;  // 57: 카드 아래 = 캐릭터 소개(desc)
+  return `<div class="hgrid">${list.map(c=>{const b=(EPS.basic||{})[c.id];return `<button class="hcc" data-c="${c.id}"><span class="pic" style="background-image:url(${c.img})">${badgesHTML(c)}</span><span class="tx"><b>${esc(c.name)}</b>${c.desc?`<small>${esc(c.desc)}</small>`:b?`<small>${esc(b.title)}</small>`:""}${(c.tags||[]).length?`<em class="htag">${c.tags.map(t=>"#"+esc(t)).join(" ")}</em>`:""}</span></button>`}).join("")}</div>`;  // 57: 카드 아래 = 캐릭터 소개(desc)
 }
 function renderGrid(){const g=$("#hGrid");if(!g)return;g.innerHTML=gridHTML();g.querySelectorAll("[data-c]").forEach(x=>x.onclick=()=>openChar(x.dataset.c))}
 function openChar(cid){const h=$("#home");H.top=h.scrollTop;H.view=cid;renderHome();h.scrollTop=0}
@@ -3068,9 +3087,8 @@ function profileHTML(pf){const T=pf.tabs||[],B=b=>{const x=b.x;
   ${T.map((t,i)=>`<div class="cpbody" role="tabpanel" data-i="${i}"${i?" hidden":""}>${(t.blocks||[]).map(B).join("")}</div>`).join("")}`}
 // 캐릭터 화면(23): 위 = 큰 카드 사진·이름·태그·한 줄 소개(desc), 아래 = 기본·특별 에피소드(예전 고른 카드 아래 목록 그대로)
 function renderChar(h,c){
-  const bd=badgeOf(c);
   h.innerHTML=`<div class="chd"><button class="bk" id="hBack" aria-label="${esc(UI("home.back"))}">${Icon.svg("back",20)}</button></div>
-  <div class="chero"><span class="pic" style="background-image:url(${c.img})">${bd?`<span class="pl${c.ageRating?" age":""}">${esc(bd)}</span>`:""}</span>
+  <div class="chero"><span class="pic" style="background-image:url(${c.img})">${badgesHTML(c)}</span>
   <div class="bd"><h2>${esc(c.name)}</h2><div class="tags">${(c.tags||[]).map(t=>"#"+esc(t)).join(" ")}</div>${c.profile?profileHTML(c.profile):`<p>${esc(c.desc)}</p>`}</div></div>
   <div id="hEps"></div>`;
   renderEps(c.id);
@@ -3081,6 +3099,7 @@ function renderChar(h,c){
 $("#hSearch").onclick=openSearch;
 function startStory(id){
   const st=STORIES.find(x=>x.id===id);if(!st)return;
+  if(isLocked(st.char||"seoa"))return lockToast();  // 107
   if(needAdult(st.char||"seoa"))return adultSheet(st.char||"seoa",()=>startStory(id));  // 19+ 인증 전: 인증 시트 → 끝나면 이 에피소드로 바로(💎는 인증 뒤에 차감)
   if(st.price&&!S.stories[id]){if(S.dia<st.price){toast(esc(UI("home.noDia")));return}S.dia-=st.price}
   // 8-1: 서아 오프닝을 아직 안 봤으면 본 것으로 처리하고 특별 에피소드 첫 대사만(기본 에피소드 「시작」은 그대로 오프닝부터)
@@ -3114,7 +3133,7 @@ function bondNow(){  // 지금 단계와 게이지 %(renderBond 와 같은 계�
 // 캐릭터별 무빙 카드: 모은 카드는 저장된 char(26-1) 기준, 아직 못 모은 칸은 컬렉션 화면처럼 서아 칸으로 셈
 function cardCount(cid){const L=COL.items.filter(x=>{const a=S.col[x.id];return a?(a.char||"seoa")===cid:cid==="seoa"});return{n:L.filter(x=>S.col[x.id]).length,total:L.length}}
 const lastAtOf=cid=>{const L=chatOf(cid).filter(m=>m.r!=="sys"),l=L[L.length-1];return l?l.at||0:0};
-const roomsRecent=()=>CH.filter(c=>S.rooms.includes(c.id)).sort((a,b)=>lastAtOf(b.id)-lastAtOf(a.id));
+const roomsRecent=()=>CH.filter(c=>S.rooms.includes(c.id)&&!isLocked(c.id)).sort((a,b)=>lastAtOf(b.id)-lastAtOf(a.id));
 function relHTML(){
   const rows=roomsRecent(),c=(DATA.config||{}).bondTop||{};
   const row=ch=>{
@@ -3208,7 +3227,7 @@ const unreadOne=cid=>{const L=chatOf(cid);return L.slice(S.read[cid]||0).filter(
 const unreadOf=cid=>cid==="seoa"?Swipe.keys().reduce((a,k)=>a+Swipe.unread(k),0):unreadOne(cid);
 function fmtTime(t){const m=Math.round((Date.now()-t)/60000);return m<1?"방금":m<60?m+"분 전":Math.round(m/60)+"시간 전"}
 // 안 읽은 수는 대화 목록에 있는 대화방만
-function renderUnread(){const n=CH.filter(c=>S.rooms.includes(c.id)).reduce((a,c)=>a+(S.room===c.id&&curTab==="chat"?0:unreadOf(c.id)),0);const b=$("#navUnread");b.style.display=n?"":"none";b.textContent=n;
+function renderUnread(){const n=CH.filter(c=>S.rooms.includes(c.id)&&!isLocked(c.id)).reduce((a,c)=>a+(S.room===c.id&&curTab==="chat"?0:unreadOf(c.id)),0);const b=$("#navUnread");b.style.display=n?"":"none";b.textContent=n;
   if(!S.room&&curTab==="chat")renderList()}
 // 목록 한 줄의 마지막 메시지 미리보기
 function pvOf(c,last,k){return last?(last.r==="u"?"나: ":"")+esc(last.r==="c"?(speechOnly(last.t)||last.t.replace(/\*/g,"")):last.r==="u"?userPlain(last.t):last.t):c.id==="seoa"&&(k||"main")==="main"&&DATA.intro?esc((DATA.intro.paragraphs[0]||"").replace(/\*/g,"")):""}
@@ -3284,11 +3303,11 @@ const Swipe={
 };
 function renderList(){
   // 목록 = 들어간 적 있는 대화방(S.rooms)만. 비어 있으면 홈으로 가는 안내
-  if(!S.rooms.length){$("#dmUnread").textContent="";
+  if(!S.rooms.some(id=>!isLocked(id))){$("#dmUnread").textContent="";  // 107: 잠긴 캐릭터의 예전 방은 목록에서 숨김(저장값 S.rooms 는 그대로)
     $("#dmList").innerHTML=`<div class="dmempty"><p>${esc(UI("chatList.empty"))}</p><button id="dmHome">${esc(UI("chatList.goHome"))}</button></div>`;
     $("#dmHome").onclick=()=>setTab("home");return}
   // 46: 서아 줄의 순서는 가장 최근 이야기의 마지막 메시지 기준
-  const rows=CH.filter(c=>S.rooms.includes(c.id)).map(c=>{let last;if(c.id==="seoa")last=Swipe.last(Swipe.order()[0]);else{const L=chatOf(c.id).filter(m=>m.r!=="sys");last=L[L.length-1]}return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
+  const rows=CH.filter(c=>S.rooms.includes(c.id)&&!isLocked(c.id)).map(c=>{let last;if(c.id==="seoa")last=Swipe.last(Swipe.order()[0]);else{const L=chatOf(c.id).filter(m=>m.r!=="sys");last=L[L.length-1]}return{c,last,u:unreadOf(c.id)}}).sort((a,b)=>(b.last?b.last.at||0:0)-(a.last?a.last.at||0:0));
   const tot=rows.reduce((a,r)=>a+r.u,0);$("#dmUnread").textContent=tot?UI("chatList.unread",{n:tot}):"";
   $("#dmList").innerHTML=rows.map(({c,last,u})=>c.id==="seoa"?Swipe.row(c):`<button class="dm" data-c="${c.id}"><span class="av" style="background-image:url(${c.img})"></span>
     <span class="mid"><b>${c.name}</b><span class="pv ${u?"new":""}">${pvOf(c,last)}</span></span>
@@ -3300,7 +3319,7 @@ function showList(){MotionCue.clear();  // 91 C: 대화방을 나가 목록으�
   Together.close();  // 84: 대화방 목록으로
   Fn.set(false);S.room=null;save();Swipe.key=null;$("#room").style.display="none";$("#dmWrap").style.display="flex";placeStage();renderList();renderUnread();Swipe.hintMaybe()}  // 46: 목록을 열면 서아 줄은 첫 칸(가장 최근 이야기)
 // 홈 카드·대화 목록·알림에서 대화방으로: 19세 이상 캐릭터는 인증 전이면 지금 화면에 인증 시트만(7-C)
-function enterRoom(cid){if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
+function enterRoom(cid){if(isLocked(cid))return lockToast();if(needAdult(cid))return adultSheet(cid);setTab("chat");openRoom(cid)}
 function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특별 에피소드). 없으면 그 캐릭터 대화방
   const sh=$("#adultSheet"),T=k=>Onboard.T("adult."+k);
   sh.innerHTML=`<h2>${esc(T("title"))}</h2><p class="sub">${esc(T("desc"))}</p><button class="adbtn" id="adVerify" type="button"><span class="spin"></span><span>${esc(T("verify"))}</span></button><button class="adlater" id="adLater" type="button">${esc(T("later"))}</button>`;
@@ -3313,6 +3332,7 @@ function adultSheet(cid,then){  // then(8-B): 인증이 끝난 뒤 할 일(특�
 function openRoom(cid){
   MotionCue.clear();  // 91: 대화방을 열거나 바꿀 때 남은 모션 강조를 바로 지움
   Together.close();  // 84: 다른 대화방·에피소드로
+  if(isLocked(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return lockToast()}  // 107: 대화방을 여는 모든 길의 마지막 관문
   if(needAdult(cid)){if(S.room===cid){S.room=null;save();if(curTab==="chat")showList()}return adultSheet(cid)}  // 안전장치(인증 초기화 뒤 남은 대화방 등)
   if(!S.rooms.includes(cid))S.rooms.push(cid);  // 대화방에 들어가면 그때 대화 목록에 생김
   S.room=cid;S.read[cid]=chatOf(cid).length;save();Moment.glow();
@@ -3776,7 +3796,7 @@ function pingLater(){const n=ncfg();setTimeout(()=>{ping();pingLater()},Math.max
 function ping(){
   if(typeof Scenes!=="undefined"&&Scenes.cur())return;  // 시연 장면 진행 중
   const now=S.room&&curTab==="chat"?S.room:null;
-  const others=CH.filter(c=>c.id!=="seoa"&&c.id!==now&&c.lines&&c.lines.length&&S.rooms.includes(c.id)&&talkedTo(c.id));
+  const others=CH.filter(c=>c.id!=="seoa"&&!isLocked(c.id)&&c.id!==now&&c.lines&&c.lines.length&&S.rooms.includes(c.id)&&talkedTo(c.id));
   if(!others.length)return;
   const c=others[dmIdx++%others.length];
   const line=c.lines[Math.floor(Math.random()*c.lines.length)];addMsg("c",line,null,c.id);
