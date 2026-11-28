@@ -123,8 +123,10 @@ const Pack=(()=>{
     $f(".pkacts").innerHTML=`<button class="pkagain" data-pk="again">${esc(T("again",{label:T(fx.n===10?"ten":"one")}))}<em>${Icon.gem(12)}${price(fx.n)}</em></button><button class="pkdone" data-pk="done">${esc(T("done"))}</button>`}
   function close(){if(!fx)return;fx.timers.forEach(clearTimeout);fx=null;el.classList.remove("on","opened","result","gridon");el.innerHTML="";
     if(typeof curTab!=="undefined"&&curTab==="album")renderAlbum()}
+  // 110: 출석 시크릿 확정 카드 — 뽑기 없이 그 카드를 가진 것으로(천장 S.packPity·S.packNext 는 그대로)
+  function grant(item){if(!item||S.col[item.id])return false;S.col[item.id]=seen();save();Cards.capture(item.id,{delay:0});return true}
   const isOpen=()=>!!fx;
   // 확인용(캡처): 팩 열림을 기다리지 않고 바로 다음으로
   const skipOpen=()=>{if(fx&&fx.open)fx.open()};
-  return{banner,bind,showOdds,pull,close,isOpen,skipOpen,left,toCharge,state:()=>fx&&{phase:fx.phase,i:fx.i,n:fx.n,flipped:[...fx.flipped],res:fx.res.map(c=>({id:c.item.id,grade:c.grade,isNew:c.isNew,forced:c.forced})),refund:fx.refund}};
+  return{banner,bind,showOdds,pull,close,isOpen,grant,skipOpen,left,toCharge,state:()=>fx&&{phase:fx.phase,i:fx.i,n:fx.n,flipped:[...fx.flipped],res:fx.res.map(c=>({id:c.item.id,grade:c.grade,isNew:c.isNew,forced:c.forced})),refund:fx.refund}};
 })();
