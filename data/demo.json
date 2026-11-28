@@ -55,6 +55,7 @@
   "serverStage": {"minMsgs": {"2": 9, "3": 9, "4": 6}, "finaleStep": 2, "doneStep": 3, "stageUp6": "STAGE_UP_6", "defaultRoute": "care"},
   "sec": {
     "scenes": "장면 바로가기",
+    "charLock": "캐릭터 잠금(107)",
     "server": "서버",
     "quick": "바로 하기",
     "mood": "기분",
@@ -133,6 +134,9 @@
   "motionPreview": "연출",
   "motionPreviewTitle": "해금 연출 미리보기 (상태는 그대로)",
   "_gift": "선물(9-B, 항상 보임): 다음 선물 결과(등급 또는 선물 몸짓 g01~g12 를 고르면 다음 선물 한 번에만 적용) · 천장 초기화 · 선물 몸짓 모두 열기 · 선물 몸짓 비우기. 전체 초기화는 도감·천장도 비운다",
+  "charUnlock": "다른 캐릭터 잠금 풀기(이 기기만)",
+  "charUnlockOn": "이 기기에서 다른 캐릭터 잠금을 풀었어요",
+  "charUnlockOff": "다른 캐릭터를 다시 잠갔어요",
   "chapter": "{n}장 · {name}",
   "keysNote": "단축키: 0 앱 처음 열기 · 1~6 장면 · ← → 이전/다음 · R 다시 · D 패널 · W 서버 깨우기",
   "photoFill": "사진 가득 채우기",
