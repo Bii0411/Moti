@@ -97,6 +97,7 @@ async function loadSeoa(){
   // 자세 차이 A: 서아 기본 방향 → 원본(T자) 기본 방향
   const A={};for(const n of ORDER){const d=M.dir[n],ch=CHILD[n];if(!d||!ch||!bones[n]||!bones[ch]){A[n]=new THREE.Quaternion();continue}
     A[n]=new THREE.Quaternion().setFromUnitVectors(wp(ch).sub(wp(n)).normalize(),new THREE.Vector3(...d))}
+  for(const s of ["Left","Right"])if(A[s+"ForeArm"]&&bones[s+"Hand"])A[s+"Hand"]=A[s+"ForeArm"].clone();  // 108: 손목 꺾임(손은 아래팔과 같은 맞춤값)
   const hipH=wp("Hips").y;
   return{root,bones,rest,A,hipH};
 }

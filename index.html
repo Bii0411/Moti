@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1723">
+<meta name="moti-version" content="20261128-1758">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -584,12 +584,12 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1723">
-<link rel="stylesheet" href="photos.css?v=20261128-1723">
-<link rel="stylesheet" href="cards.css?v=20261128-1723">
-<link rel="stylesheet" href="pose.css?v=20261128-1723">
-<link rel="stylesheet" href="pack.css?v=20261128-1723">
-<link rel="stylesheet" href="together.css?v=20261128-1723">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1758">
+<link rel="stylesheet" href="photos.css?v=20261128-1758">
+<link rel="stylesheet" href="cards.css?v=20261128-1758">
+<link rel="stylesheet" href="pose.css?v=20261128-1758">
+<link rel="stylesheet" href="pack.css?v=20261128-1758">
+<link rel="stylesheet" href="together.css?v=20261128-1758">
 </head>
 <body>
 <div class="app">
@@ -670,21 +670,21 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1723"></script>
-<script src="motion.js?v=20261128-1723"></script>
-<script src="gacha.js?v=20261128-1723"></script>
-<script src="look.js?v=20261128-1723"></script>
-<script src="alive.js?v=20261128-1723"></script>
-<script src="film.js?v=20261128-1723"></script>
-<script src="photos.js?v=20261128-1723"></script>
-<script src="seoaphoto.js?v=20261128-1723"></script>
-<script src="cards.js?v=20261128-1723"></script>
-<script src="pose.js?v=20261128-1723"></script>
-<script src="photoask.js?v=20261128-1723"></script>
-<script src="together.js?v=20261128-1723"></script>
-<script src="pack.js?v=20261128-1723"></script>
-<script src="storypic.js?v=20261128-1723"></script>
-<script src="onboarding.js?v=20261128-1723"></script>
+<script src="icons.js?v=20261128-1758"></script>
+<script src="motion.js?v=20261128-1758"></script>
+<script src="gacha.js?v=20261128-1758"></script>
+<script src="look.js?v=20261128-1758"></script>
+<script src="alive.js?v=20261128-1758"></script>
+<script src="film.js?v=20261128-1758"></script>
+<script src="photos.js?v=20261128-1758"></script>
+<script src="seoaphoto.js?v=20261128-1758"></script>
+<script src="cards.js?v=20261128-1758"></script>
+<script src="pose.js?v=20261128-1758"></script>
+<script src="photoask.js?v=20261128-1758"></script>
+<script src="together.js?v=20261128-1758"></script>
+<script src="pack.js?v=20261128-1758"></script>
+<script src="storypic.js?v=20261128-1758"></script>
+<script src="onboarding.js?v=20261128-1758"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -998,6 +998,9 @@ const Stage=(()=>{
     const a={A:{},W:{},hipH:wp("Hips").y};
     for(const n of XORD){const b=md.bones[n],dir=d.dir[n];if(!b)continue;const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
       a.A[n]=md.bones[XCH[n]]&&dir?new THREE.Quaternion().setFromUnitVectors(wp(XCH[n]).sub(wp(n)).normalize(),new THREE.Vector3(...dir).normalize()):new THREE.Quaternion()}
+    // 108 손목 꺾임: 손(Hand)은 다음 뼈가 없어 맞춤값이 비어(그대로) 있었음. 서아 기본 자세는 팔을 내린 A자, 모션 원본은 T자라
+    //   아래팔만 T자 쪽으로 맞춰지고 손은 A자 기울기(약 60°)가 그대로 남아 손목이 꺾여 보였음 → 손은 아래팔과 같은 맞춤값(원본의 손목 각도를 그대로 옮김)
+    for(const s of ["Left","Right"])if(a.A[s+"ForeArm"]&&a.W[s+"Hand"])a.A[s+"Hand"]=a.A[s+"ForeArm"].clone();
     // 45-1 손가락: 1·2마디는 다음 마디 쪽 방향을 맞춤, 3마디(끝 뼈 없음)는 2마디 맞춤값을 씀
     const F=d.fingers;if(F)for(const n of XFING){const b=md.bones[n];if(!b||!(F.tracks[n]||F.hold[n]))continue;const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
       const k=n.endsWith("3")?n.replace(/3$/,"2"):n,nx=k.replace(/\d$/,c=>+c+1),dir=F.dir[k];
@@ -1738,18 +1741,30 @@ let faceRT;function faceReset(){clearTimeout(faceRT);const t0=performance.now(),
 
 // ───────────────────────── 대화 ─────────────────────────
 // *별표* = 나레이션(지문), 나머지 = 대사. 따옴표만 있으면 따옴표 안이 대사.
-function msgParts(t){
+// 108: 지문이 말풍선에 섞이던 것 고침 — 닫히지 않은 *별표*(줄 끝까지 지문), 괄호 ( ) 지문, 서버 지문(action) 안의 따옴표 대사도 나눔.
+//      따옴표 바로 뒤에 한글이 붙으면(「"작전"이라고」) 문장 속 인용이라 나누지 않음
+const MP_STAR=/(\*[^*]+\*|\*[^*\n]+(?=\n|$)|[(（][^()（）\n]*[)）])/,MP_Q=/([“"][^”"\n]+[”"](?![가-힣]))/;
+const mpMark=s=>/^\*/.test(s)?s.replace(/^\*|\*$/g,""):/^[(（]/.test(s)&&/[)）]$/.test(s)?s.slice(1,-1):null;
+// plain = 표시가 없는 글의 종류(d 대사 · n 지문). 서버 지문(action)은 "n"
+function msgParts(t,plain){
   t=String(t||"");const out=[];const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
-  if(/\*[^*]+\*/.test(t)){t.split(/(\*[^*]+\*)/).forEach(seg=>{if(/^\*[^*]+\*$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg.replace(/\*/g,""))})}
-  else if(/[“"][^”"]+[”"]/.test(t)){t.split(/([“"][^”"]+[”"])/).forEach(seg=>{if(/^[“"][^”"]+[”"]$/.test(seg))push("d",seg.slice(1,-1));else push("n",seg)})}
-  else push("d",t);
-  return out.flatMap(p=>p.x.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>({k:p.k,x:p.k==="d"?x.replace(/^[“"]|[”"]$/g,""):x})));
+  const quote=s=>{if(!MP_Q.test(s))return false;s.split(MP_Q).forEach(seg=>{if(/^[“"].*[”"]$/.test(seg)&&MP_Q.test(seg))push("d",seg.slice(1,-1));else push("n",seg)});return true};
+  if(/\*/.test(t)||/[(（][^()（）\n]*[)）]/.test(t)){
+    // 낱말에 바로 붙은 괄호(「그거(작전) 말이야」)는 대사 속 덧말이라 지문으로 떼지 않음 — 앞 조각과 이어 붙임
+    const S=[];t.split(MP_STAR).forEach(seg=>{let m=mpMark(seg);if(m!=null&&/^[(（]/.test(seg)&&S.length&&S[S.length-1].m==null&&/[가-힣A-Za-z0-9]$/.test(S[S.length-1].x))m=null;
+      if(m==null&&S.length&&S[S.length-1].m==null)S[S.length-1].x+=seg;else S.push({m,x:seg})});
+    S.forEach(({m,x:seg})=>{if(m!=null)push("n",m);else if(plain==="n"){if(!quote(seg))push("n",seg)}else push("d",seg.replace(/\*/g,""))})}
+  else if(!quote(t))push(plain||"d",t);
+  return out.flatMap(p=>p.x.split(/\n+/).map(x=>x.trim()).filter(Boolean).map(x=>({k:p.k,x:p.k==="d"?mpUnq(x):x})));
 }
+// 대사 줄 양 끝 따옴표 떼기(108: 줄 안에 다른 따옴표가 있으면 문장 속 인용이라 그대로)
+function mpUnq(x){const n=(x.match(/[“”"]/g)||[]).length;if(n===2&&/^[“"]/.test(x)&&/[”"]$/.test(x))return x.slice(1,-1);return n===1?x.replace(/^[“"]|[”"]$/,""):x}
 const speechOnly=t=>msgParts(t).filter(p=>p.k==="d").map(p=>p.x).join(" ");
-// 내 메시지: 괄호 ( ) 안 = 상황 묘사(지문), 나머지 = 말풍선. 괄호 기호는 보이지 않게. 서버에는 원문 그대로 보냄
+// 내 메시지: 괄호 ( ) 안 · *별표* 안 = 상황 묘사(지문), 나머지 = 말풍선. 기호는 보이지 않게. 서버에는 원문 그대로 보냄
+// 108: *별표* 로 쓴 지문도 말풍선이 아니라 지문으로(닫히지 않은 별표는 그 줄 끝까지)
 function userParts(t){
   const out=[];const push=(k,x)=>{x=x.trim();if(x)out.push({k,x})};
-  String(t||"").split(/([(（][^()（）]*[)）])/).forEach(seg=>{if(/^[(（][^()（）]*[)）]$/.test(seg))push("n",seg.slice(1,-1));else push("d",seg)});  // 말풍선 안 줄바꿈은 그대로
+  String(t||"").split(MP_STAR).forEach(seg=>{const m=mpMark(seg);if(m!=null)push("n",m);else push("d",seg)});  // 말풍선 안 줄바꿈은 그대로
   return out;
 }
 const userPlain=t=>userParts(t).map(p=>p.x).join(" ");
@@ -1767,7 +1782,7 @@ function trimChat(cid,L){const K=DATA.config.chatKeep||{};
 function addMsg(r,t,extra,cid){cid=cid||S.room||"seoa";const L=chatOf(cid);L.push({r,t,at:Date.now(),...(extra||{})});const L2=trimChat(cid,L);if(L2!==L)S.chats[cid]=L2;
   if(S.room===cid&&curTab==="chat")S.read[cid]=chatOf(cid).length;save();if(S.room===cid)renderLog();renderUnread()}
 // 캐릭터 답장 한 개 = 지문·대사 조각 여러 개. 답장은 인트로처럼 조각을 하나씩 보여 줌(data/config.json replyReveal)
-const cParts=m=>[...(m.act?[{k:"n",x:m.act}]:[]),...msgParts(m.t)];
+const cParts=m=>[...(m.act?msgParts(m.act,"n"):[]),...msgParts(m.t)];  // 108: 서버 지문 안의 따옴표 대사는 말풍선으로
 let reveal=null;  // {m: 보여 주는 중인 답장, n: 지금까지 보인 조각 수, t: 타이머}
 function revealGap(p){const R=DATA.config.replyReveal||{};const len=(p&&p.x||"").length;
   return Math.min(R.maxMs!=null?R.maxMs:1700,Math.max(R.minMs!=null?R.minMs:700,(R.minMs!=null?R.minMs:700)+len*(R.perCharMs!=null?R.perCharMs:25)))}
@@ -1836,8 +1851,11 @@ async function post(path,body,ms){
 }
 const isFiller=t=>(DATA.config.serverFiller||["…"]).includes(String(t).replace(/\*/g,"").trim());
 // 서버 응답 두 형식을 한 모양으로. 예전: {reply, emotion, motions, scene} / v2: {action, dialogue, motion_id, emotion, location}
+// 108: 서버 답장의 잘못 쓴 낱말 고치기(data/config.json textFix: {틀린 말: 바른 말}). 지문·대사 모두
+function fixText(t){const F=DATA.config&&DATA.config.textFix;if(!F||typeof t!=="string")return t;for(const k in F)if(k[0]!=="_"&&F[k]!=null)t=t.split(k).join(F[k]);return t}
 function readReply(j){
   if(!j)return null;
+  if(typeof j.dialogue==="string")j={...j,dialogue:fixText(j.dialogue),action:fixText(j.action)};else if(typeof j.reply==="string")j={...j,reply:fixText(j.reply)};
   if(typeof j.dialogue==="string"&&isFiller(j.dialogue))return null;  // 29: 서버 대체 응답 「…」 = 실패로 봄 → 예비 대사
   if(typeof j.dialogue==="string"&&j.dialogue.trim())return{line:j.dialogue,action:j.action||null,motion:j.motion_id||null,motionNames:[],emotion:j.emotion||"",location:j.location||null,giftMoment:j.gift_moment||null,photoAsk:j.photo_ask||null};  // 83: 서버 S5 사진 제안
   if(typeof j.reply==="string"&&j.reply.trim())return{line:j.reply,action:null,motion:null,motionNames:j.motions||[],emotion:j.emotion||"",location:j.scene||null};

@@ -73,6 +73,7 @@ const J3D=(()=>{
     for(const n of XORD){const b=md.bones[n],ch=md.bones[XCH[n]],dir=d.dir[n];if(!b)continue;
       const r=md.rest[n].world;a.W[n]=new THREE.Quaternion(r[0],r[1],r[2],r[3]);
       a.A[n]=ch&&dir?new THREE.Quaternion().setFromUnitVectors(wp(XCH[n]).sub(wp(n)).normalize(),new THREE.Vector3(dir[0],dir[1],dir[2]).normalize()):new THREE.Quaternion()}
+    for(const s of ["Left","Right"])if(a.A[s+"ForeArm"]&&a.W[s+"Hand"])a.A[s+"Hand"]=a.A[s+"ForeArm"].clone();  // 108: 손목 꺾임(손은 아래팔과 같은 맞춤값)
     for(const n in keep)md.bones[n].quaternion.copy(keep[n]);md.root.position.copy(kp);md.root.updateMatrixWorld(true);
     d.al.set(md,a);return a;
   }
