@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>moti</title>
-<meta name="moti-version" content="20261128-1905">
+<meta name="moti-version" content="20261128-1925">
 <style>
 :root{--bg:#0b0a12;--card:#17151f;--line:#2a2635;--text:#f2effa;--sub:#a59fb8;--pri:#8b5cf6;--pri2:#c4b5fd;--gold:#f5c66b;--pink:#f472b6}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -259,6 +259,11 @@ main{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column}
 .packs{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 8px;padding-top:6px}
 .packs .bn{display:block;font-size:11px;font-weight:700;color:#c4b5fd;margin-top:2px}
 .packs .bn.none{visibility:hidden}
+.adrw{display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:11px 12px;border-radius:12px;border:1px solid #4b3d78;background:#221b36;text-align:left}  /* 110-1 광고 보상(.adbtn 은 19+ 인증 버튼과 겹쳐서 adrw) */
+.adrw .adt{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:800;color:var(--text)}
+.adrw small{flex:none;font-size:11.5px;font-weight:600;color:var(--pri2)}
+.adrw:disabled{opacity:.45}
+.adrw:disabled small{color:var(--sub)}
 .packs button{background:#0f0d16;border:1px solid var(--line);border-radius:12px;padding:13px 4px 11px;font-size:13px;font-weight:800}
 .packs button small{display:block;font-size:11px;color:var(--sub);font-weight:500;margin-top:2px}
 .bondbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub)}
@@ -586,13 +591,13 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 .fmskip{position:absolute;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:7;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:12.5px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s}
 .fmskip.on{opacity:1;pointer-events:auto}
 </style>
-<link rel="stylesheet" href="onboarding.css?v=20261128-1905">
-<link rel="stylesheet" href="photos.css?v=20261128-1905">
-<link rel="stylesheet" href="cards.css?v=20261128-1905">
-<link rel="stylesheet" href="pose.css?v=20261128-1905">
-<link rel="stylesheet" href="pack.css?v=20261128-1905">
-<link rel="stylesheet" href="attendance.css?v=20261128-1905">
-<link rel="stylesheet" href="together.css?v=20261128-1905">
+<link rel="stylesheet" href="onboarding.css?v=20261128-1925">
+<link rel="stylesheet" href="photos.css?v=20261128-1925">
+<link rel="stylesheet" href="cards.css?v=20261128-1925">
+<link rel="stylesheet" href="pose.css?v=20261128-1925">
+<link rel="stylesheet" href="pack.css?v=20261128-1925">
+<link rel="stylesheet" href="attendance.css?v=20261128-1925">
+<link rel="stylesheet" href="together.css?v=20261128-1925">
 </head>
 <body>
 <div class="app">
@@ -674,22 +679,22 @@ img.gi.g2,.burst img.g2{border-radius:0;box-shadow:none;object-fit:contain;backg
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="icons.js?v=20261128-1905"></script>
-<script src="motion.js?v=20261128-1905"></script>
-<script src="gacha.js?v=20261128-1905"></script>
-<script src="look.js?v=20261128-1905"></script>
-<script src="alive.js?v=20261128-1905"></script>
-<script src="film.js?v=20261128-1905"></script>
-<script src="photos.js?v=20261128-1905"></script>
-<script src="seoaphoto.js?v=20261128-1905"></script>
-<script src="cards.js?v=20261128-1905"></script>
-<script src="pose.js?v=20261128-1905"></script>
-<script src="photoask.js?v=20261128-1905"></script>
-<script src="together.js?v=20261128-1905"></script>
-<script src="pack.js?v=20261128-1905"></script>
-<script src="attendance.js?v=20261128-1905"></script>
-<script src="storypic.js?v=20261128-1905"></script>
-<script src="onboarding.js?v=20261128-1905"></script>
+<script src="icons.js?v=20261128-1925"></script>
+<script src="motion.js?v=20261128-1925"></script>
+<script src="gacha.js?v=20261128-1925"></script>
+<script src="look.js?v=20261128-1925"></script>
+<script src="alive.js?v=20261128-1925"></script>
+<script src="film.js?v=20261128-1925"></script>
+<script src="photos.js?v=20261128-1925"></script>
+<script src="seoaphoto.js?v=20261128-1925"></script>
+<script src="cards.js?v=20261128-1925"></script>
+<script src="pose.js?v=20261128-1925"></script>
+<script src="photoask.js?v=20261128-1925"></script>
+<script src="together.js?v=20261128-1925"></script>
+<script src="pack.js?v=20261128-1925"></script>
+<script src="attendance.js?v=20261128-1925"></script>
+<script src="storypic.js?v=20261128-1925"></script>
+<script src="onboarding.js?v=20261128-1925"></script>
 <script>
 // ───────────────────────── 데이터 ─────────────────────────
 const $=s=>document.querySelector(s);
@@ -3224,6 +3229,13 @@ const NameSheet=(()=>{
   function open(){draw();openSheet("#nameSheet")}
   function close(){closeSheets();kb()}
   return{open,close,cost}})();
+// 110-1: 광고 보상(시연용 — 실제 광고 없이 바로 지급). 하루 perDay 번, 날짜는 출석과 같은 Attend.today()(한국 자정 · 시연 「다음 날로」). 저장값 S.ad = {day, n 오늘 쓴 횟수}
+const adCfg=()=>{const a=((DATA.ui||{}).my||{}).ad||{};return{dia:+a.dia||10,perDay:+a.perDay||3}};
+const adLeft=()=>{const c=adCfg(),used=S.ad&&S.ad.day===Attend.today()?+S.ad.n||0:0;return Math.max(0,c.perDay-used)};
+function adHTML(){const c=adCfg(),n=adLeft();
+  return `<button class="adrw" id="adBtn"${n?"":" disabled"}><span class="adt">${GEM(14)}${esc(UI(S.plus?"my.adBtnPlus":"my.adBtn",{n:c.dia}))}</span><small>${esc(n?UI("my.adLeft",{n}):UI("my.adDone"))}</small></button>`}
+function adTake(){if(!adLeft())return;const c=adCfg(),d=Attend.today();
+  if(!S.ad||S.ad.day!==d)S.ad={day:d,n:0};S.ad.n++;S.dia+=c.dia;save();renderTop();renderMy();toast(esc(UI("my.adToast",{n:c.dia})),2200)}
 function renderMy(){
   renderBond();const M=(DATA.ui||{}).my||{};
   const plusCap=((DATA.photos||{}).slots||{}).plusCap||200;
@@ -3238,6 +3250,7 @@ function renderMy(){
   ${Attend.myHTML()}
   <div class="card" id="chargeCard"><div class="mch"><b>${esc(UI("my.chargeTitle"))}</b><span class="bal">${GEM(15)}${Number(S.dia).toLocaleString()}</span></div>
     <div class="packs">${packs}</div>
+    ${adHTML()}
     <p class="alnote" style="margin:10px 0 0">${esc(UI("my.chargeNote"))}</p></div>
   ${M.xstageUrl?`<a class="card xsgo" href="${esc(M.xstageUrl)}" target="_blank" rel="noopener"><span class="xst"><b>${esc(UI("my.xstageTitle"))}</b><small>${esc(UI("my.xstageSub"))}</small></span><span class="xsb"><b class="xwm">XSTAGE</b>${esc(UI("my.xstageGo"))}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></a>`:""}
   <p class="alnote" style="text-align:center"><a href="v1.html" style="color:var(--sub)">이전 버전(v1) 보기</a></p>`;
@@ -3245,6 +3258,7 @@ function renderMy(){
   const rh=$("#relHome");if(rh)rh.onclick=()=>setTab("home");
   $("#meEdit").onclick=()=>NameSheet.open();
   Attend.bindMy($("#my"));  // 110
+  $("#adBtn").onclick=adTake;  // 110-1
   $("#plusBtn").onclick=()=>{S.plus=!S.plus;if(S.plus){S.dia+=300;toast(esc(UI("photo.plusStart")))}save();renderTop();renderMy()};
   $("#my").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{S.dia+=+b.dataset.p;save();renderTop();renderMy();toast(esc(UI("my.charged",{n:Number(b.dataset.p).toLocaleString()})))});
 }
